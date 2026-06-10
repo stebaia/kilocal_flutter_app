@@ -7,6 +7,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/mock_data_factory.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/circular_progress.dart';
+import '../../../core/widgets/localized_bloc_loader.dart';
 import 'cubit/statistics_cubit.dart';
 
 class StatisticsScreen extends StatelessWidget {
@@ -15,11 +16,14 @@ class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) {
-        final l10n = AppLocalizations.of(context)!;
-        return StatisticsCubit(initialData: MockDataFactory.statistics(l10n))..load();
-      },
-      child: const _StatisticsView(),
+      create: (_) => StatisticsCubit(),
+      child: LocalizedBlocLoader<StatisticsCubit, StatisticsState>(
+        load: (context, cubit) {
+          final l10n = AppLocalizations.of(context)!;
+          cubit.loadWithData(MockDataFactory.statistics(l10n));
+        },
+        child: const _StatisticsView(),
+      ),
     );
   }
 }

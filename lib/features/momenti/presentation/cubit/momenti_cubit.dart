@@ -8,6 +8,10 @@ part 'momenti_state.dart';
 class MomentiCubit extends Cubit<MomentiState> {
   MomentiCubit({MomentiData? initialData}) : super(MomentiState(data: initialData));
 
+  void loadWithData(MomentiData data) {
+    emit(MomentiState(status: MomentiStatus.loaded, data: data));
+  }
+
   Future<void> load() async {
     if (state.data != null) {
       emit(state.copyWith(status: MomentiStatus.loaded));

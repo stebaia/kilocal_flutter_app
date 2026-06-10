@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/mock_data_factory.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/localized_bloc_loader.dart';
 import 'cubit/momenti_cubit.dart';
 
 class MomentiScreen extends StatelessWidget {
@@ -15,11 +16,14 @@ class MomentiScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) {
-        final l10n = AppLocalizations.of(context)!;
-        return MomentiCubit(initialData: MockDataFactory.momenti(l10n))..load();
-      },
-      child: const _MomentiView(),
+      create: (_) => MomentiCubit(),
+      child: LocalizedBlocLoader<MomentiCubit, MomentiState>(
+        load: (context, cubit) {
+          final l10n = AppLocalizations.of(context)!;
+          cubit.loadWithData(MockDataFactory.momenti(l10n));
+        },
+        child: const _MomentiView(),
+      ),
     );
   }
 }

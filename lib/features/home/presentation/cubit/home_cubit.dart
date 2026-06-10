@@ -8,6 +8,10 @@ part 'home_state.dart';
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit({HomeData? initialData}) : super(HomeState(data: initialData));
 
+  void loadWithData(HomeData data) {
+    emit(HomeState(status: HomeStatus.loaded, data: data));
+  }
+
   Future<void> load() async {
     if (state.data != null) {
       emit(state.copyWith(status: HomeStatus.loaded));

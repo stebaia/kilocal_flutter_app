@@ -9,6 +9,10 @@ class NotificationsCubit extends Cubit<NotificationsState> {
   NotificationsCubit({List<NotificationItem>? initialData})
       : super(NotificationsState(items: initialData ?? const []));
 
+  void loadWithData(List<NotificationItem> data) {
+    emit(NotificationsState(status: NotificationsStatus.loaded, items: data));
+  }
+
   Future<void> load() async {
     if (state.items.isNotEmpty) {
       emit(state.copyWith(status: NotificationsStatus.loaded));

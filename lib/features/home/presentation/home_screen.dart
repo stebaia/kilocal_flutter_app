@@ -4,12 +4,12 @@ import 'package:go_router/go_router.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../../core/utils/mock_data_factory.dart';
-
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
 import '../../../core/widgets/circular_progress.dart';
+import '../../../core/widgets/localized_bloc_loader.dart';
 import 'cubit/home_cubit.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,11 +18,14 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) {
-        final l10n = AppLocalizations.of(context)!;
-        return HomeCubit(initialData: MockDataFactory.homeData(l10n))..load();
-      },
-      child: const _HomeView(),
+      create: (_) => HomeCubit(),
+      child: LocalizedBlocLoader<HomeCubit, HomeState>(
+        load: (context, cubit) {
+          final l10n = AppLocalizations.of(context)!;
+          cubit.loadWithData(MockDataFactory.homeData(l10n));
+        },
+        child: const _HomeView(),
+      ),
     );
   }
 }
