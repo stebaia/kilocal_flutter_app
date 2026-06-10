@@ -49,5 +49,32 @@
   "statisticsMonth": "Current month",
   "notificationsTitle": "Notifications",
   "errorGeneric": "Something went wrong. Please try again.",
-  "retry": "Retry"
+  "retry": "Retry",
+  "surveyNext": "Next",
+  "surveyVerify": "Verify",
+  "surveyStart": "Start",
+  "notificationsEmpty": "No notifications",
+  "benefitDetails": "Details",
+  "diaryCompleted": "Completed",
+  "diaryPending": "Pending",
+  "areaTraining": "Training",
+  "areaNutrition": "Nutrition",
+  "areaWellbeing": "Wellbeing",
+  "areaIntegration": "Integration",
+  "month1": "Month 1",
+  "phase1": "Phase 1",
+  "activitiesCount": "{completed}/{total} activities",
+  "@activitiesCount": {
+    "description": "Activity counter (e.g. 3/15 activities)",
+    "placeholders": {
+      "completed": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "pathCompletedPercent": "completed at {percent}%",
+  "@pathCompletedPercent": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  }
 }

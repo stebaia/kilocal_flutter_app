@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -121,7 +122,7 @@ class _PresetStep extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: selected != null ? onNext : null,
-              child: const Text('Avanti'),
+              child: Text(AppLocalizations.of(context)!.surveyNext),
             ),
           ),
         ],
@@ -155,7 +156,7 @@ class _FreeStep extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: value != null && value!.trim().isNotEmpty ? onNext : null,
-              child: const Text('Avanti'),
+              child: Text(AppLocalizations.of(context)!.surveyNext),
             ),
           ),
         ],
@@ -188,7 +189,7 @@ class _ProofStep extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: value != null && value!.trim().isNotEmpty ? onNext : null,
-              child: const Text('Verifica'),
+              child: Text(AppLocalizations.of(context)!.surveyVerify),
             ),
           ),
         ],
@@ -206,6 +207,7 @@ class _InfoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return _StepLayout(
       title: step.title,
       body: step.body,
@@ -213,7 +215,7 @@ class _InfoStep extends StatelessWidget {
         width: double.infinity,
         child: ElevatedButton(
           onPressed: onNext,
-          child: Text(isLast ? 'Inizia' : 'Avanti'),
+          child: Text(isLast ? l10n.surveyStart : l10n.surveyNext),
         ),
       ),
     );

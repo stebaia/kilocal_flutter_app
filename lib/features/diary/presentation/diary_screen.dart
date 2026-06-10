@@ -44,7 +44,9 @@ class DiaryScreen extends StatelessWidget {
                       children: [
                         Text('Attività giorno ${index + 1}', style: AppTypography.textTheme.bodyMedium),
                         Text(
-                          index % 2 == 0 ? 'Completato' : 'In attesa',
+                          index % 2 == 0
+                              ? AppLocalizations.of(context)!.diaryCompleted
+                              : AppLocalizations.of(context)!.diaryPending,
                           style: AppTypography.textTheme.labelMedium,
                         ),
                       ],

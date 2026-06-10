@@ -313,6 +313,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
+
+  /// No description provided for @surveyNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get surveyNext;
+
+  /// No description provided for @surveyVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get surveyVerify;
+
+  /// No description provided for @surveyStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get surveyStart;
+
+  /// No description provided for @notificationsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get notificationsEmpty;
+
+  /// No description provided for @benefitDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get benefitDetails;
+
+  /// No description provided for @diaryCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get diaryCompleted;
+
+  /// No description provided for @diaryPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get diaryPending;
+
+  /// No description provided for @areaTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get areaTraining;
+
+  /// No description provided for @areaNutrition.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition'**
+  String get areaNutrition;
+
+  /// No description provided for @areaWellbeing.
+  ///
+  /// In en, this message translates to:
+  /// **'Wellbeing'**
+  String get areaWellbeing;
+
+  /// No description provided for @areaIntegration.
+  ///
+  /// In en, this message translates to:
+  /// **'Integration'**
+  String get areaIntegration;
+
+  /// No description provided for @month1.
+  ///
+  /// In en, this message translates to:
+  /// **'Month 1'**
+  String get month1;
+
+  /// No description provided for @phase1.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase 1'**
+  String get phase1;
+
+  /// Activity counter (e.g. 3/15 activities)
+  ///
+  /// In en, this message translates to:
+  /// **'{completed}/{total} activities'**
+  String activitiesCount(int completed, int total);
+
+  /// No description provided for @pathCompletedPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'completed at {percent}%'**
+  String pathCompletedPercent(int percent);
 }
 
 class _AppLocalizationsDelegate

@@ -120,4 +120,53 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get retry => 'Riprova';
+
+  @override
+  String get surveyNext => 'Avanti';
+
+  @override
+  String get surveyVerify => 'Verifica';
+
+  @override
+  String get surveyStart => 'Inizia';
+
+  @override
+  String get notificationsEmpty => 'Nessuna notifica';
+
+  @override
+  String get benefitDetails => 'Dettagli';
+
+  @override
+  String get diaryCompleted => 'Completato';
+
+  @override
+  String get diaryPending => 'In attesa';
+
+  @override
+  String get areaTraining => 'Allenamento';
+
+  @override
+  String get areaNutrition => 'Alimentazione';
+
+  @override
+  String get areaWellbeing => 'Benessere';
+
+  @override
+  String get areaIntegration => 'Integrazione';
+
+  @override
+  String get month1 => 'Mese 1';
+
+  @override
+  String get phase1 => 'Fase 1';
+
+  @override
+  String activitiesCount(int completed, int total) {
+    return '$completed/$total attività';
+  }
+
+  @override
+  String pathCompletedPercent(int percent) {
+    return 'completato al $percent%';
+  }
 }

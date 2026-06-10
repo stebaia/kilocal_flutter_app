@@ -48,7 +48,7 @@ class _NotificationsView extends StatelessWidget {
           final visible = state.items.where((i) => !i.archived).toList();
 
           if (visible.isEmpty) {
-            return const Center(child: Text('Nessuna notifica'));
+            return Center(child: Text(AppLocalizations.of(context)!.notificationsEmpty));
           }
 
           return ListView.builder(

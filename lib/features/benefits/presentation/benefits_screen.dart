@@ -47,7 +47,7 @@ class BenefitsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  TextButton(onPressed: () {}, child: const Text('Dettagli')),
+                  TextButton(onPressed: () {}, child: Text(AppLocalizations.of(context)!.benefitDetails)),
                 ],
               ),
             ),

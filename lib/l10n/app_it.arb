@@ -35,5 +35,20 @@
   "statisticsMonth": "Mese corrente",
   "notificationsTitle": "Notifiche",
   "errorGeneric": "Qualcosa è andato storto. Riprova.",
-  "retry": "Riprova"
+  "retry": "Riprova",
+  "surveyNext": "Avanti",
+  "surveyVerify": "Verifica",
+  "surveyStart": "Inizia",
+  "notificationsEmpty": "Nessuna notifica",
+  "benefitDetails": "Dettagli",
+  "diaryCompleted": "Completato",
+  "diaryPending": "In attesa",
+  "areaTraining": "Allenamento",
+  "areaNutrition": "Alimentazione",
+  "areaWellbeing": "Benessere",
+  "areaIntegration": "Integrazione",
+  "month1": "Mese 1",
+  "phase1": "Fase 1",
+  "activitiesCount": "{completed}/{total} attività",
+  "pathCompletedPercent": "completato al {percent}%"
 }

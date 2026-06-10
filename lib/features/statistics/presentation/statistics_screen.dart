@@ -63,7 +63,7 @@ class _StatisticsView extends StatelessWidget {
                             Text(stat.area, style: AppTypography.textTheme.titleMedium),
                             const SizedBox(height: AppSpacing.space2xs),
                             Text(
-                              '${stat.month} — ${stat.completed}/${stat.total} attività',
+                              '${stat.month} — ${l10n.activitiesCount(stat.completed, stat.total)}',
                               style: AppTypography.textTheme.labelMedium,
                             ),
                           ],
