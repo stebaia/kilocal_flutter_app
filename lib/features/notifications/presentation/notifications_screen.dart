@@ -5,6 +5,7 @@ import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/mock_data_factory.dart';
 import '../../../core/widgets/app_card.dart';
 import 'cubit/notifications_cubit.dart';
 
@@ -14,7 +15,10 @@ class NotificationsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => NotificationsCubit()..load(),
+      create: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return NotificationsCubit(initialData: MockDataFactory.notifications(l10n))..load();
+      },
       child: const _NotificationsView(),
     );
   }

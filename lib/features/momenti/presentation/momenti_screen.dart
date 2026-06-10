@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/mock_data_factory.dart';
 import '../../../core/widgets/app_card.dart';
 import 'cubit/momenti_cubit.dart';
 
@@ -13,7 +15,10 @@ class MomentiScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MomentiCubit()..load(),
+      create: (context) {
+        final l10n = AppLocalizations.of(context)!;
+        return MomentiCubit(initialData: MockDataFactory.momenti(l10n))..load();
+      },
       child: const _MomentiView(),
     );
   }
