@@ -1,0 +1,83 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
+
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/circular_progress.dart';
+import 'cubit/statistics_cubit.dart';
+
+class StatisticsScreen extends StatelessWidget {
+  const StatisticsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => StatisticsCubit()..load(),
+      child: const _StatisticsView(),
+    );
+  }
+}
+
+class _StatisticsView extends StatelessWidget {
+  const _StatisticsView();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.statisticsTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_outlined),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: BlocBuilder<StatisticsCubit, StatisticsState>(
+        builder: (context, state) {
+          if (state.status == StatisticsStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenGutter,
+              vertical: AppSpacing.spaceMd,
+            ),
+            itemCount: state.stats.length,
+            itemBuilder: (context, index) {
+              final stat = state.stats[index];
+              return Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
+                child: AppCard(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(stat.area, style: AppTypography.textTheme.titleMedium),
+                            const SizedBox(height: AppSpacing.space2xs),
+                            Text(
+                              '${stat.month} — ${stat.completed}/${stat.total} attività',
+                              style: AppTypography.textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
+                      ),
+                      CircularProgress(value: stat.percent),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}

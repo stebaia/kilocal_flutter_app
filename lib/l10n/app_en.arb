@@ -1,0 +1,53 @@
+{
+  "@@locale": "en",
+  "appTitle": "Kilocal",
+  "@appTitle": {
+    "description": "App name shown in the app bar and tasks"
+  },
+  "splashLoading": "Loading...",
+  "@splashLoading": {
+    "description": "Text shown while the app is loading on splash"
+  },
+  "onboardingTitle1": "Welcome to Kilocal",
+  "onboardingBody1": "Start your personalized wellness journey with us.",
+  "onboardingTitle2": "Follow your path",
+  "onboardingBody2": "Training, nutrition, wellbeing and integration in one place.",
+  "onboardingTitle3": "Track your progress",
+  "onboardingBody3": "Monitor your results and achieve your goals.",
+  "onboardingNext": "Next",
+  "onboardingStart": "Start",
+  "loginTitle": "Login",
+  "loginEmail": "Email",
+  "loginPassword": "Password",
+  "loginButton": "Sign in",
+  "loginForgotPassword": "Forgot password?",
+  "loginNoAccount": "Don't have an account?",
+  "loginSignUp": "Sign up",
+  "homeGreeting": "Hello {name}",
+  "@homeGreeting": {
+    "description": "Greeting on the home screen",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeProgress": "Overall progress",
+  "homeQuickLinks": "Quick links",
+  "homeHeroTitle": "For you",
+  "tabHome": "Home",
+  "tabPath": "Path",
+  "tabDiary": "Diary",
+  "tabBenefits": "Benefits",
+  "tabProfile": "Profile",
+  "pathTitle": "Your path",
+  "pathOverallProgress": "Overall progress",
+  "diaryTitle": "Diary",
+  "benefitsTitle": "Benefits",
+  "profileTitle": "Profile",
+  "statisticsTitle": "Statistics",
+  "statisticsMonth": "Current month",
+  "notificationsTitle": "Notifications",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "retry": "Retry"
+}
