@@ -1,25 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../domain/entities/survey_step.dart';
+
 part 'survey_state.dart';
-
-enum SurveyStepType { preset, free, info, kitResult, intermezzo, proofOfPurchase, platformIntro }
-
-class SurveyStep {
-  const SurveyStep({
-    required this.type,
-    required this.title,
-    this.body,
-    this.choices,
-    this.hint,
-  });
-
-  final SurveyStepType type;
-  final String title;
-  final String? body;
-  final List<String>? choices;
-  final String? hint;
-}
 
 class SurveyCubit extends Cubit<SurveyState> {
   SurveyCubit() : super(const SurveyState());
