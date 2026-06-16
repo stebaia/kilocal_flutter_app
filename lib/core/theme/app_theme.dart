@@ -27,7 +27,6 @@ abstract final class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: AppColors.background,
-      fontFamily: AppTypography.fontFamily,
       textTheme: AppTypography.textTheme,
       dividerColor: AppColors.divider,
       dividerTheme: const DividerThemeData(

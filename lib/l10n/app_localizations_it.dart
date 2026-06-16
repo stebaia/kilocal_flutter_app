@@ -77,6 +77,25 @@ class AppLocalizationsIt extends AppLocalizations {
   String get homeHeroTitle => 'Per te';
 
   @override
+  String get homeContinuePath => 'Continua il percorso';
+
+  @override
+  String get homeSeeStatistics => 'Vedi statistiche';
+
+  @override
+  String get homeMoments => 'Momenti';
+
+  @override
+  String get homeBenefits => 'Benefit';
+
+  @override
+  String get homePathCardTitle => 'Titolo contenuto da continuare lorem ipsuim';
+
+  @override
+  String get homeMonthStatsDescription =>
+      'Lorem ipsum dolor sit amet consectetur. Facilisi varius.';
+
+  @override
   String get tabHome => 'Home';
 
   @override

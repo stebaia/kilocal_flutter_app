@@ -46,6 +46,28 @@ in documentazione**. Aggiornato il **2026-06-08**. Vedi anche [[missing-informat
 
 ---
 
+## 2bis. Livelli di accesso utente / abilitazioni contenuti
+- **Schermata:** *(da esportare dal Figma — mostra una tab/hub in stato "bloccato")*
+- **Serve per:** sapere **quali aree/hub/tab sono sbloccati** per l'utente corrente. Dal Figma
+  alcune tab del percorso appaiono in stato **bloccato** (es. l'utente accede ad Allenamento ma
+  non agli altri hub). L'app deve conoscere le **abilitazioni per utente** per renderle
+  (lucchetto/badge) e gestire il tap su un contenuto bloccato.
+- **Endpoint proposti (alternativi):**
+  - estendere `GET /api/program/status` con un campo `unlocked_hubs` / `access` →
+    es. `{ "training": true, "nutrition": false, "wellbeing": false, "supplements": false, "materials": false }`
+  - oppure `GET /api/me/entitlements` → elenco abilitazioni/tier dell'utente
+- **Da chiarire:**
+  - **Driver dello sblocco:** kit/biotipo dalla survey, codice prova d'acquisto, tier/abbonamento,
+    fase/mese del percorso, o ruolo Directus?
+  - **Statico vs progressivo:** sblocco fissato all'attivazione o che avanza col percorso?
+  - **Enforcement:** lo stato "bloccato" è solo UI, oppure le API dei contenuti (`GET /api/path/{hub}`)
+    **negano** l'accesso (es. `403`) per gli hub non abilitati?
+- **Note:** in [[authentication]] i "livelli di accesso" descrivono solo l'autenticazione degli
+  endpoint (Public/Authenticated/Server). Qui si tratta di **autorizzazione per contenuto**, un
+  concetto distinto e non documentato.
+
+---
+
 ## 3. Percorso
 
 ### 3.1 Percorso (overview)
@@ -199,6 +221,7 @@ paypal/users/user-addresses/finder/CMS proxy.
 | Survey | `GET /api/survey/{type}`, `POST /api/survey/{type}/answers` | survey-iniziale, prova-acquisto-iniziale |
 | Prova d'acquisto | `POST /api/proof-of-purchase` | prova-acquisto-iniziale |
 | Home | `GET /api/program/status`, `GET /api/home/hero` | hero-home |
+| Accessi/abilitazioni | `GET /api/me/entitlements` (o campo `unlocked_hubs` su program/status) | *(da esportare)* |
 | Percorso | `GET /api/path`, `GET /api/path/progress`, `GET /api/path/{hub}`, `GET /api/path/{hub}/{contentId}` | percorso1–6 |
 | Diario | `GET /api/diary`, `POST /api/diary`, `GET /api/diary/achievements` | diario1, diario2 |
 | Statistiche | `GET /api/statistics?month={n}` | statistiche |
@@ -221,6 +244,9 @@ paypal/users/user-addresses/finder/CMS proxy.
   di nuovi endpoint `/api/*`.
 - Da chiarire se l'**app di programma** e lo **shop e-commerce** condividano la stessa
   autenticazione ([[authentication]]) e lo stesso back-end, o siano sistemi distinti.
+- Da definire il **modello di accesso ai contenuti** (§2bis): quali hub/aree sono sbloccati per
+  utente, cosa lo determina (kit, prova d'acquisto, tier, fase, ruolo) e se lo stato "bloccato"
+  è solo UI o applicato dalle API.
 
 ## Related
 

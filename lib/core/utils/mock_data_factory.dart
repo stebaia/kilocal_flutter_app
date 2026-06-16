@@ -15,22 +15,28 @@ abstract final class MockDataFactory {
 
   static HomeData homeData(AppLocalizations l10n) {
     return HomeData(
-      userName: 'Management',
-      overallProgress: 0.80,
-      quickCards: [
-        QuickCard(title: l10n.month1, subtitle: l10n.phase1, icon: '📅'),
-        QuickCard(title: l10n.areaTraining, subtitle: '4 ${l10n.diaryPending.toLowerCase()}', icon: '🎯'),
-      ],
-      heroItems: [
-        HeroItem(
-          title: l10n.homeHeroTitle,
-          subtitle: l10n.areaNutrition,
-          imageUrl: 'https://placehold.co/600x300/e51e4d/ffffff?text=Hero+1',
+      userName: 'Mariagiovanna',
+      currentDate: DateTime(2026, 9, 3),
+      continuePath: ContinuePathItem(
+        title: l10n.homePathCardTitle,
+        subtitle: l10n.homeContinuePath,
+        imageUrl: 'https://placehold.co/400x320/e51e4d/ffffff?text=Path',
+      ),
+      monthStats: MonthStats(
+        monthLabel: l10n.month1,
+        description: l10n.homeMonthStatsDescription,
+        progress: 0.80,
+      ),
+      actionCards: [
+        HomeActionCard(
+          title: l10n.homeMoments,
+          imageUrl: 'https://placehold.co/200x200/ffffff/e51e4d?text=Momenti',
+          route: '/momenti/home',
         ),
-        HeroItem(
-          title: l10n.homeProgress,
-          subtitle: l10n.activitiesCount(3, 15),
-          imageUrl: 'https://placehold.co/600x300/c9143c/ffffff?text=Hero+2',
+        HomeActionCard(
+          title: l10n.homeBenefits,
+          imageUrl: 'https://placehold.co/200x200/ffffff/e51e4d?text=Benefit',
+          route: '/benefits',
         ),
       ],
     );

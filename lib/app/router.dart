@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/icons/app_icons.dart';
+import '../core/theme/app_colors.dart';
+import '../core/theme/app_shadows.dart';
+import '../core/theme/app_spacing.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/benefits/presentation/benefits_screen.dart';
 import '../features/diary/presentation/diary_screen.dart';
@@ -76,21 +81,65 @@ class AppScaffold extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
+  static const _items = [
+    AppIcons.home,
+    AppIcons.path,
+    AppIcons.diary,
+    AppIcons.benefits,
+    AppIcons.popsicle,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: navigationShell.goBranch,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.route_outlined), activeIcon: Icon(Icons.route), label: 'Path'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book_outlined), activeIcon: Icon(Icons.menu_book), label: 'Diary'),
-          BottomNavigationBarItem(icon: Icon(Icons.card_giftcard_outlined), activeIcon: Icon(Icons.card_giftcard), label: 'Benefits'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profile'),
-        ],
+      bottomNavigationBar: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.surface,
+          boxShadow: AppShadows.bar,
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceSm),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: List.generate(_items.length, (index) {
+                final isSelected = navigationShell.currentIndex == index;
+                final item = _items[index];
+                final color = isSelected ? AppColors.accent : AppColors.textSecondary;
+
+                return GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    navigationShell.goBranch(index);
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: isSelected
+                        ? BoxDecoration(
+                            color: AppColors.accentSoft,
+                            shape: BoxShape.circle,
+                          )
+                        : null,
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: AppIcon(
+                        item,
+                        size: 20,
+                        color: color,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
       ),
     );
   }

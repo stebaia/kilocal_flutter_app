@@ -76,6 +76,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeHeroTitle => 'For you';
 
   @override
+  String get homeContinuePath => 'Continue the path';
+
+  @override
+  String get homeSeeStatistics => 'See statistics';
+
+  @override
+  String get homeMoments => 'Moments';
+
+  @override
+  String get homeBenefits => 'Benefits';
+
+  @override
+  String get homePathCardTitle => 'Title content to continue lorem ipsuim';
+
+  @override
+  String get homeMonthStatsDescription =>
+      'Lorem ipsum dolor sit amet consectetur. Facilisi varius.';
+
+  @override
   String get tabHome => 'Home';
 
   @override

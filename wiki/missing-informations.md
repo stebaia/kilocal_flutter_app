@@ -64,6 +64,37 @@ schermate del flusso Figma **non hanno un file `.md` corrispondente**:
 
 ---
 
+## 2bis. Livelli di accesso utente / contenuti bloccati (gating)
+
+Dal Figma emerge che **non tutti gli utenti hanno accesso a tutti i contenuti**: alcune tab/hub
+del percorso possono apparire in stato **"bloccato"** (es. un utente vede e usa la tab
+**Allenamento** ma altre tab risultano bloccate). Questo implica l'esistenza di **livelli di
+accesso / abilitazioni** per utente — non documentati da nessuna parte.
+
+- **Cosa manca nella wiki:** la documentazione tratta i livelli di accesso solo in termini di
+  **autenticazione di endpoint** (Public / Authenticated / Server only in [[authentication]]).
+  **Non esiste** alcuna descrizione di un modello di **autorizzazione per contenuto** (quali
+  hub/tab/aree sono sbloccati per quale utente).
+- **Cosa mostra il design:** stato visivo **bloccato/sbloccato** sulle tile degli hub di
+  [[screen-path]] (Allenamento, Alimentazione, Benessere, Integrazione, Materiali Extra) e,
+  potenzialmente, su altre sezioni.
+- **Domande aperte (da confermare col team):**
+  1. Cosa determina lo sblocco? Possibili driver: **kit/biotipo** dalla survey, **codice prova
+     d'acquisto** validato, **tier/abbonamento** dell'utente, **fase/mese** del percorso, o un
+     **ruolo Directus**.
+  2. Lo sblocco è **statico** (impostato all'attivazione del programma) o **progressivo**
+     (si sblocca avanzando nel percorso)?
+  3. È un attributo dell'utente, della sua iscrizione al programma, o dei singoli contenuti CMS?
+  4. Lo stato "bloccato" è solo **UI** o l'API **nega** anche l'accesso ai contenuti dell'hub?
+- **Impatto sviluppo:** la UI deve rendere lo stato bloccato (badge/lucchetto, tap → messaggio o
+  redirect all'acquisto/upgrade) e l'app deve ricevere dal back-end le **abilitazioni per utente**.
+  Vedi [[missing-apis]] (§2bis) per il dato/endpoint necessario.
+
+> ⚠️ Manca la **schermata Figma** che mostra esplicitamente questo stato: andrebbe esportata in
+> `wiki/flow-screen/` e collegata qui per documentare l'esatto comportamento.
+
+---
+
 ## 3. API documentate senza schermata corrispondente nel flusso
 
 Le seguenti API sono documentate ma **non trovano riscontro in nessuna schermata** del flusso
@@ -139,6 +170,9 @@ nella wiki (l'unica documentazione API riguarda lo shop):
    chiare e la **bottom navigation a 5 tab**.
 5. Aggiornare [[screen-splash]] e [[flutter-architecture]] (router) per includere il carosello
    di onboarding post-splash e la shell con tab di navigazione.
+6. Definire con il team il **modello di accesso ai contenuti** (vedi §2bis): cosa sblocca gli
+   hub/tab, se lo sblocco è statico o progressivo, e come l'app riceve le abilitazioni per
+   utente. Esportare la schermata Figma con lo stato "bloccato" in `wiki/flow-screen/`.
 
 ## Related
 

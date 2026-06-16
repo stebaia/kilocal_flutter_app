@@ -45,6 +45,12 @@ Invalidates session cookies and redirects to `/?logout=true`.
 > ⚠️ See [[contradictions]] — the "Public" classification of the cart conflicts with cart logic
 > that branches on whether the user is logged in.
 
+> ⚠️ **Authentication ≠ content authorization.** The table above is only about *endpoint
+> authentication*. The Figma shows that within the program app some hubs/tabs are **locked**
+> per user (e.g. a user has the Allenamento tab but other tabs appear locked), implying a
+> separate **per-content access / entitlements** model that is **not documented**. See
+> [[missing-informations]] §2bis and [[missing-apis]] §2bis.
+
 ## Related
 
 - [[cms-proxy]]

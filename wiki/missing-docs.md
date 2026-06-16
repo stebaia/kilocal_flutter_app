@@ -57,6 +57,28 @@ dato necessario a ogni schermata.
 
 ---
 
+## 2bis. Livelli di accesso utente / abilitazioni contenuti
+
+- **Serve per:** sapere **quali aree/hub/tab sono sbloccati** per l'utente corrente. Dal Figma
+  alcune tab del percorso appaiono in stato **bloccato** (es. l'utente accede ad Allenamento ma
+  non agli altri hub). L'app deve quindi conoscere le **abilitazioni per utente** per renderle
+  (lucchetto/badge) e per gestire il tap su un contenuto bloccato.
+- **Endpoint proposti (alternativi):**
+  - estendere `GET /api/program/status` con un campo `unlocked_hubs` / `access` →
+    es. `{ "training": true, "nutrition": false, "wellbeing": false, "supplements": false, "materials": false }`
+  - oppure `GET /api/me/entitlements` → elenco abilitazioni/tier dell'utente
+- **Da chiarire:**
+  - **Driver dello sblocco:** kit/biotipo dalla survey, codice prova d'acquisto, tier/abbonamento,
+    fase/mese del percorso, o ruolo Directus?
+  - **Statico vs progressivo:** sblocco fissato all'attivazione o che avanza col percorso?
+  - **Enforcement:** lo stato "bloccato" è solo UI, oppure le API dei contenuti (`GET /api/path/{hub}`)
+    **negano** l'accesso (es. `403`) per gli hub non abilitati?
+- **Nota:** in [[authentication]] i "livelli di accesso" descrivono solo l'autenticazione degli
+  endpoint (Public/Authenticated/Server). Qui si tratta di **autorizzazione per contenuto**, un
+  concetto distinto e non documentato. Vedi [[missing-informations]] §2bis.
+
+---
+
 ## 3. Percorso
 
 ### 3.1 Percorso (overview)
@@ -190,6 +212,7 @@ La sezione Strumenti raggruppa quattro tool: **Promemoria**, **Timer**, **Glossa
 | Survey | `GET /api/survey/{type}`, `POST /api/survey/{type}/answers` |
 | Prova d'acquisto | `POST /api/proof-of-purchase` |
 | Home | `GET /api/program/status`, `GET /api/home/hero` |
+| Accessi/abilitazioni | `GET /api/me/entitlements` (o campo `unlocked_hubs` su program/status) |
 | Percorso | `GET /api/path`, `GET /api/path/progress`, `GET /api/path/{hub}`, `GET /api/path/{hub}/{contentId}` |
 | Diario | `GET /api/diary`, `POST /api/diary`, `GET /api/diary/achievements` |
 | Statistiche | `GET /api/statistics?month={n}` |
@@ -216,3 +239,6 @@ Per ciascuna area sopra, chiediamo di confermare:
    back-end, oppure sono sistemi distinti?
 5. **Funzioni locali vs sincronizzate** — per Promemoria, Timer e Foto progressi, confermare
    se devono essere salvati sul server o gestiti solo sul dispositivo.
+6. **Livelli di accesso / abilitazioni** (§2bis) — come l'app sa quali hub/aree sono sbloccati
+   per l'utente, cosa determina lo sblocco (kit, prova d'acquisto, tier, fase, ruolo), se lo
+   sblocco è statico o progressivo, e se le API negano l'accesso ai contenuti non abilitati.

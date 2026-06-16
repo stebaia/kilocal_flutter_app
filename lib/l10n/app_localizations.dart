@@ -224,6 +224,42 @@ abstract class AppLocalizations {
   /// **'For you'**
   String get homeHeroTitle;
 
+  /// No description provided for @homeContinuePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue the path'**
+  String get homeContinuePath;
+
+  /// No description provided for @homeSeeStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'See statistics'**
+  String get homeSeeStatistics;
+
+  /// No description provided for @homeMoments.
+  ///
+  /// In en, this message translates to:
+  /// **'Moments'**
+  String get homeMoments;
+
+  /// No description provided for @homeBenefits.
+  ///
+  /// In en, this message translates to:
+  /// **'Benefits'**
+  String get homeBenefits;
+
+  /// No description provided for @homePathCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title content to continue lorem ipsuim'**
+  String get homePathCardTitle;
+
+  /// No description provided for @homeMonthStatsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Lorem ipsum dolor sit amet consectetur. Facilisi varius.'**
+  String get homeMonthStatsDescription;
+
   /// No description provided for @tabHome.
   ///
   /// In en, this message translates to:

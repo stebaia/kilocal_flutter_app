@@ -14,7 +14,7 @@ sheets.
 | Element | Description |
 |---------|-------------|
 | Progress | "Progressi complessivi" bar + counter (e.g. `23/132`) |
-| Area tiles | Allenamento, Alimentazione, Benessere, Integrazione (2×2 grid) |
+| Area tiles | Allenamento, Alimentazione, Benessere, Integrazione (2×2 grid). Tiles can render a **locked** state (lucchetto/badge) when the user is not entitled to that hub — see below |
 | Info view | "Attivi ora" list with per-month/phase completion (e.g. "Allenamento Mese 1 — completato al XX%") |
 
 ## Sub-hubs
@@ -30,10 +30,21 @@ sheets.
 Shared patterns: "Tendina info" (info bottom sheet), "Dettaglio prodotto" (product detail),
 "Modale filtri" (filters modal) — see [[navigation]].
 
+## Content access / locked hubs
+
+Not all users are entitled to all hubs: the Figma shows hub tiles in a **locked** state (e.g.
+a user can open Allenamento while the other hubs appear locked). The app must receive the
+**per-user entitlements** to render the locked state and handle taps on locked content
+(message / upgrade redirect). What drives the unlock (kit/biotype, proof-of-purchase code,
+tier/subscription, program phase, or Directus role) and whether locking is UI-only or enforced
+by the API is **not documented** — see [[missing-informations]] §2bis and [[missing-apis]] §2bis.
+
 ## Data / API
 
 - Path structure, progress, and per-hub content are **not documented** — see [[missing-apis]]
   (§3). Likely CMS-driven via [[cms-proxy]].
+- Per-user **hub entitlements** (which hubs are unlocked) are **not documented** — see
+  [[missing-apis]] §2bis.
 
 ## Implementation notes
 

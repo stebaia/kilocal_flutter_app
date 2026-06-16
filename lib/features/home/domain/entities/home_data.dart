@@ -3,29 +3,54 @@
 class HomeData {
   const HomeData({
     required this.userName,
-    required this.overallProgress,
-    required this.quickCards,
-    required this.heroItems,
+    required this.currentDate,
+    required this.continuePath,
+    required this.monthStats,
+    required this.actionCards,
   });
 
   final String userName;
-  final double overallProgress; // 0..1
-  final List<QuickCard> quickCards;
-  final List<HeroItem> heroItems;
+  final DateTime currentDate;
+  final ContinuePathItem continuePath;
+  final MonthStats monthStats;
+  final List<HomeActionCard> actionCards;
 }
 
-class QuickCard {
-  const QuickCard({required this.title, this.subtitle, required this.icon});
+/// The large pink "continue the path" hero card.
+class ContinuePathItem {
+  const ContinuePathItem({
+    required this.title,
+    required this.subtitle,
+    required this.imageUrl,
+  });
 
   final String title;
-  final String? subtitle;
-  final String icon; // emoji or asset key for simplicity
+  final String subtitle;
+  final String imageUrl;
 }
 
-class HeroItem {
-  const HeroItem({required this.title, required this.imageUrl, this.subtitle});
+/// Statistics summary for the current month.
+class MonthStats {
+  const MonthStats({
+    required this.monthLabel,
+    required this.description,
+    required this.progress,
+  });
+
+  final String monthLabel;
+  final String description;
+  final double progress; // 0..1
+}
+
+/// Small actionable card shown on the home grid (Momenti, Benefit, ...).
+class HomeActionCard {
+  const HomeActionCard({
+    required this.title,
+    required this.imageUrl,
+    required this.route,
+  });
 
   final String title;
   final String imageUrl;
-  final String? subtitle;
+  final String route;
 }
