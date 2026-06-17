@@ -22,6 +22,7 @@ abstract final class AppColors {
   static const Color surface = Color(0xFFFFFFFF);
   static const Color accent = Color(0xFFE51E4D);
   static const Color accentSoft = Color(0xFFFCE7EC);
+  static const Color borderCard = Color(0xFFC2C2C2);
   static const Color textPrimary = ink;
   static const Color textSecondary = Color(0xFF6B6B72);
   static const Color divider = Color(0xFFECECEF);

@@ -37,7 +37,7 @@ class CircularProgress extends StatelessWidget {
             child: CircularProgressIndicator(
               value: clamped,
               strokeWidth: strokeWidth,
-              
+              backgroundColor: bg,
               valueColor: AlwaysStoppedAnimation<Color>(fg),
             ),
           ),

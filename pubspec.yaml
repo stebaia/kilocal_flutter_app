@@ -40,3 +40,8 @@ flutter:
     - assets/icons/
     - assets/postcard.png
     - assets/letter.png
+    - assets/training.png
+    - assets/alimentation.png
+    - assets/wellness.png
+    - assets/name_logo.png
+    - assets/path_header_ellipse.svg

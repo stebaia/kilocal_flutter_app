@@ -116,6 +116,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathOverallProgress => 'Overall progress';
 
   @override
+  String get pathActivitiesCompleted => 'Activities completed';
+
+  @override
   String get diaryTitle => 'Diary';
 
   @override

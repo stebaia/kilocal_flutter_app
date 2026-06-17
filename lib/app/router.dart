@@ -96,6 +96,10 @@ class AppScaffold extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(AppRadius.lg),
+            topRight: Radius.circular(AppRadius.lg),
+          ),
           boxShadow: AppShadows.bar,
         ),
         child: SafeArea(

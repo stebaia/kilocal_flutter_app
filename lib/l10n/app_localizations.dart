@@ -302,6 +302,12 @@ abstract class AppLocalizations {
   /// **'Overall progress'**
   String get pathOverallProgress;
 
+  /// No description provided for @pathActivitiesCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities completed'**
+  String get pathActivitiesCompleted;
+
   /// No description provided for @diaryTitle.
   ///
   /// In en, this message translates to:
