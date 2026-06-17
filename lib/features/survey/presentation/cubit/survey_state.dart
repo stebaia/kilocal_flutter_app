@@ -15,7 +15,10 @@ class SurveyState extends Equatable {
   final int currentStep;
   final Map<int, dynamic> answers;
 
-  SurveyStep? get currentStepData => steps.isNotEmpty && currentStep < steps.length ? steps[currentStep] : null;
+  SurveyStep? get currentStepData =>
+      steps.isNotEmpty && currentStep < steps.length
+      ? steps[currentStep]
+      : null;
 
   bool get isFirstStep => currentStep == 0;
   bool get isLastStep => currentStep == steps.length - 1;

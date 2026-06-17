@@ -3,12 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/mock_data_factory.dart';
-import '../../../core/widgets/app_card.dart';
-import '../../../core/widgets/circular_progress.dart';
 import '../../../core/widgets/localized_bloc_loader.dart';
 import 'cubit/statistics_cubit.dart';
+import 'widgets/statistics_card.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -61,24 +59,11 @@ class _StatisticsView extends StatelessWidget {
               final stat = state.stats[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
-                child: AppCard(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(stat.area, style: AppTypography.textTheme.titleMedium),
-                            const SizedBox(height: AppSpacing.space2xs),
-                            Text(
-                              '${stat.month} — ${l10n.activitiesCount(stat.completed, stat.total)}',
-                              style: AppTypography.textTheme.labelMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                      CircularProgress(value: stat.percent),
-                    ],
+                child: StatisticsCard(
+                  stat: stat,
+                  activitiesCount: l10n.activitiesCount(
+                    stat.completed,
+                    stat.total,
                   ),
                 ),
               );

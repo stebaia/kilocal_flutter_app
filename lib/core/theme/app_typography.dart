@@ -54,4 +54,12 @@ abstract final class AppTypography {
       color: AppColors.accent,
     );
   }
+
+  static TextStyle get numericAccentCircular {
+    return GoogleFonts.montserrat(
+      fontSize: 28,
+      fontWeight: FontWeight.w600,
+      color: AppColors.textPrimary,
+    );
+  }
 }

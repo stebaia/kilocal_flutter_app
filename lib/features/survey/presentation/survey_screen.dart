@@ -67,7 +67,9 @@ class _SurveyView extends StatelessWidget {
                 return SurveyInfoStep(
                   title: step.title,
                   body: step.body,
-                  buttonLabel: state.isLastStep ? l10n.surveyStart : l10n.surveyNext,
+                  buttonLabel: state.isLastStep
+                      ? l10n.surveyStart
+                      : l10n.surveyNext,
                   onNext: () => context.read<SurveyCubit>().next(),
                 );
               case SurveyStepType.preset:
@@ -86,7 +88,8 @@ class _SurveyView extends StatelessWidget {
                   body: step.body,
                   hint: step.hint,
                   value: state.answers[state.currentStep] as String?,
-                  onChanged: (t) => context.read<SurveyCubit>().setTextAnswer(t),
+                  onChanged: (t) =>
+                      context.read<SurveyCubit>().setTextAnswer(t),
                   onNext: () => context.read<SurveyCubit>().next(),
                   nextLabel: l10n.surveyNext,
                 );
@@ -96,7 +99,8 @@ class _SurveyView extends StatelessWidget {
                   body: step.body,
                   hint: step.hint,
                   value: state.answers[state.currentStep] as String?,
-                  onChanged: (t) => context.read<SurveyCubit>().setProofOfPurchase(t),
+                  onChanged: (t) =>
+                      context.read<SurveyCubit>().setProofOfPurchase(t),
                   onNext: () => context.read<SurveyCubit>().next(),
                   verifyLabel: l10n.surveyVerify,
                 );

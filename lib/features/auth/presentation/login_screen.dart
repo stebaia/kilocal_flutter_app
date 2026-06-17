@@ -6,18 +6,15 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/app_card.dart';
 import 'cubit/login_cubit.dart';
+import 'widgets/login_form_card.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => LoginCubit(),
-      child: const _LoginView(),
-    );
+    return BlocProvider(create: (_) => LoginCubit(), child: const _LoginView());
   }
 }
 
@@ -38,7 +35,9 @@ class _LoginView extends StatelessWidget {
         },
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenGutter),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenGutter,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -54,68 +53,21 @@ class _LoginView extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.spaceXl),
-                Text(l10n.loginTitle, style: AppTypography.textTheme.headlineLarge),
-                const SizedBox(height: AppSpacing.spaceLg),
-                AppCard(
-                  child: Column(
-                    children: [
-                      TextField(
-                        onChanged: (v) => context.read<LoginCubit>().emailChanged(v),
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: InputDecoration(
-                          labelText: l10n.loginEmail,
-                          prefixIcon: const Icon(Icons.email_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.spaceMd),
-                      TextField(
-                        onChanged: (v) => context.read<LoginCubit>().passwordChanged(v),
-                        obscureText: true,
-                        decoration: InputDecoration(
-                          labelText: l10n.loginPassword,
-                          prefixIcon: const Icon(Icons.lock_outline),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.spaceSm),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {},
-                          child: Text(l10n.loginForgotPassword),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.spaceSm),
-                      SizedBox(
-                        width: double.infinity,
-                        child: BlocBuilder<LoginCubit, LoginState>(
-                          builder: (context, state) {
-                            return ElevatedButton(
-                              onPressed: state.status == LoginStatus.submitting
-                                  ? null
-                                  : () => context.read<LoginCubit>().login(),
-                              child: state.status == LoginStatus.submitting
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(strokeWidth: 2),
-                                    )
-                                  : Text(l10n.loginButton),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+                Text(
+                  l10n.loginTitle,
+                  style: AppTypography.textTheme.headlineLarge,
                 ),
+                const SizedBox(height: AppSpacing.spaceLg),
+                const LoginFormCard(),
                 const SizedBox(height: AppSpacing.spaceLg),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(l10n.loginNoAccount, style: AppTypography.textTheme.bodyMedium),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(l10n.loginSignUp),
+                    Text(
+                      l10n.loginNoAccount,
+                      style: AppTypography.textTheme.bodyMedium,
                     ),
+                    TextButton(onPressed: () {}, child: Text(l10n.loginSignUp)),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.spaceXl),

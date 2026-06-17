@@ -12,7 +12,11 @@ class SurveyCubit extends Cubit<SurveyState> {
     SurveyStep(
       type: SurveyStepType.preset,
       title: 'Qual è il tuo obiettivo principale?',
-      choices: ['Perdere peso', 'Aumentare massa muscolare', 'Migliorare il benessere'],
+      choices: [
+        'Perdere peso',
+        'Aumentare massa muscolare',
+        'Migliorare il benessere',
+      ],
     ),
     SurveyStep(
       type: SurveyStepType.free,
@@ -22,7 +26,8 @@ class SurveyCubit extends Cubit<SurveyState> {
     SurveyStep(
       type: SurveyStepType.info,
       title: 'Informazioni utili',
-      body: 'Il nostro programma si basa su un approccio scientifico alla nutrizione e all\'allenamento.',
+      body:
+          'Il nostro programma si basa su un approccio scientifico alla nutrizione e all\'allenamento.',
     ),
     SurveyStep(
       type: SurveyStepType.intermezzo,
@@ -31,7 +36,8 @@ class SurveyCubit extends Cubit<SurveyState> {
     SurveyStep(
       type: SurveyStepType.kitResult,
       title: 'Il tuo kit consigliato',
-      body: 'Kit Bilanciato — Ideale per chi cerca un miglioramento generale del benessere.',
+      body:
+          'Kit Bilanciato — Ideale per chi cerca un miglioramento generale del benessere.',
     ),
     SurveyStep(
       type: SurveyStepType.proofOfPurchase,
@@ -46,7 +52,8 @@ class SurveyCubit extends Cubit<SurveyState> {
     SurveyStep(
       type: SurveyStepType.platformIntro,
       title: 'Benvenuto sulla piattaforma',
-      body: 'Hai completato il survey. Ora puoi iniziare il tuo percorso personalizzato.',
+      body:
+          'Hai completato il survey. Ora puoi iniziare il tuo percorso personalizzato.',
     ),
   ];
 

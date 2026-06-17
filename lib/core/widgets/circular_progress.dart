@@ -37,13 +37,13 @@ class CircularProgress extends StatelessWidget {
             child: CircularProgressIndicator(
               value: clamped,
               strokeWidth: strokeWidth,
-              backgroundColor: bg,
+              
               valueColor: AlwaysStoppedAnimation<Color>(fg),
             ),
           ),
           Text(
             '${(clamped * 100).round()}%',
-            style: AppTypography.numericAccent.copyWith(fontSize: size * 0.22),
+            style: AppTypography.numericAccentCircular
           ),
         ],
       ),

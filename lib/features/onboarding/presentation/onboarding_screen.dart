@@ -4,10 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/brand_gradient_background.dart';
 import 'cubit/onboarding_cubit.dart';
+import 'widgets/onboarding_cta_button.dart';
+import 'widgets/onboarding_page_indicator.dart';
+import 'widgets/onboarding_slide.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -48,9 +50,18 @@ class _OnboardingViewState extends State<_OnboardingView> {
     final l10n = AppLocalizations.of(context)!;
 
     final slides = [
-      _SlideData(title: l10n.onboardingTitle1, body: l10n.onboardingBody1),
-      _SlideData(title: l10n.onboardingTitle2, body: l10n.onboardingBody2),
-      _SlideData(title: l10n.onboardingTitle3, body: l10n.onboardingBody3),
+      OnboardingSlideData(
+        title: l10n.onboardingTitle1,
+        body: l10n.onboardingBody1,
+      ),
+      OnboardingSlideData(
+        title: l10n.onboardingTitle2,
+        body: l10n.onboardingBody2,
+      ),
+      OnboardingSlideData(
+        title: l10n.onboardingTitle3,
+        body: l10n.onboardingBody3,
+      ),
     ];
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -75,91 +86,41 @@ class _OnboardingViewState extends State<_OnboardingView> {
                 Expanded(
                   child: PageView.builder(
                     controller: _pageController,
-                    onPageChanged: (index) => context.read<OnboardingCubit>().setPage(index),
+                    onPageChanged: (index) =>
+                        context.read<OnboardingCubit>().setPage(index),
                     itemCount: slides.length,
                     itemBuilder: (context, index) {
-                      final slide = slides[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.spaceLg),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              slide.title,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.neutralWhite,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.spaceMd),
-                            Text(
-                              slide.body,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: AppColors.neutralWhite,
-                                height: 1.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
+                      return OnboardingSlide(data: slides[index]);
                     },
                   ),
                 ),
                 const SizedBox(height: AppSpacing.spaceLg),
                 BlocBuilder<OnboardingCubit, OnboardingState>(
                   builder: (context, state) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(slides.length, (index) {
-                        final isActive = index == state.currentPage;
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: isActive ? 24 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.neutralWhite
-                                : AppColors.neutralWhite.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(AppRadius.pill),
-                          ),
-                        );
-                      }),
+                    return OnboardingPageIndicator(
+                      itemCount: slides.length,
+                      currentPage: state.currentPage,
                     );
                   },
                 ),
                 const SizedBox(height: AppSpacing.spaceLg),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenGutter),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenGutter,
+                  ),
                   child: BlocBuilder<OnboardingCubit, OnboardingState>(
                     builder: (context, state) {
-                      return SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (state.isLastPage) {
-                              context.go('/login');
-                            } else {
-                              context.read<OnboardingCubit>().nextPage();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.neutralWhite,
-                            foregroundColor: AppColors.brandPink,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppRadius.pill),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceMd),
-                          ),
-                          child: Text(
-                            state.isLastPage ? l10n.onboardingStart : l10n.onboardingNext,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
-                        ),
+                      return OnboardingCtaButton(
+                        label: state.isLastPage
+                            ? l10n.onboardingStart
+                            : l10n.onboardingNext,
+                        onPressed: () {
+                          if (state.isLastPage) {
+                            context.go('/login');
+                          } else {
+                            context.read<OnboardingCubit>().nextPage();
+                          }
+                        },
                       );
                     },
                   ),
@@ -172,11 +133,4 @@ class _OnboardingViewState extends State<_OnboardingView> {
       ),
     );
   }
-}
-
-class _SlideData {
-  const _SlideData({required this.title, required this.body});
-
-  final String title;
-  final String body;
 }

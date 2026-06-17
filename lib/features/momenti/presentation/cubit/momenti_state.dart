@@ -9,10 +9,7 @@ class MomentiState extends Equatable {
   final MomentiData? data;
 
   MomentiState copyWith({MomentiStatus? status, MomentiData? data}) {
-    return MomentiState(
-      status: status ?? this.status,
-      data: data ?? this.data,
-    );
+    return MomentiState(status: status ?? this.status, data: data ?? this.data);
   }
 
   @override

@@ -7,7 +7,7 @@ part 'statistics_state.dart';
 
 class StatisticsCubit extends Cubit<StatisticsState> {
   StatisticsCubit({List<AreaStat>? initialData})
-      : super(StatisticsState(stats: initialData ?? const []));
+    : super(StatisticsState(stats: initialData ?? const []));
 
   void loadWithData(List<AreaStat> data) {
     emit(StatisticsState(status: StatisticsStatus.loaded, stats: data));

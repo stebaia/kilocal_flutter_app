@@ -6,7 +6,8 @@ import '../../domain/entities/momenti_data.dart';
 part 'momenti_state.dart';
 
 class MomentiCubit extends Cubit<MomentiState> {
-  MomentiCubit({MomentiData? initialData}) : super(MomentiState(data: initialData));
+  MomentiCubit({MomentiData? initialData})
+    : super(MomentiState(data: initialData));
 
   void loadWithData(MomentiData data) {
     emit(MomentiState(status: MomentiStatus.loaded, data: data));

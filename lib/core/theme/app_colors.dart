@@ -9,8 +9,8 @@ abstract final class AppColors {
   AppColors._();
 
   // --- Brand (gradient theme: splash / onboarding) ---
-  static const Color brandPink = Color(0xFFED1A4B);
-  static const Color brandCrimson = Color(0xFFC9143C);
+  static const Color brandPink = Color(0xFFC7153B);
+  static const Color brandCrimson = Color(0xFFFF3D66);
   static const Color coral = Color(0xFFFF5A5A);
 
   // --- Neutrals ---
@@ -29,8 +29,8 @@ abstract final class AppColors {
   /// Signature vertical brand gradient (top -> bottom), used full-bleed behind
   /// illustration screens (splash, onboarding).
   static const LinearGradient brandGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
     colors: [brandPink, brandCrimson],
   );
 }

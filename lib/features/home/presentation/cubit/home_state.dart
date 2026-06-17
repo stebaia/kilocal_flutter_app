@@ -9,10 +9,7 @@ class HomeState extends Equatable {
   final HomeData? data;
 
   HomeState copyWith({HomeStatus? status, HomeData? data}) {
-    return HomeState(
-      status: status ?? this.status,
-      data: data ?? this.data,
-    );
+    return HomeState(status: status ?? this.status, data: data ?? this.data);
   }
 
   @override

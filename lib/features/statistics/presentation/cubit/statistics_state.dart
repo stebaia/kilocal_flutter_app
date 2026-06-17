@@ -3,7 +3,10 @@ part of 'statistics_cubit.dart';
 enum StatisticsStatus { initial, loading, loaded, error }
 
 class StatisticsState extends Equatable {
-  const StatisticsState({this.status = StatisticsStatus.initial, this.stats = const []});
+  const StatisticsState({
+    this.status = StatisticsStatus.initial,
+    this.stats = const [],
+  });
 
   final StatisticsStatus status;
   final List<AreaStat> stats;
