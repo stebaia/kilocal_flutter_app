@@ -7,6 +7,7 @@ import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/home_data.dart';
+import 'action_card_illustration.dart';
 
 class ActionCard extends StatelessWidget {
   const ActionCard({super.key, required this.card});
@@ -18,9 +19,10 @@ class ActionCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.push(card.route),
       child: Container(
-        height: 180,
+        height: 165,
+        width: 159,
         decoration: BoxDecoration(
-          gradient: AppColors.brandGradient,
+          gradient: AppColors.brandGradientVertical,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           boxShadow: AppShadows.card,
         ),
@@ -34,14 +36,9 @@ class ActionCard extends StatelessWidget {
                 left: 0,
                 right: 0,
                 child: Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    child: Image.network(
-                      card.imageUrl,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
+                  child: ActionCardIllustration(
+                    imageUrl: card.imageUrl,
+                    assetName: card.assetName,
                   ),
                 ),
               ),
@@ -53,6 +50,7 @@ class ActionCard extends StatelessWidget {
                   card.title,
                   style: AppTypography.textTheme.titleMedium?.copyWith(
                     color: AppColors.neutralWhite,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -61,7 +59,7 @@ class ActionCard extends StatelessWidget {
               Positioned(
                 bottom: AppSpacing.spaceMd,
                 right: AppSpacing.spaceMd,
-                child: AppIcon(AppIcons.play, size: 24),
+                child: AppIcon(AppIcons.play, size: AppSpacing.spaceMd),
               ),
             ],
           ),

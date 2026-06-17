@@ -13,7 +13,7 @@ abstract final class AppSpacing {
   static const double spaceXl = 32;
 
   /// Default horizontal screen gutter (left/right padding).
-  static const double screenGutter = spaceMd;
+  static const double screenGutter = spaceLg;
 }
 
 /// Corner radii. `radiusPill` is intentionally large to fully round controls.

@@ -38,3 +38,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icons/
+    - assets/postcard.png
+    - assets/letter.png

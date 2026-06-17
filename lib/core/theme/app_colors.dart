@@ -33,4 +33,11 @@ abstract final class AppColors {
     end: Alignment.centerRight,
     colors: [brandPink, brandCrimson],
   );
+
+  /// Vertical variant of the brand gradient, used on home action cards.
+  static const LinearGradient brandGradientVertical = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [brandPink, brandCrimson],
+  );
 }

@@ -32,11 +32,13 @@ abstract final class MockDataFactory {
           title: l10n.homeMoments,
           imageUrl: 'https://placehold.co/200x200/ffffff/e51e4d?text=Momenti',
           route: '/momenti/home',
+          assetName: 'assets/postcard.png',
         ),
         HomeActionCard(
           title: l10n.homeBenefits,
           imageUrl: 'https://placehold.co/200x200/ffffff/e51e4d?text=Benefit',
           route: '/benefits',
+          assetName: 'assets/letter.png',
         ),
       ],
     );

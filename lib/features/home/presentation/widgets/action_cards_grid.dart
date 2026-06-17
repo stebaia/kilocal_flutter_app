@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/home_data.dart';
 import 'action_card.dart';
 
@@ -12,12 +11,13 @@ class ActionCardsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: cards.map((card) {
-        return Expanded(
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: card == cards.first ? AppSpacing.spaceSm : 0,
-            ),
+      children: cards.asMap().entries.map((entry) {
+        final index = entry.key;
+        final card = entry.value;
+        return Padding(
+          padding: EdgeInsets.only(right: index == 0 ? 24 : 0),
+          child: SizedBox(
+            width: 159,
             child: ActionCard(card: card),
           ),
         );

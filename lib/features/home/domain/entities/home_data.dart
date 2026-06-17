@@ -48,9 +48,14 @@ class HomeActionCard {
     required this.title,
     required this.imageUrl,
     required this.route,
+    this.assetName,
   });
 
   final String title;
   final String imageUrl;
   final String route;
+
+  /// Optional local asset used as the card illustration.
+  /// When provided, it takes precedence over [imageUrl].
+  final String? assetName;
 }
