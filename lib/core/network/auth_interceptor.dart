@@ -1,26 +1,25 @@
 import 'package:dio/dio.dart';
 
-import '../config/env.dart';
-import 'cookie_store.dart';
+import 'token_store.dart';
 
 /// Attaches auth and handles single-shot token refresh on 401.
 ///
 /// From `wiki/authentication.md` and `wiki/flutter-architecture.md`:
 /// - authenticated calls send `Authorization: Bearer {access_token}`;
-/// - on `401`, attempt `POST /cms/auth/refresh` once, then retry the request;
+/// - on `401`, attempt `POST /auth/refresh` once, then retry the request;
 ///   otherwise emit an auth-expired signal and route to login.
 ///
 /// Maps by **status code**, never by message text (PayPal returns its 401 in
 /// Italian — see `wiki/contradictions.md` §4).
 class AuthInterceptor extends QueuedInterceptor {
   AuthInterceptor({
-    required CookieStore cookieStore,
+    required TokenStore tokenStore,
     required Dio refreshClient,
     this.onAuthExpired,
-  })  : _cookies = cookieStore,
-        _refreshClient = refreshClient;
+  }) : _tokenStore = tokenStore,
+       _refreshClient = refreshClient;
 
-  final CookieStore _cookies;
+  final TokenStore _tokenStore;
 
   /// A bare Dio (no AuthInterceptor) used to call the refresh endpoint, to
   /// avoid recursive 401 handling.
@@ -35,7 +34,7 @@ class AuthInterceptor extends QueuedInterceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    final token = await _cookies.accessToken;
+    final token = await _tokenStore.accessToken;
     if (token != null) {
       options.headers['Authorization'] = 'Bearer $token';
     }
@@ -63,7 +62,7 @@ class AuthInterceptor extends QueuedInterceptor {
     try {
       final options = err.requestOptions;
       options.extra['__retried__'] = true;
-      final token = await _cookies.accessToken;
+      final token = await _tokenStore.accessToken;
       if (token != null) {
         options.headers['Authorization'] = 'Bearer $token';
       }
@@ -75,23 +74,23 @@ class AuthInterceptor extends QueuedInterceptor {
   }
 
   Future<bool> _tryRefresh() async {
-    final refresh = await _cookies.refreshToken;
+    final refresh = await _tokenStore.refreshToken;
     if (refresh == null) return false;
     try {
       final res = await _refreshClient.post<Map<String, dynamic>>(
-        '${Env.shopUrl}/cms/auth/refresh',
-        data: {'refresh_token': refresh},
+        '/auth/refresh',
+        data: {'refresh_token': refresh, 'mode': 'json'},
       );
       final data = res.data?['data'] as Map<String, dynamic>?;
       final access = data?['access_token'] as String?;
       if (access == null) return false;
-      await _cookies.saveSession(
+      await _tokenStore.saveSession(
         accessToken: access,
         refreshToken: data?['refresh_token'] as String?,
       );
       return true;
     } on DioException {
-      await _cookies.clear();
+      await _tokenStore.clear();
       return false;
     }
   }

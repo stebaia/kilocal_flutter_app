@@ -7,7 +7,12 @@ import '../theme/app_spacing.dart';
 /// Standard white card with rounded corners and soft shadow.
 /// Use this across all light-theme screens.
 class AppCard extends StatelessWidget {
-  const AppCard({super.key, this.child, this.padding = const EdgeInsets.all(AppSpacing.spaceMd), this.onTap});
+  const AppCard({
+    super.key,
+    this.child,
+    this.padding = const EdgeInsets.all(AppSpacing.spaceMd),
+    this.onTap,
+  });
 
   final Widget? child;
   final EdgeInsetsGeometry padding;
@@ -19,7 +24,7 @@ class AppCard extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.all(color: AppColors.borderCard ),
+        border: Border.all(color: AppColors.borderCard),
         borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: AppShadows.card,
       ),

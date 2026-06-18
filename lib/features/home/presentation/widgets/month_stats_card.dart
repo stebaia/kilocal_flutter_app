@@ -61,7 +61,7 @@ class MonthStatsCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: AppSpacing.spaceLg,),
+          SizedBox(width: AppSpacing.spaceLg),
           CircularProgress(value: stats.progress, size: 116, strokeWidth: 12),
         ],
       ),

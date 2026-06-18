@@ -16,10 +16,7 @@ class ActionCardsGrid extends StatelessWidget {
         final card = entry.value;
         return Padding(
           padding: EdgeInsets.only(right: index == 0 ? 24 : 0),
-          child: SizedBox(
-            width: 159,
-            child: ActionCard(card: card),
-          ),
+          child: SizedBox(width: 159, child: ActionCard(card: card)),
         );
       }).toList(),
     );

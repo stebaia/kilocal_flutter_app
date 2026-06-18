@@ -14,14 +14,15 @@ abstract final class AppTheme {
   AppTheme._();
 
   static ThemeData get light {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.accent,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: AppColors.accent,
-      surface: AppColors.surface,
-      onSurface: AppColors.textPrimary,
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.accent,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: AppColors.accent,
+          surface: AppColors.surface,
+          onSurface: AppColors.textPrimary,
+        );
 
     return ThemeData(
       useMaterial3: true,

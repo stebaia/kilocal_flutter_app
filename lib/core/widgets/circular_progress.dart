@@ -43,7 +43,7 @@ class CircularProgress extends StatelessWidget {
           ),
           Text(
             '${(clamped * 100).round()}%',
-            style: AppTypography.numericAccentCircular
+            style: AppTypography.numericAccentCircular,
           ),
         ],
       ),

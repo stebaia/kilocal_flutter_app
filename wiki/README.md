@@ -62,6 +62,7 @@ wiki/
 ## Client architecture
 
 - [flutter-architecture](flutter-architecture.md) — BLoC, feature-first, Dio/Retrofit
+- [auth-implementation-plan](auth-implementation-plan.md) — step-by-step plan to build login & registration
 
 ## Design & screens
 

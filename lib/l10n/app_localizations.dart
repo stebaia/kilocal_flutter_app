@@ -164,6 +164,12 @@ abstract class AppLocalizations {
   /// **'Login'**
   String get loginTitle;
 
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.'**
+  String get loginSubtitle;
+
   /// No description provided for @loginEmail.
   ///
   /// In en, this message translates to:
@@ -182,11 +188,17 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get loginButton;
 
-  /// No description provided for @loginForgotPassword.
+  /// No description provided for @loginForgotPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Forgot password?'**
-  String get loginForgotPassword;
+  /// **'Forgot your password?'**
+  String get loginForgotPrompt;
+
+  /// No description provided for @loginForgotLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover it here'**
+  String get loginForgotLink;
 
   /// No description provided for @loginNoAccount.
   ///
@@ -199,6 +211,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign up'**
   String get loginSignUp;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get registerTitle;
+
+  /// No description provided for @registerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.'**
+  String get registerSubtitle;
+
+  /// No description provided for @registerFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get registerFullName;
+
+  /// No description provided for @registerEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email address'**
+  String get registerEmail;
+
+  /// No description provided for @registerPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get registerPassword;
+
+  /// No description provided for @registerPasswordConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get registerPasswordConfirm;
+
+  /// No description provided for @registerTermsPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'By signing up you accept the'**
+  String get registerTermsPrefix;
+
+  /// No description provided for @registerTermsLink.
+  ///
+  /// In en, this message translates to:
+  /// **'terms and conditions'**
+  String get registerTermsLink;
+
+  /// No description provided for @registerButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get registerButton;
+
+  /// No description provided for @registerBottomPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Not registered?'**
+  String get registerBottomPrompt;
+
+  /// No description provided for @registerBottomLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up now'**
+  String get registerBottomLink;
+
+  /// No description provided for @registerSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration completed'**
+  String get registerSuccessTitle;
+
+  /// No description provided for @registerSuccessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'You can now log in with your credentials.'**
+  String get registerSuccessDescription;
+
+  /// No description provided for @errorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorTitle;
+
+  /// No description provided for @registerErrorMissingFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in all required fields and accept the terms.'**
+  String get registerErrorMissingFields;
+
+  /// No description provided for @registerErrorPasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match.'**
+  String get registerErrorPasswordMismatch;
+
+  /// No description provided for @registerErrorConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Email already registered.'**
+  String get registerErrorConflict;
+
+  /// No description provided for @registerErrorBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid data. Please check the entered fields.'**
+  String get registerErrorBadRequest;
+
+  /// No description provided for @registerErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Please try again later.'**
+  String get registerErrorNetwork;
+
+  /// No description provided for @registerErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Please try again later.'**
+  String get registerErrorServer;
+
+  /// No description provided for @registerErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get registerErrorGeneric;
+
+  /// No description provided for @loginErrorMissingFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email and password.'**
+  String get loginErrorMissingFields;
+
+  /// No description provided for @loginErrorUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password.'**
+  String get loginErrorUnauthorized;
+
+  /// No description provided for @loginErrorBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid data. Please check email and password.'**
+  String get loginErrorBadRequest;
+
+  /// No description provided for @loginErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Please try again later.'**
+  String get loginErrorNetwork;
+
+  /// No description provided for @loginErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Please try again later.'**
+  String get loginErrorServer;
+
+  /// No description provided for @loginErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get loginErrorGeneric;
 
   /// Greeting on the home screen
   ///

@@ -13,6 +13,7 @@ enum ApiErrorType {
   forbidden, // 403
   notFound, // 404
   badRequest, // 400
+  conflict, // 409
   server, // 5xx
   unknown,
 }
@@ -71,6 +72,8 @@ class ApiException implements Exception {
         return ApiErrorType.forbidden;
       case 404:
         return ApiErrorType.notFound;
+      case 409:
+        return ApiErrorType.conflict;
       default:
         if (status != null && status >= 500) return ApiErrorType.server;
         return ApiErrorType.unknown;

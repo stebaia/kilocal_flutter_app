@@ -45,6 +45,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get loginTitle => 'Accedi';
 
   @override
+  String get loginSubtitle =>
+      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+
+  @override
   String get loginEmail => 'Email';
 
   @override
@@ -54,13 +58,102 @@ class AppLocalizationsIt extends AppLocalizations {
   String get loginButton => 'Accedi';
 
   @override
-  String get loginForgotPassword => 'Password dimenticata?';
+  String get loginForgotPrompt => 'Hai dimenticato la password?';
+
+  @override
+  String get loginForgotLink => 'Recuperala qui';
 
   @override
   String get loginNoAccount => 'Non hai un account?';
 
   @override
   String get loginSignUp => 'Registrati';
+
+  @override
+  String get registerTitle => 'Registrati';
+
+  @override
+  String get registerSubtitle =>
+      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+
+  @override
+  String get registerFullName => 'Nome e Cognome';
+
+  @override
+  String get registerEmail => 'Indirizzo e-mail';
+
+  @override
+  String get registerPassword => 'Password';
+
+  @override
+  String get registerPasswordConfirm => 'Conferma password';
+
+  @override
+  String get registerTermsPrefix => 'Registrandoti accetti i';
+
+  @override
+  String get registerTermsLink => 'termini e condizioni';
+
+  @override
+  String get registerButton => 'Registrati';
+
+  @override
+  String get registerBottomPrompt => 'Non sei iscritto?';
+
+  @override
+  String get registerBottomLink => 'Registrati subito';
+
+  @override
+  String get registerSuccessTitle => 'Registrazione completata';
+
+  @override
+  String get registerSuccessDescription =>
+      'Ora puoi accedere con le tue credenziali.';
+
+  @override
+  String get errorTitle => 'Errore';
+
+  @override
+  String get registerErrorMissingFields =>
+      'Compila tutti i campi obbligatori e accetta i termini.';
+
+  @override
+  String get registerErrorPasswordMismatch => 'Le password non coincidono.';
+
+  @override
+  String get registerErrorConflict => 'Email già registrata.';
+
+  @override
+  String get registerErrorBadRequest =>
+      'Dati non validi. Controlla i campi inseriti.';
+
+  @override
+  String get registerErrorNetwork => 'Connessione assente. Riprova più tardi.';
+
+  @override
+  String get registerErrorServer => 'Errore del server. Riprova più tardi.';
+
+  @override
+  String get registerErrorGeneric => 'Si è verificato un errore. Riprova.';
+
+  @override
+  String get loginErrorMissingFields => 'Inserisci email e password.';
+
+  @override
+  String get loginErrorUnauthorized => 'Email o password non valide.';
+
+  @override
+  String get loginErrorBadRequest =>
+      'Dati non validi. Controlla email e password.';
+
+  @override
+  String get loginErrorNetwork => 'Connessione assente. Riprova più tardi.';
+
+  @override
+  String get loginErrorServer => 'Errore del server. Riprova più tardi.';
+
+  @override
+  String get loginErrorGeneric => 'Si è verificato un errore. Riprova.';
 
   @override
   String homeGreeting(String name) {

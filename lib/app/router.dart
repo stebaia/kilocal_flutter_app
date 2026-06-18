@@ -7,6 +7,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_shadows.dart';
 import '../core/theme/app_spacing.dart';
 import '../features/auth/presentation/login_screen.dart';
+import '../features/auth/presentation/register_screen.dart';
 import '../features/benefits/presentation/benefits_screen.dart';
 import '../features/diary/presentation/diary_screen.dart';
 import '../features/home/presentation/home_screen.dart';
@@ -25,17 +26,15 @@ final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/splash',
   routes: [
-    GoRoute(
-      path: '/splash',
-      builder: (context, state) => const SplashScreen(),
-    ),
+    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingScreen(),
     ),
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     GoRoute(
-      path: '/login',
-      builder: (context, state) => const LoginScreen(),
+      path: '/signup',
+      builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(
       path: '/statistics',
@@ -45,31 +44,54 @@ final GoRouter appRouter = GoRouter(
       path: '/notifications',
       builder: (context, state) => const NotificationsScreen(),
     ),
-    GoRoute(
-      path: '/survey',
-      builder: (context, state) => const SurveyScreen(),
-    ),
+    GoRoute(path: '/survey', builder: (context, state) => const SurveyScreen()),
     GoRoute(
       path: '/momenti/:id',
       builder: (context, state) => const MomentiScreen(),
     ),
     StatefulShellRoute.indexedStack(
-      builder: (context, state, navigationShell) => AppScaffold(navigationShell: navigationShell),
+      builder: (context, state, navigationShell) =>
+          AppScaffold(navigationShell: navigationShell),
       branches: [
         StatefulShellBranch(
-          routes: [GoRoute(path: '/home', builder: (context, state) => const HomeScreen())],
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/path', builder: (context, state) => const PathScreen())],
+          routes: [
+            GoRoute(
+              path: '/path',
+              builder: (context, state) => const PathScreen(),
+            ),
+          ],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/diary', builder: (context, state) => const DiaryScreen())],
+          routes: [
+            GoRoute(
+              path: '/diary',
+              builder: (context, state) => const DiaryScreen(),
+            ),
+          ],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/benefits', builder: (context, state) => const BenefitsScreen())],
+          routes: [
+            GoRoute(
+              path: '/benefits',
+              builder: (context, state) => const BenefitsScreen(),
+            ),
+          ],
         ),
         StatefulShellBranch(
-          routes: [GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen())],
+          routes: [
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => const ProfileScreen(),
+            ),
+          ],
         ),
       ],
     ),
@@ -110,7 +132,9 @@ class AppScaffold extends StatelessWidget {
               children: List.generate(_items.length, (index) {
                 final isSelected = navigationShell.currentIndex == index;
                 final item = _items[index];
-                final color = isSelected ? AppColors.accent : AppColors.textSecondary;
+                final color = isSelected
+                    ? AppColors.accent
+                    : AppColors.textSecondary;
 
                 return GestureDetector(
                   onTap: () {
@@ -132,11 +156,7 @@ class AppScaffold extends StatelessWidget {
                     child: SizedBox(
                       width: 24,
                       height: 24,
-                      child: AppIcon(
-                        item,
-                        size: 20,
-                        color: color,
-                      ),
+                      child: AppIcon(item, size: 20, color: color),
                     ),
                   ),
                 );

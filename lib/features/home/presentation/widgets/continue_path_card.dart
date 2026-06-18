@@ -55,7 +55,7 @@ class ContinuePathCard extends StatelessWidget {
                       left: AppSpacing.spaceLg,
                       child: Container(
                         width: 140,
-                        
+
                         padding: const EdgeInsets.all(AppSpacing.spaceMd),
                         decoration: BoxDecoration(
                           color: AppColors.neutralWhite,

@@ -33,16 +33,14 @@ class SurveyFreeStep extends StatelessWidget {
       body: body,
       child: Column(
         children: [
-          SurveyTextInput(
-            hint: hint,
-            maxLines: 4,
-            onChanged: onChanged,
-          ),
+          SurveyTextInput(hint: hint, maxLines: 4, onChanged: onChanged),
           const SizedBox(height: AppSpacing.spaceLg),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: value != null && value!.trim().isNotEmpty ? onNext : null,
+              onPressed: value != null && value!.trim().isNotEmpty
+                  ? onNext
+                  : null,
               child: Text(nextLabel),
             ),
           ),

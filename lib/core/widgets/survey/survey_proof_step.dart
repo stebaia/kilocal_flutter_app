@@ -33,15 +33,14 @@ class SurveyProofStep extends StatelessWidget {
       body: body,
       child: Column(
         children: [
-          SurveyTextInput(
-            hint: hint,
-            onChanged: onChanged,
-          ),
+          SurveyTextInput(hint: hint, onChanged: onChanged),
           const SizedBox(height: AppSpacing.spaceLg),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: value != null && value!.trim().isNotEmpty ? onNext : null,
+              onPressed: value != null && value!.trim().isNotEmpty
+                  ? onNext
+                  : null,
               child: Text(verifyLabel),
             ),
           ),

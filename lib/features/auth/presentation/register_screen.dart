@@ -9,38 +9,40 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/arc_clipper.dart';
 import '../../../l10n/app_localizations.dart';
-import 'cubit/login_cubit.dart';
-import 'widgets/login_form_card.dart';
+import 'cubit/register_cubit.dart';
+import 'widgets/register_form_card.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatelessWidget {
+  const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<LoginCubit>(),
-      child: const _LoginView(),
+      create: (_) => getIt<RegisterCubit>(),
+      child: const _RegisterView(),
     );
   }
 }
 
-class _LoginView extends StatelessWidget {
-  const _LoginView();
+class _RegisterView extends StatelessWidget {
+  const _RegisterView();
 
-  String _mapLoginError(AppLocalizations l10n, LoginError error) {
+  String _mapRegisterError(AppLocalizations l10n, RegisterError error) {
     switch (error) {
-      case LoginError.missingFields:
-        return l10n.loginErrorMissingFields;
-      case LoginError.invalidCredentials:
-        return l10n.loginErrorUnauthorized;
-      case LoginError.badRequest:
-        return l10n.loginErrorBadRequest;
-      case LoginError.network:
-        return l10n.loginErrorNetwork;
-      case LoginError.server:
-        return l10n.loginErrorServer;
-      case LoginError.unknown:
-        return l10n.loginErrorGeneric;
+      case RegisterError.missingFields:
+        return l10n.registerErrorMissingFields;
+      case RegisterError.passwordMismatch:
+        return l10n.registerErrorPasswordMismatch;
+      case RegisterError.conflict:
+        return l10n.registerErrorConflict;
+      case RegisterError.badRequest:
+        return l10n.registerErrorBadRequest;
+      case RegisterError.network:
+        return l10n.registerErrorNetwork;
+      case RegisterError.server:
+        return l10n.registerErrorServer;
+      case RegisterError.unknown:
+        return l10n.registerErrorGeneric;
     }
   }
 
@@ -50,14 +52,21 @@ class _LoginView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: BlocListener<LoginCubit, LoginState>(
+      body: BlocListener<RegisterCubit, RegisterState>(
         listenWhen: (prev, curr) =>
             prev.status != curr.status || prev.error != curr.error,
         listener: (context, state) {
-          if (state.status == LoginStatus.success) {
-            // TODO(team): branch by profile_status — GET /survey/me/status
-            // decides home vs /survey. See wiki/missing-apis.md.
-            context.go('/home');
+          if (state.status == RegisterStatus.success) {
+            toastification.show(
+              context: context,
+              type: ToastificationType.success,
+              style: ToastificationStyle.flat,
+              autoCloseDuration: const Duration(seconds: 4),
+              title: Text(l10n.registerSuccessTitle),
+              description: Text(l10n.registerSuccessDescription),
+              alignment: Alignment.topCenter,
+            );
+            context.go('/login');
           } else if (state.error != null) {
             toastification.show(
               context: context,
@@ -65,7 +74,7 @@ class _LoginView extends StatelessWidget {
               style: ToastificationStyle.flat,
               autoCloseDuration: const Duration(seconds: 5),
               title: Text(l10n.errorTitle),
-              description: Text(_mapLoginError(l10n, state.error!)),
+              description: Text(_mapRegisterError(l10n, state.error!)),
               alignment: Alignment.topCenter,
             );
           }
@@ -85,16 +94,17 @@ class _LoginView extends StatelessWidget {
                     children: [
                       const SizedBox(height: AppSpacing.spaceXl),
                       Text(
-                        l10n.loginTitle,
+                        l10n.registerTitle,
                         style: AppTypography.textTheme.headlineMedium?.copyWith(
                           color: AppColors.textPrimary,
+
                           fontSize: 32,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.spaceSm),
                       Text(
-                        l10n.loginSubtitle,
+                        l10n.registerSubtitle,
                         style: AppTypography.textTheme.bodyLarge?.copyWith(
                           color: AppColors.textPrimary,
                           fontSize: 16,
@@ -102,15 +112,15 @@ class _LoginView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.spaceXl),
-                      const LoginFormCard(),
+                      const RegisterFormCard(),
                       const SizedBox(height: AppSpacing.spaceXl),
-                      _ForgotPasswordRow(),
+                      _TermsRow(),
                       const SizedBox(height: AppSpacing.spaceXl),
                     ],
                   ),
                 ),
               ),
-              _LoginBottomBar(),
+              _RegisterBottomBar(),
             ],
           ),
         ),
@@ -119,7 +129,7 @@ class _LoginView extends StatelessWidget {
   }
 }
 
-class _ForgotPasswordRow extends StatelessWidget {
+class _TermsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -132,9 +142,9 @@ class _ForgotPasswordRow extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
         children: [
-          TextSpan(text: '${l10n.loginForgotPrompt} '),
+          TextSpan(text: '${l10n.registerTermsPrefix} '),
           TextSpan(
-            text: l10n.loginForgotLink,
+            text: l10n.registerTermsLink,
             style: const TextStyle(
               color: AppColors.accent,
               decoration: TextDecoration.underline,
@@ -146,7 +156,7 @@ class _ForgotPasswordRow extends StatelessWidget {
   }
 }
 
-class _LoginBottomBar extends StatelessWidget {
+class _RegisterBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -168,7 +178,7 @@ class _LoginBottomBar extends StatelessWidget {
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: () => context.read<LoginCubit>().login(),
+                onPressed: () => context.read<RegisterCubit>().register(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.surface,
                   foregroundColor: AppColors.accent,
@@ -184,7 +194,7 @@ class _LoginBottomBar extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      l10n.loginButton,
+                      l10n.registerButton,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -212,23 +222,23 @@ class _LoginBottomBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  l10n.loginNoAccount,
+                  l10n.registerBottomPrompt,
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
                     color: AppColors.surface,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 4),
                 TextButton(
-                  onPressed: () => context.go('/signup'),
+                  onPressed: () => context.go('/login'),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.surface,
                     padding: EdgeInsets.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    l10n.loginSignUp,
+                    l10n.registerBottomLink,
                     style: const TextStyle(
                       decoration: TextDecoration.underline,
                       fontSize: 16,

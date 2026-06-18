@@ -49,16 +49,14 @@ class _HomeView extends StatelessWidget {
         body: Column(
           children: [
             // White filler behind the status bar.
-            Container(
-              color: AppColors.surface,
-              height: statusBarHeight,
-            ),
+            Container(color: AppColors.surface, height: statusBarHeight),
             Expanded(
               child: SafeArea(
                 top: false,
                 child: BlocBuilder<HomeCubit, HomeState>(
                   builder: (context, state) {
-                    if (state.status == HomeStatus.loading || state.data == null) {
+                    if (state.status == HomeStatus.loading ||
+                        state.data == null) {
                       return const Center(child: CircularProgressIndicator());
                     }
 

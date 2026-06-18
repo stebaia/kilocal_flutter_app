@@ -1,21 +1,20 @@
 /// Environment configuration (base URLs per flavor).
 ///
-/// From `wiki/overview.md`: the shop frontend exposes `{SHOP_URL}/api/*` and
-/// `{SHOP_URL}/cms/*`. Override via `--dart-define` at build time.
+/// The mobile app talks directly to the Directus CMS with Bearer JWT.
+/// Override via `--dart-define=API_BASE_URL=...` at build time.
 abstract final class Env {
   Env._();
 
-  /// Shop base URL (Nuxt frontend). Hosts `/api/*`, `/cms/*`, `/finder`, `/logout`.
+  /// Directus CMS base URL.
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://cms-stg.kilocal.thefullproject.it',
+  );
+
+  /// Legacy shop base URL. Kept for any direct frontend references; prefer [baseUrl].
   static const String shopUrl = String.fromEnvironment(
     'SHOP_URL',
     defaultValue: 'https://shop.kilocalprogram.it',
-  );
-
-  /// CMS (Directus) base URL. Used for documentation / direct references; the
-  /// client normally reaches the CMS through the `{SHOP_URL}/cms/*` proxy.
-  static const String cmsUrl = String.fromEnvironment(
-    'CMS_URL',
-    defaultValue: 'https://cms.kilocalprogram.it',
   );
 
   /// Network timeout for connect/receive/send.

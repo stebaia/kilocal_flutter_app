@@ -69,6 +69,7 @@ Tools can be blocked via `is_tool_blocked` (config) when
 
 - [[overview]]
 - [[registration]]
+- [[auth-implementation-plan]]
 - [[graphql]]
 - [[profilo-read]]
 - [[contradictions]]

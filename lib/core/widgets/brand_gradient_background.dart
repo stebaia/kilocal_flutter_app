@@ -5,7 +5,11 @@ import '../theme/app_colors.dart';
 /// Full-bleed brand gradient background used by splash, onboarding, and other
 /// branded screens. Optionally overlays a soft radial glow near the top.
 class BrandGradientBackground extends StatelessWidget {
-  const BrandGradientBackground({super.key, this.child, this.showTopGlow = false});
+  const BrandGradientBackground({
+    super.key,
+    this.child,
+    this.showTopGlow = false,
+  });
 
   final Widget? child;
   final bool showTopGlow;

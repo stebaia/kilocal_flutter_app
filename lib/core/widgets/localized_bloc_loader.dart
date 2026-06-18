@@ -5,7 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 ///
 /// Use this wrapper when a Cubit needs access to [AppLocalizations]
 /// (which is unavailable inside a Provider `create` callback).
-class LocalizedBlocLoader<C extends StateStreamable<S>, S> extends StatefulWidget {
+class LocalizedBlocLoader<C extends StateStreamable<S>, S>
+    extends StatefulWidget {
   const LocalizedBlocLoader({
     super.key,
     required this.child,
@@ -16,7 +17,8 @@ class LocalizedBlocLoader<C extends StateStreamable<S>, S> extends StatefulWidge
   final void Function(BuildContext context, C cubit) load;
 
   @override
-  State<LocalizedBlocLoader<C, S>> createState() => _LocalizedBlocLoaderState<C, S>();
+  State<LocalizedBlocLoader<C, S>> createState() =>
+      _LocalizedBlocLoaderState<C, S>();
 }
 
 class _LocalizedBlocLoaderState<C extends StateStreamable<S>, S>

@@ -15,7 +15,7 @@ abstract final class AppColors {
 
   // --- Neutrals ---
   static const Color neutralWhite = Color(0xFFFFFFFF);
-  static const Color ink = Color(0xFF1A1A1A);
+  static const Color ink = Color(0xFF383838);
 
   // --- Light surface palette (in-app screens) ---
   static const Color background = Color(0xFFF4F4F6);

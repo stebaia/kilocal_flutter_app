@@ -46,10 +46,30 @@ abstract final class MockDataFactory {
 
   static List<AreaStat> statistics(AppLocalizations l10n) {
     return [
-      AreaStat(area: l10n.areaTraining, month: l10n.month1, completed: 3, total: 15),
-      AreaStat(area: l10n.areaNutrition, month: l10n.month1, completed: 5, total: 18),
-      AreaStat(area: l10n.areaWellbeing, month: l10n.month1, completed: 8, total: 25),
-      AreaStat(area: l10n.areaIntegration, month: l10n.phase1, completed: 5, total: 19),
+      AreaStat(
+        area: l10n.areaTraining,
+        month: l10n.month1,
+        completed: 3,
+        total: 15,
+      ),
+      AreaStat(
+        area: l10n.areaNutrition,
+        month: l10n.month1,
+        completed: 5,
+        total: 18,
+      ),
+      AreaStat(
+        area: l10n.areaWellbeing,
+        month: l10n.month1,
+        completed: 8,
+        total: 25,
+      ),
+      AreaStat(
+        area: l10n.areaIntegration,
+        month: l10n.phase1,
+        completed: 5,
+        total: 19,
+      ),
     ];
   }
 
@@ -92,13 +112,22 @@ abstract final class MockDataFactory {
       body: l10n.homeProgress,
       heroImageUrl: 'https://placehold.co/600x300/e51e4d/ffffff?text=Momenti',
       meccanica: [
-        MeccanicaItem(day: '${l10n.month1} 1', description: l10n.diaryCompleted),
+        MeccanicaItem(
+          day: '${l10n.month1} 1',
+          description: l10n.diaryCompleted,
+        ),
         MeccanicaItem(day: '${l10n.month1} 2', description: l10n.diaryPending),
         MeccanicaItem(day: '${l10n.month1} 3', description: l10n.areaTraining),
         MeccanicaItem(day: '${l10n.month1} 4', description: l10n.areaNutrition),
         MeccanicaItem(day: '${l10n.month1} 5', description: l10n.areaWellbeing),
-        MeccanicaItem(day: '${l10n.month1} 6', description: l10n.areaIntegration),
-        MeccanicaItem(day: '${l10n.month1} 7', description: l10n.statisticsTitle),
+        MeccanicaItem(
+          day: '${l10n.month1} 6',
+          description: l10n.areaIntegration,
+        ),
+        MeccanicaItem(
+          day: '${l10n.month1} 7',
+          description: l10n.statisticsTitle,
+        ),
       ],
     );
   }

@@ -34,20 +34,12 @@ class ActionCardIllustration extends StatelessWidget {
                 // Back postcard, rotated to the left.
                 Transform.rotate(
                   angle: -0.3,
-                  child: Image.asset(
-                    assetName!,
-                    width: 112,
-                    height: 112,
-                  ),
+                  child: Image.asset(assetName!, width: 112, height: 112),
                 ),
                 // Front postcard, slightly offset to the right.
                 Positioned(
                   left: 0.2,
-                  child: Image.asset(
-                    assetName!,
-                    width: 112,
-                    height: 112,
-                  ),
+                  child: Image.asset(assetName!, width: 112, height: 112),
                 ),
               ],
             ),
@@ -64,11 +56,7 @@ class ActionCardIllustration extends StatelessWidget {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            assetName!,
-            width: 112,
-            height: 112,
-          ),
+          Image.asset(assetName!, width: 112, height: 112),
           Transform.translate(
             offset: const Offset(0, -12),
             child: const EllipseShadow(width: 80, height: 16, opacity: 0.15),
@@ -78,11 +66,7 @@ class ActionCardIllustration extends StatelessWidget {
     }
 
     if (assetName != null) {
-      return Image.asset(
-        assetName!,
-        width: 112,
-        height: 112,
-      );
+      return Image.asset(assetName!, width: 112, height: 112);
     }
 
     // Fallback to network image for any other card.

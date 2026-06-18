@@ -17,7 +17,9 @@ class SurveyIntermezzoStep extends StatelessWidget {
       showTopGlow: true,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenGutter),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenGutter,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

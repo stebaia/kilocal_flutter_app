@@ -48,7 +48,6 @@ class HomeHeader extends StatelessWidget {
               color: AppColors.textPrimary,
               onPressed: () => context.push('/notifications'),
             ),
-             
           ],
         ),
       ],

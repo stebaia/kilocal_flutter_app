@@ -24,10 +24,7 @@ class SurveyInfoStep extends StatelessWidget {
       body: body,
       child: SizedBox(
         width: double.infinity,
-        child: ElevatedButton(
-          onPressed: onNext,
-          child: Text(buttonLabel),
-        ),
+        child: ElevatedButton(onPressed: onNext, child: Text(buttonLabel)),
       ),
     );
   }

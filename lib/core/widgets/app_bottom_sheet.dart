@@ -40,7 +40,9 @@ class AppBottomSheet extends StatelessWidget {
             if (showDragHandle) const SizedBox(height: AppSpacing.spaceMd),
             if (title != null)
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenGutter),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenGutter,
+                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -63,7 +65,9 @@ class AppBottomSheet extends StatelessWidget {
             if (title != null) const SizedBox(height: AppSpacing.spaceSm),
             Flexible(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenGutter),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenGutter,
+                ),
                 child: child,
               ),
             ),
