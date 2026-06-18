@@ -1,7 +1,15 @@
 # Flutter App Architecture
 
-Architecture plan for the `kilocal_flutter_app` client that consumes the Kilocal shop API
-documented in this wiki ([[overview]]).
+Architecture plan for the `kilocal_flutter_app` client.
+
+> ⚠️ **Partly outdated — needs a feature-map refresh.** The decisions below (Clean
+> Architecture, bloc/cubit, Retrofit/Dio, GoRouter, get_it) **still hold**. But the **feature
+> list and endpoint table** describe the legacy **shop** (cart, checkout, paypal, cookie auth)
+> — see `legacy-shop/`. The real app is **Directus + Bearer JWT**, hybrid **GraphQL reads +
+> REST writes** ([[overview]]). The feature slices should be: `auth`, `survey`, `percorso`,
+> `diario`, `strumenti`, `profilo`, `momenti`, `benefit`, `notifiche`, `integrazione` — each
+> with a Dio-based GraphQL datasource for reads and a Retrofit REST client for writes. Treat
+> the cart/checkout/paypal rows below as **legacy** until this page is rewritten.
 
 ## Decisions
 

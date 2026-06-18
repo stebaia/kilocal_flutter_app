@@ -1,58 +1,74 @@
-# Authentication
+# Authentication (mobile app)
 
-Session state is held in cookies set by Directus. Login does **not** go through `/api/*`; it uses
-the Directus SDK over the [[cms-proxy]].
+Source of truth: Swagger **`/api/docs`** → tab *Kilocal App* (`/api/docs/openapi.yaml`,
+spec v1.2.1). The mobile app talks **directly to the Directus CMS** with **Bearer JWT** —
+**not** the cookie session used by the legacy [[legacy-shop/authentication|shop]].
 
-## Session cookies
+> For the old cookie-session shop auth see [[legacy-shop/authentication]] (legacy).
 
-| Cookie | Description |
-|--------|-------------|
-| `klkl-data` | Directus session token (access + refresh) |
-| `klkl_refresh_token` | Refresh token |
+## Base URL
 
-- Duration: **7 days**
-- `SameSite: lax`, `Secure` in production
-- Authenticated requests must use `credentials: 'include'`
+| Env | URL |
+|-----|-----|
+| Staging | `https://cms-stg.kilocal.thefullproject.it` |
+| Production | `https://cms.kilocalprogram.it` |
+| Local (Docker) | `http://localhost:8055` |
 
-## Login
+## Flow
+
+1. `POST /auth/login` with `email` / `password` and `mode: json` → returns access + refresh token.
+2. Send `Authorization: Bearer <access_token>` on every protected route.
+3. `POST /auth/refresh` with the refresh token when the access token expires.
+4. `POST /auth/logout` invalidates the refresh token.
+
+> **Always use `mode: json`** from native apps (no cookies). Tokens are returned in the JSON
+> body, the app stores them itself.
+
+## Endpoints
+
+| Method | Path | Auth | Notes |
+|--------|------|------|-------|
+| POST | `/auth/login` | public | body `{ email, password, mode: "json" }` → `AuthTokens` |
+| POST | `/auth/refresh` | public | body `{ refresh_token, mode: "json" }` → `AuthTokens` |
+| POST | `/auth/logout` | public | body `{ refresh_token, mode: "json" }` → `204` |
+| POST | `/api/auth/register` | public | Kilocal registration (see [[registration]]) |
+| POST | `/api/auth/password-forgotten` | public | request reset email (always `200`, never reveals if email exists) |
+| POST | `/api/auth/password-reset` | public | `{ token, password, password_confirm }` |
+
+> **Two prefixes.** Login/refresh/logout are **native Directus** (`/auth/*`). Registration and
+> password flows are the **Kilocal `survey` extension** (`/api/auth/*`) and are public — always
+> send `origin: app`.
+
+### `AuthTokens` response shape
+
+```json
+{ "data": { "access_token": "…", "refresh_token": "…", "expires": 900000 } }
+```
+
+`expires` is the access-token lifetime **in milliseconds**.
+
+## Header (survey/extension routes)
 
 ```
-POST {SHOP_URL}/cms/auth/login
-Content-Type: application/json
-
-{ "email": "utente@example.com", "password": "********" }
+X-Kilocal-Origin: app
 ```
 
-After login, authenticated calls automatically send `Authorization: Bearer {access_token}`
-(handled by the Directus client).
+Optional header marking the mobile client on `survey` / extension routes.
 
-## Logout
+## Authorization ≠ content access
 
-```
-GET {SHOP_URL}/logout
-```
-
-Invalidates session cookies and redirects to `/?logout=true`.
-
-## Access levels
-
-| Level | Endpoints |
-|-------|-----------|
-| Public | Cart (init, items, discount), [[settings]], registration, password reset |
-| Authenticated | [[orders]], [[user-addresses]], [[paypal]] |
-| Server only | Internal CMS calls using `CMS_TOKEN` (not exposed to the client) |
-
-> ⚠️ See [[contradictions]] — the "Public" classification of the cart conflicts with cart logic
-> that branches on whether the user is logged in.
-
-> ⚠️ **Authentication ≠ content authorization.** The table above is only about *endpoint
-> authentication*. The Figma shows that within the program app some hubs/tabs are **locked**
-> per user (e.g. a user has the Allenamento tab but other tabs appear locked), implying a
-> separate **per-content access / entitlements** model that is **not documented**. See
-> [[missing-informations]] §2bis and [[missing-apis]] §2bis.
+Endpoint auth (bearer present/valid) is separate from **content access**. Which percorso
+hubs/tools the user sees is driven by **`profile_status`** in `user_details`
+(`initial_survey`, `type_survey`, `starter_kit`, `active`, `active_restricted_access`,
+`qr_pharmacy_1`, `qr_pharmacy_2`) and by **server-side CMS filters** (profile type + gender).
+Tools can be blocked via `is_tool_blocked` (config) when
+`profile_status = active_restricted_access`. This resolves the old open question in
+[[missing-apis]] §2bis.
 
 ## Related
 
-- [[cms-proxy]]
-- [[users]]
 - [[overview]]
+- [[registration]]
+- [[graphql]]
+- [[profilo-read]]
+- [[contradictions]]

@@ -1,0 +1,1431 @@
+openapi: 3.0.3
+info:
+  title: Kilocal App API
+  description: |
+    Endpoint per app mobile Kilocal (iOS / Android) — flusso completo in un'unica spec.
+
+    Swagger UI ha due tab:
+    - **Kilocal App** (questa spec) — tutto ciò che serve all'app
+    - **Directus REST** — [OpenAPI auto-generata](/server/specs/oas) — CRUD collection, assets, admin, …
+
+    ## Base URL
+
+    | Ambiente | URL |
+    |----------|-----|
+    | Staging | `https://cms-stg.kilocal.thefullproject.it` |
+    | Production | `https://cms.kilocalprogram.it` |
+    | Local | `http://localhost:8055` |
+
+    ## Autenticazione
+
+    1. `POST /auth/login` con email/password, `mode: json`
+    2. `Authorization: Bearer <access_token>` sulle route protette
+    3. `POST /auth/refresh` quando scade
+
+    ## Header survey
+
+    ```
+    X-Kilocal-Origin: app
+    ```
+
+    ## Registrazione e password Kilocal
+
+    Route **pubbliche** — nessun bearer token. Usare sempre `origin: app`.
+
+    ## Contenuti e lettura dati
+
+    Per **lettura** (percorsi, momenti, diario, glossario, timer, …) usa `POST /graphql`
+    con bearer token. Query, filtri ed esempi sono documentati nell'endpoint **GraphQL**
+    di questa spec.
+
+    Per **scrittura centralizzata** (completamento step, promemoria, gallery, traguardi, profilo)
+    usa le route `tools`, `journal`, `path`, `profile` e `survey` documentate sotto.
+
+    CRUD generico → tab [Directus REST](/server/specs/oas) in Swagger.
+
+    Schema GraphQL (SDL): [GET /server/specs/graphql/system](/server/specs/graphql/system)
+
+    Directus REST (OpenAPI): [GET /server/specs/oas](/server/specs/oas)
+
+  version: 1.2.1
+  contact:
+    name: The Full Project
+    email: info@thefullproject.it
+
+servers:
+  - url: https://cms-stg.kilocal.thefullproject.it
+    description: Staging
+  - url: https://cms.kilocalprogram.it
+    description: Production
+  - url: http://localhost:8055
+    description: Local (Docker)
+
+tags:
+  - name: Auth
+    description: Login Directus + registrazione e reset password Kilocal
+  - name: User
+    description: Profilo utente corrente
+  - name: Survey
+    description: Onboarding e profilo (`survey` extension)
+  - name: Newsletter
+    description: Iscrizione newsletter (pubblico)
+  - name: Percorso
+    description: Avanzamento step percorso (`path` extension)
+  - name: Strumenti
+    description: Promemoria e photo gallery (`tools` extension)
+  - name: Diario
+    description: Traguardi / obiettivi (`journal` extension)
+  - name: Profilo
+    description: Aggiornamento dati utente (`profile` + survey)
+  - name: GraphQL
+    description: Lettura contenuti CMS (momenti, benefit, preferiti, diario attività, notifiche, strumenti read-only, integrazione)
+
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login
+      operationId: authLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                mode:
+                  type: string
+                  enum: [json]
+                  default: json
+                  description: Usare sempre `json` dalle app native
+      responses:
+        '200':
+          description: Token emessi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      operationId: authRefresh
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+                mode:
+                  type: string
+                  enum: [json]
+                  default: json
+      responses:
+        '200':
+          description: Nuovo access token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokens'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout (invalida refresh token)
+      operationId: authLogout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                mode:
+                  type: string
+                  enum: [json]
+                  default: json
+      responses:
+        '204':
+          description: Logout ok
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Registrazione utente
+      operationId: authRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, password_confirm, first_name, last_name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                password_confirm:
+                  type: string
+                  format: password
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                origin:
+                  type: string
+                  enum: [app]
+                  default: app
+                newsletter:
+                  type: boolean
+                is_from_qr:
+                  type: boolean
+                qr_campaign_code:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Utente creato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  email:
+                    type: string
+                  first_name:
+                    type: string
+                  last_name:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email già registrata
+
+  /api/auth/password-forgotten:
+    post:
+      tags: [Auth]
+      summary: Richiesta reset password
+      operationId: authPasswordForgotten
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                origin:
+                  type: string
+                  enum: [app]
+                  default: app
+      responses:
+        '200':
+          description: Richiesta accettata (risposta sempre ok per non rivelare se l'email esiste)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/auth/password-reset:
+    post:
+      tags: [Auth]
+      summary: Conferma nuova password
+      operationId: authPasswordReset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password, password_confirm]
+              properties:
+                token:
+                  type: string
+                  description: Token ricevuto via email
+                password:
+                  type: string
+                  format: password
+                password_confirm:
+                  type: string
+                  format: password
+                origin:
+                  type: string
+                  enum: [app]
+                  default: app
+      responses:
+        '200':
+          description: Password aggiornata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /users/me:
+    get:
+      tags: [User]
+      summary: Utente corrente
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: fields
+          in: query
+          schema:
+            type: string
+          example: id,email,first_name,last_name,role.name
+      responses:
+        '200':
+          description: Dati utente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /survey/me/status:
+    get:
+      tags: [Survey]
+      summary: Stato profilo e survey completate
+      operationId: surveyMeStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/KilocalOrigin'
+      responses:
+        '200':
+          description: Stato onboarding
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SurveyMeStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /survey/me/ensure-details:
+    post:
+      tags: [Survey]
+      summary: Crea `user_details` se assente
+      operationId: surveyEnsureDetails
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/KilocalOrigin'
+      responses:
+        '200':
+          description: Riga user_details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /survey/submit/{internalName}:
+    post:
+      tags: [Survey]
+      summary: Invia risposte survey
+      operationId: surveySubmit
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/KilocalOrigin'
+        - name: internalName
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Nome interno survey nel CMS
+          example: type_survey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SurveySubmitBody'
+      responses:
+        '200':
+          description: Survey inviata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SurveySubmitResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/newsletter/subscribe:
+    post:
+      tags: [Newsletter]
+      summary: Iscrizione newsletter
+      operationId: newsletterSubscribe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '200':
+          description: Iscritto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /path/steps/{stepId}/start:
+    post:
+      tags: [Percorso]
+      summary: Avvia uno step (crea user_activity)
+      description: |
+        Idempotente: se l'attività esiste già per lo step, la restituisce senza duplicare.
+
+        **Prima di chiamare:** carica gruppi e contenuto step via GraphQL (`percorsi_groups`,
+        `percorsi_content`). `stepId` è l'ID del record `percorsi_content`.
+
+        **Non usare per integrazione** — quel percorso segue fasi prodotto, non step.
+      operationId: percorsoStartStep
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: stepId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID del record `percorsi_content`
+      responses:
+        '200':
+          description: Attività creata o esistente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserActivity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /path/steps/{stepId}/complete:
+    post:
+      tags: [Percorso]
+      summary: Completa uno step
+      description: |
+        Aggiorna `user_activities.completed_on`, il campo `percorso_*_curr_step` in
+        `user_details` e, se il timeframe corrente è al 100%, avanza `active_timeframe`.
+
+        **Flusso tipico:** GraphQL `GetUserDetails` (step correnti) → carica step →
+        `POST .../start` alla prima apertura → `POST .../complete` al tap "Segna come completato".
+
+        Mapping `percorsoInternalName` → campo `user_details`:
+        `allenamento` → `percorso_allenamento_curr_step`,
+        `alimentazione` → `percorso_alimentazione_curr_step`,
+        `benessere` → `percorso_benessere_curr_step`.
+      operationId: percorsoCompleteStep
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: stepId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [percorsoInternalName]
+              properties:
+                percorsoInternalName:
+                  type: string
+                  enum: [allenamento, alimentazione, benessere]
+                  description: |
+                    Nome root del percorso. `integrazione` ha logica separata (fasi prodotto).
+      responses:
+        '200':
+          description: Step completato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PercorsoCompleteResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Attività o user_details non trovati
+
+  /tools/photo-gallery:
+    post:
+      tags: [Strumenti]
+      summary: Carica foto in gallery
+      description: |
+        Upload file + crea riga `user_photos`.
+
+        **Lista foto:** GraphQL su `user_photos` (sort `-date_created`, nested `file`).
+        **Delete:** `DELETE /tools/photo-gallery` con body `{ "fileId": "<uuid>" }`.
+        **Config hub strumenti:** GraphQL singleton `timer`, `reminders`, `photo_gallery`, `glossary_tool`.
+      operationId: toolsPhotoGalleryUpload
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: File caricato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      fileId:
+                        type: string
+                        format: uuid
+                      userPhotoId:
+                        type: string
+                        format: uuid
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags: [Strumenti]
+      summary: Elimina foto da gallery
+      operationId: toolsPhotoGalleryDelete
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fileId]
+              properties:
+                fileId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Foto eliminata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tools/reminders:
+    get:
+      tags: [Strumenti]
+      summary: Lista promemoria utente
+      description: Promemoria calendario (senza `category`, esclusi traguardi/diario).
+      operationId: toolsRemindersList
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista promemoria
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserReminder'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Strumenti]
+      summary: Crea promemoria
+      operationId: toolsRemindersCreate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserReminderInput'
+      responses:
+        '200':
+          description: Promemoria creato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserReminder'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tools/reminders/{id}:
+    patch:
+      tags: [Strumenti]
+      summary: Aggiorna promemoria
+      operationId: toolsRemindersUpdate
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserReminderInput'
+      responses:
+        '200':
+          description: Promemoria aggiornato
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Promemoria non trovato
+    delete:
+      tags: [Strumenti]
+      summary: Elimina promemoria
+      operationId: toolsRemindersDelete
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Eliminato
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /journal/goals:
+    get:
+      tags: [Diario]
+      summary: Lista traguardi utente
+      description: |
+        Obiettivi diario: `user_reminders` con `category` **oppure** `related_goal`
+        (esclusi i promemoria calendario — quelli sono su `/tools/reminders`).
+
+        **Cronologia attività** (step completati): GraphQL su `user_activities`
+        con filtro `completed_on` not null e `activity.collection = percorsi_content`.
+      operationId: diarioGoalsList
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista traguardi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserGoal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Diario]
+      summary: Crea traguardo
+      operationId: diarioGoalsCreate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGoalInput'
+      responses:
+        '200':
+          description: Traguardo creato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UserGoal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /journal/goals/{id}:
+    patch:
+      tags: [Diario]
+      summary: Aggiorna traguardo
+      operationId: diarioGoalsUpdate
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserGoalInput'
+      responses:
+        '200':
+          description: Traguardo aggiornato
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Traguardo non trovato
+    delete:
+      tags: [Diario]
+      summary: Elimina traguardo
+      operationId: diarioGoalsDelete
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Eliminato
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /profile:
+    patch:
+      tags: [Profilo]
+      summary: Aggiorna profilo utente
+      description: |
+        Aggiorna `directus_users`, `user_addresses` e `user_details` in un'unica chiamata.
+
+        **Lettura profilo completo:** GraphQL `GetUserDetails` su `user_details` + `user_addresses`
+        (variabile `myId` da `GET /users/me`). **Stato onboarding:** `GET /survey/me/status`.
+      operationId: profileUpdate
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdateBody'
+      responses:
+        '200':
+          description: Profilo aggiornato
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: user_details non trovato
+
+  /graphql:
+    post:
+      tags: [GraphQL]
+      summary: Query e mutation CMS
+      description: |
+        Endpoint Directus nativo per **lettura** contenuti CMS.
+
+        ```
+        POST /graphql
+        Authorization: Bearer <access_token>
+        Content-Type: application/json
+
+        { "query": "...", "variables": { ... } }
+        ```
+
+        Schema completo (SDL): [GET /server/specs/graphql/system](/server/specs/graphql/system)
+
+        ---
+
+        ### Riepilogo domini
+
+        | Dominio | Collection / root | Operazioni GraphQL | Scrittura REST |
+        |---------|-------------------|--------------------|--------------------|
+        | Momenti | `moments` | query `moments` | — |
+        | Benefit | `partners` | query `partners` | — |
+        | Preferiti | `user_favourites` | query + mutation create/update | — (soft delete via `removed_on`) |
+        | Notifiche | `user_notifications` | query + mutation `update_user_notifications_item` | — |
+        | Diario attività | `user_activities` | query aggregata / paginata | — |
+        | Diario traguardi | `user_reminders` | query opzionale | **`/journal/goals`** |
+        | Strumenti read | `timer`, `glossary`, `user_photos`, … | query singleton / collection | promemoria, gallery → **`/tools/*`** |
+        | Percorso read | `percorsi`, `percorsi_groups`, `percorsi_content` | query percorsi/gruppi/step | start/complete → **`/path/steps/*`** |
+        | Integrazione | `user_integratori`, `kit_products`, `products` | query + mutation integratori | — (no step complete) |
+        | Profilo read | `user_details`, `user_addresses` | query `GetUserDetails` | **`PATCH /profile`** |
+
+        ---
+
+        ### Momenti
+
+        Collection `moments` — contenuti editoriali con finestra `starts_on` / `ends_on`.
+
+        Filtri tab (sostituire `$NOW` con ISO 8601 corrente lato client):
+
+        | Tab | Filtro |
+        |-----|--------|
+        | In corso | `starts_on <= now`, `ends_on >= now` |
+        | Passati | `ends_on < now` |
+        | Futuri | `starts_on > now` |
+
+        ```json
+        {
+          "filter": {
+            "_and": [
+              { "starts_on": { "_lte": "2026-06-16T12:00:00" } },
+              { "ends_on": { "_gte": "2026-06-16T12:00:00" } }
+            ]
+          }
+        }
+        ```
+
+        Campi utili: `translations` (title, description, plot), `asset`, `ctas`.
+
+        ---
+
+        ### Benefit (partner)
+
+        Collection `partners`. Partner hero: `main_partner: true`; lista secondaria: `main_partner: false`.
+
+        Campi utili: `name`, `coupon`, `logo`, `asset`, `translations` (description, coupon_instructions), `cta_brand`.
+
+        ---
+
+        ### Preferiti
+
+        Collection `user_favourites` + relazione M2A `user_favourites_content`.
+
+        Contenuti salvabili: `articles`, `percorsi_content`, `percorsi_materials`, `pharmacies`.
+
+        Lista attiva: filtro `removed_on: { "_null": true }`. Tab per tipo:
+
+        | Tab | Filtro `content.collection` |
+        |-----|------------------------------|
+        | Magazine | `_eq: articles` |
+        | Percorso | `_or: percorsi_content, percorsi_materials` |
+        | Farmacie | `_eq: pharmacies` |
+
+        Toggle: `create_user_favourites_item` (nuovo) oppure `update_user_favourites_item`
+        con `removed_on` (ISO datetime = rimuovi, `null` = ripristina). **Non** usare delete hard.
+
+        Guida completa: [`preferiti-apis.md`](./preferiti-apis.md)
+
+        ---
+
+        ### Notifiche (inbox)
+
+        Collection `user_notifications`. Canale app: `job_channel: web_app` (push FCM/APNs non implementato).
+
+        Filtri tab:
+
+        | Tab | Filtro |
+        |-----|--------|
+        | Non lette | `read_on` null, `archived_on` null, `job_status: completed`, `job_channel: web_app` |
+        | Lette | `read_on` not null, `archived_on` null |
+        | Archiviate | `archived_on` not null |
+
+        Badge non lette: `user_notifications_aggregated` con stesso filtro → `count { id }`.
+
+        Mutation: `update_user_notifications_item` con `read_on` o `archived_on` (Date).
+
+        `job_payload` contiene template Liquid (html, title, cta) — renderizzare lato app.
+
+        ---
+
+        ### Diario — attività (cronologia)
+
+        Collection `user_activities`. Raggruppare per data: `user_activities_aggregated`
+        con `groupBy: ["year(started_on)", "month(started_on)", "day(started_on)"]`.
+
+        Dettaglio giorno — filtro tipico step completati:
+
+        ```json
+        {
+          "filter": {
+            "_and": [
+              { "completed_on": { "_nnull": true } },
+              { "activity": { "collection": { "_eq": "percorsi_content" } } }
+            ]
+          }
+        }
+        ```
+
+        **Traguardi:** non creare/aggiornare via GraphQL — usare `/journal/goals`.
+
+        ---
+
+        ### Strumenti (lettura)
+
+        - **Config hub:** query su singleton `timer`, `reminders`, `photo_gallery`, `glossary_tool`
+          (traduzioni, asset, `is_tool_blocked`). Blocco se `profile_status = active_restricted_access`.
+        - **Timer:** solo config da CMS; countdown **locale** nell'app.
+        - **Glossario:** query `glossary` con filtro ricerca opzionale, sort `sort`.
+        - **Photo gallery:** query `user_photos` (sort `-date_created`, nested `file`).
+
+        Promemoria calendario e upload foto → `/tools/reminders` e `/tools/photo-gallery`.
+
+        ---
+
+        ### Percorso (lettura)
+
+        I percorsi visibili sono filtrati dal CMS (tipo profilo + genere).
+
+        Query tipiche:
+
+        | Query | Uso |
+        |-------|-----|
+        | `percorsi` + timeframe + attività utente | Dashboard home |
+        | `percorsi_groups` filtrate per `percorsi_id.root.internal_name` | Tab di un percorso |
+        | `percorsi_content` per `group` | Step di un gruppo |
+
+        Root `internal_name`: `allenamento`, `alimentazione`, `benessere`, `integrazione`.
+
+        Step correnti in `user_details`: `percorso_allenamento_curr_step`, `percorso_alimentazione_curr_step`,
+        `percorso_benessere_curr_step`, `active_timeframe`.
+
+        Avvio/completamento step → `/path/steps/{stepId}/start|complete` (non `integrazione`).
+
+        ---
+
+        ### Integrazione
+
+        Logica separata: avanzamento su `user_details.percorso_integrazione_curr_phase` (fasi prodotto).
+
+        - Prodotti kit: `kit_products` con `phase`, filtrati per genere se `only_for_gender`.
+        - Tracking giornaliero: `user_integratori` (`took_dates`, `delay_days`, `expected_to_end_on`).
+        - Assunzione: `create_user_integratori_item` / `update_user_integratori_item` (append a `took_dates`).
+        - Avanzamento fase: `update_user_details_item` con `percorso_integrazione_curr_phase`.
+        - Sblocco barcode: query `products` con `use_for_barcode_check: true`, validazione **client-side**
+          su `barcodes` / `variants.barcodes`, poi survey/profilo.
+
+        ---
+
+        ### Profilo (lettura)
+
+        ```graphql
+        query GetUserDetails($myId: ID!) {
+          user_details(filter: { user: { id: { _eq: $myId } } }) {
+            id profile_status weight height gender newsletter
+            active_timeframe { id sort translations { languages_code { code } title } }
+            percorso_allenamento_curr_step { id sort }
+            percorso_alimentazione_curr_step { id sort }
+            percorso_benessere_curr_step { id sort }
+            percorso_integrazione_curr_phase { id sort translations { languages_code { code } title } }
+            profile_kit { id internal_name }
+          }
+          user_addresses(filter: { user_created: { id: { _eq: $myId } } }) {
+            id address city province zip phone
+          }
+        }
+        ```
+
+        `myId` da `GET /users/me`. Aggiornamento → `PATCH /profile`.
+      operationId: graphqlQuery
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query:
+                  type: string
+                  description: Query o mutation GraphQL
+                variables:
+                  type: object
+                  additionalProperties: true
+            examples:
+              momentiInCorso:
+                summary: Momenti in corso
+                value:
+                  query: |
+                    query GetMoments($filter: moments_filter) {
+                      moments(filter: $filter, sort: ["-starts_on", "-ends_on"]) {
+                        id
+                        starts_on
+                        ends_on
+                        translations { languages_code { code } title description }
+                      }
+                    }
+                  variables:
+                    filter:
+                      _and:
+                        - starts_on: { _lte: "2026-06-16T12:00:00" }
+                        - ends_on: { _gte: "2026-06-16T12:00:00" }
+              notificheNonLette:
+                summary: Inbox — notifiche non lette (pagina 1)
+                value:
+                  query: |
+                    query GetUserNotificationsPaginated($filter: user_notifications_filter, $page: Int = 1) {
+                      user_notifications(filter: $filter, page: $page, sort: ["-created_on"]) {
+                        id
+                        created_on
+                        read_on
+                        archived_on
+                        job_channel
+                        job_payload
+                      }
+                    }
+                  variables:
+                    filter:
+                      _and:
+                        - read_on: { _null: true }
+                        - archived_on: { _null: true }
+                        - job_status: { _eq: "completed" }
+                        - job_channel: { _eq: "web_app" }
+                    page: 1
+              profiloCompleto:
+                summary: Profilo utente completo
+                value:
+                  query: |
+                    query GetUserDetails($myId: ID!) {
+                      user_details(filter: { user: { id: { _eq: $myId } } }) {
+                        id
+                        profile_status
+                        weight
+                        height
+                        gender
+                        active_timeframe { id sort }
+                        percorso_allenamento_curr_step { id sort }
+                      }
+                      user_addresses(filter: { user_created: { id: { _eq: $myId } } }) {
+                        id address city province zip phone
+                      }
+                    }
+                  variables:
+                    myId: "<uuid-da-GET-/users/me>"
+      responses:
+        '200':
+          description: Risposta GraphQL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    additionalProperties: true
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      additionalProperties: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token da `POST /auth/login`
+
+  parameters:
+    KilocalOrigin:
+      name: X-Kilocal-Origin
+      in: header
+      required: false
+      schema:
+        type: string
+        enum: [app]
+        default: app
+      description: Client app mobile
+
+  schemas:
+    AuthTokens:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+            refresh_token:
+              type: string
+            expires:
+              type: integer
+              description: Durata access token in ms
+
+    SurveyMeStatus:
+      type: object
+      properties:
+        profile_status:
+          type: string
+          example: initial_survey
+          description: |
+            Valori comuni: `initial_survey`, `type_survey`, `starter_kit`, `active`,
+            `active_restricted_access`, `qr_pharmacy_1`, `qr_pharmacy_2`
+        completed_surveys:
+          type: array
+          items:
+            type: string
+          example: [type_survey]
+        user_details_id:
+          type: string
+          nullable: true
+
+    SurveySubmitBody:
+      type: object
+      required: [bmi, steps]
+      properties:
+        bmi:
+          oneOf:
+            - type: number
+            - type: string
+        ageValue:
+          type: integer
+          nullable: true
+        pharmacy_data:
+          nullable: true
+        single_product_id:
+          type: string
+          nullable: true
+        steps:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SurveyStep'
+
+    SurveyStep:
+      type: object
+      required: [sectionId, answer]
+      properties:
+        sectionId:
+          oneOf:
+            - type: integer
+            - type: string
+        storeToField:
+          type: string
+          nullable: true
+        answer:
+          oneOf:
+            - $ref: '#/components/schemas/SurveyStepAnswer'
+            - type: array
+              items:
+                $ref: '#/components/schemas/SurveyStepAnswer'
+            - type: string
+            - type: number
+            - type: boolean
+
+    SurveyStepAnswer:
+      type: object
+      properties:
+        id:
+          oneOf:
+            - type: integer
+            - type: string
+        value_to_store:
+          nullable: true
+        is_other:
+          type: boolean
+        other_value:
+          type: string
+
+    SurveySubmitResponse:
+      type: object
+      properties:
+        survey_submit_id:
+          type: string
+        profile_status:
+          type: string
+        outcome:
+          type: object
+          nullable: true
+          additionalProperties: true
+        kit_shop_url:
+          type: string
+          format: uri
+          nullable: true
+        legacy:
+          type: object
+          description: Compatibilità client web in migrazione
+          additionalProperties: true
+
+    UserActivity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        started_on:
+          type: string
+          format: date-time
+          nullable: true
+        completed_on:
+          type: string
+          format: date-time
+          nullable: true
+
+    PercorsoCompleteResponse:
+      type: object
+      properties:
+        activity:
+          $ref: '#/components/schemas/UserActivity'
+        currStepField:
+          type: string
+          example: percorso_allenamento_curr_step
+        stepId:
+          type: string
+          format: uuid
+        timeframeAdvanced:
+          type: boolean
+        activeTimeframe:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+            sort:
+              type: integer
+              nullable: true
+
+    UserReminder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        content:
+          type: string
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        due_time:
+          type: string
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        redirectTo:
+          type: string
+          nullable: true
+
+    UserReminderInput:
+      type: object
+      properties:
+        content:
+          type: string
+        due_date:
+          type: string
+          format: date
+        due_time:
+          type: string
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        redirectTo:
+          type: string
+
+    UserGoal:
+      allOf:
+        - $ref: '#/components/schemas/UserReminder'
+        - type: object
+          properties:
+            category:
+              oneOf:
+                - type: integer
+                - type: string
+              nullable: true
+              description: Categoria obiettivo personale (`goal_categories`)
+            related_goal:
+              oneOf:
+                - type: integer
+                - type: string
+              nullable: true
+              description: Traguardo predefinito da catalogo `goals`
+
+    UserGoalInput:
+      allOf:
+        - $ref: '#/components/schemas/UserReminderInput'
+        - type: object
+          properties:
+            category:
+              oneOf:
+                - type: integer
+                - type: string
+              description: Obbligatorio per obiettivi personali (se `related_goal` assente)
+            related_goal:
+              oneOf:
+                - type: integer
+                - type: string
+              description: Collegamento a traguardo catalogo (alternativa a `category`)
+
+    ProfileUpdateBody:
+      type: object
+      additionalProperties: true
+      description: |
+        Campi `directus_users`: `first_name`, `last_name`, `email`.
+        Campi `user_addresses`: `province`, `zip`, `city`, `address`, `phone`.
+        Altri campi → `user_details` (es. `weight`, `height`, `gender`, `newsletter`, …).
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+              extensions:
+                type: object
+                properties:
+                  code:
+                    type: string
+
+  responses:
+    Unauthorized:
+      description: Token mancante o non valido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Permessi insufficienti (es. ruolo non User)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Payload non valido
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/ErrorResponse'
+              - type: object
+                properties:
+                  error:
+                    type: string
