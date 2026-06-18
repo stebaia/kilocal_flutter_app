@@ -8,12 +8,17 @@ import 'dto/auth_tokens_dto.dart';
 import 'dto/register_response_dto.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl({required AuthApi api, required TokenStore tokenStore})
-    : _api = api,
-      _tokenStore = tokenStore;
+  AuthRepositoryImpl({
+    required AuthApi api,
+    required TokenStore tokenStore,
+    void Function()? onLogout,
+  }) : _api = api,
+       _tokenStore = tokenStore,
+       _onLogout = onLogout;
 
   final AuthApi _api;
   final TokenStore _tokenStore;
+  final void Function()? _onLogout;
 
   @override
   Future<void> login({required String email, required String password}) async {
@@ -47,7 +52,9 @@ class AuthRepositoryImpl implements AuthRepository {
         'password': password,
         'password_confirm': passwordConfirm,
         'origin': 'app',
+        // ignore: use_null_aware_elements
         if (privacyAccepted != null) 'privacy_accepted': privacyAccepted,
+        // ignore: use_null_aware_elements
         if (newsletterAccepted != null)
           'newsletter_accepted': newsletterAccepted,
       });
@@ -60,6 +67,8 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> logout() async {
     final refresh = await _tokenStore.refreshToken;
     await _tokenStore.clear();
+    // Clear the cached user session so profile data does not survive logout.
+    _onLogout?.call();
     if (refresh == null) return;
     try {
       await _api.logout({'refresh_token': refresh, 'mode': 'json'});

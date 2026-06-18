@@ -10,15 +10,15 @@ class ActionCardsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: cards.asMap().entries.map((entry) {
-        final index = entry.key;
-        final card = entry.value;
-        return Padding(
-          padding: EdgeInsets.only(right: index == 0 ? 24 : 0),
-          child: SizedBox(width: 159, child: ActionCard(card: card)),
-        );
-      }).toList(),
+    return SizedBox(
+      height: 165,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: cards.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 16),
+        itemBuilder: (_, index) =>
+            SizedBox(width: 159, child: ActionCard(card: cards[index])),
+      ),
     );
   }
 }

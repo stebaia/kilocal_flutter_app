@@ -55,9 +55,7 @@ class _LoginView extends StatelessWidget {
             prev.status != curr.status || prev.error != curr.error,
         listener: (context, state) {
           if (state.status == LoginStatus.success) {
-            // TODO(team): branch by profile_status — GET /survey/me/status
-            // decides home vs /survey. See wiki/missing-apis.md.
-            context.go('/home');
+            context.go(state.route ?? '/home');
           } else if (state.error != null) {
             toastification.show(
               context: context,

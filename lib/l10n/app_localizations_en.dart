@@ -221,6 +221,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTitle => 'Profile';
 
   @override
+  String get profileLogout => 'Log out';
+
+  @override
+  String get logoutConfirmationTitle => 'Log out?';
+
+  @override
+  String get logoutConfirmationMessage => 'Are you sure you want to log out?';
+
+  @override
+  String get logoutConfirm => 'Log out';
+
+  @override
+  String get logoutCancel => 'Cancel';
+
+  @override
   String get statisticsTitle => 'Statistics';
 
   @override

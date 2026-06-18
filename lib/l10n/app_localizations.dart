@@ -500,6 +500,36 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get profileTitle;
 
+  /// Logout action label in the profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get profileLogout;
+
+  /// Title of the logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Log out?'**
+  String get logoutConfirmationTitle;
+
+  /// Body of the logout confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get logoutConfirmationMessage;
+
+  /// Confirm button in the logout dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logoutConfirm;
+
+  /// Cancel button in the logout dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get logoutCancel;
+
   /// No description provided for @statisticsTitle.
   ///
   /// In en, this message translates to:

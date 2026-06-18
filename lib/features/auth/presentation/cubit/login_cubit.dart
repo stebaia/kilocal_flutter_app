@@ -2,16 +2,21 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../user/presentation/cubit/user_cubit.dart';
 import '../../domain/auth_repository.dart';
 
 part 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  LoginCubit({required AuthRepository authRepository})
-    : _authRepository = authRepository,
-      super(const LoginState());
+  LoginCubit({
+    required AuthRepository authRepository,
+    required UserCubit userCubit,
+  }) : _authRepository = authRepository,
+       _userCubit = userCubit,
+       super(const LoginState());
 
   final AuthRepository _authRepository;
+  final UserCubit _userCubit;
 
   void emailChanged(String value) {
     emit(state.copyWith(email: value, clearError: true));
@@ -42,7 +47,15 @@ class LoginCubit extends Cubit<LoginState> {
         email: state.email.trim(),
         password: state.password,
       );
-      emit(state.copyWith(status: LoginStatus.success));
+
+      await _userCubit.loadSession();
+
+      emit(
+        state.copyWith(
+          status: LoginStatus.success,
+          route: _userCubit.state.route ?? '/home',
+        ),
+      );
     } on ApiException catch (e) {
       emit(
         state.copyWith(

@@ -63,6 +63,7 @@ wiki/
 
 - [flutter-architecture](flutter-architecture.md) — BLoC, feature-first, Dio/Retrofit
 - [auth-implementation-plan](auth-implementation-plan.md) — step-by-step plan to build login & registration
+- [user-session-implementation-plan](user-session-implementation-plan.md) — fetch & cache the user after login (`/users/me` + `GetUserDetails`), profile_status routing
 
 ## Design & screens
 

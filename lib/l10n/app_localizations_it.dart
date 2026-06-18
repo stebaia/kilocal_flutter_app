@@ -222,6 +222,22 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileTitle => 'Profilo';
 
   @override
+  String get profileLogout => 'Esci';
+
+  @override
+  String get logoutConfirmationTitle => 'Vuoi uscire?';
+
+  @override
+  String get logoutConfirmationMessage =>
+      'Sei sicuro di voler effettuare il logout?';
+
+  @override
+  String get logoutConfirm => 'Esci';
+
+  @override
+  String get logoutCancel => 'Annulla';
+
+  @override
   String get statisticsTitle => 'Statistiche';
 
   @override

@@ -105,12 +105,19 @@ class ContinuePathCard extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                child: Image.network(item.imageUrl, fit: BoxFit.cover),
+                child: _buildImage(item.imageUrl),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildImage(String imageUrl) {
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(imageUrl, fit: BoxFit.cover);
+    }
+    return Image.network(imageUrl, fit: BoxFit.cover);
   }
 }

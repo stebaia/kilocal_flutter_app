@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
 import '../core/network/dio_client.dart';
+import '../core/network/graphql_client.dart';
 import '../core/network/token_store.dart';
 import 'router.dart';
 import '../features/auth/data/auth_api.dart';
@@ -9,8 +10,15 @@ import '../features/auth/data/auth_repository_impl.dart';
 import '../features/auth/domain/auth_repository.dart';
 import '../features/auth/presentation/cubit/login_cubit.dart';
 import '../features/auth/presentation/cubit/register_cubit.dart';
+import '../features/home/data/home_repository_impl.dart';
+import '../features/home/domain/home_repository.dart';
+import '../features/home/presentation/cubit/home_cubit.dart';
 import '../features/settings/data/settings_api.dart';
 import '../features/splash/presentation/cubit/splash_cubit.dart';
+import '../features/user/data/user_api.dart';
+import '../features/user/data/user_repository_impl.dart';
+import '../features/user/domain/user_repository.dart';
+import '../features/user/presentation/cubit/user_cubit.dart';
 
 /// Global service locator backed by get_it.
 ///
@@ -34,22 +42,59 @@ void configureDependencies() {
   // Expose the raw Dio instance for ad-hoc use or additional Retrofit clients.
   getIt.registerLazySingleton<Dio>(() => getIt<DioClient>().dio);
 
+  // --- Core: GraphQL client ---
+  getIt.registerLazySingleton<GraphqlClient>(
+    () => GraphqlClient(dio: getIt<Dio>()),
+  );
+
   // --- Feature: Auth ---
   getIt.registerLazySingleton<AuthApi>(() => AuthApi(getIt<Dio>()));
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       api: getIt<AuthApi>(),
       tokenStore: getIt<TokenStore>(),
+      onLogout: getIt<UserCubit>().clear,
     ),
   );
+
+  // --- Feature: User session ---
+  getIt.registerLazySingleton<UserApi>(() => UserApi(getIt<Dio>()));
+  getIt.registerLazySingleton<UserRepository>(
+    () => UserRepositoryImpl(
+      userApi: getIt<UserApi>(),
+      graphqlClient: getIt<GraphqlClient>(),
+    ),
+  );
+  getIt.registerLazySingleton<UserCubit>(
+    () => UserCubit(userRepository: getIt<UserRepository>()),
+  );
+
   getIt.registerFactory<LoginCubit>(
-    () => LoginCubit(authRepository: getIt<AuthRepository>()),
+    () => LoginCubit(
+      authRepository: getIt<AuthRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
   );
   getIt.registerFactory<RegisterCubit>(
     () => RegisterCubit(authRepository: getIt<AuthRepository>()),
   );
+
+  // --- Feature: Home ---
+  getIt.registerLazySingleton<HomeRepository>(
+    () => HomeRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<HomeCubit>(
+    () => HomeCubit(
+      homeRepository: getIt<HomeRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
+  );
+
   getIt.registerFactory<SplashCubit>(
-    () => SplashCubit(tokenStore: getIt<TokenStore>()),
+    () => SplashCubit(
+      tokenStore: getIt<TokenStore>(),
+      userCubit: getIt<UserCubit>(),
+    ),
   );
 
   // --- Feature: Settings API ---

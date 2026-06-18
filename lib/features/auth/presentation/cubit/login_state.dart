@@ -18,6 +18,7 @@ class LoginState extends Equatable {
     this.obscurePassword = true,
     this.status = LoginStatus.initial,
     this.error,
+    this.route,
   });
 
   final String email;
@@ -25,6 +26,10 @@ class LoginState extends Equatable {
   final bool obscurePassword;
   final LoginStatus status;
   final LoginError? error;
+
+  /// The post-login route derived from `profile_status`. Only set when
+  /// [status] is [LoginStatus.success].
+  final String? route;
 
   bool get isValid => email.isNotEmpty && password.isNotEmpty;
 
@@ -34,6 +39,7 @@ class LoginState extends Equatable {
     bool? obscurePassword,
     LoginStatus? status,
     LoginError? error,
+    String? route,
     bool clearError = false,
   }) {
     return LoginState(
@@ -42,9 +48,17 @@ class LoginState extends Equatable {
       obscurePassword: obscurePassword ?? this.obscurePassword,
       status: status ?? this.status,
       error: clearError ? null : error ?? this.error,
+      route: route ?? this.route,
     );
   }
 
   @override
-  List<Object?> get props => [email, password, obscurePassword, status, error];
+  List<Object?> get props => [
+    email,
+    password,
+    obscurePassword,
+    status,
+    error,
+    route,
+  ];
 }

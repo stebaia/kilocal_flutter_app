@@ -81,6 +81,26 @@
   "diaryTitle": "Diary",
   "benefitsTitle": "Benefits",
   "profileTitle": "Profile",
+  "profileLogout": "Log out",
+  "@profileLogout": {
+    "description": "Logout action label in the profile screen"
+  },
+  "logoutConfirmationTitle": "Log out?",
+  "@logoutConfirmationTitle": {
+    "description": "Title of the logout confirmation dialog"
+  },
+  "logoutConfirmationMessage": "Are you sure you want to log out?",
+  "@logoutConfirmationMessage": {
+    "description": "Body of the logout confirmation dialog"
+  },
+  "logoutConfirm": "Log out",
+  "@logoutConfirm": {
+    "description": "Confirm button in the logout dialog"
+  },
+  "logoutCancel": "Cancel",
+  "@logoutCancel": {
+    "description": "Cancel button in the logout dialog"
+  },
   "statisticsTitle": "Statistics",
   "statisticsMonth": "Current month",
   "notificationsTitle": "Notifications",
