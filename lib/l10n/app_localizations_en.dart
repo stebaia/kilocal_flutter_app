@@ -263,6 +263,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsEmpty => 'No notifications';
 
   @override
+  String get notificationArchive => 'Archive notification';
+
+  @override
+  String get notificationsFilterAll => 'All';
+
+  @override
+  String get notificationsFilterUnread => 'Unread';
+
+  @override
+  String get notificationsFilterRead => 'Read';
+
+  @override
+  String get notificationsFilterArchived => 'Archived';
+
+  @override
   String get benefitDetails => 'Details';
 
   @override

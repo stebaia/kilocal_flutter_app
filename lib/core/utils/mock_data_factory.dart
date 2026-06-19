@@ -2,7 +2,6 @@ import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../features/home/domain/entities/home_data.dart';
 import '../../features/momenti/domain/entities/momenti_data.dart';
-import '../../features/notifications/domain/entities/notification_item.dart';
 import '../../features/statistics/domain/entities/area_stat.dart';
 
 /// Centralized factory for localized mock data.
@@ -69,39 +68,6 @@ abstract final class MockDataFactory {
         month: l10n.phase1,
         completed: 5,
         total: 19,
-      ),
-    ];
-  }
-
-  static List<NotificationItem> notifications(AppLocalizations l10n) {
-    return [
-      NotificationItem(
-        id: '1',
-        title: l10n.areaTraining,
-        body: l10n.homeProgress,
-        timestamp: DateTime.now().subtract(const Duration(minutes: 5)),
-        type: NotificationType.withCta,
-        ctaLabel: l10n.surveyStart,
-      ),
-      NotificationItem(
-        id: '2',
-        title: l10n.areaNutrition,
-        body: l10n.homeQuickLinks,
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      NotificationItem(
-        id: '3',
-        title: l10n.benefitsTitle,
-        body: l10n.benefitDetails,
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        type: NotificationType.withImage,
-        imageUrl: 'https://placehold.co/80x80/e51e4d/ffffff?text=SP',
-      ),
-      NotificationItem(
-        id: '4',
-        title: l10n.surveyVerify,
-        body: l10n.notificationsEmpty,
-        timestamp: DateTime.now().subtract(const Duration(days: 2)),
       ),
     ];
   }

@@ -584,6 +584,36 @@ abstract class AppLocalizations {
   /// **'No notifications'**
   String get notificationsEmpty;
 
+  /// No description provided for @notificationArchive.
+  ///
+  /// In en, this message translates to:
+  /// **'Archive notification'**
+  String get notificationArchive;
+
+  /// No description provided for @notificationsFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get notificationsFilterAll;
+
+  /// No description provided for @notificationsFilterUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get notificationsFilterUnread;
+
+  /// No description provided for @notificationsFilterRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get notificationsFilterRead;
+
+  /// No description provided for @notificationsFilterArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get notificationsFilterArchived;
+
   /// No description provided for @benefitDetails.
   ///
   /// In en, this message translates to:

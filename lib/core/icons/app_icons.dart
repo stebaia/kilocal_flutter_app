@@ -10,6 +10,7 @@ abstract final class AppIcons {
   static const String popsicle = 'popsicle';
   static const String play = 'play';
   static const String chart = 'chart';
+  static const String filter = 'filter';
 }
 
 /// Widget generico per le icone SVG dell'app.

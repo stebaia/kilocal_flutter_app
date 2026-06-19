@@ -25,7 +25,8 @@ abstract final class AppColors {
   static const Color borderCard = Color(0xFFC2C2C2);
   static const Color textPrimary = ink;
   static const Color textSecondary = Color(0xFF6B6B72);
-  static const Color divider = Color(0xFFECECEF);
+  static const Color divider = Color(0xFFEDEDED);
+  static const Color unreadBackground = Color(0xFFFFF9FA);
 
   /// Signature vertical brand gradient (top -> bottom), used full-bleed behind
   /// illustration screens (splash, onboarding).

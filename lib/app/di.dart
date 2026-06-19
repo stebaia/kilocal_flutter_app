@@ -13,6 +13,9 @@ import '../features/auth/presentation/cubit/register_cubit.dart';
 import '../features/home/data/home_repository_impl.dart';
 import '../features/home/domain/home_repository.dart';
 import '../features/home/presentation/cubit/home_cubit.dart';
+import '../features/notifications/data/notifications_repository_impl.dart';
+import '../features/notifications/domain/notifications_repository.dart';
+import '../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../features/path/data/path_repository_impl.dart';
 import '../features/path/domain/path_repository.dart';
 import '../features/path/presentation/cubit/path_cubit.dart';
@@ -97,6 +100,17 @@ void configureDependencies() {
   getIt.registerLazySingleton<PathRepository>(() => const PathRepositoryImpl());
   getIt.registerFactory<PathCubit>(
     () => PathCubit(pathRepository: getIt<PathRepository>()),
+  );
+
+  // --- Feature: Notifications ---
+  getIt.registerLazySingleton<NotificationsRepository>(
+    () => NotificationsRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<NotificationsCubit>(
+    () => NotificationsCubit(
+      notificationsRepository: getIt<NotificationsRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
   );
 
   getIt.registerFactory<SplashCubit>(
