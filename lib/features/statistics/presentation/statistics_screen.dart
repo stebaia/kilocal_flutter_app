@@ -11,6 +11,8 @@ import 'widgets/statistics_card.dart';
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
 
+  static const String route = '/statistics';
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(

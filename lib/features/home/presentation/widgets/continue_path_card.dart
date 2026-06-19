@@ -5,6 +5,7 @@ import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/home_data.dart';
 
 class ContinuePathCard extends StatelessWidget {
@@ -14,6 +15,7 @@ class ContinuePathCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     const cardRadius = 16.0;
     const imageOverflow = 20.0;
 
@@ -54,7 +56,7 @@ class ContinuePathCard extends StatelessWidget {
                       top: AppSpacing.spaceLg,
                       left: AppSpacing.spaceLg,
                       child: Container(
-                        width: 140,
+                        width: 120,
 
                         padding: const EdgeInsets.all(AppSpacing.spaceMd),
                         decoration: BoxDecoration(
@@ -75,7 +77,7 @@ class ContinuePathCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            item.subtitle,
+                            l10n.homeContinuePath,
                             style: AppTypography.textTheme.bodyMedium?.copyWith(
                               color: AppColors.neutralWhite,
                               fontWeight: FontWeight.w600,
@@ -98,7 +100,7 @@ class ContinuePathCard extends StatelessWidget {
             child: Container(
               width: 157,
               height: 157,
-              padding: const EdgeInsets.all(4),
+              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: AppColors.neutralWhite,
                 borderRadius: BorderRadius.circular(AppRadius.lg),

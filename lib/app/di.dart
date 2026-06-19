@@ -13,6 +13,9 @@ import '../features/auth/presentation/cubit/register_cubit.dart';
 import '../features/home/data/home_repository_impl.dart';
 import '../features/home/domain/home_repository.dart';
 import '../features/home/presentation/cubit/home_cubit.dart';
+import '../features/path/data/path_repository_impl.dart';
+import '../features/path/domain/path_repository.dart';
+import '../features/path/presentation/cubit/path_cubit.dart';
 import '../features/settings/data/settings_api.dart';
 import '../features/splash/presentation/cubit/splash_cubit.dart';
 import '../features/user/data/user_api.dart';
@@ -88,6 +91,12 @@ void configureDependencies() {
       homeRepository: getIt<HomeRepository>(),
       userCubit: getIt<UserCubit>(),
     ),
+  );
+
+  // --- Feature: Path ---
+  getIt.registerLazySingleton<PathRepository>(() => const PathRepositoryImpl());
+  getIt.registerFactory<PathCubit>(
+    () => PathCubit(pathRepository: getIt<PathRepository>()),
   );
 
   getIt.registerFactory<SplashCubit>(

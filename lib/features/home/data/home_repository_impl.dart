@@ -186,7 +186,7 @@ query HomePartners($limit: Int!) {
       currentDate: DateTime.now(),
       continuePath: ContinuePathItem(
         title: continueStep.title ?? _continueFallbackTitle,
-        subtitle: continueStep.ctaLabel ?? _defaultCtaLabel,
+        subtitle: continueStep.ctaLabel,
         imageUrl: continueImage,
       ),
       monthStats: MonthStats(

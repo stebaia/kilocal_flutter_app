@@ -20,12 +20,12 @@ class HomeData {
 class ContinuePathItem {
   const ContinuePathItem({
     required this.title,
-    required this.subtitle,
+    this.subtitle,
     required this.imageUrl,
   });
 
   final String title;
-  final String subtitle;
+  final String? subtitle;
   final String imageUrl;
 }
 
