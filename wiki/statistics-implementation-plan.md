@@ -86,15 +86,17 @@ Per il timeframe selezionato `T`:
 3. Test cubit: `loadWithData` + stato loaded.
 
 ## 5. Dipendenze / rischi
-- **Condivisa con [[path-implementation-plan]]:** il "totale per area" dipende dalla stessa
-  query `percorsi_content_aggregated` ancora da confermare col backend (domanda 1 del path).
-  → Conviene attendere la stessa risposta backend e implementare path + statistics insieme,
-  riusando un'unica fonte per i totali.
+- **Condivisa con [[path-implementation-plan]]:** il "totale per area" usa la **stessa mappa
+  `stepId → area`** ora confermata dal backend (`percorsi { root, groups, steps }`, vedi
+  path §2). **Non più bloccante.** → Implementare path + statistics insieme riusando un'unica
+  sorgente per la mappa area/totali.
+- `integrazione` nelle statistiche eredita la stessa complessità di path (kit + took_dates) →
+  stessa decisione: preferire l'endpoint REST dedicato se Daniele lo crea.
 
 ## Stato
-- **2026-06-19** — Piano scritto e verificato contro SDL staging. **Bloccato sulla stessa
-  domanda backend di path** (totale step per area). Prossimo passo: implementare insieme a path
-  alla risposta del backend, via `api-integrator`.
+- **2026-06-19** — Backend ha risposto (vedi path §5): totale per area risolto via mappa
+  `stepId→area`. **Sbloccato.** Prossimo passo: implementare insieme a path via `api-integrator`,
+  riusando la mappa per le 3 root a step. `integrazione` quando arriva l'endpoint REST.
 
 ## Related
 - [[diario-attivita]]

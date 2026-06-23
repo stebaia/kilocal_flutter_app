@@ -620,6 +620,30 @@ abstract class AppLocalizations {
   /// **'Details'**
   String get benefitDetails;
 
+  /// No description provided for @benefitsPrimaryPartners.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Partners'**
+  String get benefitsPrimaryPartners;
+
+  /// No description provided for @benefitsSecondaryPartners.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary Partners'**
+  String get benefitsSecondaryPartners;
+
+  /// No description provided for @benefitViewDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View details'**
+  String get benefitViewDetails;
+
+  /// No description provided for @benefitsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No benefits available'**
+  String get benefitsEmpty;
+
   /// No description provided for @diaryCompleted.
   ///
   /// In en, this message translates to:

@@ -281,6 +281,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get benefitDetails => 'Details';
 
   @override
+  String get benefitsPrimaryPartners => 'Primary Partners';
+
+  @override
+  String get benefitsSecondaryPartners => 'Secondary Partners';
+
+  @override
+  String get benefitViewDetails => 'View details';
+
+  @override
+  String get benefitsEmpty => 'No benefits available';
+
+  @override
   String get diaryCompleted => 'Completed';
 
   @override

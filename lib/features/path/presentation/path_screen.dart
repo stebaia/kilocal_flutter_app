@@ -11,6 +11,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_card.dart';
+import '../../../core/widgets/app_header.dart';
 import '../../statistics/presentation/statistics_screen.dart';
 import 'cubit/path_cubit.dart';
 import 'widgets/path_area_tile.dart';
@@ -34,7 +35,6 @@ class _PathView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final statusBarHeight = MediaQuery.paddingOf(context).top;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -42,29 +42,14 @@ class _PathView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // White header (extends behind the status bar).
-          Container(
-            color: AppColors.surface,
-            padding: EdgeInsets.only(
-              top: statusBarHeight,
-              left: AppSpacing.screenGutter,
-              right: AppSpacing.screenGutter,
-              bottom: AppSpacing.spaceMd,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.pathTitle,
-                  style: AppTypography.textTheme.headlineLarge,
-                ),
-                GestureDetector(
-                  onTap: () => context.push(StatisticsScreen.route),
-                  child: const AppIcon(
-                    AppIcons.chart,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
+          AppHeader(
+            title: l10n.pathTitle,
+            trailing: GestureDetector(
+              onTap: () => context.push(StatisticsScreen.route),
+              child: const AppIcon(
+                AppIcons.chart,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
           // Scrollable content with red band behind the progress card.

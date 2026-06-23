@@ -51,18 +51,50 @@ Sorgenti controllate il 2026-06-19:
 - Scritture `POST /path/steps/{id}/start|complete` → solo firme stub nel repository.
 - `integrazione` start/complete (usa fasi via `update_user_details_item`, [[integrazione]]).
 
-## 2. Calcolo progressi (solo SDL confermato)
+## 2. Calcolo progressi (CONFERMATO dal backend, Daniele Pastori 2026-06-19)
 
-Per ciascuna delle 3 root a step (`allenamento`/`alimentazione`/`benessere`):
-- **completed** = conteggio `user_activities` con `completed_on { _nnull: true }` la cui
-  `activity[].item` appartiene alla root. Stesso meccanismo M2A di
-  `home_repository_impl.dart:99` (filtro per `timeframe.sort`).
-- **total** = via `percorsi_content_aggregated` filtrato per root/timeframe (come la home, riga
-  90). ⚠️ collezione auth-gated → fallback al conteggio noto se la query non risponde.
+### 3 root a step (`allenamento`/`alimentazione`/`benessere`)
+
+**Passo 1 — mappa `stepId → area`** (una sola query, risolve il "totale per area"):
+```graphql
+percorsi(sort: "order") {
+  root { internal_name }
+  groups(filter: { is_percorso_main_tab: { _eq: true } }) {
+    steps(sort: "percorsi_content_id.sort") {
+      percorsi_content_id { id timeframe { id } }
+    }
+  }
+}
+```
+- **total** per area = numero di `steps` di quell'area.
+- **completed** per area = quanti di quegli `stepId` compaiono con `completed_on` valorizzato
+  nelle `user_activities` dell'utente.
 - **currentStepSort** = `percorso_<root>_curr_step` (Int) da `user_details`.
 
-`integrazione`: progresso a fasi da `percorso_integrazione_curr_phase` (relazione
-`product_phases`), senza step.
+> ✅ Risolve la vecchia incertezza su `percorsi_content_aggregated`: NON serve, si conta dalla
+> mappa. `percorsi`/`groups`/`steps` sono auth-gated ma confermati funzionanti col token.
+
+### `integrazione` — NON a fasi, ma a giorni di assunzione
+
+Diverso dalle altre 3. Si traccia con `user_integratori.took_dates` (giorni presi). Il
+**totale** (durata) si ricava dal kit dell'utente:
+```graphql
+# kitId = user_details.profile_kit
+kit_products(filter: { kit: { id: { _eq: $kitId } } }) {
+  phase { id sort }
+  only_for_gender          # valorizzato se la fase è specifica uomo/donna
+  products_with_duration {
+    kit_products_duration_id { duration product { id } }
+  }
+}
+```
+- total = somma/durata delle fasi del kit; **media** se ci sono più prodotti.
+- `only_for_gender` → filtrare per il gender dell'utente quando valorizzato.
+- completed = numero di `took_dates` in `user_integratori`.
+
+> ⚠️ `integrazione` è sensibilmente più complessa. Daniele si è offerto di **creare un endpoint
+> REST dedicato** se la query diventa ingestibile → vedi §5. **Decisione consigliata: chiedere
+> l'endpoint REST per integrazione** e tenere GraphQL solo per le 3 root a step.
 
 ## 3. Modifiche file
 
@@ -102,31 +134,166 @@ Per ciascuna delle 3 root a step (`allenamento`/`alimentazione`/`benessere`):
 3. **Probe col token reale** (prima di cablare le scritture): `percorsi_groups`/`percorsi_content`
    + `POST /path/steps/*` — solo allora aprire il dettaglio area in un secondo PR.
 
-## 5. Domande aperte al backend (BLOCCANTI prima di implementare)
+## 5. Risposte del backend (Daniele Pastori, 2026-06-19) → quasi tutto risolto
 
-Inviate al team il 2026-06-19. Implementazione **in attesa di risposta**.
+1. ✅ **RISOLTA.** Mappa `stepId → area` via `percorsi { root.internal_name, groups, steps }`
+   (vedi §2). Totale = nº step dell'area; completati = step con `completed_on`. Niente
+   `percorsi_content_aggregated`.
+2. 🟡 **In attesa di conferma da Francesco Galatro.** "Su web ho solo quelle eseguite, ma credo
+   sia il totale di tutto il percorso." → assumere **totale intero percorso**, confermare.
+3. ✅ **RISOLTA (ma complessa).** `integrazione` = giorni di assunzione (`user_integratori.took_dates`),
+   non fasi. Totale/durata da `user_details.profile_kit` → `kit_products` (vedi §2). Media se
+   più prodotti; filtrare per `only_for_gender`.
+4. ✅ **CONFERMATA.** Directus+GraphQL espandono le relazioni in base ai permessi del ruolo: un
+   utente vede la relazione estesa dove l'SDL pubblico mostra solo l'id. Comportamento stabile.
+   Cautela: non confondere `user_details` con `user_details_aggregated_count` (valori aggregati).
 
-1. **Conteggio completati/totali per area.** Come si risale da uno `user_activity` completato
-   (`completed_on` valorizzato) alla root di appartenenza (`percorsi_content` → root)? E qual è
-   il filtro per il **totale step** di un'area? `percorsi_content_aggregated` non è nell'SDL
-   pubblico — risponde col token dell'app?
-2. **Scope del progresso.** La barra complessiva ("23/132" nel mock) è sull'intero percorso o
-   solo sul `active_timeframe` corrente?
-3. **Integrazione = fasi, non step.** Come mostrare `completati/totale` per `integrazione`
-   (`percorso_integrazione_curr_phase` → `product_phases`)? `product_phases` non ha un campo
-   "numero totale fasi" né `internal_name`: come si ricava il totale fasi del prodotto utente?
-4. **`curr_step` Int vs oggetto.** Nello SDL `percorso_*_curr_step` è `Int`, ma la home lo
-   interroga come oggetto (titolo/asset) e funziona. È il ruolo autenticato che lo rimappa a
-   `percorsi_content`? Comportamento stabile?
+### ✅ DECISO (2026-06-19) — un unico endpoint REST `GET /path/me/progress`
 
-> Il messaggio in forma discorsiva per il team è stato preparato in chat (2026-06-19), basato
-> su queste 4 domande + la query GraphQL già usata dalla home come riferimento.
+Invece di GraphQL per 3 aree + REST per integrazione, Daniele crea **un solo endpoint REST** che
+ritorna tutto il progresso già calcolato.
+
+> ⚠️ **Endpoint reale (confermato dal backend, 2026-06-22):** `GET /path/me/progress`
+> (bearer token), **non** `/path/progress`. Lo shape è invariato rispetto a quanto concordato.
+
+**Shape CONCORDATA** (proposta da Daniele, confermata dal client):
+```
+GET /path/me/progress    (bearer token)
+{
+  "data": {
+    "overall": { "completed": 23, "total": 132, "percent": 17 },
+    "areas": {
+      "allenamento":   { "completed": 8, "total": 44, "percent": 18 },
+      "alimentazione": { "completed": 6, "total": 44, "percent": 14 },
+      "benessere":     { "completed": 5, "total": 44, "percent": 11 },
+      "integrazione":  { "completed": 4, "total": 0,  "percent": 0  }
+    }
+  }
+}
+```
+Decisioni sulle due domande di Daniele:
+- **`areas` come OGGETTO** (chiave = `root.internal_name`), non array. Le 4 aree sono fisse e
+  note → mapping 1:1 esplicito, nessuna ambiguità d'ordine. ✅
+- **`percent`**: tecnicamente ridondante (il client lo calcola da `completed/total`), ma **ok
+  tenerlo** — evita discrepanze di arrotondamento UI. Il client può ignorarlo se preferisce
+  ricalcolarlo. Intero 0-100.
+
+✅ **Risolto:** i valori erano inventati. Deciso che il backend **invia sempre tutte e 4 le
+aree**, anche `integrazione` con `total: 0` (utente senza kit) — NON la omette. Motivo: le card
+sono fisse nel layout, ometterne una squilibra la griglia. Il client gestisce già `total == 0`
+(`PathData.progress` → 0).
+
+`area` = `root.internal_name`. Un solo meccanismo, zero logica di dominio nel client,
+**copre anche [[statistics-implementation-plan|Statistiche]]** (stesso dato per area).
+→ La sezione §2 (calcolo GraphQL) diventa **riferimento storico**: la fa il backend.
 
 ## Stato
 
-- **2026-06-19** — Piano scritto e verificato contro Swagger/SDL staging. Domande inviate al
-  backend. **Prossimo passo:** alla risposta, implementare l'overview (Fasi 1-5) via
-  `api-integrator`. Le scritture REST e il dettaglio area restano a un secondo PR.
+- **2026-06-22** — ✅ **INTEGRATO.** Endpoint reale `GET /path/me/progress` confermato dal
+  backend e cablato nel client:
+  1. DTO `PathProgressResponseDto`/`PathProgressDto`/`AreaProgressDto` (data.overall +
+     data.areas come `Map<String,AreaProgressDto>`, json_serializable).
+  2. `PathRepositoryImpl` riscritto su `Dio` (NON GraphQL): `GET /path/me/progress`, error-map
+     `ApiException.fromDio`. `path_mock_data_factory.dart` **eliminato**.
+  3. `PathCubit` invariato. `fetchPath(l10n)` mantiene `l10n` perché titoli/asset/header
+     restano **client-side** (mapping per chiave `internal_name`: `allenamento`,
+     `alimentazione`, `benessere`, `integrazione`).
+  4. DI: `PathRepositoryImpl(dio: getIt())`.
+  - Stesso endpoint riusabile da [[statistics-implementation-plan|Statistiche]].
+  - Aperti: scope `overall` (Francesco Galatro); `integrazione.total: 0` gestito client-side
+    (`total == 0 → progress 0`).
+- **2026-06-19** — Shape concordata con Daniele (areas=oggetto, percent incluso).
+
+> §2/§3 (calcolo e query GraphQL) restano come **riferimento storico** — la logica è lato
+> backend. Il client legge un JSON piatto.
+
+## Dettaglio area — probe backend (2026-06-22)
+
+Probe col token reale (ruolo app, `app_access: false`) su staging, prima di costruire la
+schermata di dettaglio (lista step al tap su una card). Stato: **bloccato su 2 domande**.
+
+### Cosa funziona ✅
+- `POST /path/steps/{id}/start` → **200**, crea l'`user_activities` (verificato: scrive davvero).
+- `/items/percorsi_groups` leggibile: `is_percorso_main_tab`, `icon`, `tools`, `translations`,
+  `steps[]` (junction `percorsi_content_id` + `sort`).
+- `/items/percorsi_groups_translations` → titoli gruppo ("Allenamento", "Materiali", …).
+- `/items/percorsi_content` → titolo, asset, content_blocks, timeframe.
+- `user_activities` = modello reale del "completato": `completed_on` + `activity[]` M2A che punta
+  a `percorsi_content` via `collection` + `item`.
+
+### Cosa è rotto / bloccato ⚠️
+- `percorsi` + campo **`root`** → **INTERNAL_SERVER_ERROR** (sia GraphQL che REST). La relazione
+  `root.internal_name` che mappa group→area **non è accessibile** col ruolo app.
+- `GET /items/percorsi/{id}` → **FORBIDDEN**. Il group espone solo `percorso: <id>` (es. 8, 26),
+  ma quell'id non è risolvibile.
+- Nessun endpoint REST aggregato per il dettaglio (`/path/me`, `/path/me/detail`, `/path` → 404).
+- `POST /path/steps/{id}/complete` con body `{}` → **400** (manca lo shape del payload).
+
+### Domande aperte al backend (Daniele)
+1. **group → area:** come capisce il client quali `percorsi_groups` sono di una certa area
+   (allenamento/alimentazione/benessere/integrazione), visto che `percorsi.root` è in 500 e
+   `/items/percorsi/{id}` è 403? Opzioni: (a) campo `area`/`internal_name` leggibile sul group;
+   (b) sbloccare `percorsi.root.internal_name` per il ruolo app; (c) **preferito** — endpoint
+   REST di dettaglio tipo `/path/me/progress` che torna gli step dell'area già con stato
+   fatto/non fatto.
+2. **complete:** qual è il body corretto di `POST /path/steps/{id}/complete`? (`start` torna 200
+   con body vuoto, `complete` dà 400.)
+
+→ Senza (1) non si costruisce la lista del dettaglio; senza (2) non si cabla il "completa step".
+
+### Risposte Daniele (2026-06-22) → entrambe risolte
+
+**2. `complete` — RISOLTA.** Body:
+```json
+{ "percorsoInternalName": "allenamento" | "alimentazione" | "benessere" }
+```
+
+**1. group → area — RISOLTA via endpoint REST di dettaglio (opzione c).** Daniele sta sistemando
+i permessi di `percorsi.root`, ma in parallelo propone un endpoint dettaglio dedicato (probabile
+`GET /path/me/{area}`) che ritorna tutto già pronto. **Shape proposto** (base di partenza,
+confermato lato client):
+```json
+{
+  "data": {
+    "area": "allenamento",
+    "percorso": { "id": "26", "internal_name": "allenamento~defence~f", "has_progressive_steps": true },
+    "progress": { "completed": 1, "total": 2, "percent": 50 },
+    "groups": [
+      {
+        "id": "42",
+        "sort": 1,
+        "is_percorso_main_tab": true,
+        "show_limited_steps_value": null,
+        "translations": [{ "languages_code": "it-IT", "title": "..." }],
+        "steps": [
+          {
+            "id": "step-uuid",
+            "sort": 1,
+            "timeframe": { "id": 1, "sort": 1 },
+            "translations": [{ "languages_code": "it-IT", "title": "..." }],
+            "started": true,
+            "completed": false,
+            "started_on": "2026-06-01T08:00:00",
+            "completed_on": null
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Campi aggiuntivi chiesti al client (dal Figma del dettaglio, [[percorso-read]]):** Daniele si è
+offerto di aggiungere altri campi comodi → richiesti:
+- **`asset`** dello step (id/url immagine) — le card contenuto hanno la foto in testa.
+- **sottotitolo/preview** dello step oltre al `title` — in lista ogni step ha titolo + riga sotto.
+- a livello step un **`is_current`/`locked`** per evidenziare lo step attivo e i bloccati (oggi si
+  ricava da `percorso_<area>_curr_step` in `user_details`; averlo nell'endpoint evita la doppia
+  lettura).
+
+> `groups[].steps[]` con `started`/`completed`/date copre già la lista. **Prossimo passo:** ricevere
+> l'URL definitivo dell'endpoint dettaglio + i campi extra → scaffold DTO + schermata dettaglio
+> (secondo PR). Cablare `complete` col body sopra.
 
 ## Related
 - [[percorso-read]]

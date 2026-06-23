@@ -5,6 +5,7 @@ import 'package:kilocal_flutter_app/core/theme/theme.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../../app/di.dart';
+import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/filter_bottom_sheet.dart';
 import '../domain/entities/notification_item.dart';
 import 'cubit/notifications_cubit.dart';
@@ -30,40 +31,48 @@ class _NotificationsView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.notificationsTitle),
-        actions: [
-          IconButton(
-            icon: AppIcon(AppIcons.filter, color: AppColors.textPrimary),
-            onPressed: () => _showFilter(context),
+      backgroundColor: AppColors.background,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          AppHeader(
+            title: l10n.notificationsTitle,
+            showBack: true,
+            trailing: GestureDetector(
+              onTap: () => _showFilter(context),
+              child: AppIcon(AppIcons.filter, color: AppColors.textPrimary),
+            ),
+          ),
+          Expanded(
+            child: BlocBuilder<NotificationsCubit, NotificationsState>(
+              builder: (context, state) {
+                if (state.status == NotificationsStatus.loading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (state.status == NotificationsStatus.error) {
+                  return Center(child: Text(l10n.errorGeneric));
+                }
+
+                final visible = _applyFilter(state.items, state.filter);
+
+                if (visible.isEmpty) {
+                  return Center(child: Text(l10n.notificationsEmpty));
+                }
+
+                return ListView.separated(
+                  separatorBuilder: (context, index) =>
+                      Divider(color: AppColors.divider),
+                  itemCount: visible.length,
+                  itemBuilder: (context, index) {
+                    final item = visible[index];
+                    return NotificationListItem(item: item);
+                  },
+                );
+              },
+            ),
           ),
         ],
-      ),
-      body: BlocBuilder<NotificationsCubit, NotificationsState>(
-        builder: (context, state) {
-          if (state.status == NotificationsStatus.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (state.status == NotificationsStatus.error) {
-            return Center(child: Text(l10n.errorGeneric));
-          }
-
-          final visible = _applyFilter(state.items, state.filter);
-
-          if (visible.isEmpty) {
-            return Center(child: Text(l10n.notificationsEmpty));
-          }
-
-          return ListView.separated(
-            separatorBuilder: (context, index) => Divider(color: AppColors.divider,),
-            itemCount: visible.length,
-            itemBuilder: (context, index) {
-              final item = visible[index];
-              return NotificationListItem(item: item);
-            },
-          );
-        },
       ),
     );
   }

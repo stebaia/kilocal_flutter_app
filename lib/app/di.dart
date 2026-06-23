@@ -10,6 +10,9 @@ import '../features/auth/data/auth_repository_impl.dart';
 import '../features/auth/domain/auth_repository.dart';
 import '../features/auth/presentation/cubit/login_cubit.dart';
 import '../features/auth/presentation/cubit/register_cubit.dart';
+import '../features/benefits/data/benefits_repository_impl.dart';
+import '../features/benefits/domain/benefits_repository.dart';
+import '../features/benefits/presentation/cubit/benefits_cubit.dart';
 import '../features/home/data/home_repository_impl.dart';
 import '../features/home/domain/home_repository.dart';
 import '../features/home/presentation/cubit/home_cubit.dart';
@@ -97,9 +100,19 @@ void configureDependencies() {
   );
 
   // --- Feature: Path ---
-  getIt.registerLazySingleton<PathRepository>(() => const PathRepositoryImpl());
+  getIt.registerLazySingleton<PathRepository>(
+    () => PathRepositoryImpl(dio: getIt<Dio>()),
+  );
   getIt.registerFactory<PathCubit>(
     () => PathCubit(pathRepository: getIt<PathRepository>()),
+  );
+
+  // --- Feature: Benefits ---
+  getIt.registerLazySingleton<BenefitsRepository>(
+    () => BenefitsRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<BenefitsCubit>(
+    () => BenefitsCubit(benefitsRepository: getIt<BenefitsRepository>()),
   );
 
   // --- Feature: Notifications ---

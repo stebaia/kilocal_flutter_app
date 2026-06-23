@@ -39,6 +39,13 @@
   richiedono ruolo autenticato. Campi presi dallo Swagger. Vedi [[contradictions]] §5.
 - **Survey questions:** lo Swagger non documenta una query GraphQL d'esempio per le domande;
   confermare i campi di `surveys`/`survey_sections`/`survey_question` col team.
+- **Benefit — filtro Attivi/Passati/Coming soon:** la modale filtri in Figma offre *Benefit
+  Attivi / Benefit passati / Coming soon*, ma l'introspection del tipo `partners`
+  (`asset, coupon, cta_brand, id, logo, main_partner, name, translations, articles`) **non
+  espone alcun campo data/status**. Serve che il backend aggiunga su `partners` un campo
+  status (es. `status: active|past|coming_soon`) **oppure** date `date_start`/`date_end` da
+  cui derivare lo stato client-side. Finché non c'è, il filtro non è implementabile. Vedi
+  [[benefit-partner]].
 
 ---
 
