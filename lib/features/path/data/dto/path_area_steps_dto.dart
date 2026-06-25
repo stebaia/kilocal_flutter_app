@@ -2,6 +2,14 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'path_area_steps_dto.g.dart';
 
+/// The backend is inconsistent about id types: some areas return ids as
+/// strings (`"42"`), others as integers (`42`). Normalize everything to a
+/// string so the DTOs don't crash on `Null is not a subtype of String`.
+String _idFromJson(Object? value) => value?.toString() ?? '';
+
+/// Nullable variant for optional ids (e.g. `current_step_id`).
+String? _nullableIdFromJson(Object? value) => value?.toString();
+
 /// Response of `GET /path/me/areas/{area}/steps`.
 ///
 /// The backend returns the full area detail: percorso metadata, groups and
@@ -25,8 +33,8 @@ class PathAreaStepsDto {
     required this.area,
     required this.percorso,
     required this.progress,
-    required this.currentStepId,
-    required this.activeTimeframe,
+    this.currentStepId,
+    this.activeTimeframe,
     required this.groups,
     this.access,
     this.timeframes,
@@ -37,14 +45,17 @@ class PathAreaStepsDto {
 
   final String area;
 
-  @JsonKey(name: 'current_step_id')
-  final String currentStepId;
+  /// Id of the current step, or `null` when the area has no active step
+  /// (e.g. a non-progressive area, or progress not started).
+  @JsonKey(name: 'current_step_id', fromJson: _nullableIdFromJson)
+  final String? currentStepId;
 
   final PathPercorsoDto percorso;
   final PathAreaProgressDto progress;
 
+  /// Active timeframe pointer; nullable when the area exposes none.
   @JsonKey(name: 'active_timeframe')
-  final PathActiveTimeframeDto activeTimeframe;
+  final PathActiveTimeframeDto? activeTimeframe;
 
   final List<PathGroupDto> groups;
 
@@ -72,6 +83,7 @@ class PathPercorsoDto {
   factory PathPercorsoDto.fromJson(Map<String, dynamic> json) =>
       _$PathPercorsoDtoFromJson(json);
 
+  @JsonKey(fromJson: _idFromJson)
   final String id;
 
   @JsonKey(name: 'internal_name')
@@ -131,6 +143,7 @@ class PathGroupDto {
   factory PathGroupDto.fromJson(Map<String, dynamic> json) =>
       _$PathGroupDtoFromJson(json);
 
+  @JsonKey(fromJson: _idFromJson)
   final String id;
   final int sort;
 
@@ -169,6 +182,7 @@ class PathStepDto {
   factory PathStepDto.fromJson(Map<String, dynamic> json) =>
       _$PathStepDtoFromJson(json);
 
+  @JsonKey(fromJson: _idFromJson)
   final String id;
   final int sort;
   final PathTimeframeDto timeframe;
@@ -275,7 +289,7 @@ class PathStepAssetDto {
 class PathTranslationDto {
   const PathTranslationDto({
     required this.languagesCode,
-    required this.title,
+    this.title,
     this.description,
   });
 
@@ -285,7 +299,9 @@ class PathTranslationDto {
   @JsonKey(name: 'languages_code')
   final String languagesCode;
 
-  final String title;
+  /// Localized title. Nullable because some translation rows (e.g. on an
+  /// asset) carry only other fields like `alt_text` and omit `title`.
+  final String? title;
 
   /// Long localized body for a step. Not yet exposed by the backend; nullable
   /// so it is populated automatically once the field is added to `translations`.

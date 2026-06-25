@@ -25,10 +25,12 @@ PathAreaStepsDto _$PathAreaStepsDtoFromJson(Map<String, dynamic> json) =>
       progress: PathAreaProgressDto.fromJson(
         json['progress'] as Map<String, dynamic>,
       ),
-      currentStepId: json['current_step_id'] as String,
-      activeTimeframe: PathActiveTimeframeDto.fromJson(
-        json['active_timeframe'] as Map<String, dynamic>,
-      ),
+      currentStepId: _nullableIdFromJson(json['current_step_id']),
+      activeTimeframe: json['active_timeframe'] == null
+          ? null
+          : PathActiveTimeframeDto.fromJson(
+              json['active_timeframe'] as Map<String, dynamic>,
+            ),
       groups: (json['groups'] as List<dynamic>)
           .map((e) => PathGroupDto.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -54,7 +56,7 @@ Map<String, dynamic> _$PathAreaStepsDtoToJson(PathAreaStepsDto instance) =>
 
 PathPercorsoDto _$PathPercorsoDtoFromJson(Map<String, dynamic> json) =>
     PathPercorsoDto(
-      id: json['id'] as String,
+      id: _idFromJson(json['id']),
       internalName: json['internal_name'] as String,
       hasProgressiveSteps: json['has_progressive_steps'] as bool,
     );
@@ -93,7 +95,7 @@ Map<String, dynamic> _$PathActiveTimeframeDtoToJson(
 ) => <String, dynamic>{'id': instance.id, 'sort': instance.sort};
 
 PathGroupDto _$PathGroupDtoFromJson(Map<String, dynamic> json) => PathGroupDto(
-  id: json['id'] as String,
+  id: _idFromJson(json['id']),
   sort: (json['sort'] as num).toInt(),
   isPercorsoMainTab: json['is_percorso_main_tab'] as bool,
   showLimitedStepsValue: (json['show_limited_steps_value'] as num?)?.toInt(),
@@ -124,7 +126,7 @@ Map<String, dynamic> _$PathGroupDtoToJson(PathGroupDto instance) =>
     };
 
 PathStepDto _$PathStepDtoFromJson(Map<String, dynamic> json) => PathStepDto(
-  id: json['id'] as String,
+  id: _idFromJson(json['id']),
   sort: (json['sort'] as num).toInt(),
   timeframe: PathTimeframeDto.fromJson(
     json['timeframe'] as Map<String, dynamic>,
@@ -209,7 +211,7 @@ Map<String, dynamic> _$PathStepAssetDtoToJson(PathStepAssetDto instance) =>
 PathTranslationDto _$PathTranslationDtoFromJson(Map<String, dynamic> json) =>
     PathTranslationDto(
       languagesCode: json['languages_code'] as String,
-      title: json['title'] as String,
+      title: json['title'] as String?,
       description: json['description'] as String?,
     );
 

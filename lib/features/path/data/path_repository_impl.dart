@@ -104,13 +104,19 @@ class PathRepositoryImpl implements PathRepository {
   }
 
   PathAreaDetail _mapAreaStepsDto(PathAreaStepsDto dto, AppLocalizations l10n) {
-    final mainGroup = dto.groups.firstWhere(
-      (g) => g.isPercorsoMainTab,
-      orElse: () => dto.groups.first,
-    );
+    // Pick the main tab group; tolerate areas that expose no group at all
+    // (200 with an empty `groups`) instead of throwing on `.first`.
+    PathGroupDto? mainGroup;
+    for (final g in dto.groups) {
+      if (g.isPercorsoMainTab) {
+        mainGroup = g;
+        break;
+      }
+    }
+    mainGroup ??= dto.groups.isNotEmpty ? dto.groups.first : null;
 
     final stepsByTimeframe = <int, List<PathStepDto>>{};
-    for (final step in mainGroup.steps) {
+    for (final step in mainGroup?.steps ?? const <PathStepDto>[]) {
       stepsByTimeframe
           .putIfAbsent(step.timeframe.id, () => <PathStepDto>[])
           .add(step);
