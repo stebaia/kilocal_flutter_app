@@ -703,6 +703,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'completed at {percent}%'**
   String pathCompletedPercent(int percent);
+
+  /// No description provided for @pathStepContentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get pathStepContentTitle;
+
+  /// No description provided for @pathStepComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete activity'**
+  String get pathStepComplete;
+
+  /// No description provided for @pathStepLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get pathStepLocked;
+
+  /// No description provided for @pathStepCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get pathStepCurrent;
+
+  /// No description provided for @pathStepCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get pathStepCompleted;
+
+  /// No description provided for @pathStepStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Started'**
+  String get pathStepStarted;
+
+  /// No description provided for @pathAreaProgressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your path'**
+  String get pathAreaProgressLabel;
+
+  /// No description provided for @pathMaterialsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra materials'**
+  String get pathMaterialsTitle;
+
+  /// No description provided for @pathMaterialsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Useful resources for your path'**
+  String get pathMaterialsSubtitle;
+
+  /// No description provided for @pathTimeframeStepsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 activity} other{{count} activities}}'**
+  String pathTimeframeStepsCount(int count);
+
+  /// No description provided for @pathTimeframeLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked'**
+  String get pathTimeframeLocked;
+
+  /// No description provided for @pathTimeframeCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get pathTimeframeCurrent;
+
+  /// No description provided for @pathAreaLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This path is not available yet.'**
+  String get pathAreaLocked;
 }
 
 class _AppLocalizationsDelegate

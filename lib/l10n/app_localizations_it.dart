@@ -327,4 +327,51 @@ class AppLocalizationsIt extends AppLocalizations {
   String pathCompletedPercent(int percent) {
     return 'completato al $percent%';
   }
+
+  @override
+  String get pathStepContentTitle => 'Attività';
+
+  @override
+  String get pathStepComplete => 'Completa attività';
+
+  @override
+  String get pathStepLocked => 'Bloccato';
+
+  @override
+  String get pathStepCurrent => 'Corrente';
+
+  @override
+  String get pathStepCompleted => 'Completato';
+
+  @override
+  String get pathStepStarted => 'Iniziato';
+
+  @override
+  String get pathAreaProgressLabel => 'Il tuo percorso';
+
+  @override
+  String get pathMaterialsTitle => 'Materiali extra';
+
+  @override
+  String get pathMaterialsSubtitle => 'Risorse utili per il tuo percorso';
+
+  @override
+  String pathTimeframeStepsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count attività',
+      one: '1 attività',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pathTimeframeLocked => 'Bloccato';
+
+  @override
+  String get pathTimeframeCurrent => 'In corso';
+
+  @override
+  String get pathAreaLocked => 'Questo percorso non è ancora disponibile.';
 }

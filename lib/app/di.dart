@@ -22,6 +22,7 @@ import '../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../features/path/data/path_repository_impl.dart';
 import '../features/path/domain/path_repository.dart';
 import '../features/path/presentation/cubit/path_cubit.dart';
+import '../features/path/presentation/cubit/path_detail_cubit.dart';
 import '../features/settings/data/settings_api.dart';
 import '../features/splash/presentation/cubit/splash_cubit.dart';
 import '../features/user/data/user_api.dart';
@@ -105,6 +106,9 @@ void configureDependencies() {
   );
   getIt.registerFactory<PathCubit>(
     () => PathCubit(pathRepository: getIt<PathRepository>()),
+  );
+  getIt.registerFactory<PathDetailCubit>(
+    () => PathDetailCubit(pathRepository: getIt<PathRepository>()),
   );
 
   // --- Feature: Benefits ---

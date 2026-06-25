@@ -141,5 +141,23 @@
     "placeholders": {
       "percent": {"type": "int"}
     }
-  }
+  },
+  "pathStepContentTitle": "Activity",
+  "pathStepComplete": "Complete activity",
+  "pathStepLocked": "Locked",
+  "pathStepCurrent": "Current",
+  "pathStepCompleted": "Completed",
+  "pathStepStarted": "Started",
+  "pathAreaProgressLabel": "Your path",
+  "pathMaterialsTitle": "Extra materials",
+  "pathMaterialsSubtitle": "Useful resources for your path",
+  "pathTimeframeStepsCount": "{count, plural, =1{1 activity} other{{count} activities}}",
+  "@pathTimeframeStepsCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "pathTimeframeLocked": "Locked",
+  "pathTimeframeCurrent": "In progress",
+  "pathAreaLocked": "This path is not available yet."
 }

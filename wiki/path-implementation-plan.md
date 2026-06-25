@@ -249,51 +249,226 @@ schermata di dettaglio (lista step al tap su una card). Stato: **bloccato su 2 d
 ```
 
 **1. group → area — RISOLTA via endpoint REST di dettaglio (opzione c).** Daniele sta sistemando
-i permessi di `percorsi.root`, ma in parallelo propone un endpoint dettaglio dedicato (probabile
-`GET /path/me/{area}`) che ritorna tutto già pronto. **Shape proposto** (base di partenza,
-confermato lato client):
-```json
+i permessi di `percorsi.root`, ma in parallelo fornisce un endpoint dettaglio dedicato.
+
+> ✅ **URL definitivo (confermato dal backend):** `GET /path/me/areas/{area}/steps` (bearer token).
+> `{area}` = chiave area pulita (`allenamento`/`alimentazione`/`benessere`/`integrazione`). Ritorna
+> tutto già pronto (groups + steps con stato fatto/non fatto).
+
+#### Shape REALE — VERIFICATO su staging col token reale (2026-06-23)
+
+Probe `GET /path/me/areas/allenamento/steps` → **200**. Sample completo salvato in
+[`wiki/samples/path-area-steps-allenamento.json`](samples/path-area-steps-allenamento.json).
+Struttura reale (più ricca di quella proposta — ci sono `current_step_id` + `active_timeframe`
+top-level e gli step hanno già `asset`/`is_current`/`locked`):
+```jsonc
 {
   "data": {
     "area": "allenamento",
-    "percorso": { "id": "26", "internal_name": "allenamento~defence~f", "has_progressive_steps": true },
-    "progress": { "completed": 1, "total": 2, "percent": 50 },
+    "percorso": { "id": "27", "internal_name": "allenamento~tipo-4-m~m", "has_progressive_steps": true },
+    "progress": { "completed": 5, "total": 27, "percent": 19 },
+    "current_step_id": 95,                       // = lo step con is_current:true (no doppia lettura user_details)
+    "active_timeframe": { "id": 3, "sort": 3 },
     "groups": [
       {
-        "id": "42",
-        "sort": 1,
-        "is_percorso_main_tab": true,
-        "show_limited_steps_value": null,
-        "translations": [{ "languages_code": "it-IT", "title": "..." }],
+        "id": "42", "sort": 1,
+        "is_percorso_main_tab": true,            // group "tab principale" (gli step veri)
+        "show_limited_steps_value": 2,
+        "icon": { "id": "<file-uuid>", "type": "image/svg+xml", ... },
+        "tools": ["timer", "reminder"],
+        "categories": [...],
+        "translations": [{ "languages_code": "it-IT", "title": "Allenamento" }],
         "steps": [
           {
-            "id": "step-uuid",
-            "sort": 1,
-            "timeframe": { "id": 1, "sort": 1 },
-            "translations": [{ "languages_code": "it-IT", "title": "..." }],
-            "started": true,
-            "completed": false,
-            "started_on": "2026-06-01T08:00:00",
-            "completed_on": null
+            "id": "1", "sort": 1,
+            "timeframe": { "id": 1, "sort": 1, "translations": [{ "languages_code": "it-IT", "title": "1° mese" }] },
+            "translations": [{ "languages_code": "it-IT", "title": "settimana 1 - allenamento 1" }],
+            "asset": {
+              "asset_is_video": true,
+              "vimeo_url": "https://vimeo.com/1120185037",
+              "default_asset": null, "mobile_asset": null, "mobile_resolution": "md",
+              "video": null, "translations": []
+            },
+            "started": true, "completed": true,
+            "started_on": "2025-10-17T15:14:41", "completed_on": "2026-03-02T17:02:41",
+            "is_current": false, "locked": false
           }
+          // ... 27 step in totale
         ]
-      }
+      },
+      { "id": "43", "sort": 2, "is_percorso_main_tab": false, "translations": [{ "title": "Materiali" }], "steps": [] }
     ]
   }
 }
 ```
 
-**Campi aggiuntivi chiesti al client (dal Figma del dettaglio, [[percorso-read]]):** Daniele si è
-offerto di aggiungere altri campi comodi → richiesti:
-- **`asset`** dello step (id/url immagine) — le card contenuto hanno la foto in testa.
-- **sottotitolo/preview** dello step oltre al `title` — in lista ogni step ha titolo + riga sotto.
-- a livello step un **`is_current`/`locked`** per evidenziare lo step attivo e i bloccati (oggi si
-  ricava da `percorso_<area>_curr_step` in `user_details`; averlo nell'endpoint evita la doppia
-  lettura).
+**Fatti reali dal sample (allenamento, utente ca0d6833…):**
+- **2 group**, NON i "mesi": `Allenamento` (`is_percorso_main_tab:true`, 27 step) e `Materiali`
+  (`false`, 0 step). → la lista a "mesi" del Figma **NON è data dai group**.
+- **Le righe "1°/2°/3° mese" del Figma = i `timeframe`** degli step del group principale. Conteggi
+  reali: `1° mese` 5/9, `2° mese` 0/10, `3° mese` 0/8. Titolo riga = `timeframe.translations.title`.
+  → **lista = raggruppare `groups[is_percorso_main_tab].steps[]` per `step.timeframe.id`**, % per gruppo.
+- Tutti i campi extra richiesti **ci sono**: `asset`, `is_current`, `locked`, `started/completed`+date.
+- `is_current` (1 solo step, id 95) **combacia** con `current_step_id` top-level → niente più lettura
+  da `percorso_<area>_curr_step` in `user_details`.
+- ⚠️ **`asset` è video-oriented**: ha `asset_is_video`, `vimeo_url`, `default_asset`, `mobile_asset`,
+  `mobile_resolution`, `video`. Nel dataset allenamento **tutti e 27 hanno `vimeo_url`** e 0 hanno
+  `default_asset`/`mobile_asset`. → l'"immagine grande" del Figma per allenamento è un **video Vimeo**;
+  il DTO deve gestire sia asset immagine (`default_asset`/`mobile_asset`) sia video (`vimeo_url`/`video`).
+- `group` ha anche `icon`, `tools` (`["timer","reminder"]`), `categories`, `show_limited_steps_value`.
+- ⚠️ **NULLABILITÀ (bug trovato in run reale 2026-06-23):** il group `Materiali`
+  (`is_percorso_main_tab:false`) ha **`tools: null`**, `show_limited_steps_value` può essere assente,
+  e `categories` può contenere oggetti complessi o essere null. → nel DTO `tools`,
+  `showLimitedStepsValue`, `categories`, `icon` DEVONO essere **nullable**, altrimenti
+  `json_serializable` lancia `as List<dynamic>` su null e la UI mostra "qualcosa è andato storto".
+  Tutti gli `id` (percorso/group/step/current_step_id) sono **stringhe** nel JSON HTTP; solo
+  `timeframe.id`/`active_timeframe.id` sono int.
 
-> `groups[].steps[]` con `started`/`completed`/date copre già la lista. **Prossimo passo:** ricevere
-> l'URL definitivo dell'endpoint dettaglio + i campi extra → scaffold DTO + schermata dettaglio
-> (secondo PR). Cablare `complete` col body sopra.
+> ✅ **Tutto verificato. Niente più incognite di shape.** **Prossimo passo:** scaffold DTO
+> (`PathAreaStepsDto` + nested) + schermata dettaglio (secondo PR): lista = step raggruppati per
+> `timeframe`, tap step → contenuto (asset video/immagine + title + content). Cablare `complete`
+> con body `{"percorsoInternalName": "<area>"}`.
+
+#### Convenzione LOCK / stato attivo — RISPOSTA backend (2026-06-23)
+
+Il backend ha confermato dove leggere lock e stato attivo (risolve il punto 2 di
+[`messaggio-daniele-path-dettaglio.md`](messaggio-daniele-path-dettaglio.md)):
+
+| Concetto | Campo autoritativo |
+|---|---|
+| Lucchetto sul **mese** | `timeframes[].locked` |
+| Mese **attivo** | `timeframes[].is_current` |
+| Lucchetto sullo **step** | `step.locked` |
+| Step **attivo** | `step.is_current` |
+| **Area intera** bloccata | `access.percorso_locked` |
+
+⚠️ **Discrepanza con il sample del 2026-06-23:** nel sample reale di staging questi nuovi
+contenitori (`timeframes[]` top-level + blocco `access`) **non esistono ancora** — c'è solo
+`step.timeframe` annidato e `step.locked`/`step.is_current` (tutti `false` nei dati reali). La
+risposta del backend descrive lo shape **futuro**. Cablato lato client in modo tollerante:
+- DTO: `PathAccessDto.percorsoLocked` (`access.percorso_locked`), `PathAreaStepsDto.timeframes`
+  (top-level, nullable), `PathTimeframeDto.locked`/`isCurrent` (nullable). Reggono sia il vecchio
+  sia il nuovo shape.
+- `PathRepositoryImpl._mapAreaStepsDto`: legge lock/active del mese dal top-level `timeframes[]`
+  quando presente, altrimenti fallback al `step.timeframe` annidato; `PathAreaDetail.isLocked`
+  da `access.percorso_locked`. Domain: `PathTimeframeGroup.isLocked`/`isCurrent`,
+  `PathAreaDetail.isLocked`.
+- **Da verificare su staging quando il backend pubblica il nuovo shape:** che `timeframes[]` e
+  `access` arrivino popolati; la Ui del lucchetto mese/step e dell'area bloccata.
+
+### Mappatura UI dal Figma del dettaglio (2026-06-23)
+
+Figma del dettaglio area (`Screenshot 2026-06-23`, es. "Allenamento"). Due schermate:
+
+**Lista (PAGINA AREA):**
+- Header back + titolo area con icona.
+- **Card riepilogo area** in alto: icona, label area, barra progresso `22/60` + `70% completato`
+  → dato = **`data.progress`** dell'endpoint `GET /path/me/areas/{area}/steps` (NON `/path/me/progress`).
+- Lista di righe con: **badge % a sinistra** (es. 25%, 0%), **titolo** ("1° mese", "2° mese",
+  "3° mese", + "Materiali"), **chevron `>`**.
+  - ✅ **RISOLTO sui dati reali (2026-06-23): ogni riga = un `timeframe`**, NON un group. Si
+    raggruppano gli `steps[]` del group `is_percorso_main_tab:true` per `step.timeframe.id`;
+    titolo riga = `timeframe.translations.title` (es. "1° mese"); % = step completati/totali del
+    timeframe. (Verificato: allenamento ha 3 timeframe — 5/9, 0/10, 0/8.) Il group `Materiali`
+    (`is_percorso_main_tab:false`, 0 step) è un'eventuale sezione a parte, non un "mese".
+
+### Stringhe localizzabili sotto `translations` — DECISO: lasciate nidificate (2026-06-23)
+
+Le stringhe localizzabili stanno quasi sempre dentro `translations` (formato nativo Directus per il
+multilingua). Il backend si è offerto di **imploderle** (appiattirle inline) visto che oggi c'è una
+sola lingua. **Deciso: lasciarle sotto `translations`** (nessuna implosione lato backend). Motivi:
+- È il formato nativo Directus; imploderle sarebbe una trasformazione custom che può divergere tra
+  endpoint e va mantenuta.
+- L'app supporta già i18n (default `it`, fallback `en`) → con `translations` il contratto non cambia
+  quando si aggiunge una seconda lingua; con l'implosione si dovrebbe tornare indietro.
+- Costo client banale e **pattern già consolidato**: `home_repository_impl.dart` legge i `curr_step`
+  con `translations { title }`. Nel DTO si prende il primo elemento (o quello che matcha
+  `languages_code`).
+
+### ⚠️ TRABOCCHETTO nomenclatura — tre concetti simili, NON intercambiabili
+
+Il backend usa nomi quasi identici per cose diverse. Da tenere bene a mente nel mapping DTO:
+
+| Dove | Campo | Esempio valore | Cos'è |
+|------|-------|----------------|-------|
+| body di `POST .../complete` | `percorsoInternalName` (camelCase) | `"allenamento"` | **chiave area "pulita"**, una delle 3 root a step |
+| `/path/me/progress` → `data.areas` | chiave dell'oggetto | `"allenamento"` | stessa chiave area pulita (= `root.internal_name` concettuale) |
+| dettaglio area → `data.percorso.internal_name` | `internal_name` (snake_case) | `"allenamento~tipo-4-m~m"` (valore reale dal sample) | **identificativo del percorso fisico** (con suffissi variante/gender), ≠ chiave area |
+
+→ Il valore da mandare a `complete` è la **chiave area** (`allenamento`/`alimentazione`/`benessere`),
+**non** il `percorso.internal_name` con i tilde. Non confonderli in fase di mapping: stesso prefisso,
+semantica diversa. (Confermato nel thread con Daniele, 2026-06-22 — lui stesso ha riconosciuto
+l'incoerenza: `internalName` da una parte, `area` dall'altra, `internal_name` ancora un'altra cosa.)
+
+## PR 2 — Dettaglio area: piano operativo (2026-06-23)
+
+Secondo PR: schermata di **dettaglio area** (tap su una card del percorso → lista step di
+quell'area, poi tap su step → contenuto). Contratto API già **verificato sui dati reali** (vedi
+shape sopra + `wiki/samples/path-area-steps-allenamento.json`). Niente più incognite: si scrive.
+
+### Modello dati (lista = step raggruppati per `timeframe`)
+- L'endpoint torna `groups[]`, ma la UI raggruppa per **timeframe**. Il client prende il group con
+  `is_percorso_main_tab == true`, poi raggruppa i suoi `steps[]` per `step.timeframe.id` (ordinati
+  per `timeframe.sort`, e gli step per `sort`). Ogni gruppo-timeframe → una riga (titolo
+  `timeframe.translations.title`, % = completati/totali del timeframe).
+- Il group `Materiali` (`is_percorso_main_tab:false`) è un'eventuale sezione separata, non un "mese".
+
+### Data
+- `data/dto/path_area_steps_dto.dart` (+ `.g.dart`) — `json_serializable`, come `path_progress_dto`.
+  Nested: `PathAreaStepsResponseDto{ data }` → `PathAreaStepsDto{ area, percorso, progress,
+  currentStepId, activeTimeframe, groups }`; `PathPercorsoDto{ id, internalName, hasProgressiveSteps }`;
+  `PathGroupDto{ id, sort, isPercorsoMainTab, showLimitedStepsValue, icon, tools, translations, steps }`;
+  `PathStepDto{ id, sort, timeframe, translations, asset, started, completed, startedOn, completedOn,
+  isCurrent, locked }`; `PathTimeframeDto{ id, sort, translations }`; `PathStepAssetDto{ assetIsVideo,
+  vimeoUrl, defaultAsset, mobileAsset, mobileResolution, video, translations }`.
+  - **translations** nidificate → helper che prende il primo elemento (o match `languages_code`),
+    come già si fa per i `curr_step` in `home_repository_impl.dart`.
+  - **`@JsonKey(name: 'internal_name')`** ecc. per i campi snake_case.
+- `domain/entities/path_area_detail.dart` — entità pulite per la UI: `PathAreaDetail{ area, percorso,
+  completed, total, currentStepId, timeframeGroups: List<PathTimeframeGroup> }`;
+  `PathTimeframeGroup{ timeframeId, title, completed, total, steps }`;
+  `PathStepItem{ id, title, timeframeTitle, asset (PathStepMedia), isCompleted, isStarted, isCurrent,
+  isLocked }`; `PathStepMedia{ isVideo, vimeoUrl, imageUrl }` (imageUrl da `default_asset`/`mobile_asset`
+  via `${Env.baseUrl}/assets/...`, come `home_repository_impl.dart:177`).
+- `domain/path_repository.dart` — aggiungere
+  `Future<PathAreaDetail> fetchAreaSteps({required String area, required AppLocalizations l10n})`
+  e cablare davvero `Future<void> completeStep({required String stepId, required String area})`
+  (oggi stub). `startStep` già verificato (200).
+- `data/path_repository_impl.dart` — `GET /path/me/areas/$area/steps`, mapping DTO→entità con il
+  raggruppamento per timeframe; `POST /path/steps/$stepId/complete` body
+  `{"percorsoInternalName": area}`; `POST /path/steps/$stepId/start`. Error-map `ApiException.fromDio`.
+
+### Presentation
+- `presentation/cubit/path_detail_cubit.dart` (+ `path_detail_state.dart`) — carica `fetchAreaSteps`,
+  espone `completeStep`/`startStep` con ricarica ottimistica. Stati initial/loading/loaded/error
+  come `PathCubit`.
+- `presentation/path_area_detail_screen.dart` — `AppHeader` (titolo area) + card riepilogo
+  (`progress`) + lista per timeframe (riga = titolo timeframe + % + chevron → espande/naviga agli step).
+- `presentation/path_step_screen.dart` — contenuto step: media in cima (immagine **o** player Vimeo
+  se `asset.isVideo`), titolo, corpo. Pulsante "completa" → `completeStep`.
+- Widget: `widgets/path_timeframe_row.dart`, `widgets/path_step_tile.dart` (badge stato
+  done/current/locked da `isCurrent`/`locked`/`completed`).
+- Navigazione: rotta `path/:area` (e `path/:area/step/:stepId`) in GoRouter; tap sulla card area in
+  `path_screen.dart` naviga passando `PathArea.id` (= chiave area pulita).
+
+### DI
+- `lib/app/di.dart` — registrare `PathDetailCubit` (factory) iniettando `PathRepository`
+  (+ `UserCubit` se serve `myId`; ma l'endpoint è `/me`, quindi probabilmente non serve).
+
+### l10n
+- Nuove stringhe IT/EN: titolo schermata dettaglio, label "completa step", stato bloccato, ecc.
+  (template EN, default IT — vedi convenzione i18n del progetto).
+
+### Verifica
+1. `dart analyze` + `dart format` (agent `dart-linter`).
+2. Run manuale: aprire allenamento → 3 righe "1°/2°/3° mese" con % 56/0/0, step con video Vimeo,
+   step `is_current` (id 95) evidenziato.
+3. `POST .../complete` su uno step non completato → 200, progress si aggiorna.
+
+> ⚠️ **Vimeo:** allenamento ha solo `vimeo_url` (0 immagini). Serve decidere il player (es.
+> `webview`/embed Vimeo) — possibile dipendenza nuova in `pubspec.yaml`. Altre aree potrebbero usare
+> `default_asset`/`mobile_asset` (immagini): verificare con un probe su `alimentazione`/`benessere`
+> prima di assumere "tutto video".
 
 ## Related
 - [[percorso-read]]

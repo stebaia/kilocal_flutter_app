@@ -12,7 +12,11 @@ import '../features/benefits/presentation/benefits_screen.dart';
 import '../features/diary/presentation/diary_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
+import '../features/path/domain/entities/path_area_detail.dart';
+import '../features/path/presentation/path_area_detail_screen.dart';
 import '../features/path/presentation/path_screen.dart';
+import '../features/path/presentation/path_step_screen.dart';
+import '../features/path/presentation/path_timeframe_steps_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/momenti/presentation/momenti_screen.dart';
@@ -66,6 +70,33 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/path',
               builder: (context, state) => const PathScreen(),
+              routes: [
+                GoRoute(
+                  path: ':area',
+                  builder: (context, state) =>
+                      PathAreaDetailScreen(area: state.pathParameters['area']!),
+                  routes: [
+                    GoRoute(
+                      path: 'timeframe/:timeframeId',
+                      builder: (context, state) => PathTimeframeStepsScreen(
+                        area: state.pathParameters['area']!,
+                        timeframeId: int.parse(
+                          state.pathParameters['timeframeId']!,
+                        ),
+                        group: state.extra as PathTimeframeGroup?,
+                      ),
+                    ),
+                    GoRoute(
+                      path: 'step/:stepId',
+                      builder: (context, state) => PathStepScreen(
+                        area: state.pathParameters['area']!,
+                        stepId: state.pathParameters['stepId']!,
+                        step: state.extra as PathStepItem?,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ],
         ),

@@ -26,6 +26,7 @@ abstract final class AppColors {
   static const Color textPrimary = ink;
   static const Color textSecondary = Color(0xFF6B6B72);
   static const Color divider = Color(0xFFEDEDED);
+  static const Color dividerStrong = Color(0xFF606060);
   static const Color unreadBackground = Color(0xFFFFF9FA);
 
   /// Signature vertical brand gradient (top -> bottom), used full-bleed behind

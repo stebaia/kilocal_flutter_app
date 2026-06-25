@@ -170,9 +170,7 @@ class _PathContent extends StatelessWidget {
                         assetName: area.assetName,
                         completed: area.completed,
                         total: area.total,
-                        onTap: () {
-                          // TODO: navigate to area detail when the route is added.
-                        },
+                        onTap: () => context.push('/path/${area.id}'),
                       ),
                     )
                     .toList(),

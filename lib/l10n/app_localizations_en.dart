@@ -325,4 +325,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String pathCompletedPercent(int percent) {
     return 'completed at $percent%';
   }
+
+  @override
+  String get pathStepContentTitle => 'Activity';
+
+  @override
+  String get pathStepComplete => 'Complete activity';
+
+  @override
+  String get pathStepLocked => 'Locked';
+
+  @override
+  String get pathStepCurrent => 'Current';
+
+  @override
+  String get pathStepCompleted => 'Completed';
+
+  @override
+  String get pathStepStarted => 'Started';
+
+  @override
+  String get pathAreaProgressLabel => 'Your path';
+
+  @override
+  String get pathMaterialsTitle => 'Extra materials';
+
+  @override
+  String get pathMaterialsSubtitle => 'Useful resources for your path';
+
+  @override
+  String pathTimeframeStepsCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count activities',
+      one: '1 activity',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get pathTimeframeLocked => 'Locked';
+
+  @override
+  String get pathTimeframeCurrent => 'In progress';
+
+  @override
+  String get pathAreaLocked => 'This path is not available yet.';
 }
