@@ -347,6 +347,42 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pathStepStarted => 'Iniziato';
 
   @override
+  String pathStepVideoDuration(String duration) {
+    return '$duration min';
+  }
+
+  @override
+  String get commonClose => 'Chiudi';
+
+  @override
+  String get pathActivitiesTitle => 'Attività';
+
+  @override
+  String pathActivitiesTotal(int count) {
+    return '$count totali';
+  }
+
+  @override
+  String get pathTimerSetTitle => 'Imposta Timer';
+
+  @override
+  String get pathTimerHours => 'Ore';
+
+  @override
+  String get pathTimerMinutes => 'Minuti';
+
+  @override
+  String get pathTimerSeconds => 'Secondi';
+
+  @override
+  String get pathTimerStart => 'Avvia timer';
+
+  @override
+  String pathTimerPill(String time) {
+    return 'Timer: $time';
+  }
+
+  @override
   String get pathAreaProgressLabel => 'Il tuo percorso';
 
   @override

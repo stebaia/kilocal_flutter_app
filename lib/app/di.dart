@@ -20,6 +20,8 @@ import '../features/notifications/data/notifications_repository_impl.dart';
 import '../features/notifications/domain/notifications_repository.dart';
 import '../features/notifications/presentation/cubit/notifications_cubit.dart';
 import '../features/path/data/path_repository_impl.dart';
+import '../features/path/data/system_timer_service.dart';
+import '../features/path/data/vimeo_oembed_service.dart';
 import '../features/path/domain/path_repository.dart';
 import '../features/path/presentation/cubit/path_cubit.dart';
 import '../features/path/presentation/cubit/path_detail_cubit.dart';
@@ -110,6 +112,8 @@ void configureDependencies() {
   getIt.registerFactory<PathDetailCubit>(
     () => PathDetailCubit(pathRepository: getIt<PathRepository>()),
   );
+  getIt.registerLazySingleton<VimeoOembedService>(() => VimeoOembedService());
+  getIt.registerLazySingleton<SystemTimerService>(() => SystemTimerService());
 
   // --- Feature: Benefits ---
   getIt.registerLazySingleton<BenefitsRepository>(

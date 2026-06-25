@@ -73,11 +73,19 @@ class PathStepItem {
     required this.isStarted,
     required this.isCurrent,
     required this.isLocked,
+    this.description,
   });
 
   final String id;
   final String title;
   final String timeframeTitle;
+
+  /// Long localized body shown on the step detail screen.
+  ///
+  /// Not yet exposed by the backend (step `translations` only carry `title`),
+  /// so it is currently always `null`; the detail screen renders nothing in
+  /// its place until the field is populated.
+  final String? description;
   final PathStepMedia asset;
   final bool isCompleted;
   final bool isStarted;

@@ -273,7 +273,11 @@ class PathStepAssetDto {
 
 @JsonSerializable()
 class PathTranslationDto {
-  const PathTranslationDto({required this.languagesCode, required this.title});
+  const PathTranslationDto({
+    required this.languagesCode,
+    required this.title,
+    this.description,
+  });
 
   factory PathTranslationDto.fromJson(Map<String, dynamic> json) =>
       _$PathTranslationDtoFromJson(json);
@@ -282,6 +286,10 @@ class PathTranslationDto {
   final String languagesCode;
 
   final String title;
+
+  /// Long localized body for a step. Not yet exposed by the backend; nullable
+  /// so it is populated automatically once the field is added to `translations`.
+  final String? description;
 
   Map<String, dynamic> toJson() => _$PathTranslationDtoToJson(this);
 }
@@ -306,11 +314,18 @@ extension PathTranslationDtoExtension on List<PathTranslationDto> {
   /// available translation as a fallback.
   String? titleFor(String languageCode) {
     if (isEmpty) return null;
-    final match = firstWhere(
-      (t) =>
-          t.languagesCode.toLowerCase().startsWith(languageCode.toLowerCase()),
-      orElse: () => first,
-    );
-    return match.title;
+    return _matchFor(languageCode).title;
   }
+
+  /// Returns the long body for the matching language, or `null` when the
+  /// backend has not populated it yet.
+  String? descriptionFor(String languageCode) {
+    if (isEmpty) return null;
+    return _matchFor(languageCode).description;
+  }
+
+  PathTranslationDto _matchFor(String languageCode) => firstWhere(
+    (t) => t.languagesCode.toLowerCase().startsWith(languageCode.toLowerCase()),
+    orElse: () => first,
+  );
 }

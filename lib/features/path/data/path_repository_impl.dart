@@ -172,6 +172,7 @@ class PathRepositoryImpl implements PathRepository {
     AppLocalizations l10n,
   ) {
     final title = dto.translations.titleFor(l10n.localeName) ?? '';
+    final description = dto.translations.descriptionFor(l10n.localeName);
     final asset = dto.asset;
 
     final PathStepMedia media;
@@ -194,6 +195,7 @@ class PathRepositoryImpl implements PathRepository {
       isStarted: dto.started,
       isCurrent: dto.isCurrent,
       isLocked: dto.locked,
+      description: description,
     );
   }
 

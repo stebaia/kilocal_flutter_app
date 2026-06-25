@@ -740,6 +740,66 @@ abstract class AppLocalizations {
   /// **'Started'**
   String get pathStepStarted;
 
+  /// No description provided for @pathStepVideoDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'{duration} min'**
+  String pathStepVideoDuration(String duration);
+
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// No description provided for @pathActivitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activities'**
+  String get pathActivitiesTitle;
+
+  /// No description provided for @pathActivitiesTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} total'**
+  String pathActivitiesTotal(int count);
+
+  /// No description provided for @pathTimerSetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Timer'**
+  String get pathTimerSetTitle;
+
+  /// No description provided for @pathTimerHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours'**
+  String get pathTimerHours;
+
+  /// No description provided for @pathTimerMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get pathTimerMinutes;
+
+  /// No description provided for @pathTimerSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'Seconds'**
+  String get pathTimerSeconds;
+
+  /// No description provided for @pathTimerStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start timer'**
+  String get pathTimerStart;
+
+  /// No description provided for @pathTimerPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer: {time}'**
+  String pathTimerPill(String time);
+
   /// No description provided for @pathAreaProgressLabel.
   ///
   /// In en, this message translates to:

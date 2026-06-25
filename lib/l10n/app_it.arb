@@ -107,6 +107,37 @@
   "pathStepCurrent": "Corrente",
   "pathStepCompleted": "Completato",
   "pathStepStarted": "Iniziato",
+  "pathStepVideoDuration": "{duration} min",
+  "@pathStepVideoDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "commonClose": "Chiudi",
+  "pathActivitiesTitle": "Attività",
+  "pathActivitiesTotal": "{count} totali",
+  "@pathActivitiesTotal": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pathTimerSetTitle": "Imposta Timer",
+  "pathTimerHours": "Ore",
+  "pathTimerMinutes": "Minuti",
+  "pathTimerSeconds": "Secondi",
+  "pathTimerStart": "Avvia timer",
+  "pathTimerPill": "Timer: {time}",
+  "@pathTimerPill": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "pathAreaProgressLabel": "Il tuo percorso",
   "pathMaterialsTitle": "Materiali extra",
   "pathMaterialsSubtitle": "Risorse utili per il tuo percorso",

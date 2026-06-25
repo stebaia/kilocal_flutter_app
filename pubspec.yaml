@@ -20,6 +20,7 @@ dependencies:
   flutter_svg: ^2.1.0
   get_it: ^9.2.1
   go_router: ^17.3.0
+  live_activities: ^2.4.9
   google_fonts: ^6.1.0
   intl: ^0.20.2
   json_annotation: ^4.12.0
@@ -37,6 +38,14 @@ dev_dependencies:
   retrofit_generator: ^10.2.6
   build_runner: ^2.15.0
   json_serializable: ^6.14.0
+
+# Local fork of live_activities 2.4.9 with one fix: the upstream iOS plugin has
+# a trailing comma in a function call (LiveActivitiesPlugin.swift:234) that only
+# compiles on Xcode 16.3+/Swift 6.1. We build on Xcode 16.2, so the override
+# points at a patched copy in third_party/. Remove once upstream ships the fix.
+dependency_overrides:
+  live_activities:
+    path: third_party/live_activities
 
 flutter:
   generate: true

@@ -1,1 +1,6 @@
 include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    # Vendored fork of live_activities (patched for Xcode 16.2); not our code.
+    - third_party/**
