@@ -293,6 +293,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get benefitsEmpty => 'No benefits available';
 
   @override
+  String get momentiTitle => 'Moments';
+
+  @override
+  String get momentiEmpty => 'No moments available';
+
+  @override
   String get diaryCompleted => 'Completed';
 
   @override

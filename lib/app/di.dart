@@ -16,6 +16,9 @@ import '../features/benefits/presentation/cubit/benefits_cubit.dart';
 import '../features/home/data/home_repository_impl.dart';
 import '../features/home/domain/home_repository.dart';
 import '../features/home/presentation/cubit/home_cubit.dart';
+import '../features/momenti/data/momenti_repository_impl.dart';
+import '../features/momenti/domain/momenti_repository.dart';
+import '../features/momenti/presentation/cubit/momenti_cubit.dart';
 import '../features/notifications/data/notifications_repository_impl.dart';
 import '../features/notifications/domain/notifications_repository.dart';
 import '../features/notifications/presentation/cubit/notifications_cubit.dart';
@@ -121,6 +124,14 @@ void configureDependencies() {
   );
   getIt.registerFactory<BenefitsCubit>(
     () => BenefitsCubit(benefitsRepository: getIt<BenefitsRepository>()),
+  );
+
+  // --- Feature: Momenti ---
+  getIt.registerLazySingleton<MomentiRepository>(
+    () => MomentiRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<MomentiCubit>(
+    () => MomentiCubit(momentiRepository: getIt<MomentiRepository>()),
   );
 
   // --- Feature: Notifications ---

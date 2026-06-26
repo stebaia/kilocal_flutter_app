@@ -33,13 +33,85 @@ class PathAreaTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 165,
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        
         decoration: BoxDecoration(
           gradient: AppColors.brandGradientVertical,
           borderRadius: BorderRadius.circular(AppRadius.lg),
           boxShadow: AppShadows.card,
         ),
-        child: ClipRRect(
+        child: Column(
+          children: [
+            Text(
+                  title,
+                  style: AppTypography.textTheme.titleMedium?.copyWith(
+                    color: AppColors.neutralWhite,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              SizedBox(height: 13,),
+              SizedBox(
+                width: 100,
+                height: 100,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: AppColors.kilokalPink,
+                      ),
+                    ),
+                    OverflowBox(
+                      maxWidth: 200,
+                      maxHeight: 120,
+                      child: PathActionCardImage(
+                        imageUrl: '',
+                        assetName: assetName,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 18,),
+              Row( 
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                  '$completed/$total',
+                  style: AppTypography.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.neutralWhite,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: const BoxDecoration(
+                    color: AppColors.neutralWhite,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: AppIcon(
+                      AppIcons.playSmall,
+                     size: 10,
+                      color: AppColors.accent,
+                    ),
+                  ),
+                ),
+                ],
+              )
+          ],
+        )));
+  }
+}
+        
+         /*ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Stack(
             children: [
@@ -105,5 +177,5 @@ class PathAreaTile extends StatelessWidget {
         ),
       ),
     );
-  }
-}
+  }*/
+

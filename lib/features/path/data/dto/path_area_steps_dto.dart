@@ -303,8 +303,10 @@ class PathTranslationDto {
   /// asset) carry only other fields like `alt_text` and omit `title`.
   final String? title;
 
-  /// Long localized body for a step. Not yet exposed by the backend; nullable
-  /// so it is populated automatically once the field is added to `translations`.
+  /// Long localized body for a step. Exposed by the backend under the
+  /// `content` key (HTML markup); nullable until populated. Kept as
+  /// `description` internally for the rest of the layers.
+  @JsonKey(name: 'content')
   final String? description;
 
   Map<String, dynamic> toJson() => _$PathTranslationDtoToJson(this);

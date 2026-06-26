@@ -81,3 +81,29 @@ class ActionCardIllustration extends StatelessWidget {
     );
   }
 }
+
+class PathActionCardImage extends StatelessWidget {
+  final String imageUrl;
+  final String? assetName;
+
+  const PathActionCardImage({
+    super.key,
+    this.assetName,
+    required this.imageUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // The dumbbell illustration is wider than the others, so keep it smaller
+    // to avoid it overflowing too far past the pink circle.
+    final isLogo = assetName == 'assets/name_logo.png';
+    final size = isLogo ? const Size(130, 90) : const Size(200, 110);
+
+    return Image.asset(
+      assetName!,
+      width: size.width,
+      height: size.height,
+      fit: BoxFit.contain,
+    );
+  }
+}

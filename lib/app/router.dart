@@ -51,7 +51,8 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/survey', builder: (context, state) => const SurveyScreen()),
     GoRoute(
       path: '/momenti/:id',
-      builder: (context, state) => const MomentiScreen(),
+      builder: (context, state) =>
+          MomentiScreen(momentId: state.pathParameters['id']),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

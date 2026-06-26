@@ -212,14 +212,14 @@ PathTranslationDto _$PathTranslationDtoFromJson(Map<String, dynamic> json) =>
     PathTranslationDto(
       languagesCode: json['languages_code'] as String,
       title: json['title'] as String?,
-      description: json['description'] as String?,
+      description: json['content'] as String?,
     );
 
 Map<String, dynamic> _$PathTranslationDtoToJson(PathTranslationDto instance) =>
     <String, dynamic>{
       'languages_code': instance.languagesCode,
       'title': instance.title,
-      'description': instance.description,
+      'content': instance.description,
     };
 
 DirectusFileDto _$DirectusFileDtoFromJson(Map<String, dynamic> json) =>

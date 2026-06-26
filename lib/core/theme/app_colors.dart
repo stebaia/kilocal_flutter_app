@@ -12,6 +12,7 @@ abstract final class AppColors {
   static const Color brandPink = Color(0xFFC7153B);
   static const Color brandCrimson = Color(0xFFFF3D66);
   static const Color coral = Color(0xFFFF5A5A);
+  static const Color kilokalPink = Color(0xFFFF949A);
 
   // --- Neutrals ---
   static const Color neutralWhite = Color(0xFFFFFFFF);

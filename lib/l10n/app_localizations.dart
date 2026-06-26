@@ -644,6 +644,18 @@ abstract class AppLocalizations {
   /// **'No benefits available'**
   String get benefitsEmpty;
 
+  /// No description provided for @momentiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Moments'**
+  String get momentiTitle;
+
+  /// No description provided for @momentiEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No moments available'**
+  String get momentiEmpty;
+
   /// No description provided for @diaryCompleted.
   ///
   /// In en, this message translates to:

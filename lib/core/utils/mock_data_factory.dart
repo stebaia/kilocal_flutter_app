@@ -1,7 +1,6 @@
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../features/home/domain/entities/home_data.dart';
-import '../../features/momenti/domain/entities/momenti_data.dart';
 import '../../features/statistics/domain/entities/area_stat.dart';
 
 /// Centralized factory for localized mock data.
@@ -70,31 +69,5 @@ abstract final class MockDataFactory {
         total: 19,
       ),
     ];
-  }
-
-  static MomentiData momenti(AppLocalizations l10n) {
-    return MomentiData(
-      title: l10n.homeHeroTitle,
-      body: l10n.homeProgress,
-      heroImageUrl: 'https://placehold.co/600x300/e51e4d/ffffff?text=Momenti',
-      meccanica: [
-        MeccanicaItem(
-          day: '${l10n.month1} 1',
-          description: l10n.diaryCompleted,
-        ),
-        MeccanicaItem(day: '${l10n.month1} 2', description: l10n.diaryPending),
-        MeccanicaItem(day: '${l10n.month1} 3', description: l10n.areaTraining),
-        MeccanicaItem(day: '${l10n.month1} 4', description: l10n.areaNutrition),
-        MeccanicaItem(day: '${l10n.month1} 5', description: l10n.areaWellbeing),
-        MeccanicaItem(
-          day: '${l10n.month1} 6',
-          description: l10n.areaIntegration,
-        ),
-        MeccanicaItem(
-          day: '${l10n.month1} 7',
-          description: l10n.statisticsTitle,
-        ),
-      ],
-    );
   }
 }

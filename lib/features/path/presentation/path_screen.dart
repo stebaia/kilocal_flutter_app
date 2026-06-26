@@ -154,15 +154,16 @@ class _PathContent extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.spaceLg),
+              SizedBox(height: 24,),
               // Area cards grid.
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
+                padding: EdgeInsets.zero,
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: AppSpacing.spaceMd,
                 crossAxisSpacing: AppSpacing.spaceMd,
-                childAspectRatio: 0.95,
+                childAspectRatio: 0.76,
                 children: data.areas
                     .map(
                       (area) => PathAreaTile(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -189,15 +190,23 @@ class _StepContent extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              // Long body, shown only once the backend exposes it.
+              // Long body (HTML markup from the backend `content` field),
+              // shown only when populated.
               if (description != null && description.isNotEmpty) ...[
                 const SizedBox(height: AppSpacing.spaceMd),
-                Text(
-                  description,
-                  style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
+                Html(
+                  data: description,
+                  style: {
+                    'body': Style(
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                      color: AppColors.textSecondary,
+                      fontSize: FontSize(
+                        AppTypography.textTheme.bodyMedium?.fontSize ?? 14,
+                      ),
+                      lineHeight: const LineHeight(1.5),
+                    ),
+                  },
                 ),
               ],
               const SizedBox(height: AppSpacing.spaceLg),

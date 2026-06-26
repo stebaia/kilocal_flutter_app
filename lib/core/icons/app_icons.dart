@@ -9,6 +9,7 @@ abstract final class AppIcons {
   static const String benefits = 'benefits';
   static const String popsicle = 'popsicle';
   static const String play = 'play';
+  static const String playSmall = 'play_small';
   static const String chart = 'chart';
   static const String filter = 'filter';
 }
