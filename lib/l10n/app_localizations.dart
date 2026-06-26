@@ -497,8 +497,80 @@ abstract class AppLocalizations {
   /// No description provided for @profileTitle.
   ///
   /// In en, this message translates to:
-  /// **'Profile'**
+  /// **'Your Profile'**
   String get profileTitle;
+
+  /// No description provided for @profileMyTypeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'My Type'**
+  String get profileMyTypeSection;
+
+  /// No description provided for @profileMyTypeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Type 4 - Pear'**
+  String get profileMyTypeValue;
+
+  /// No description provided for @profileCategorySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Section category name'**
+  String get profileCategorySection;
+
+  /// No description provided for @profilePersonalData.
+  ///
+  /// In en, this message translates to:
+  /// **'My personal data'**
+  String get profilePersonalData;
+
+  /// No description provided for @profileMyAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'My account'**
+  String get profileMyAccount;
+
+  /// No description provided for @profileFoodPreferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Food preferences'**
+  String get profileFoodPreferences;
+
+  /// No description provided for @profileNotificationsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get profileNotificationsSection;
+
+  /// No description provided for @profilePushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push notifications'**
+  String get profilePushNotifications;
+
+  /// No description provided for @profilePushNotificationsStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get profilePushNotificationsStatus;
+
+  /// No description provided for @profileSupportSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get profileSupportSection;
+
+  /// No description provided for @profileTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'Tutorial on how to use the app'**
+  String get profileTutorial;
+
+  /// No description provided for @profileContactSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact support'**
+  String get profileContactSupport;
 
   /// Logout action label in the profile screen
   ///

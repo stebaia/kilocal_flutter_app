@@ -218,7 +218,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get benefitsTitle => 'Benefits';
 
   @override
-  String get profileTitle => 'Profile';
+  String get profileTitle => 'Your Profile';
+
+  @override
+  String get profileMyTypeSection => 'My Type';
+
+  @override
+  String get profileMyTypeValue => 'Type 4 - Pear';
+
+  @override
+  String get profileCategorySection => 'Section category name';
+
+  @override
+  String get profilePersonalData => 'My personal data';
+
+  @override
+  String get profileMyAccount => 'My account';
+
+  @override
+  String get profileFoodPreferences => 'Food preferences';
+
+  @override
+  String get profileNotificationsSection => 'Notifications';
+
+  @override
+  String get profilePushNotifications => 'Push notifications';
+
+  @override
+  String get profilePushNotificationsStatus => 'Active';
+
+  @override
+  String get profileSupportSection => 'Support';
+
+  @override
+  String get profileTutorial => 'Tutorial on how to use the app';
+
+  @override
+  String get profileContactSupport => 'Contact support';
 
   @override
   String get profileLogout => 'Log out';
