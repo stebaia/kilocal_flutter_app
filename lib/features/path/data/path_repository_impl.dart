@@ -157,9 +157,13 @@ class PathRepositoryImpl implements PathRepository {
       );
     }).toList();
 
-    final hasMaterials = dto.groups.any(
-      (g) => !g.isPercorsoMainTab && g.translations.isNotEmpty,
-    );
+    PathGroupDto? materialsGroup;
+    for (final g in dto.groups) {
+      if (!g.isPercorsoMainTab && g.translations.isNotEmpty) {
+        materialsGroup = g;
+        break;
+      }
+    }
 
     return PathAreaDetail(
       area: dto.area,
@@ -167,7 +171,8 @@ class PathRepositoryImpl implements PathRepository {
       completed: dto.progress.completed,
       total: dto.progress.total,
       timeframeGroups: timeframeGroups,
-      hasMaterials: hasMaterials,
+      hasMaterials: materialsGroup != null,
+      materialsGroupId: materialsGroup?.id,
       isLocked: dto.access?.percorsoLocked ?? false,
     );
   }

@@ -14,6 +14,8 @@ import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/path/domain/entities/path_area_detail.dart';
 import '../features/path/presentation/path_area_detail_screen.dart';
+import '../features/path/presentation/path_material_detail_screen.dart';
+import '../features/path/presentation/path_materials_screen.dart';
 import '../features/path/presentation/path_screen.dart';
 import '../features/path/presentation/path_step_screen.dart';
 import '../features/path/presentation/path_timeframe_steps_screen.dart';
@@ -94,6 +96,21 @@ final GoRouter appRouter = GoRouter(
                         stepId: state.pathParameters['stepId']!,
                         step: state.extra as PathStepItem?,
                       ),
+                    ),
+                    GoRoute(
+                      path: 'materials/:groupId',
+                      builder: (context, state) => PathMaterialsScreen(
+                        groupId: state.pathParameters['groupId']!,
+                      ),
+                      routes: [
+                        GoRoute(
+                          path: 'detail/:materialId',
+                          builder: (context, state) => PathMaterialDetailScreen(
+                            materialId: state.pathParameters['materialId']!,
+                            categoryTitle: state.extra as String?,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

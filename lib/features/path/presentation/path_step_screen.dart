@@ -309,16 +309,19 @@ class _StepMediaState extends State<_StepMedia> {
     return SizedBox(
       height: _mediaHeight,
       width: double.infinity,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _buildSurface(),
-          // Overlays are hidden once the native player takes over.
-          if (_controller == null) ...[
-            _MediaTopBar(siblings: widget.siblings, step: widget.step),
-            _MediaBottomTools(timerController: widget.timerController),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildSurface(),
+            // Overlays are hidden once the native player takes over.
+            if (_controller == null) ...[
+              _MediaTopBar(siblings: widget.siblings, step: widget.step),
+              _MediaBottomTools(timerController: widget.timerController),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

@@ -432,6 +432,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathMaterialsSubtitle => 'Useful resources for your path';
 
   @override
+  String get pathMaterialAvailable => 'Available';
+
+  @override
+  String get pathMaterialsEmpty => 'No materials available';
+
+  @override
+  String get pathMaterialsFilterAvailable => 'Available';
+
+  @override
+  String get pathMaterialsFilterCompleted => 'Completed';
+
+  @override
+  String get pathMaterialsFilterUnavailable => 'Unavailable';
+
+  @override
   String pathTimeframeStepsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,

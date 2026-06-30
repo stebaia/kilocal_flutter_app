@@ -20,13 +20,16 @@ class DioClient {
     final refreshClient = _baseDio();
 
     _dio.interceptors.addAll([
+      // Logging first: it must observe the raw request/response/error before
+      // any later interceptor (e.g. ErrorInterceptor) can `reject()` and
+      // truncate the error chain, which would hide failures from the logs.
+      if (kDebugMode) const LoggingInterceptor(),
       AuthInterceptor(
         tokenStore: tokenStore,
         refreshClient: refreshClient,
         onAuthExpired: onAuthExpired,
       ),
       const ErrorInterceptor(),
-      if (kDebugMode) const LoggingInterceptor(),
     ]);
   }
 
