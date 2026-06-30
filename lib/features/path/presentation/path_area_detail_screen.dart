@@ -22,39 +22,39 @@ class _AreaPresentation {
   const _AreaPresentation({
     required this.title,
     required this.assetName,
-    required this.icon,
+    required this.iconName,
   });
 
   final String title;
   final String assetName;
-  final IconData icon;
+  final String iconName;
 
   static _AreaPresentation of(String area, AppLocalizations l10n) {
     return switch (area) {
       'allenamento' => _AreaPresentation(
         title: l10n.areaTraining,
         assetName: 'assets/training.png',
-        icon: Icons.fitness_center,
+        iconName: AppIcons.training,
       ),
       'alimentazione' => _AreaPresentation(
         title: l10n.areaNutrition,
         assetName: 'assets/alimentation.png',
-        icon: Icons.restaurant,
+        iconName: AppIcons.food,
       ),
       'benessere' => _AreaPresentation(
         title: l10n.areaWellbeing,
         assetName: 'assets/wellness.png',
-        icon: Icons.spa,
+        iconName: AppIcons.wellness,
       ),
       'integrazione' => _AreaPresentation(
         title: l10n.areaIntegration,
         assetName: 'assets/name_logo.png',
-        icon: Icons.medication,
+        iconName: AppIcons.flash,
       ),
       _ => _AreaPresentation(
         title: area,
         assetName: 'assets/training.png',
-        icon: Icons.fitness_center,
+        iconName: AppIcons.training,
       ),
     };
   }
@@ -159,7 +159,7 @@ class _PathAreaDetailContent extends StatelessWidget {
           assetName: presentation.assetName,
           completed: data.completed,
           total: data.total,
-          icon: presentation.icon,
+          iconName: presentation.iconName,
         ),
         const SizedBox(height: AppSpacing.spaceLg),
         PathSectionHeader(
@@ -188,7 +188,9 @@ class _PathAreaDetailContent extends StatelessWidget {
           PathMaterialsRow(
             title: l10n.pathMaterialsTitle,
             subtitle: l10n.pathMaterialsSubtitle,
-            onTap: () {},
+            onTap: data.materialsGroupId == null
+                ? null
+                : () => _openMaterials(context, data.materialsGroupId!),
           ),
         ],
         const SizedBox(height: AppSpacing.spaceXl),
@@ -207,6 +209,10 @@ class _PathAreaDetailContent extends StatelessWidget {
       '/path/${data.area}/timeframe/${group.timeframeId}',
       extra: group,
     );
+  }
+
+  void _openMaterials(BuildContext context, String groupId) {
+    context.push('/path/${data.area}/materials/$groupId');
   }
 }
 
@@ -228,7 +234,7 @@ class _AreaLockedBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.lock, size: 20, color: AppColors.textSecondary),
+          const AppIcon(AppIcons.lock, size: 20),
           const SizedBox(width: AppSpacing.spaceSm),
           Expanded(
             child: Text(

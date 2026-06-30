@@ -7,6 +7,7 @@ class PathAreaDetail {
     required this.total,
     required this.timeframeGroups,
     this.hasMaterials = false,
+    this.materialsGroupId,
     this.isLocked = false,
   });
 
@@ -22,6 +23,10 @@ class PathAreaDetail {
 
   /// Whether the area exposes a non-progressive "Materiali" group.
   final bool hasMaterials;
+
+  /// Id of the "Materiali" group (`is_percorso_main_tab: false`), used to load
+  /// the materials hub. Null when the area has no such group.
+  final String? materialsGroupId;
 
   /// Whether the whole area is locked (`access.percorso_locked`).
   final bool isLocked;

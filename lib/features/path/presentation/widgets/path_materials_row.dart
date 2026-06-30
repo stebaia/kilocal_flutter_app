@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -16,7 +17,7 @@ class PathMaterialsRow extends StatelessWidget {
 
   final String title;
   final String subtitle;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   static const double _badgeSize = 52;
 
@@ -37,11 +38,7 @@ class PathMaterialsRow extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               alignment: Alignment.center,
-              child: const Icon(
-                Icons.work_outline,
-                color: AppColors.neutralWhite,
-                size: 24,
-              ),
+              child: const AppIcon(AppIcons.briefcase, size: 24),
             ),
             const SizedBox(width: AppSpacing.spaceMd),
             Expanded(

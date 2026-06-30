@@ -6,7 +6,6 @@ import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../home/presentation/widgets/action_card_illustration.dart';
-import '../../../../l10n/app_localizations.dart';
 
 /// Square gradient card for a path area (training, nutrition, wellbeing,
 /// integration) shown on the path screen.
@@ -28,13 +27,11 @@ class PathAreaTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        
+
         decoration: BoxDecoration(
           gradient: AppColors.brandGradientVertical,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -43,45 +40,45 @@ class PathAreaTile extends StatelessWidget {
         child: Column(
           children: [
             Text(
-                  title,
-                  style: AppTypography.textTheme.titleMedium?.copyWith(
-                    color: AppColors.neutralWhite,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              SizedBox(height: 13,),
-              SizedBox(
-                width: 100,
-                height: 100,
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      height: 100,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: AppColors.kilokalPink,
-                      ),
-                    ),
-                    OverflowBox(
-                      maxWidth: 200,
-                      maxHeight: 120,
-                      child: PathActionCardImage(
-                        imageUrl: '',
-                        assetName: assetName,
-                      ),
-                    ),
-                  ],
-                ),
+              title,
+              style: AppTypography.textTheme.titleMedium?.copyWith(
+                color: AppColors.neutralWhite,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
-              SizedBox(height: 18,),
-              Row( 
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
+            SizedBox(height: 13),
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
                 children: [
-                  Text(
+                  Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: AppColors.kilokalPink,
+                    ),
+                  ),
+                  OverflowBox(
+                    maxWidth: 200,
+                    maxHeight: 120,
+                    child: PathActionCardImage(
+                      imageUrl: '',
+                      assetName: assetName,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 18),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
                   '$completed/$total',
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
                     color: AppColors.neutralWhite,
@@ -99,19 +96,21 @@ class PathAreaTile extends StatelessWidget {
                   child: const Center(
                     child: AppIcon(
                       AppIcons.playSmall,
-                     size: 10,
+                      size: 10,
                       color: AppColors.accent,
                     ),
                   ),
                 ),
-                ],
-              )
+              ],
+            ),
           ],
-        )));
+        ),
+      ),
+    );
   }
 }
-        
-         /*ClipRRect(
+
+/*ClipRRect(
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Stack(
             children: [
@@ -178,4 +177,3 @@ class PathAreaTile extends StatelessWidget {
       ),
     );
   }*/
-

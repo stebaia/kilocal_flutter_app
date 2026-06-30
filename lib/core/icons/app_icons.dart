@@ -12,6 +12,13 @@ abstract final class AppIcons {
   static const String playSmall = 'play_small';
   static const String chart = 'chart';
   static const String filter = 'filter';
+  static const String training = 'training';
+  static const String flash = 'flash';
+  static const String food = 'food';
+  static const String wellness = 'wellness';
+  static const String lock = 'lock';
+  static const String briefcase = 'briefcase';
+  static const String archive = 'archive';
 }
 
 /// Widget generico per le icone SVG dell'app.

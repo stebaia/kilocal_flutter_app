@@ -154,7 +154,7 @@ class _PathContent extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(height: 24,),
+              SizedBox(height: 24),
               // Area cards grid.
               GridView.count(
                 crossAxisCount: 2,

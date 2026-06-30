@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -144,23 +145,43 @@ class _BrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.screenGutter,
-        AppSpacing.spaceXl,
-        AppSpacing.screenGutter,
-        AppSpacing.spaceLg,
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(AppRadius.lg),
       ),
-      decoration: const BoxDecoration(
-        gradient: AppColors.brandGradient,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
-      ),
-      child: Text(
-        title,
-        style: AppTypography.textTheme.titleMedium?.copyWith(
-          color: AppColors.neutralWhite,
-          fontWeight: FontWeight.w600,
+      child: Container(
+        width: double.infinity,
+        color: AppColors.brandPink,
+        child: Stack(
+          children: [
+            Positioned(
+              bottom: -1,
+              right: 0,
+              child: Transform.rotate(
+                angle: -0.0,
+                child: SvgPicture.asset(
+                  'assets/icons/line_gradient.svg',
+                  width: 100,
+                  height: 100,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenGutter,
+                AppSpacing.spaceXl,
+                AppSpacing.screenGutter,
+                AppSpacing.spaceLg,
+              ),
+              child: Text(
+                title,
+                style: AppTypography.textTheme.titleMedium?.copyWith(
+                  color: AppColors.neutralWhite,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

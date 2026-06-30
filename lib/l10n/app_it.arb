@@ -155,6 +155,11 @@
   "pathAreaProgressLabel": "Il tuo percorso",
   "pathMaterialsTitle": "Materiali extra",
   "pathMaterialsSubtitle": "Risorse utili per il tuo percorso",
+  "pathMaterialAvailable": "Disponibile",
+  "pathMaterialsEmpty": "Nessun materiale disponibile",
+  "pathMaterialsFilterAvailable": "Disponibili",
+  "pathMaterialsFilterCompleted": "Completati",
+  "pathMaterialsFilterUnavailable": "Non disponibili",
   "pathTimeframeStepsCount": "{count, plural, =1{1 attività} other{{count} attività}}",
   "@pathTimeframeStepsCount": {
     "placeholders": {
