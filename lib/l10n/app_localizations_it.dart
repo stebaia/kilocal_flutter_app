@@ -228,6 +228,24 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileMyTypeValue => 'Tipo 4 - Pera';
 
   @override
+  String get profileTypeUnknown => 'Il mio Tipo';
+
+  @override
+  String get profileTypeCharacteristics => 'Le tue caratteristiche';
+
+  @override
+  String get profileTypeDiscoverMore => 'Scopri di più';
+
+  @override
+  String get profileTypeProductsSection => 'Informazioni sui prodotti';
+
+  @override
+  String get profileTypeMyKit => 'Il mio Kit';
+
+  @override
+  String get profileTypeSupplements => 'Integrazioni e prodotti';
+
+  @override
   String get profileCategorySection => 'Nome categoria sezioni';
 
   @override
@@ -235,6 +253,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get profileMyAccount => 'Il mio account';
+
+  @override
+  String get profileSaved => 'Modifiche salvate';
 
   @override
   String get profileFoodPreferences => 'Preferenze alimentari';

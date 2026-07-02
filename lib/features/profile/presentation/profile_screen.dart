@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kilocal_flutter_app/app/di.dart';
 import 'package:kilocal_flutter_app/features/auth/domain/auth_repository.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
+import '../../../core/network/token_store.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/hex_color.dart';
+import '../../user/presentation/cubit/user_cubit.dart';
 import 'widgets/profile_group_card.dart';
 import 'widgets/profile_list_tile.dart';
 import 'widgets/profile_section_label.dart';
@@ -26,9 +30,7 @@ class ProfileScreen extends StatelessWidget {
         context.go('/login');
       }
     } catch (_) {
-      messenger.showSnackBar(
-        SnackBar(content: Text(l10n.errorGeneric)),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.errorGeneric)));
     }
   }
 
@@ -84,9 +86,19 @@ class ProfileScreen extends StatelessWidget {
                     // --- Il mio Tipo ---
                     ProfileSectionLabel(text: l10n.profileMyTypeSection),
                     const SizedBox(height: AppSpacing.spaceSm),
-                    ProfileTypeCard(
-                      label: l10n.profileMyTypeValue,
-                      onTap: () {},
+                    BlocBuilder<UserCubit, UserState>(
+                      bloc: getIt<UserCubit>(),
+                      builder: (context, state) {
+                        final biotype = state.details?.biotype;
+                        final typeColor = colorFromHex(biotype?.mainColor);
+                        return ProfileTypeCard(
+                          label: biotype?.label ?? l10n.profileMyTypeValue,
+                          iconUrl: biotype?.iconUrl,
+                          cardColor: typeColor,
+                          iconColor: typeColor,
+                          onTap: () => context.go('/profile/type'),
+                        );
+                      },
                     ),
                     const SizedBox(height: AppSpacing.spaceLg),
 
@@ -98,17 +110,17 @@ class ProfileScreen extends StatelessWidget {
                         ProfileListTile(
                           icon: Icons.description_outlined,
                           title: l10n.profilePersonalData,
-                          onTap: () {},
+                          onTap: () => context.go('/profile/personal-data'),
                         ),
                         ProfileListTile(
                           icon: Icons.description_outlined,
                           title: l10n.profileMyAccount,
-                          onTap: () {},
+                          onTap: () => context.go('/profile/account'),
                         ),
                         ProfileListTile(
                           icon: Icons.description_outlined,
                           title: l10n.profileFoodPreferences,
-                          onTap: () {},
+                          onTap: () => context.go('/profile/food-preferences'),
                         ),
                       ],
                     ),
@@ -162,25 +174,72 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
-/// Circular avatar shown in the profile header (top-right).
+/// Circular avatar shown in the profile header (top-right). Shows the user's
+/// profile photo (`directus_users.avatar`) when available, otherwise a person
+/// icon placeholder.
 class _ProfileAvatar extends StatelessWidget {
   const _ProfileAvatar();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.accentSoft,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: const Icon(
-        Icons.person,
-        color: AppColors.accent,
-        size: 28,
-      ),
+    return BlocBuilder<UserCubit, UserState>(
+      bloc: getIt<UserCubit>(),
+      builder: (context, state) {
+        final avatarUrl = state.user?.avatarUrl;
+        return Container(
+          width: 44,
+          height: 44,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.accentSoft,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: avatarUrl == null
+              ? const _AvatarPlaceholder()
+              : _AvatarImage(url: avatarUrl),
+        );
+      },
+    );
+  }
+}
+
+/// Default person icon shown when there is no avatar or it fails to load.
+class _AvatarPlaceholder extends StatelessWidget {
+  const _AvatarPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Icon(Icons.person, color: AppColors.accent, size: 28);
+  }
+}
+
+/// Loads the avatar image from the CMS with the Bearer token (Directus serves
+/// user avatars only to authenticated requests), falling back to the person
+/// placeholder while loading or on error.
+class _AvatarImage extends StatelessWidget {
+  const _AvatarImage({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: getIt<TokenStore>().accessToken,
+      builder: (context, snapshot) {
+        final token = snapshot.data;
+        if (token == null) return const _AvatarPlaceholder();
+        return Image.network(
+          url,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          headers: {'Authorization': 'Bearer $token'},
+          errorBuilder: (context, error, stackTrace) =>
+              const _AvatarPlaceholder(),
+          loadingBuilder: (context, child, progress) =>
+              progress == null ? child : const _AvatarPlaceholder(),
+        );
+      },
     );
   }
 }

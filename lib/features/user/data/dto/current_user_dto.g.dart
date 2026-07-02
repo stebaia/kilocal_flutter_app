@@ -25,6 +25,7 @@ CurrentUserDataDto _$CurrentUserDataDtoFromJson(Map<String, dynamic> json) =>
       role: json['role'] == null
           ? null
           : UserRoleDto.fromJson(json['role'] as Map<String, dynamic>),
+      avatar: _avatarId(json['avatar']),
     );
 
 Map<String, dynamic> _$CurrentUserDataDtoToJson(CurrentUserDataDto instance) =>
@@ -34,6 +35,7 @@ Map<String, dynamic> _$CurrentUserDataDtoToJson(CurrentUserDataDto instance) =>
       'first_name': instance.firstName,
       'last_name': instance.lastName,
       'role': instance.role,
+      'avatar': instance.avatar,
     };
 
 UserRoleDto _$UserRoleDtoFromJson(Map<String, dynamic> json) =>

@@ -32,8 +32,9 @@ class DiaryScreen extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
                   child: DiaryEntryCard(
                     title: 'Attività giorno ${index + 1}',
-                    subtitle:
-                        isCompleted ? l10n.diaryCompleted : l10n.diaryPending,
+                    subtitle: isCompleted
+                        ? l10n.diaryCompleted
+                        : l10n.diaryPending,
                     isCompleted: isCompleted,
                   ),
                 );

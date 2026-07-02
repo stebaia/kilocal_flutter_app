@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import 'dto/current_user_dto.dart';
+import 'dto/success_response_dto.dart';
 
 part 'user_api.g.dart';
 
@@ -19,4 +20,10 @@ abstract class UserApi {
   /// `id,email,first_name,last_name,role.name`.
   @GET('/users/me')
   Future<CurrentUserResponseDto> getCurrentUser(@Query('fields') String fields);
+
+  /// `PATCH /profile` — updates `directus_users`, `user_addresses` and
+  /// `user_details` in one call. The free-form body is routed by field name
+  /// server-side (see `wiki/profilo.md`). Returns `{ "success": true }`.
+  @PATCH('/profile')
+  Future<SuccessResponseDto> updateProfile(@Body() Map<String, dynamic> body);
 }

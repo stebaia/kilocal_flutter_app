@@ -11,6 +11,7 @@ class AppUser extends Equatable {
     this.firstName,
     this.lastName,
     this.roleName,
+    this.avatarUrl,
   });
 
   final String id;
@@ -18,6 +19,10 @@ class AppUser extends Equatable {
   final String? firstName;
   final String? lastName;
   final String? roleName;
+
+  /// Full URL to the profile photo (`{baseUrl}/assets/{avatar}`), or `null`
+  /// when the user has no avatar.
+  final String? avatarUrl;
 
   String? get displayName {
     final buffer = StringBuffer();
@@ -30,5 +35,12 @@ class AppUser extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, email, firstName, lastName, roleName];
+  List<Object?> get props => [
+    id,
+    email,
+    firstName,
+    lastName,
+    roleName,
+    avatarUrl,
+  ];
 }

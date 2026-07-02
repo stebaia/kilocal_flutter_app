@@ -36,6 +36,7 @@ class CurrentUserDataDto {
     this.firstName,
     this.lastName,
     this.role,
+    this.avatar,
   });
 
   final String id;
@@ -49,10 +50,24 @@ class CurrentUserDataDto {
 
   final UserRoleDto? role;
 
+  /// Avatar file id (`directus_users.avatar`), served at `/assets/{id}`.
+  /// `null` when the user has no profile photo.
+  @JsonKey(fromJson: _avatarId)
+  final String? avatar;
+
   factory CurrentUserDataDto.fromJson(Map<String, dynamic> json) =>
       _$CurrentUserDataDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$CurrentUserDataDtoToJson(this);
+}
+
+/// `avatar` may arrive as a plain file-id string or, when expanded, as an
+/// object with an `id`. Returns the file id or `null`.
+String? _avatarId(dynamic value) {
+  if (value == null) return null;
+  if (value is String) return value.isEmpty ? null : value;
+  if (value is Map) return value['id']?.toString();
+  return value.toString();
 }
 
 @JsonSerializable()

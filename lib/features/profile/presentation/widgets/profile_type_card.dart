@@ -4,66 +4,96 @@ import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/cms_svg_icon.dart';
+import '../../../../core/widgets/wave_decoration.dart';
 
 /// Pink gradient "Il mio Tipo" card with a soft wave decoration, a circular
-/// icon badge, the type label, and a trailing chevron.
+/// icon badge, the type label, and a trailing chevron. When [cardColor] /
+/// [iconColor] are provided (the biotype `main_color`) the card is filled with
+/// that colour and the white icon badge shows the biotype icon tinted with it.
 class ProfileTypeCard extends StatelessWidget {
-  const ProfileTypeCard({super.key, required this.label, this.onTap});
+  const ProfileTypeCard({
+    super.key,
+    required this.label,
+    this.iconUrl,
+    this.cardColor,
+    this.iconColor,
+    this.onTap,
+  });
 
   final String label;
+  final String? iconUrl;
+
+  /// Card background (`main_color`). Falls back to the brand gradient.
+  final Color? cardColor;
+
+  /// Tint of the biotype icon inside the white badge (`main_color`).
+  final Color? iconColor;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final tint = iconColor ?? AppColors.accent;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.lg),
         child: Container(
-          height: 64,
-          decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+          height: 72,
+          decoration: BoxDecoration(
+            color: cardColor,
+            gradient: cardColor == null ? AppColors.brandGradient : null,
+          ),
           child: Stack(
             children: [
-              // Decorative translucent wave on the right half.
+              // Decorative wave on the right half — a soft translucent white
+              // flourish over the (biotype-coloured) card background.
               Positioned.fill(
-                child: CustomPaint(painter: _WavePainter()),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.spaceMd,
+                child: WaveDecoration(
+                  color: Colors.white.withValues(alpha: 0.25),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.18),
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: AppIcon(
-                        AppIcons.popsicle,
-                        size: 18,
-                        color: AppColors.neutralWhite,
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.spaceSm),
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: AppTypography.textTheme.titleMedium?.copyWith(
+              ),
+              Container(
+                padding: EdgeInsets.all(24),
+                child: Center(
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: const BoxDecoration(
                           color: AppColors.neutralWhite,
-                          fontWeight: FontWeight.w600,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: CmsSvgIcon(
+                          url: iconUrl,
+                          size: 18,
+                          color: tint,
+                          fallback: AppIcon(
+                            AppIcons.popsicle,
+                            size: 18,
+                            color: tint,
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: AppColors.neutralWhite,
-                    ),
-                  ],
+                      const SizedBox(width: AppSpacing.spaceSm),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: AppTypography.textTheme.titleMedium?.copyWith(
+                            color: AppColors.neutralWhite,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.chevron_right,
+                        color: AppColors.neutralWhite,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -72,50 +102,4 @@ class ProfileTypeCard extends StatelessWidget {
       ),
     );
   }
-}
-
-/// Paints two soft, semi-transparent white waves sweeping across the card,
-/// fading toward the right edge.
-class _WavePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.12)
-      ..style = PaintingStyle.fill;
-
-    final path = Path()
-      ..moveTo(size.width * 0.35, size.height)
-      ..cubicTo(
-        size.width * 0.5,
-        size.height * 0.2,
-        size.width * 0.7,
-        size.height * 1.1,
-        size.width,
-        size.height * 0.35,
-      )
-      ..lineTo(size.width, size.height)
-      ..close();
-    canvas.drawPath(path, paint);
-
-    final paint2 = Paint()
-      ..color = Colors.white.withValues(alpha: 0.10)
-      ..style = PaintingStyle.fill;
-
-    final path2 = Path()
-      ..moveTo(size.width * 0.55, 0)
-      ..cubicTo(
-        size.width * 0.7,
-        size.height * 0.7,
-        size.width * 0.85,
-        -size.height * 0.1,
-        size.width,
-        size.height * 0.6,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-    canvas.drawPath(path2, paint2);
-  }
-
-  @override
-  bool shouldRepaint(covariant _WavePainter oldDelegate) => false;
 }
