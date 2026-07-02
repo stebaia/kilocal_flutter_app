@@ -13,6 +13,10 @@ import '../features/auth/presentation/cubit/register_cubit.dart';
 import '../features/benefits/data/benefits_repository_impl.dart';
 import '../features/benefits/domain/benefits_repository.dart';
 import '../features/benefits/presentation/cubit/benefits_cubit.dart';
+import '../features/profile/data/profile_page_repository_impl.dart';
+import '../features/profile/domain/profile_page_repository.dart';
+import '../features/profile/presentation/cubit/profile_page_cubit.dart';
+import '../features/profile/presentation/cubit/profile_update_cubit.dart';
 import '../features/home/data/home_repository_impl.dart';
 import '../features/home/domain/home_repository.dart';
 import '../features/home/presentation/cubit/home_cubit.dart';
@@ -141,6 +145,20 @@ void configureDependencies() {
   );
   getIt.registerFactory<BenefitsCubit>(
     () => BenefitsCubit(benefitsRepository: getIt<BenefitsRepository>()),
+  );
+
+  // --- Feature: Profile (CMS pages) ---
+  getIt.registerLazySingleton<ProfilePageRepository>(
+    () => ProfilePageRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<ProfilePageCubit>(
+    () => ProfilePageCubit(repository: getIt<ProfilePageRepository>()),
+  );
+  getIt.registerFactory<ProfileUpdateCubit>(
+    () => ProfileUpdateCubit(
+      userRepository: getIt<UserRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
   );
 
   // --- Feature: Momenti ---

@@ -5,11 +5,7 @@ part 'moment_dto.g.dart';
 /// DTO for the `moments` GraphQL collection.
 @JsonSerializable()
 class MomentDto {
-  const MomentDto({
-    required this.id,
-    this.translations = const [],
-    this.asset,
-  });
+  const MomentDto({required this.id, this.translations = const [], this.asset});
 
   factory MomentDto.fromJson(Map<String, dynamic> json) =>
       _$MomentDtoFromJson(json);

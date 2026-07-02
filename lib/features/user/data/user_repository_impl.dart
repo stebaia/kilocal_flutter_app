@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
 import '../domain/app_user.dart';
@@ -19,7 +20,8 @@ class UserRepositoryImpl implements UserRepository {
   final UserApi _userApi;
   final GraphqlClient _graphqlClient;
 
-  static const _currentUserFields = 'id,email,first_name,last_name,role.name';
+  static const _currentUserFields =
+      'id,email,first_name,last_name,role.name,avatar';
 
   static const _getUserDetailsQuery = r'''
 query GetUserDetails($myId: ID!) {
@@ -30,6 +32,9 @@ query GetUserDetails($myId: ID!) {
     height
     gender
     newsletter
+    allergie
+    intolleranze
+    dieta
     active_timeframe {
       id
       sort
@@ -40,6 +45,29 @@ query GetUserDetails($myId: ID!) {
       translations {
         languages_code { code }
         title
+      }
+    }
+    profile {
+      id
+      title
+      main_color
+      secondary_color
+      icon { id }
+      translations {
+        languages_code { code }
+        title
+        name
+        content
+        content_f
+      }
+      kit {
+        id
+        price
+        translations {
+          languages_code { code }
+          description
+          tipo_kit
+        }
       }
     }
   }
@@ -107,11 +135,30 @@ query GetUserDetails($myId: ID!) {
     }
   }
 
+  @override
+  Future<void> updateProfile(Map<String, dynamic> values) async {
+    try {
+      final response = await _userApi.updateProfile(values);
+      if (!response.success) {
+        throw const ApiException(
+          type: ApiErrorType.unknown,
+          statusCode: 200,
+          message: 'Profile update reported success: false',
+        );
+      }
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
   AppUser _mapCurrentUser(CurrentUserDataDto dto) => AppUser(
     id: dto.id,
     email: dto.email,
     firstName: dto.firstName,
     lastName: dto.lastName,
     roleName: dto.role?.name,
+    avatarUrl: dto.avatar != null
+        ? '${Env.baseUrl}/assets/${dto.avatar}'
+        : null,
   );
 }

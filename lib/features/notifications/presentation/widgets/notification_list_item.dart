@@ -20,121 +20,112 @@ class NotificationListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return  Container(
-          color: item.read ? null : AppColors.unreadBackground,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenGutter,
-              vertical: AppSpacing.spaceMd,
-            ),
-            child: Column(
+    return Container(
+      color: item.read ? null : AppColors.unreadBackground,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.screenGutter,
+          vertical: AppSpacing.spaceMd,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _Avatar(category: item.category),
-                    const SizedBox(width: AppSpacing.spaceMd),
-                    Expanded(
-                      child: Column(
+                _Avatar(category: item.category),
+                const SizedBox(width: AppSpacing.spaceMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        item.title,
-                                        style: AppTypography
-                                            .textTheme
-                                            .bodyMedium
-                                            ?.copyWith(
-                                              fontWeight: item.read
-                                                  ? FontWeight.w500
-                                                  : FontWeight.w700,
-                                            ),
-                                      ),
-                                    ),
-                                    
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.spaceSm),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    _relativeTime(item.timestamp),
-                                    style: AppTypography.textTheme.labelSmall
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    item.title,
+                                    style: AppTypography.textTheme.bodyMedium
                                         ?.copyWith(
-                                          color: AppColors.textSecondary,
+                                          fontWeight: item.read
+                                              ? FontWeight.w500
+                                              : FontWeight.w700,
                                         ),
                                   ),
-                                  const SizedBox(height: AppSpacing.space2xs),
-                                  _MoreButton(itemId: item.id),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.space2xs),
-                          Html(
-                            data: item.body,
-                            style: {
-                              'body': Style(
-                                margin: Margins.zero,
-                                padding: HtmlPaddings.zero,
-                                color: AppColors.textSecondary,
-                                fontSize: FontSize(
-                                  AppTypography
-                                          .textTheme
-                                          .labelMedium
-                                          ?.fontSize ??
-                                      14,
                                 ),
-                              ),
-                            },
-                          ),
-                          if (item.imageUrl != null) ...[
-                            const SizedBox(height: AppSpacing.spaceSm),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(AppRadius.md),
-                              child: Image.network(
-                                item.imageUrl!,
-                                width: double.infinity,
-                                height: 160,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ],
-                          if (item.ctas.isNotEmpty) ...[
-                            const SizedBox(height: AppSpacing.spaceMd),
-                            Wrap(
-                              spacing: AppSpacing.spaceSm,
-                              runSpacing: AppSpacing.spaceSm,
-                              children: [
-                                for (var i = 0; i < item.ctas.length; i++)
-                                  _CtaButton(
-                                    cta: item.ctas[i],
-                                    filled: i == 0,
-                                    fallbackLabel: l10n.benefitDetails,
-                                  ),
                               ],
                             ),
-                          ],
+                          ),
+                          const SizedBox(width: AppSpacing.spaceSm),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                _relativeTime(item.timestamp),
+                                style: AppTypography.textTheme.labelSmall
+                                    ?.copyWith(color: AppColors.textSecondary),
+                              ),
+                              const SizedBox(height: AppSpacing.space2xs),
+                              _MoreButton(itemId: item.id),
+                            ],
+                          ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: AppSpacing.space2xs),
+                      Html(
+                        data: item.body,
+                        style: {
+                          'body': Style(
+                            margin: Margins.zero,
+                            padding: HtmlPaddings.zero,
+                            color: AppColors.textSecondary,
+                            fontSize: FontSize(
+                              AppTypography.textTheme.labelMedium?.fontSize ??
+                                  14,
+                            ),
+                          ),
+                        },
+                      ),
+                      if (item.imageUrl != null) ...[
+                        const SizedBox(height: AppSpacing.spaceSm),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          child: Image.network(
+                            item.imageUrl!,
+                            width: double.infinity,
+                            height: 160,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ],
+                      if (item.ctas.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.spaceMd),
+                        Wrap(
+                          spacing: AppSpacing.spaceSm,
+                          runSpacing: AppSpacing.spaceSm,
+                          children: [
+                            for (var i = 0; i < item.ctas.length; i++)
+                              _CtaButton(
+                                cta: item.ctas[i],
+                                filled: i == 0,
+                                fallbackLabel: l10n.benefitDetails,
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                
-                Divider(height: 1, color: AppColors.divider),
               ],
             ),
-          ),
-        
+
+            Divider(height: 1, color: AppColors.divider),
+          ],
+        ),
+      ),
     );
   }
 

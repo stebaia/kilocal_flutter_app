@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'di.dart';
 import '../core/icons/app_icons.dart';
+import '../core/utils/hex_color.dart';
+import '../core/widgets/cms_svg_icon.dart';
+import '../l10n/app_localizations.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_shadows.dart';
 import '../core/theme/app_spacing.dart';
+import '../features/user/presentation/cubit/user_cubit.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
 import '../features/benefits/presentation/benefits_screen.dart';
@@ -19,7 +25,10 @@ import '../features/path/presentation/path_materials_screen.dart';
 import '../features/path/presentation/path_screen.dart';
 import '../features/path/presentation/path_step_screen.dart';
 import '../features/path/presentation/path_timeframe_steps_screen.dart';
+import '../features/profile/presentation/profile_form_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/profile/presentation/profile_type_screen.dart';
+import '../features/profile/presentation/profile_type_percorsi_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/momenti/presentation/momenti_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
@@ -139,6 +148,49 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/profile',
               builder: (context, state) => const ProfileScreen(),
+              routes: [
+                GoRoute(
+                  path: 'type',
+                  builder: (context, state) => const ProfileTypeScreen(),
+                  routes: [
+                    GoRoute(
+                      path: 'percorsi',
+                      builder: (context, state) =>
+                          const ProfileTypePercorsiScreen(),
+                    ),
+                  ],
+                ),
+                // Account forms — one screen per CMS `private_sec_profile` tab
+                // (dashboard-profile). Tab ids: 1 personal data, 4 account
+                // settings, 3 food preferences.
+                GoRoute(
+                  path: 'personal-data',
+                  builder: (context, state) => ProfileFormScreen(
+                    tabId: '1',
+                    fallbackTitle: AppLocalizations.of(
+                      context,
+                    )!.profilePersonalData,
+                  ),
+                ),
+                GoRoute(
+                  path: 'account',
+                  builder: (context, state) => ProfileFormScreen(
+                    tabId: '4',
+                    fallbackTitle: AppLocalizations.of(
+                      context,
+                    )!.profileMyAccount,
+                  ),
+                ),
+                GoRoute(
+                  path: 'food-preferences',
+                  builder: (context, state) => ProfileFormScreen(
+                    tabId: '3',
+                    fallbackTitle: AppLocalizations.of(
+                      context,
+                    )!.profileFoodPreferences,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -205,7 +257,14 @@ class AppScaffold extends StatelessWidget {
                     child: SizedBox(
                       width: 24,
                       height: 24,
-                      child: AppIcon(item, size: 20, color: color),
+                      child: _NavIcon(
+                        item: item,
+                        color: color,
+                        isSelected: isSelected,
+                        // The profile tab (last) shows the user's biotype icon
+                        // from the CMS when available.
+                        useBiotypeIcon: index == _items.length - 1,
+                      ),
                     ),
                   ),
                 );
@@ -214,6 +273,52 @@ class AppScaffold extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// A bottom-bar icon. For the profile tab ([useBiotypeIcon]) it shows the user's
+/// biotype icon from the CMS (tinted with the current [color]), falling back to
+/// the static [item] SVG when the biotype or its icon is unavailable.
+class _NavIcon extends StatelessWidget {
+  const _NavIcon({
+    required this.item,
+    required this.color,
+    required this.isSelected,
+    required this.useBiotypeIcon,
+  });
+
+  final String item;
+  final Color color;
+  final bool isSelected;
+  final bool useBiotypeIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!useBiotypeIcon) {
+      return AppIcon(item, size: 20, color: color);
+    }
+
+    return BlocBuilder<UserCubit, UserState>(
+      bloc: getIt<UserCubit>(),
+      builder: (context, state) {
+        final biotype = state.details?.biotype;
+        // Selected: tint with the biotype colour (main_color), falling back to
+        // the accent. Unselected: keep the muted grey for a clear active state.
+        final iconColor = isSelected
+            ? (colorFromHex(biotype?.mainColor) ?? AppColors.accent)
+            : color;
+        final fallback = AppIcon(item, size: 20, color: iconColor);
+
+        final iconUrl = biotype?.iconUrl;
+        if (iconUrl == null) return fallback;
+        return CmsSvgIcon(
+          url: iconUrl,
+          size: 20,
+          color: iconColor,
+          fallback: fallback,
+        );
+      },
     );
   }
 }

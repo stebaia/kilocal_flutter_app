@@ -512,6 +512,42 @@ abstract class AppLocalizations {
   /// **'Type 4 - Pear'**
   String get profileMyTypeValue;
 
+  /// No description provided for @profileTypeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'My Type'**
+  String get profileTypeUnknown;
+
+  /// No description provided for @profileTypeCharacteristics.
+  ///
+  /// In en, this message translates to:
+  /// **'Your characteristics'**
+  String get profileTypeCharacteristics;
+
+  /// No description provided for @profileTypeDiscoverMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover more'**
+  String get profileTypeDiscoverMore;
+
+  /// No description provided for @profileTypeProductsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Product information'**
+  String get profileTypeProductsSection;
+
+  /// No description provided for @profileTypeMyKit.
+  ///
+  /// In en, this message translates to:
+  /// **'My Kit'**
+  String get profileTypeMyKit;
+
+  /// No description provided for @profileTypeSupplements.
+  ///
+  /// In en, this message translates to:
+  /// **'Supplements and products'**
+  String get profileTypeSupplements;
+
   /// No description provided for @profileCategorySection.
   ///
   /// In en, this message translates to:
@@ -529,6 +565,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My account'**
   String get profileMyAccount;
+
+  /// No description provided for @profileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get profileSaved;
 
   /// No description provided for @profileFoodPreferences.
   ///

@@ -227,6 +227,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileMyTypeValue => 'Type 4 - Pear';
 
   @override
+  String get profileTypeUnknown => 'My Type';
+
+  @override
+  String get profileTypeCharacteristics => 'Your characteristics';
+
+  @override
+  String get profileTypeDiscoverMore => 'Discover more';
+
+  @override
+  String get profileTypeProductsSection => 'Product information';
+
+  @override
+  String get profileTypeMyKit => 'My Kit';
+
+  @override
+  String get profileTypeSupplements => 'Supplements and products';
+
+  @override
   String get profileCategorySection => 'Section category name';
 
   @override
@@ -234,6 +252,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileMyAccount => 'My account';
+
+  @override
+  String get profileSaved => 'Changes saved';
 
   @override
   String get profileFoodPreferences => 'Food preferences';

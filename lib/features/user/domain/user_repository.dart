@@ -13,4 +13,10 @@ abstract class UserRepository {
 
   /// Fetches the profile details for the user identified by [myId].
   Future<UserDetails> fetchUserDetails(String myId);
+
+  /// Updates the profile via `PATCH /profile`. [values] is a free-form map of
+  /// field name → value, routed server-side to `directus_users`,
+  /// `user_addresses` or `user_details`. Throws [ApiException] on failure or if
+  /// the API reports `success: false`.
+  Future<void> updateProfile(Map<String, dynamic> values);
 }
