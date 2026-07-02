@@ -37,6 +37,9 @@ import '../features/path/presentation/cubit/path_detail_cubit.dart';
 import '../features/path/presentation/cubit/path_material_detail_cubit.dart';
 import '../features/path/presentation/cubit/path_materials_cubit.dart';
 import '../features/settings/data/settings_api.dart';
+import '../features/statistics/data/statistics_repository_impl.dart';
+import '../features/statistics/domain/statistics_repository.dart';
+import '../features/statistics/presentation/cubit/statistics_cubit.dart';
 import '../features/survey/data/survey_repository_impl.dart';
 import '../features/survey/domain/survey_repository.dart';
 import '../features/survey/presentation/cubit/survey_cubit.dart';
@@ -125,6 +128,12 @@ void configureDependencies() {
   );
   getIt.registerFactory<PathDetailCubit>(
     () => PathDetailCubit(pathRepository: getIt<PathRepository>()),
+  );
+  getIt.registerLazySingleton<StatisticsRepository>(
+    () => StatisticsRepositoryImpl(dio: getIt<Dio>()),
+  );
+  getIt.registerFactory<StatisticsCubit>(
+    () => StatisticsCubit(statisticsRepository: getIt<StatisticsRepository>()),
   );
   getIt.registerLazySingleton<PathMaterialsRepository>(
     () => PathMaterialsRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),

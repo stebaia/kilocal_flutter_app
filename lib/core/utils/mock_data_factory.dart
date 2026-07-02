@@ -1,7 +1,6 @@
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../features/home/domain/entities/home_data.dart';
-import '../../features/statistics/domain/entities/area_stat.dart';
 
 /// Centralized factory for localized mock data.
 ///
@@ -40,34 +39,5 @@ abstract final class MockDataFactory {
         ),
       ],
     );
-  }
-
-  static List<AreaStat> statistics(AppLocalizations l10n) {
-    return [
-      AreaStat(
-        area: l10n.areaTraining,
-        month: l10n.month1,
-        completed: 3,
-        total: 15,
-      ),
-      AreaStat(
-        area: l10n.areaNutrition,
-        month: l10n.month1,
-        completed: 5,
-        total: 18,
-      ),
-      AreaStat(
-        area: l10n.areaWellbeing,
-        month: l10n.month1,
-        completed: 8,
-        total: 25,
-      ),
-      AreaStat(
-        area: l10n.areaIntegration,
-        month: l10n.phase1,
-        completed: 5,
-        total: 19,
-      ),
-    ];
   }
 }

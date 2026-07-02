@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
+import '../../../app/di.dart';
 import '../../../core/theme/app_spacing.dart';
-import '../../../core/utils/mock_data_factory.dart';
-import '../../../core/widgets/localized_bloc_loader.dart';
 import 'cubit/statistics_cubit.dart';
 import 'widgets/statistics_card.dart';
 
@@ -15,15 +14,10 @@ class StatisticsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
-      create: (_) => StatisticsCubit(),
-      child: LocalizedBlocLoader<StatisticsCubit, StatisticsState>(
-        load: (context, cubit) {
-          final l10n = AppLocalizations.of(context)!;
-          cubit.loadWithData(MockDataFactory.statistics(l10n));
-        },
-        child: const _StatisticsView(),
-      ),
+      create: (_) => getIt<StatisticsCubit>()..load(l10n),
+      child: const _StatisticsView(),
     );
   }
 }
@@ -37,7 +31,7 @@ class _StatisticsView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.statisticsTitle),
+        title: Text('${l10n.statisticsTitle} ${l10n.statisticsMonth}'),
         actions: [
           IconButton(
             icon: const Icon(Icons.calendar_month_outlined),
@@ -47,8 +41,18 @@ class _StatisticsView extends StatelessWidget {
       ),
       body: BlocBuilder<StatisticsCubit, StatisticsState>(
         builder: (context, state) {
-          if (state.status == StatisticsStatus.loading) {
+          if (state.status == StatisticsStatus.loading ||
+              state.status == StatisticsStatus.initial) {
             return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state.status == StatisticsStatus.error && state.stats.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.screenGutter),
+                child: Text(l10n.errorGeneric, textAlign: TextAlign.center),
+              ),
+            );
           }
 
           return ListView.builder(
