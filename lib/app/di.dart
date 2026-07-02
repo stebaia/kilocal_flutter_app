@@ -37,6 +37,9 @@ import '../features/path/presentation/cubit/path_detail_cubit.dart';
 import '../features/path/presentation/cubit/path_material_detail_cubit.dart';
 import '../features/path/presentation/cubit/path_materials_cubit.dart';
 import '../features/settings/data/settings_api.dart';
+import '../features/survey/data/survey_repository_impl.dart';
+import '../features/survey/domain/survey_repository.dart';
+import '../features/survey/presentation/cubit/survey_cubit.dart';
 import '../features/splash/presentation/cubit/splash_cubit.dart';
 import '../features/user/data/user_api.dart';
 import '../features/user/data/user_repository_impl.dart';
@@ -185,6 +188,17 @@ void configureDependencies() {
       tokenStore: getIt<TokenStore>(),
       userCubit: getIt<UserCubit>(),
     ),
+  );
+
+  // --- Feature: Survey / onboarding ---
+  getIt.registerLazySingleton<SurveyRepository>(
+    () => SurveyRepositoryImpl(
+      graphqlClient: getIt<GraphqlClient>(),
+      dio: getIt<Dio>(),
+    ),
+  );
+  getIt.registerFactory<SurveyCubit>(
+    () => SurveyCubit(repository: getIt<SurveyRepository>()),
   );
 
   // --- Feature: Settings API ---

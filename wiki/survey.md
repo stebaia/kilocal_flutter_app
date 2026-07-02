@@ -69,7 +69,153 @@ web-client migration compatibility — ignore in the app.
 > `surveys` / `survey_sections` / `survey_question` collections — there is no dedicated REST
 > GET. This resolves the proposed `GET /api/survey/{type}` in [[missing-apis]] §1.
 
+## Read model (GraphQL) — verified on staging
+
+The survey definitions are readable on `POST /graphql` (staging returns them **even
+without a token**; production likely bearer-gated). Verified 2026-07-02 against
+`cms-stg`. Five surveys exist:
+
+| `internal_name` | Role |
+|-----------------|------|
+| `type_survey` | Initial survey → biotype/kit result ("sei un Tipo N") |
+| `starter_kit` | Post-purchase final survey (barcode → intro platform) |
+| `qr_pharmacy_1` / `qr_pharmacy_2` | Pharmacy QR onboarding (+ `load_kilocal_points` step) |
+| `single_product_survey` | Single-product purchase (product dropdown + barcode) |
+
+### Query shape
+
+```graphql
+query GetSurvey($internalName: String!, $lang: String!) {
+  surveys(filter: { internal_name: { _eq: $internalName } }, limit: 1) {
+    id
+    internal_name
+    possible_outcomes          # String (nullable) — outcome scoring config
+    sections(sort: ["sort"]) {
+      sort
+      survey_sections_id {
+        id
+        condition_action       # "show" | "hide"
+        use_custom_cta         # result/intro screens use a custom CTA
+        store_in_user_data     # persist the answer to user_details
+        user_data_field_name   # e.g. date_of_birth, gender, height, weight, menopause
+        load_kilocal_points    # pharmacy step
+        show_single_product_cta
+        single_product_barcode_check
+        show_as_dropdown       # render options as a dropdown (single_product_survey)
+        small_notification_text
+        is_dob_question is_gender_question is_menopausa_question
+        translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+          title subtitle content   # HTML — strip/render
+        }
+        default_cta_translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+          label                # "Avanti" | "Inizia" | "Continua" | "Chiudi"
+        }
+        conditions(sort: ["sort"]) {
+          survey_section_conditions_id {   # NULLABLE (dangling junctions exist — guard)
+            condition          # Directus op, e.g. "_eq"
+            simple_value
+            value { id }       # a survey_question_options id
+            values { survey_question_options_id { id } }
+          }
+        }
+        possible_answer {      # NULL for info/intermezzo/result sections
+          id
+          type                 # "radio" | "checkbox" | "input" | "scale"
+          input_type           # "text" | "number" | "date"
+          required
+          scale_values         # JSON, e.g. [{ "from": 0, "to": 10 }]
+          result_value
+          other_validations    # Zod-style, e.g. "number|int|gte:100|lte:300"
+          text_translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+            placeholder
+          }
+          scale_translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+            initial_label final_label
+          }
+          options(sort: ["sort"]) {
+            survey_question_options_id {
+              id sort
+              is_other          # true → show a free-text field when selected
+              result_value      # score for this option
+              value_to_store    # value persisted (e.g. gender m/f/other)
+              deselect_others   # true → selecting clears the other checkboxes ("Nessuno")
+              translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+                text warning_when_selected
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+### Section → screen-type mapping (from the wireframes)
+
+| Wireframe | CMS signal |
+|-----------|-----------|
+| Risposta preimpostata (single) | `possible_answer.type = radio` |
+| Risposta preimpostata (multi) | `type = checkbox` (+ `deselect_others`, `is_other`) |
+| Risposta libera | `type = input` (`input_type` text/date, `other_validations`) |
+| Scala 0–N | `type = scale` (`scale_values`, `initial_label`/`final_label`) |
+| Testo informativo / Intermezzo / Intro piattaforma | no `possible_answer`, `use_custom_cta` optional |
+| Risultato kit/tipo | `use_custom_cta`, title templated `{{name}}` `{{type}}` `{{product}}` |
+| Prova d'acquisto | `input` + `single_product_barcode_check` / `show_single_product_cta` |
+| Dropdown | `show_as_dropdown` |
+| Branching (gravidanza/menopausa) | `conditions` + `condition_action`; e.g. shown only if gender `_eq` option `id:97` (Femmina) |
+
+## Submit contract — confermato dal backend
+
+Confermato da **Daniele Pastori** con una fixture reale (domande originali in
+[[survey-domande-backend]]). Implementato in `buildSubmitBody`
+(`lib/features/survey/data/survey_mapper.dart`), con regression test in
+`test/features/survey/data/survey_submit_body_test.dart`.
+
+1. **Chiave `steps`** = l'**id della domanda** (`survey_sections.possible_answer.id`), **non**
+   l'id sezione. Ogni step contiene anche `sectionId` (id sezione) e `storeToField`.
+2. **`storeToField`** = `survey_sections.user_data_field_name` **solo se**
+   `store_in_user_data === true`, altrimenti `null`. Gli step vanno inviati **anche con
+   `storeToField: null`** (servono al calcolo dell'outcome/biotipo). Le sezioni senza
+   `possible_answer` (info/intermezzo/risultato) **non** producono step.
+3. **`answer`** — `radio` → oggetto singolo `{ id, value_to_store }`; `checkbox` → array di
+   quegli oggetti; opzione "Altro" → `{ id, is_other: true, other_value }`. `input`/`scale` →
+   scalare grezzo. Data di nascita → ISO `yyyy-MM-dd`. `sectionId`/`id` sono **numerici**.
+4. **`bmi`** = peso(kg) / altezza(m)² come **float**; **`ageValue`** = anni interi dalla dob.
+5. **Risultato kit/biotipo** — tutto nella risposta del submit (`outcome`, `kit_shop_url`).
+6. **Ordine flussi** — deciso da `profile_status` (`/survey/me/status`): `initial_survey` →
+   `type_survey`, poi `starter_kit`, ecc. **`pharmacy_data`** = oggetto della farmacia scelta
+   (`{ id, title, city, address, … }`); **`single_product_id`** = ID numerico del prodotto
+   scelto nel dropdown di `starter_kit`.
+
+Esempio di body reale (fixture):
+
+```json
+{
+  "bmi": 22,
+  "ageValue": 22,
+  "pharmacy_data": null,
+  "single_product_id": null,
+  "steps": {
+    "10": { "sectionId": 100, "storeToField": "gender", "answer": { "id": 1, "value_to_store": "f" } },
+    "11": { "sectionId": 101, "storeToField": null,     "answer": { "id": 501, "value_to_store": "1" } }
+  }
+}
+```
+
+**`pharmacy_data` e `single_product_id` — cablati.**
+- `pharmacy_data`: le sezioni `load_kilocal_points` mostrano un **picker farmacia** con ricerca
+  server-side sulla collection `pharmacies` (22k+ righe, param GraphQL `search` su
+  nome/città/provincia). La farmacia scelta viene inviata come oggetto
+  `{ id, title, address, city, province, zip, region, store_id }`. Il CTA dello step è bloccato
+  finché non se ne seleziona una.
+- `single_product_id`: deriva dalla risposta alla domanda prodotto `show_as_dropdown`
+  (`single_product_survey`); l'`value_to_store` dell'opzione scelta è l'ID numerico del prodotto
+  (es. `Kilocal AGE Menopausa` → `23`).
+
 ## Related
+
+- [[survey-domande-backend]]
 
 - [[authentication]]
 - [[profilo]]

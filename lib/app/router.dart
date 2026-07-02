@@ -59,7 +59,15 @@ final GoRouter appRouter = GoRouter(
       path: '/notifications',
       builder: (context, state) => const NotificationsScreen(),
     ),
-    GoRoute(path: '/survey', builder: (context, state) => const SurveyScreen()),
+    GoRoute(
+      path: '/survey',
+      // `internalName` selects the CMS survey (type_survey, starter_kit,
+      // qr_pharmacy_1/2, single_product_survey). Defaults to the initial survey.
+      builder: (context, state) => SurveyScreen(
+        internalName:
+            state.uri.queryParameters['internalName'] ?? 'type_survey',
+      ),
+    ),
     GoRoute(
       path: '/momenti/:id',
       builder: (context, state) =>

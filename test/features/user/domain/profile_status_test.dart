@@ -46,22 +46,36 @@ void main() {
   });
 
   group('ProfileStatus.route', () {
-    // TODO: revert to '/survey' once the survey APIs are implemented.
-    test('temporarily routes survey statuses to /home', () {
-      expect(ProfileStatus.initialSurvey.route, '/home');
-      expect(ProfileStatus.typeSurvey.route, '/home');
+    test('routes pending-survey statuses to the matching CMS survey', () {
+      expect(
+        ProfileStatus.initialSurvey.route,
+        '/survey?internalName=type_survey',
+      );
+      expect(
+        ProfileStatus.starterKit.route,
+        '/survey?internalName=starter_kit',
+      );
+      expect(
+        ProfileStatus.qrPharmacy1.route,
+        '/survey?internalName=qr_pharmacy_1',
+      );
+      expect(
+        ProfileStatus.qrPharmacy2.route,
+        '/survey?internalName=qr_pharmacy_2',
+      );
     });
 
-    test('routes active and QR statuses to /home', () {
+    test('routes completed / active statuses to /home', () {
+      expect(ProfileStatus.typeSurvey.route, '/home');
       expect(ProfileStatus.active.route, '/home');
       expect(ProfileStatus.activeRestrictedAccess.route, '/home');
-      expect(ProfileStatus.qrPharmacy1.route, '/home');
-      expect(ProfileStatus.qrPharmacy2.route, '/home');
+      expect(ProfileStatus.unknown.route, '/home');
     });
 
-    test('routes starter_kit and unknown to /home as fallback', () {
-      expect(ProfileStatus.starterKit.route, '/home');
-      expect(ProfileStatus.unknown.route, '/home');
+    test('surveyInternalName exposes the pending survey (or null)', () {
+      expect(ProfileStatus.initialSurvey.surveyInternalName, 'type_survey');
+      expect(ProfileStatus.starterKit.surveyInternalName, 'starter_kit');
+      expect(ProfileStatus.active.surveyInternalName, isNull);
     });
   });
 }

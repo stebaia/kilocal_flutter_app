@@ -61,27 +61,35 @@ enum ProfileStatus {
 
   /// The post-login route implied by this status.
   ///
-  /// Mapping from `wiki/user-session-implementation-plan.md`:
-  /// - `initial_survey`, `type_survey` → `/survey`
-  /// - `active`, `active_restricted_access`, `qr_pharmacy_1`, `qr_pharmacy_2`,
-  ///   `starter_kit`, `unknown` → `/home`
-  ///
-  /// TODO: survey APIs and dynamic questions are not implemented yet, so
-  /// `initial_survey` / `type_survey` temporarily route to `/home` to allow
-  /// testing the rest of the app. Revert to `/survey` once the survey flow is
-  /// wired to the CMS.
+  /// Onboarding drives which CMS survey to open (`internalName`), gated on
+  /// `profile_status` (see `wiki/survey.md`):
+  /// - `initial_survey` → the initial survey (`type_survey`)
+  /// - `starter_kit` → the post-purchase survey (`starter_kit`)
+  /// - `qr_pharmacy_1` / `qr_pharmacy_2` → the matching pharmacy survey
+  /// - `active`, `active_restricted_access`, `type_survey`, `unknown` → `/home`
   String? get route {
+    final survey = surveyInternalName;
+    if (survey != null) return '/survey?internalName=$survey';
+    return '/home';
+  }
+
+  /// The CMS survey `internal_name` the user still has to complete for this
+  /// status, or `null` if there is no pending survey (→ `/home`).
+  String? get surveyInternalName {
     switch (this) {
       case initialSurvey:
+        return 'type_survey';
+      case starterKit:
+        return 'starter_kit';
+      case qrPharmacy1:
+        return 'qr_pharmacy_1';
+      case qrPharmacy2:
+        return 'qr_pharmacy_2';
       case typeSurvey:
-        return '/home';
       case active:
       case activeRestrictedAccess:
-      case qrPharmacy1:
-      case qrPharmacy2:
-      case starterKit:
       case unknown:
-        return '/home';
+        return null;
     }
   }
 }

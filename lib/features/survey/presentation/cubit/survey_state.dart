@@ -1,42 +1,93 @@
 part of 'survey_cubit.dart';
 
-enum SurveyStatus { initial, inProgress, completed }
+enum SurveyStatus {
+  initial,
+  loading,
+  inProgress,
+  submitting,
+  completed,
+  failure,
+}
 
 class SurveyState extends Equatable {
   const SurveyState({
     this.status = SurveyStatus.initial,
-    this.steps = const [],
-    this.currentStep = 0,
+    this.survey,
+    this.visibleSections = const [],
+    this.currentIndex = 0,
     this.answers = const {},
+    this.selectedPharmacy,
+    this.submitResult,
+    this.errorMessage,
   });
 
   final SurveyStatus status;
-  final List<SurveyStep> steps;
-  final int currentStep;
-  final Map<int, dynamic> answers;
+  final Survey? survey;
 
-  SurveyStep? get currentStepData =>
-      steps.isNotEmpty && currentStep < steps.length
-      ? steps[currentStep]
+  /// Sections currently visible given the answers so far (conditions applied).
+  final List<SurveySection> visibleSections;
+
+  /// Index into [visibleSections].
+  final int currentIndex;
+
+  /// Answers keyed by section id.
+  final Map<String, SurveyAnswer> answers;
+
+  /// The Kilocal Point chosen in a `load_kilocal_points` step, sent as
+  /// `pharmacy_data`.
+  final Pharmacy? selectedPharmacy;
+
+  final SurveySubmitResult? submitResult;
+  final String? errorMessage;
+
+  SurveySection? get currentSection =>
+      currentIndex >= 0 && currentIndex < visibleSections.length
+      ? visibleSections[currentIndex]
       : null;
 
-  bool get isFirstStep => currentStep == 0;
-  bool get isLastStep => currentStep == steps.length - 1;
+  SurveyAnswer? get currentAnswer {
+    final section = currentSection;
+    return section == null ? null : answers[section.id];
+  }
+
+  bool get isFirstStep => currentIndex == 0;
+  bool get isLastStep => currentIndex >= visibleSections.length - 1;
+
+  /// 0..1 progress across the visible sections.
+  double get progress =>
+      visibleSections.isEmpty ? 0 : (currentIndex + 1) / visibleSections.length;
 
   SurveyState copyWith({
     SurveyStatus? status,
-    List<SurveyStep>? steps,
-    int? currentStep,
-    Map<int, dynamic>? answers,
+    Survey? survey,
+    List<SurveySection>? visibleSections,
+    int? currentIndex,
+    Map<String, SurveyAnswer>? answers,
+    Pharmacy? selectedPharmacy,
+    SurveySubmitResult? submitResult,
+    String? errorMessage,
   }) {
     return SurveyState(
       status: status ?? this.status,
-      steps: steps ?? this.steps,
-      currentStep: currentStep ?? this.currentStep,
+      survey: survey ?? this.survey,
+      visibleSections: visibleSections ?? this.visibleSections,
+      currentIndex: currentIndex ?? this.currentIndex,
       answers: answers ?? this.answers,
+      selectedPharmacy: selectedPharmacy ?? this.selectedPharmacy,
+      submitResult: submitResult ?? this.submitResult,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, steps, currentStep, answers];
+  List<Object?> get props => [
+    status,
+    survey,
+    visibleSections,
+    currentIndex,
+    answers,
+    selectedPharmacy,
+    submitResult,
+    errorMessage,
+  ];
 }

@@ -23,6 +23,10 @@ abstract final class AppColors {
   static const Color surface = Color(0xFFFFFFFF);
   static const Color accent = Color(0xFFE51E4D);
   static const Color accentSoft = Color(0xFFFCE7EC);
+
+  /// Magenta highlight used for the biotype name on the survey result screen
+  /// (e.g. "Tipo 4 - Pera").
+  static const Color typeHighlight = Color(0xFFE5157F);
   static const Color borderCard = Color(0xFFC2C2C2);
   static const Color textPrimary = ink;
   static const Color textSecondary = Color(0xFF6B6B72);
@@ -35,6 +39,14 @@ abstract final class AppColors {
   static const LinearGradient brandGradient = LinearGradient(
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
+    colors: [brandPink, brandCrimson],
+  );
+
+  /// Diagonal brand gradient (top-left -> bottom-right) used full-bleed on the
+  /// splash screen. Darker crimson at the top, warmer coral toward the bottom.
+  static const LinearGradient brandGradientSplash = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomRight,
     colors: [brandPink, brandCrimson],
   );
 
