@@ -9,15 +9,17 @@ class BrandGradientBackground extends StatelessWidget {
     super.key,
     this.child,
     this.showTopGlow = false,
+    this.gradient = AppColors.brandGradient,
   });
 
   final Widget? child;
   final bool showTopGlow;
+  final Gradient gradient;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(gradient: AppColors.brandGradient),
+      decoration: BoxDecoration(gradient: gradient),
       child: Stack(
         fit: StackFit.expand,
         children: [

@@ -8,7 +8,6 @@ import '../domain/home_repository.dart';
 import 'dto/home_continue_step_dto.dart';
 import 'dto/home_month_progress_dto.dart';
 import 'dto/home_moment_dto.dart';
-import 'dto/home_partner_dto.dart';
 
 /// Repository implementation that loads the home dashboard from GraphQL.
 class HomeRepositoryImpl implements HomeRepository {
@@ -137,20 +136,6 @@ query HomeMoments($now: String!, $lang: String!) {
 }
 ''';
 
-  static const _partnersQuery = r'''
-query HomePartners($limit: Int!) {
-  partners(limit: $limit) {
-    id
-    name
-    main_partner
-    asset {
-      id
-      filename_download
-    }
-  }
-}
-''';
-
   @override
   Future<HomeData> fetchHome({
     required String myId,
@@ -163,7 +148,6 @@ query HomePartners($limit: Int!) {
     final continueAndText = await _fetchContinueAndText(myId, lang);
     final monthProgress = await _fetchMonthProgress(myId, currentMonth);
     final moment = await _fetchMoment(now, lang);
-    final partners = await _fetchPartners(limit: 1);
 
     final (continueStepDto, monthText) = continueAndText;
     final continueStep =
@@ -207,15 +191,11 @@ query HomePartners($limit: Int!) {
           route: '/momenti/home',
           assetName: moment?.imageFileId == null ? _momentFallbackImage : null,
         ),
-        ...partners.map(
-          (p) => HomeActionCard(
-            title: p.name ?? 'Benefit',
-            imageUrl: p.imageFileId != null
-                ? '${Env.baseUrl}/assets/${p.imageFileId}/${p.imageFileName}'
-                : _benefitFallbackImage,
-            route: '/benefits',
-            assetName: p.imageFileId == null ? _benefitFallbackImage : null,
-          ),
+        HomeActionCard(
+          title: 'Benefit',
+          imageUrl: _benefitFallbackImage,
+          route: '/benefits',
+          assetName: _benefitFallbackImage,
         ),
       ],
     );
@@ -375,35 +355,6 @@ query HomePartners($limit: Int!) {
         imageFileId: file?['id'] as String?,
         imageFileName: file?['filename_download'] as String?,
       );
-    } on ApiException {
-      rethrow;
-    } on DioException catch (e) {
-      throw ApiException.fromDio(e);
-    }
-  }
-
-  Future<List<HomePartnerDto>> _fetchPartners({required int limit}) async {
-    try {
-      final result = await _graphqlClient.query(
-        _partnersQuery,
-        variables: {'limit': limit},
-      );
-
-      final data = result['data'] as Map<String, dynamic>?;
-      final partners = data?['partners'] as List<dynamic>?;
-
-      return partners?.map((p) {
-            final partner = p as Map<String, dynamic>;
-            final file = partner['asset'] as Map<String, dynamic>?;
-            return HomePartnerDto(
-              id: partner['id'] as String?,
-              name: partner['name'] as String?,
-              mainPartner: partner['main_partner'] as bool?,
-              imageFileId: file?['id'] as String?,
-              imageFileName: file?['filename_download'] as String?,
-            );
-          }).toList() ??
-          const [];
     } on ApiException {
       rethrow;
     } on DioException catch (e) {

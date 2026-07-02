@@ -35,17 +35,12 @@ class _SplashView extends StatelessWidget {
           }
         },
         child: const BrandGradientBackground(
-          showTopGlow: true,
+          gradient: AppColors.brandGradientSplash,
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Placeholder for the 3D meditating figure asset.
-                // Replace with Image.asset('assets/images/splash_figure.png') once available.
-                FlutterLogo(size: 180),
-                SizedBox(height: 24),
-                CircularProgressIndicator(color: AppColors.neutralWhite),
-              ],
+            child: Image(
+              image: AssetImage('assets/kilokal.png'),
+              width: 200,
+              fit: BoxFit.contain,
             ),
           ),
         ),

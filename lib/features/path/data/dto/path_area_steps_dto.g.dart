@@ -96,7 +96,7 @@ Map<String, dynamic> _$PathActiveTimeframeDtoToJson(
 
 PathGroupDto _$PathGroupDtoFromJson(Map<String, dynamic> json) => PathGroupDto(
   id: _idFromJson(json['id']),
-  sort: (json['sort'] as num).toInt(),
+  sort: (json['sort'] as num?)?.toInt(),
   isPercorsoMainTab: json['is_percorso_main_tab'] as bool,
   showLimitedStepsValue: (json['show_limited_steps_value'] as num?)?.toInt(),
   icon: json['icon'] == null

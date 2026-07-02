@@ -130,7 +130,7 @@ class PathActiveTimeframeDto {
 class PathGroupDto {
   const PathGroupDto({
     required this.id,
-    required this.sort,
+    this.sort,
     required this.isPercorsoMainTab,
     this.showLimitedStepsValue,
     this.icon,
@@ -145,7 +145,12 @@ class PathGroupDto {
 
   @JsonKey(fromJson: _idFromJson)
   final String id;
-  final int sort;
+
+  /// Group ordering hint. Nullable: the backend sends `sort: null` for groups
+  /// (unlike steps/timeframes). Never read by the app — groups are picked by
+  /// `is_percorso_main_tab`, not sorted — but a non-null cast here crashed the
+  /// whole area parse.
+  final int? sort;
 
   @JsonKey(name: 'is_percorso_main_tab')
   final bool isPercorsoMainTab;

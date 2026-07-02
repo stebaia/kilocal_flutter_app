@@ -35,7 +35,7 @@ class SplashCubit extends Cubit<SplashState> {
       emit(
         state.copyWith(
           status: SplashStatus.ready,
-          route: _userCubit.state.route ?? '/home',
+          route:'/home'  // _userCubit.state.route ?? '/home',
         ),
       );
     } on ApiException {
