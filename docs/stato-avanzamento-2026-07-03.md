@@ -72,7 +72,7 @@ Requisiti richiesti e stato attuale nel codice:
 
 ### D) Monitoring & Analytics
 
-**Stato attuale:** 🟢 **integrato a livello di codice.** Stack Firebase completo cablato in Clean Architecture (astrazioni + implementazioni Firebase + DI). Manca solo il provisioning del progetto Firebase (`flutterfire configure`, che genera `firebase_options.dart` + i file nativi) e, per le push iOS, la configurazione APNs lato Apple Developer. Guida operativa: **`docs/firebase-setup.md`**.
+**Stato attuale:** 🟢 **integrato e verificato.** Stack Firebase completo cablato in Clean Architecture (astrazioni + implementazioni Firebase + DI), progetto Firebase `kilokal-app-flutter` configurato via `flutterfire configure`. **Build verificati:** Android `flutter build apk --debug` ✅ e iOS simulator `flutter build ios --debug --simulator` ✅; app avviata su simulatore iPhone 16 con Firebase inizializzato (log `[Firebase/Crashlytics] Version 12.14.0`). Resta da fare solo la configurazione APNs lato Apple Developer per le push iOS. Guida operativa: **`docs/firebase-setup.md`**.
 
 | Strumento | Scopo | Stato |
 |-----------|-------|:----:|
@@ -83,7 +83,16 @@ Requisiti richiesti e stato attuale nel codice:
 
 **Collection disabilitata in debug** (Crashlytics/Analytics/Performance) per non inquinare le dashboard; abilitata automaticamente in release. Override via `--dart-define`.
 
-Passi rimanenti (non eseguibili da codice): vedi `docs/firebase-setup.md` §2 (`flutterfire configure`) e §4 (APNs iOS).
+Passi rimanenti (non eseguibili da codice): vedi `docs/firebase-setup.md` §4 (APNs iOS).
+
+> 🔧 **DEBITO TECNICO — aggiornare Xcode (da fare più avanti).** Le versioni Firebase sono state **volutamente bloccate** (`firebase_core: 4.9.0` → Firebase iOS SDK 12.13.0) perché le release più recenti (firebase_core 4.11 → iOS SDK 12.15) richiedono **Swift tools 6.1 = Xcode 16.3+**, mentre la macchina è su **Xcode 16.2**. Downgrade scelto per rispettare il SAL corrente.
+>
+> Quando si aggiorna Xcode a **16.3+**:
+> 1. Rimuovere i pin in `pubspec.yaml` e tornare alle versioni Firebase più recenti (`flutter pub upgrade firebase_core firebase_crashlytics firebase_analytics firebase_performance firebase_messaging`).
+> 2. Valutare la rimozione del fork `live_activities` in `third_party/` e del relativo `dependency_override` (esiste solo perché l'upstream compila su Xcode 16.3+).
+> 3. Ripulire lo stato SPM: `flutter clean` + eliminare `ios/.../swiftpm/Package.resolved` e la DerivedData di Runner, poi `flutter pub get`.
+>
+> Nota minore: la build phase Xcode "FlutterFire: upload-crashlytics-symbols" è stata patchata per **saltare su simulatore** e quando lo script non è presente (evitava un fallimento su debug/simulator); il caricamento simboli resta attivo per le build device/release.
 
 ---
 
