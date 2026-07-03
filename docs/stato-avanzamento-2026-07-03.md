@@ -87,8 +87,10 @@ Passi rimanenti (non eseguibili da codice): vedi `docs/firebase-setup.md` §4 (A
 
 > 🔧 **DEBITO TECNICO — aggiornare Xcode (da fare più avanti).** Le versioni Firebase sono state **volutamente bloccate** (`firebase_core: 4.9.0` → Firebase iOS SDK 12.13.0) perché le release più recenti (firebase_core 4.11 → iOS SDK 12.15) richiedono **Swift tools 6.1 = Xcode 16.3+**, mentre la macchina è su **Xcode 16.2**. Downgrade scelto per rispettare il SAL corrente.
 >
+> Il downgrade ha richiesto anche un `dependency_override` su **`firebase_core_platform_interface: 7.0.1`**: la 7.1.0 aggiunge un 15° campo (`recaptchaSiteKey`) al pigeon `FirebaseOptions`, ma il codice nativo iOS di `firebase_core 4.9.0` ne invia 14 → `RangeError` a `Firebase.initializeApp`. Inoltre la deployment target iOS è stata alzata a **15.0** (richiesta da `firebase_performance`).
+>
 > Quando si aggiorna Xcode a **16.3+**:
-> 1. Rimuovere i pin in `pubspec.yaml` e tornare alle versioni Firebase più recenti (`flutter pub upgrade firebase_core firebase_crashlytics firebase_analytics firebase_performance firebase_messaging`).
+> 1. Rimuovere i pin in `pubspec.yaml` (incluso l'override `firebase_core_platform_interface`) e tornare alle versioni Firebase più recenti (`flutter pub upgrade firebase_core firebase_crashlytics firebase_analytics firebase_performance firebase_messaging`).
 > 2. Valutare la rimozione del fork `live_activities` in `third_party/` e del relativo `dependency_override` (esiste solo perché l'upstream compila su Xcode 16.3+).
 > 3. Ripulire lo stato SPM: `flutter clean` + eliminare `ios/.../swiftpm/Package.resolved` e la DerivedData di Runner, poi `flutter pub get`.
 >
