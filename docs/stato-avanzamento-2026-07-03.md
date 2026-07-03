@@ -72,16 +72,18 @@ Requisiti richiesti e stato attuale nel codice:
 
 ### D) Monitoring & Analytics
 
-**Stato attuale:** non ancora integrato (nessuna dipendenza Firebase/analytics presente nel progetto). Da **predisporre**. Proposta di stack:
+**Stato attuale:** 🟢 **integrato a livello di codice.** Stack Firebase completo cablato in Clean Architecture (astrazioni + implementazioni Firebase + DI). Manca solo il provisioning del progetto Firebase (`flutterfire configure`, che genera `firebase_options.dart` + i file nativi) e, per le push iOS, la configurazione APNs lato Apple Developer. Guida operativa: **`docs/firebase-setup.md`**.
 
-| Strumento | Scopo |
-|-----------|-------|
-| **Firebase Crashlytics** | Crash reporting (crash e non-fatal errors) in tempo reale. |
-| **Firebase Analytics** (o equivalente: Mixpanel / Amplitude) | Tracciamento comportamenti utente, funnel, retention, eventi chiave (onboarding completato, percorso avviato, survey inviata, ecc.). |
-| **Firebase Performance Monitoring** | Latenze di rete, tempi di avvio, slow/frozen frames (slow renders). |
-| **Firebase Cloud Messaging (FCM)** | Infrastruttura per le **notifiche push** (copre anche il punto 9). |
+| Strumento | Scopo | Stato |
+|-----------|-------|:----:|
+| **Firebase Crashlytics** | Crash reporting (crash e non-fatal errors) in tempo reale. | ✅ codice: hook `FlutterError` + `PlatformDispatcher` + `runZonedGuarded` in `bootstrap.dart`. |
+| **Firebase Analytics** | Tracciamento eventi chiave (login, onboarding completato, survey inviata, path step, ecc.). | ✅ codice: `AnalyticsService` + catalogo eventi tipizzato, eventi già emessi dai cubit. |
+| **Firebase Performance Monitoring** | Latenze di rete (trace HTTP su Dio) + trace custom. | ✅ codice: `PerformanceInterceptor` + `MonitoringService.startTrace`. |
+| **Firebase Cloud Messaging (FCM)** | Infrastruttura per le **notifiche push** (copre anche il punto 9). | ✅ codice: `PushNotificationService` (permessi, token, handler foreground/background/terminated). Richiede APNs su iOS. |
 
-Integrando Firebase si coprono in un colpo solo crash reporting, analytics, performance e push notifications.
+**Collection disabilitata in debug** (Crashlytics/Analytics/Performance) per non inquinare le dashboard; abilitata automaticamente in release. Override via `--dart-define`.
+
+Passi rimanenti (non eseguibili da codice): vedi `docs/firebase-setup.md` §2 (`flutterfire configure`) e §4 (APNs iOS).
 
 ---
 
@@ -90,14 +92,13 @@ Integrando Firebase si coprono in un colpo solo crash reporting, analytics, perf
 **Da avviare (⚪):**
 1. Attivazione tramite codice prodotto (punto 3) — sblocca la personalizzazione del Percorso.
 2. Strumenti: Promemoria, Glossario, Gallery.
-3. Integrazione Firebase (Crashlytics, Analytics, Performance, FCM/push).
-4. Build di rilascio e pubblicazione store.
+3. Build di rilascio e pubblicazione store.
 
 **Da completare (🟡):**
-5. Collegamento API del Diario.
-6. Chiusura survey (6 domande aperte al backend).
-7. Filtro Benefit e selettore intervallo Statistiche (dipendenze backend).
-8. Gating log nelle build di rilascio.
+4. Collegamento API del Diario.
+5. Chiusura survey (6 domande aperte al backend).
+6. Filtro Benefit e selettore intervallo Statistiche (dipendenze backend).
+7. Firebase: provisioning progetto (`flutterfire configure`) + APNs iOS — codice pronto, vedi `docs/firebase-setup.md`.
 
 **Già coperto (✅):**
 - Accesso utente completo (registrazione/login/recupero password).

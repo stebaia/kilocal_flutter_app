@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/path_area_detail.dart';
@@ -10,11 +11,15 @@ part 'path_detail_state.dart';
 
 /// Cubit that loads and exposes the detail of a single path area.
 class PathDetailCubit extends Cubit<PathDetailState> {
-  PathDetailCubit({required PathRepository pathRepository})
-    : _pathRepository = pathRepository,
-      super(const PathDetailState());
+  PathDetailCubit({
+    required PathRepository pathRepository,
+    required AnalyticsEvents analytics,
+  }) : _pathRepository = pathRepository,
+       _analytics = analytics,
+       super(const PathDetailState());
 
   final PathRepository _pathRepository;
+  final AnalyticsEvents _analytics;
 
   Future<void> load({
     required String area,
@@ -48,6 +53,7 @@ class PathDetailCubit extends Cubit<PathDetailState> {
   }) async {
     try {
       await _pathRepository.startStep(stepId);
+      await _analytics.pathStepOpened(pathId: area, stepId: stepId);
       await load(area: area, l10n: l10n);
     } on ApiException catch (e) {
       emit(state.copyWith(status: PathDetailStatus.error, error: e));

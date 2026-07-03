@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/pharmacy.dart';
 import '../../domain/entities/survey_answer.dart';
@@ -12,15 +15,20 @@ part 'survey_state.dart';
 /// Drives the CMS-defined survey wizard: loads the survey, applies section
 /// visibility conditions, collects answers, and submits.
 class SurveyCubit extends Cubit<SurveyState> {
-  SurveyCubit({required SurveyRepository repository})
-    : _repository = repository,
-      super(const SurveyState());
+  SurveyCubit({
+    required SurveyRepository repository,
+    required AnalyticsEvents analytics,
+  }) : _repository = repository,
+       _analytics = analytics,
+       super(const SurveyState());
 
   final SurveyRepository _repository;
+  final AnalyticsEvents _analytics;
 
   /// Loads the survey [internalName] and starts the wizard.
   Future<void> start(String internalName) async {
     emit(state.copyWith(status: SurveyStatus.loading, errorMessage: null));
+    unawaited(_analytics.onboardingStarted());
     try {
       // Ensure the user_details row exists before collecting answers.
       await _repository.ensureDetails();
@@ -188,6 +196,8 @@ class SurveyCubit extends Cubit<SurveyState> {
         survey: survey,
         pharmacy: state.selectedPharmacy,
       );
+      await _analytics.surveySubmitted(survey.internalName);
+      await _analytics.onboardingCompleted();
       emit(
         state.copyWith(status: SurveyStatus.completed, submitResult: result),
       );

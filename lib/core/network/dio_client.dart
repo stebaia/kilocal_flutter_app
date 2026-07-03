@@ -12,7 +12,11 @@ import 'token_store.dart';
 /// From `wiki/flutter-architecture.md`: Retrofit over Dio, with interceptors for
 /// Bearer auth, single-shot token refresh, and centralized error mapping.
 class DioClient {
-  DioClient({required TokenStore tokenStore, void Function()? onAuthExpired}) {
+  DioClient({
+    required TokenStore tokenStore,
+    void Function()? onAuthExpired,
+    List<Interceptor> extraInterceptors = const [],
+  }) {
     _dio = _baseDio();
 
     // Bare client (no auth interceptor) used for token refresh and retries to
@@ -24,6 +28,9 @@ class DioClient {
       // any later interceptor (e.g. ErrorInterceptor) can `reject()` and
       // truncate the error chain, which would hide failures from the logs.
       if (kDebugMode) const LoggingInterceptor(),
+      // e.g. Firebase Performance HTTP tracing. Runs after logging but before
+      // auth/error handling so it observes the full request lifecycle.
+      ...extraInterceptors,
       AuthInterceptor(
         tokenStore: tokenStore,
         refreshClient: refreshClient,

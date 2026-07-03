@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/monitoring/analytics_service.dart';
+import '../../../../core/monitoring/monitoring_service.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../domain/app_user.dart';
 import '../../domain/profile_status.dart';
@@ -15,11 +17,18 @@ part 'user_state.dart';
 /// successful login and on app restart when a token is present. Call [clear] on
 /// logout to reset the cached session.
 class UserCubit extends Cubit<UserState> {
-  UserCubit({required UserRepository userRepository})
-    : _userRepository = userRepository,
-      super(const UserState());
+  UserCubit({
+    required UserRepository userRepository,
+    required MonitoringService monitoring,
+    required AnalyticsService analytics,
+  }) : _userRepository = userRepository,
+       _monitoring = monitoring,
+       _analytics = analytics,
+       super(const UserState());
 
   final UserRepository _userRepository;
+  final MonitoringService _monitoring;
+  final AnalyticsService _analytics;
 
   String? _myId;
 
@@ -38,6 +47,10 @@ class UserCubit extends Cubit<UserState> {
     try {
       final user = await _userRepository.fetchCurrentUser();
       _myId = user.id;
+
+      // Tag crash reports and analytics with the session user.
+      await _monitoring.setUserId(_myId);
+      await _analytics.setUserId(_myId);
 
       final details = await _userRepository.fetchUserDetails(_myId!);
 
@@ -58,6 +71,8 @@ class UserCubit extends Cubit<UserState> {
   /// Clears the cached session. Must be called on logout.
   void clear() {
     _myId = null;
+    _monitoring.setUserId(null);
+    _analytics.setUserId(null);
     emit(const UserState());
   }
 }

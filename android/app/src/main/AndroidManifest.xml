@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Allows opening the system Clock app to set a workout timer. -->
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <!-- Required for FCM push notifications on Android 13+ (API 33). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
         android:label="kilocal_flutter_app"
         android:name="${applicationName}"

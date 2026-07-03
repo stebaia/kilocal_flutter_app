@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../user/presentation/cubit/user_cubit.dart';
 import '../../domain/auth_repository.dart';
@@ -11,12 +12,15 @@ class LoginCubit extends Cubit<LoginState> {
   LoginCubit({
     required AuthRepository authRepository,
     required UserCubit userCubit,
+    required AnalyticsEvents analytics,
   }) : _authRepository = authRepository,
        _userCubit = userCubit,
+       _analytics = analytics,
        super(const LoginState());
 
   final AuthRepository _authRepository;
   final UserCubit _userCubit;
+  final AnalyticsEvents _analytics;
 
   void emailChanged(String value) {
     emit(state.copyWith(email: value, clearError: true));
@@ -49,6 +53,8 @@ class LoginCubit extends Cubit<LoginState> {
       );
 
       await _userCubit.loadSession();
+
+      await _analytics.login();
 
       emit(
         state.copyWith(

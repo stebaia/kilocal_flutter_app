@@ -1,9 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
+import '../core/monitoring/analytics_events.dart';
+import '../core/monitoring/analytics_service.dart';
+import '../core/monitoring/firebase_analytics_service.dart';
+import '../core/monitoring/firebase_monitoring_service.dart';
+import '../core/monitoring/monitoring_service.dart';
+import '../core/monitoring/performance_interceptor.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/graphql_client.dart';
 import '../core/network/token_store.dart';
+import '../core/push/push_notification_service.dart';
 import 'router.dart';
 import '../features/auth/data/auth_api.dart';
 import '../features/auth/data/auth_repository_impl.dart';
@@ -57,6 +64,23 @@ import '../features/user/presentation/cubit/user_cubit.dart';
 final GetIt getIt = GetIt.instance;
 
 void configureDependencies() {
+  // --- Core: monitoring & analytics ---
+  // Registered first so the Dio client can attach the performance interceptor
+  // and other layers can report errors/events. Swap the Firebase impls for the
+  // Noop variants in tests via a test-only DI setup.
+  getIt.registerLazySingleton<MonitoringService>(
+    () => FirebaseMonitoringService(),
+  );
+  getIt.registerLazySingleton<AnalyticsService>(
+    () => FirebaseAnalyticsService(),
+  );
+  getIt.registerLazySingleton<AnalyticsEvents>(
+    () => AnalyticsEvents(getIt<AnalyticsService>()),
+  );
+  getIt.registerLazySingleton<PushNotificationService>(
+    () => PushNotificationService(),
+  );
+
   // --- Core: token persistence ---
   getIt.registerLazySingleton<TokenStore>(TokenStore.new);
 
@@ -65,6 +89,7 @@ void configureDependencies() {
     () => DioClient(
       tokenStore: getIt<TokenStore>(),
       onAuthExpired: _onAuthExpired,
+      extraInterceptors: [PerformanceInterceptor()],
     ),
   );
 
@@ -95,13 +120,18 @@ void configureDependencies() {
     ),
   );
   getIt.registerLazySingleton<UserCubit>(
-    () => UserCubit(userRepository: getIt<UserRepository>()),
+    () => UserCubit(
+      userRepository: getIt<UserRepository>(),
+      monitoring: getIt<MonitoringService>(),
+      analytics: getIt<AnalyticsService>(),
+    ),
   );
 
   getIt.registerFactory<LoginCubit>(
     () => LoginCubit(
       authRepository: getIt<AuthRepository>(),
       userCubit: getIt<UserCubit>(),
+      analytics: getIt<AnalyticsEvents>(),
     ),
   );
   getIt.registerFactory<RegisterCubit>(
@@ -127,7 +157,10 @@ void configureDependencies() {
     () => PathCubit(pathRepository: getIt<PathRepository>()),
   );
   getIt.registerFactory<PathDetailCubit>(
-    () => PathDetailCubit(pathRepository: getIt<PathRepository>()),
+    () => PathDetailCubit(
+      pathRepository: getIt<PathRepository>(),
+      analytics: getIt<AnalyticsEvents>(),
+    ),
   );
   getIt.registerLazySingleton<StatisticsRepository>(
     () => StatisticsRepositoryImpl(dio: getIt<Dio>()),
@@ -207,7 +240,10 @@ void configureDependencies() {
     ),
   );
   getIt.registerFactory<SurveyCubit>(
-    () => SurveyCubit(repository: getIt<SurveyRepository>()),
+    () => SurveyCubit(
+      repository: getIt<SurveyRepository>(),
+      analytics: getIt<AnalyticsEvents>(),
+    ),
   );
 
   // --- Feature: Settings API ---
