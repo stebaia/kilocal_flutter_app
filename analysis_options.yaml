@@ -4,3 +4,6 @@ analyzer:
   exclude:
     # Vendored fork of live_activities (patched for Xcode 16.2); not our code.
     - third_party/**
+    # Build output, incl. iOS SPM package checkouts (e.g. firebase_* test files)
+    # that are not part of this app's source.
+    - build/**

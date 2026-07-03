@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
-
 import 'app/app.dart';
-import 'app/di.dart';
+import 'app/bootstrap.dart';
 
 void main() {
-  WidgetsFlutterBinding.ensureInitialized();
-  configureDependencies();
-  runApp(const KilocalApp());
+  // Firebase init, crash reporting, analytics, and DI are set up in bootstrap,
+  // which runs the app inside a guarded zone.
+  bootstrap(() => const KilocalApp());
 }
