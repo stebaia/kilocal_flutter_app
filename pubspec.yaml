@@ -50,6 +50,14 @@ dev_dependencies:
 dependency_overrides:
   live_activities:
     path: third_party/live_activities
+  # Firebase is pinned to firebase_core 4.9.0 for Xcode 16.2 compatibility (see
+  # firebase_setup docs / tech-debt note). Its native iOS pigeon sends 14
+  # FirebaseOptions fields, but firebase_core_platform_interface 7.1.0 added a
+  # 15th (recaptchaSiteKey) and its decoder reads result[14], causing a
+  # RangeError at Firebase.initializeApp. Pin the platform interface to 7.0.1 so
+  # the Dart decoder matches the native encoder. Remove together with the
+  # Firebase pins when upgrading Xcode.
+  firebase_core_platform_interface: 7.0.1
 
 flutter:
   generate: true
