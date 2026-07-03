@@ -58,6 +58,7 @@ class SurveyOptionsList extends StatelessWidget {
     required this.onToggle,
     this.otherValue,
     this.onOtherChanged,
+    this.otherFieldKey,
   });
 
   final List<SurveyOption> options;
@@ -65,6 +66,10 @@ class SurveyOptionsList extends StatelessWidget {
   final ValueChanged<SurveyOption> onToggle;
   final String? otherValue;
   final ValueChanged<String>? onOtherChanged;
+
+  /// Key for the free-text "Specifica" field, so consecutive questions with an
+  /// `is_other` option don't reuse the previous step's field state.
+  final Key? otherFieldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -84,8 +89,12 @@ class SurveyOptionsList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Chips hug their content and stack one per line, left-aligned.
+        // Keyed by option id so the AnimatedContainer doesn't reuse the previous
+        // step's chip Element (which flashed its old "selected" state for a frame
+        // on step change).
         for (final o in options)
           Padding(
+            key: ValueKey('survey-chip-${o.id}'),
             padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
             child: Align(
               alignment: Alignment.centerLeft,
@@ -99,6 +108,7 @@ class SurveyOptionsList extends StatelessWidget {
         if (showOther) ...[
           const SizedBox(height: AppSpacing.space2xs),
           SurveyTextField(
+            key: otherFieldKey,
             hint: 'Specifica',
             value: otherValue,
             onChanged: onOtherChanged ?? (_) {},

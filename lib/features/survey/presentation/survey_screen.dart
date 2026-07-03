@@ -239,18 +239,22 @@ class _QuestionInput extends StatelessWidget {
           );
         }
         return SurveyOptionsList(
+          key: ValueKey('survey-options-${section.id}'),
           options: question.options,
           selectedIds: selectedIds,
           otherValue: answer?.otherValue,
           onOtherChanged: cubit.setOtherValue,
+          otherFieldKey: ValueKey('survey-other-${section.id}'),
           onToggle: cubit.selectRadio,
         );
       case SurveyAnswerType.checkbox:
         return SurveyOptionsList(
+          key: ValueKey('survey-options-${section.id}'),
           options: question.options,
           selectedIds: selectedIds,
           otherValue: answer?.otherValue,
           onOtherChanged: cubit.setOtherValue,
+          otherFieldKey: ValueKey('survey-other-${section.id}'),
           onToggle: cubit.toggleCheckbox,
         );
       case SurveyAnswerType.scale:
@@ -268,6 +272,9 @@ class _QuestionInput extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(top: AppSpacing.spaceXl),
             child: SurveyDateField(
+              // Keyed by section so consecutive text/date steps don't reuse the
+              // previous step's field state (which leaked the prior answer).
+              key: ValueKey('survey-date-${section.id}'),
               value: answer?.textValue,
               hint: question.placeholder,
               onChanged: cubit.setText,
@@ -278,13 +285,16 @@ class _QuestionInput extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.only(top: AppSpacing.spaceXl),
           child: SurveyTextField(
+            // Keyed by section so consecutive text steps don't reuse the
+            // previous step's field state (which leaked the prior answer).
+            key: ValueKey('survey-text-${section.id}'),
             large: true,
             hint: question.placeholder?.isNotEmpty ?? false
                 ? question.placeholder
                 : 'Inserisci la risposta',
             value: answer?.textValue,
             onChanged: cubit.setText,
-            
+
             keyboardType: question.inputType == SurveyInputType.number
                 ? const TextInputType.numberWithOptions(decimal: true)
                 : TextInputType.text,
