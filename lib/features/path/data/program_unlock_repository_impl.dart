@@ -1,5 +1,5 @@
-import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../user/domain/user_repository.dart';
 import '../domain/entities/barcode_product.dart';
 import '../domain/program_unlock_repository.dart';
 
@@ -9,10 +9,14 @@ import '../domain/program_unlock_repository.dart';
 /// Barcodes live in a JSON field shaped `[{ "codice": "A947328593" }]`, both on
 /// the product and on each `variants` row. See `wiki/integrazione.md`.
 class ProgramUnlockRepositoryImpl implements ProgramUnlockRepository {
-  ProgramUnlockRepositoryImpl({required GraphqlClient graphqlClient})
-    : _graphqlClient = graphqlClient;
+  ProgramUnlockRepositoryImpl({
+    required GraphqlClient graphqlClient,
+    required UserRepository userRepository,
+  }) : _graphqlClient = graphqlClient,
+       _userRepository = userRepository;
 
   final GraphqlClient _graphqlClient;
+  final UserRepository _userRepository;
 
   static const _barcodeProductsQuery = r'''
 query BarcodeProducts {
@@ -70,14 +74,14 @@ query BarcodeProducts {
 
   @override
   Future<void> unlockWithProduct(BarcodeProduct product) async {
-    // STUB — the backend contract for lifting `active_restricted_access` after a
-    // valid barcode match is not yet defined. See
-    // [[restricted-access-path-gating]] / wiki/integrazione.md ("OPEN (BE)").
-    // Once the backend confirms the field/mutation, wire it here.
-    throw const ApiException(
-      type: ApiErrorType.unknown,
-      statusCode: 501,
-      message: 'Program unlock persistence not implemented (pending backend).',
-    );
+    // Backend contract (confirmed 2026-07-08): posting the starter-kit survey
+    // moves the status by itself, but the app can also lift the restriction
+    // directly via `PATCH /profile`. We take the direct route so the unlock is
+    // immediate: clear `active_restricted_access` by moving to `initial_survey`
+    // (the natural post-purchase step) and flag the kit as purchased.
+    await _userRepository.updateProfile(<String, dynamic>{
+      'has_kit_purchased': true,
+      'profile_status': 'initial_survey',
+    });
   }
 }

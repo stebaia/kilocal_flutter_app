@@ -287,10 +287,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'This code doesn\'t match any Kilocal product. Check it and try again.';
 
   @override
-  String get pathUnlockUnavailable =>
-      'Code verified, but unlocking isn\'t available yet. Please try again later.';
-
-  @override
   String get pathUnlockSuccess => 'Programme unlocked!';
 
   @override

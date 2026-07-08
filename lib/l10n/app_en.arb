@@ -112,7 +112,6 @@
   "pathUnlockCodeHint": "Enter proof-of-purchase code…",
   "pathUnlockSubmit": "Submit",
   "pathUnlockInvalidCode": "This code doesn't match any Kilocal product. Check it and try again.",
-  "pathUnlockUnavailable": "Code verified, but unlocking isn't available yet. Please try again later.",
   "pathUnlockSuccess": "Programme unlocked!",
   "diaryTitle": "Activity diary",
   "benefitsTitle": "Benefits",

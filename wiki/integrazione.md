@@ -65,12 +65,13 @@ product { id title use_for_barcode_check asset { id } } }`. Verified live on cms
     `description`, `avvertenze` → feeds the unlock bottom-sheet copy (product name +
     instructions). Match = codice `_eq` on `products[].barcodes[].codice` OR
     `variants[].barcodes[].codice`.
-  - **OPEN (BE) — only remaining gap:** the *effect* of a valid match is still
-    undocumented. The BE's 2026-07-08 answer covered reading/validating the barcode but
-    NOT the unlock write. After validation what do we write to lift
-    `active_restricted_access`? (a `update_user_details_item` field? a dedicated
-    mutation/endpoint?) Blocks the "Sblocca il programma" sheet's unlock call.
-    See [[restricted-access-path-gating]].
+  - **Unlock write (BE confirmed 2026-07-08):** posting `/api/surveys/starter_kit` (or
+    `qr_pharmacy_2`) moves `profile_status` by itself; alternatively the app can lift the
+    restriction directly with `PATCH /profile` (`/cms/profile`) body
+    `{ "has_kit_purchased": true, "profile_status": "initial_survey" }`. The app takes the
+    direct `PATCH /profile` route (via the existing `UserRepository.updateProfile`) so the
+    unlock is immediate; it then reloads the session so gating re-evaluates.
+    See [[restricted-access-path-gating]]. **No open BE gaps remain for this flow.**
 
 ## Resolves missing-apis §1.2, §3.2
 

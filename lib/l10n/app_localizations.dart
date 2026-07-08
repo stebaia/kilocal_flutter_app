@@ -614,12 +614,6 @@ abstract class AppLocalizations {
   /// **'This code doesn\'t match any Kilocal product. Check it and try again.'**
   String get pathUnlockInvalidCode;
 
-  /// No description provided for @pathUnlockUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Code verified, but unlocking isn\'t available yet. Please try again later.'**
-  String get pathUnlockUnavailable;
-
   /// No description provided for @pathUnlockSuccess.
   ///
   /// In en, this message translates to:

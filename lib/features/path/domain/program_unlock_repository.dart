@@ -4,10 +4,9 @@ import 'entities/barcode_product.dart';
 ///
 /// Unlocking is a **client-side barcode check** (there is no dedicated unlock
 /// endpoint): the app fetches the products flagged `use_for_barcode_check` and
-/// validates the code the user typed against their barcodes. The final step —
-/// persisting the unlock so `profile_status` leaves `active_restricted_access`
-/// — is still open on the backend (see [[restricted-access-path-gating]]) and
-/// is currently a stub in the implementation.
+/// validates the code the user typed against their barcodes. On a match the
+/// unlock is persisted by moving `profile_status` off `active_restricted_access`
+/// via `PATCH /profile` (see [[restricted-access-path-gating]]).
 abstract class ProgramUnlockRepository {
   /// Fetches every product usable for the barcode check, with its accepted
   /// codes (product + variants). Used to validate the code entered in the
@@ -17,8 +16,9 @@ abstract class ProgramUnlockRepository {
   /// Persists the unlock after a valid barcode match, lifting the user's
   /// restricted access.
   ///
-  /// STUB: the backend contract for this is not yet defined. See
-  /// [[restricted-access-path-gating]]. Throws [UnimplementedError] until the
-  /// backend answers which field/mutation performs the unlock.
+  /// Backend contract (confirmed 2026-07-08): `PATCH /profile` with
+  /// `{ "has_kit_purchased": true, "profile_status": "initial_survey" }`.
+  /// This clears `active_restricted_access` and routes the user into the
+  /// initial survey (the natural post-purchase flow).
   Future<void> unlockWithProduct(BarcodeProduct product);
 }

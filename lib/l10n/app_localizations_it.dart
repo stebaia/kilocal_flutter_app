@@ -288,10 +288,6 @@ class AppLocalizationsIt extends AppLocalizations {
       'Questo codice non corrisponde a nessun prodotto Kilocal. Controllalo e riprova.';
 
   @override
-  String get pathUnlockUnavailable =>
-      'Codice verificato, ma lo sblocco non è ancora disponibile. Riprova più tardi.';
-
-  @override
   String get pathUnlockSuccess => 'Programma sbloccato!';
 
   @override

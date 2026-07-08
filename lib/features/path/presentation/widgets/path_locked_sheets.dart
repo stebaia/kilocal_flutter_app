@@ -260,8 +260,6 @@ class _UnlockBodyState extends State<_UnlockBody> {
     switch (status) {
       case ProgramUnlockStatus.invalidCode:
         return l10n.pathUnlockInvalidCode;
-      case ProgramUnlockStatus.unlockUnavailable:
-        return l10n.pathUnlockUnavailable;
       case ProgramUnlockStatus.error:
         return l10n.errorGeneric;
       case ProgramUnlockStatus.editing:

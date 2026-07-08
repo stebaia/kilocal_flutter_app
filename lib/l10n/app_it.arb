@@ -86,7 +86,6 @@
   "pathUnlockCodeHint": "Inserisci codice prova d'acquisto…",
   "pathUnlockSubmit": "Inserisci",
   "pathUnlockInvalidCode": "Questo codice non corrisponde a nessun prodotto Kilocal. Controllalo e riprova.",
-  "pathUnlockUnavailable": "Codice verificato, ma lo sblocco non è ancora disponibile. Riprova più tardi.",
   "pathUnlockSuccess": "Programma sbloccato!",
   "diaryTitle": "Diario delle attività",
   "benefitsTitle": "Benefit",

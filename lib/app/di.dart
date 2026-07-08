@@ -200,10 +200,16 @@ void configureDependencies() {
     ),
   );
   getIt.registerLazySingleton<ProgramUnlockRepository>(
-    () => ProgramUnlockRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+    () => ProgramUnlockRepositoryImpl(
+      graphqlClient: getIt<GraphqlClient>(),
+      userRepository: getIt<UserRepository>(),
+    ),
   );
   getIt.registerFactory<ProgramUnlockCubit>(
-    () => ProgramUnlockCubit(repository: getIt<ProgramUnlockRepository>()),
+    () => ProgramUnlockCubit(
+      repository: getIt<ProgramUnlockRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
   );
   getIt.registerLazySingleton<IntegrazioneRepository>(
     () => IntegrazioneRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),

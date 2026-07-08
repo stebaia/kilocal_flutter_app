@@ -10,10 +10,6 @@ enum ProgramUnlockStatus {
   /// The entered code matched no product.
   invalidCode,
 
-  /// A valid code was entered but the unlock could not be persisted because the
-  /// backend contract is not implemented yet (stub).
-  unlockUnavailable,
-
   /// The programme was unlocked.
   unlocked,
 

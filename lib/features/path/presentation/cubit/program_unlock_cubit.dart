@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../user/presentation/cubit/user_cubit.dart';
 import '../../domain/entities/barcode_product.dart';
 import '../../domain/program_unlock_repository.dart';
 
@@ -10,15 +11,19 @@ part 'program_unlock_state.dart';
 /// Drives the "Sblocca il programma" sheet: validates the barcode the user
 /// typed against the products flagged `use_for_barcode_check`, then unlocks.
 ///
-/// Validation is fully client-side. The final unlock persistence is a stub in
-/// the repository (pending the backend contract), so a valid code currently
-/// surfaces [ProgramUnlockStatus.unlockUnavailable] rather than success.
+/// Validation is fully client-side. On a match the unlock is persisted via
+/// `PATCH /profile` (moving off `active_restricted_access`) and the session is
+/// reloaded so the app re-evaluates content gating.
 class ProgramUnlockCubit extends Cubit<ProgramUnlockState> {
-  ProgramUnlockCubit({required ProgramUnlockRepository repository})
-    : _repository = repository,
-      super(const ProgramUnlockState());
+  ProgramUnlockCubit({
+    required ProgramUnlockRepository repository,
+    required UserCubit userCubit,
+  }) : _repository = repository,
+       _userCubit = userCubit,
+       super(const ProgramUnlockState());
 
   final ProgramUnlockRepository _repository;
+  final UserCubit _userCubit;
 
   /// Validates [rawCode] against the barcode-check catalogue and, on a match,
   /// attempts to unlock the programme.
@@ -50,16 +55,12 @@ class ProgramUnlockCubit extends Cubit<ProgramUnlockState> {
 
     try {
       await _repository.unlockWithProduct(match);
+      // Reload the session so `profile_status` (now off restricted access) is
+      // reflected across the app and the path areas render unlocked.
+      await _userCubit.loadSession();
       emit(state.copyWith(status: ProgramUnlockStatus.unlocked));
     } on ApiException catch (e) {
-      // The unlock persistence is not implemented yet (stubbed 501): the code
-      // was valid but we cannot complete the unlock. Surface a distinct state
-      // so the UI can explain the pending backend rather than "wrong code".
-      if (e.statusCode == 501) {
-        emit(state.copyWith(status: ProgramUnlockStatus.unlockUnavailable));
-      } else {
-        emit(state.copyWith(status: ProgramUnlockStatus.error, error: e));
-      }
+      emit(state.copyWith(status: ProgramUnlockStatus.error, error: e));
     }
   }
 
