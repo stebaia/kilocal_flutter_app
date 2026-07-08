@@ -161,9 +161,7 @@ query HomeMoments($now: String!, $lang: String!) {
         ? '${Env.baseUrl}/assets/${continueStep.imageFileId}/${continueStep.imageFileName}'
         : _continueFallbackImage;
 
-    final momentImage = moment?.imageFileId != null
-        ? '${Env.baseUrl}/assets/${moment!.imageFileId}/${moment.imageFileName}'
-        : _momentFallbackImage;
+    final momentImage = _momentFallbackImage;
 
     return HomeData(
       userName: userName,
@@ -189,7 +187,7 @@ query HomeMoments($now: String!, $lang: String!) {
           title: 'Momenti',
           imageUrl: momentImage,
           route: '/momenti/home',
-          assetName: moment?.imageFileId == null ? _momentFallbackImage : null,
+          assetName:  _momentFallbackImage,
         ),
         HomeActionCard(
           title: 'Benefit',
