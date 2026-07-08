@@ -8,7 +8,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_header.dart';
+import '../domain/entities/benefit.dart';
 import 'cubit/benefits_cubit.dart';
+import 'widgets/benefit_detail_sheet.dart';
 import 'widgets/benefit_hero_card.dart';
 import 'widgets/benefit_list_tile.dart';
 
@@ -86,9 +88,7 @@ class _BenefitsList extends StatelessWidget {
               child: BenefitHeroCard(
                 benefit: benefit,
                 detailsLabel: l10n.benefitViewDetails,
-                onDetailsPressed: benefit.ctaUrl != null
-                    ? () => _openUrl(benefit.ctaUrl!)
-                    : null,
+                onDetailsPressed: () => _openDetail(context, benefit),
               ),
             ),
         ],
@@ -100,14 +100,21 @@ class _BenefitsList extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
               child: BenefitListTile(
                 benefit: benefit,
-                onTap: benefit.ctaUrl != null
-                    ? () => _openUrl(benefit.ctaUrl!)
-                    : null,
+                onTap: () => _openDetail(context, benefit),
               ),
             ),
         ],
       ],
     );
+  }
+
+  /// Opens the benefit detail bottom sheet; if the user taps the reward CTA,
+  /// launches the external offer url.
+  Future<void> _openDetail(BuildContext context, Benefit benefit) async {
+    final claimed = await showBenefitDetailSheet(context, benefit);
+    if (claimed == true && benefit.ctaUrl != null) {
+      await _openUrl(benefit.ctaUrl!);
+    }
   }
 
   Future<void> _openUrl(String url) async {
