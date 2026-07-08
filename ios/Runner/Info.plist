@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Kilocal Flutter App</string>
+	<string>Kilocal</string>
 	<key>NSSupportsLiveActivities</key>
    	<true/>
 	<key>CFBundleExecutable</key>

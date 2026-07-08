@@ -4,7 +4,7 @@
     <!-- Required for FCM push notifications on Android 13+ (API 33). -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
-        android:label="kilocal_flutter_app"
+        android:label="Kilocal"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
