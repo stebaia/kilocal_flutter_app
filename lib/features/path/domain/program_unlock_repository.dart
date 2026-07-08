@@ -17,8 +17,10 @@ abstract class ProgramUnlockRepository {
   /// restricted access.
   ///
   /// Backend contract (confirmed 2026-07-08): `PATCH /profile` with
-  /// `{ "has_kit_purchased": true, "profile_status": "initial_survey" }`.
+  /// `{ "has_kit_purchased": true, "profile_status": "starter_kit" }`.
   /// This clears `active_restricted_access` and routes the user into the
-  /// initial survey (the natural post-purchase flow).
+  /// post-purchase `starter_kit` survey. (`initial_survey` is avoided on
+  /// purpose: it reopens the biotype quiz and crashes the CMS result template
+  /// for a user who already has a biotype.)
   Future<void> unlockWithProduct(BarcodeProduct product);
 }

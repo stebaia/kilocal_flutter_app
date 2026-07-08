@@ -77,11 +77,17 @@ query BarcodeProducts {
     // Backend contract (confirmed 2026-07-08): posting the starter-kit survey
     // moves the status by itself, but the app can also lift the restriction
     // directly via `PATCH /profile`. We take the direct route so the unlock is
-    // immediate: clear `active_restricted_access` by moving to `initial_survey`
-    // (the natural post-purchase step) and flag the kit as purchased.
+    // immediate: flag the kit as purchased and move to `starter_kit`, the
+    // post-purchase step.
+    //
+    // NOTE: we deliberately do NOT use `initial_survey` here. That status
+    // reopens `type_survey` (the biotype quiz), which is wrong for a restricted
+    // user who already has a computed biotype — and the CMS result template then
+    // crashes (500 "Cannot read properties of undefined (reading 'replace')").
+    // `starter_kit` is the natural next step after buying the kit.
     await _userRepository.updateProfile(<String, dynamic>{
       'has_kit_purchased': true,
-      'profile_status': 'initial_survey',
+      'profile_status': 'starter_kit',
     });
   }
 }

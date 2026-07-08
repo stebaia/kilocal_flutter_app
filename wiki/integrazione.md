@@ -67,11 +67,14 @@ product { id title use_for_barcode_check asset { id } } }`. Verified live on cms
     `variants[].barcodes[].codice`.
   - **Unlock write (BE confirmed 2026-07-08):** posting `/api/surveys/starter_kit` (or
     `qr_pharmacy_2`) moves `profile_status` by itself; alternatively the app can lift the
-    restriction directly with `PATCH /profile` (`/cms/profile`) body
-    `{ "has_kit_purchased": true, "profile_status": "initial_survey" }`. The app takes the
-    direct `PATCH /profile` route (via the existing `UserRepository.updateProfile`) so the
-    unlock is immediate; it then reloads the session so gating re-evaluates.
-    See [[restricted-access-path-gating]]. **No open BE gaps remain for this flow.**
+    restriction directly with `PATCH /profile` (`/cms/profile`). The app takes the direct
+    `PATCH /profile` route (via `UserRepository.updateProfile`) with body
+    `{ "has_kit_purchased": true, "profile_status": "starter_kit" }`, then reloads the
+    session so gating re-evaluates. **⚠️ Use `starter_kit`, NOT `initial_survey`:** a
+    restricted user already has a computed biotype, so `initial_survey` reopens
+    `type_survey` (the biotype quiz) and the CMS result template then crashes with
+    `500 Cannot read properties of undefined (reading 'replace')` on submit. `starter_kit`
+    is the natural post-purchase step. See [[restricted-access-path-gating]].
 
 ## Resolves missing-apis §1.2, §3.2
 
