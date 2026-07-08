@@ -65,16 +65,16 @@ product { id title use_for_barcode_check asset { id } } }`. Verified live on cms
     `description`, `avvertenze` → feeds the unlock bottom-sheet copy (product name +
     instructions). Match = codice `_eq` on `products[].barcodes[].codice` OR
     `variants[].barcodes[].codice`.
-  - **Unlock write (BE confirmed 2026-07-08):** posting `/api/surveys/starter_kit` (or
-    `qr_pharmacy_2`) moves `profile_status` by itself; alternatively the app can lift the
-    restriction directly with `PATCH /profile` (`/cms/profile`). The app takes the direct
-    `PATCH /profile` route (via `UserRepository.updateProfile`) with body
-    `{ "has_kit_purchased": true, "profile_status": "starter_kit" }`, then reloads the
-    session so gating re-evaluates. **⚠️ Use `starter_kit`, NOT `initial_survey`:** a
-    restricted user already has a computed biotype, so `initial_survey` reopens
-    `type_survey` (the biotype quiz) and the CMS result template then crashes with
-    `500 Cannot read properties of undefined (reading 'replace')` on submit. `starter_kit`
-    is the natural post-purchase step. See [[restricted-access-path-gating]].
+  - **Unlock write (BE confirmed 2026-07-08):** the app lifts the restriction directly
+    with `PATCH /profile` (`/cms/profile`) via `UserRepository.updateProfile`, body
+    `{ "has_kit_purchased": true, "profile_status": "active" }`, then reloads the session
+    so gating re-evaluates. **⚠️ Use `active`, NOT a survey state.** A restricted user who
+    unlocks with a valid barcode already has a computed biotype, so there is no survey left
+    to run: reopening one on app restart makes no sense. Specifically:
+    `initial_survey` reopens `type_survey` (biotype quiz) → CMS result template 500s
+    (`Cannot read properties of undefined (reading 'replace')`); `starter_kit` reopens the
+    post-purchase survey (pointless post-unlock). `active` = full access, no pending survey.
+    See [[restricted-access-path-gating]].
 
 ## Resolves missing-apis §1.2, §3.2
 

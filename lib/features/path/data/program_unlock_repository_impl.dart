@@ -74,20 +74,22 @@ query BarcodeProducts {
 
   @override
   Future<void> unlockWithProduct(BarcodeProduct product) async {
-    // Backend contract (confirmed 2026-07-08): posting the starter-kit survey
-    // moves the status by itself, but the app can also lift the restriction
-    // directly via `PATCH /profile`. We take the direct route so the unlock is
-    // immediate: flag the kit as purchased and move to `starter_kit`, the
-    // post-purchase step.
+    // Backend contract (confirmed 2026-07-08): the app lifts the restriction
+    // directly via `PATCH /profile`. A restricted user who unlocks with a valid
+    // barcode already has a computed biotype, so there is no survey left to run:
+    // we grant full access straight away (`profile_status = active`) and flag
+    // the kit as purchased.
     //
-    // NOTE: we deliberately do NOT use `initial_survey` here. That status
-    // reopens `type_survey` (the biotype quiz), which is wrong for a restricted
-    // user who already has a computed biotype — and the CMS result template then
-    // crashes (500 "Cannot read properties of undefined (reading 'replace')").
-    // `starter_kit` is the natural next step after buying the kit.
+    // NOTE: we deliberately avoid the survey states here.
+    //  - `initial_survey` reopens `type_survey` (the biotype quiz) and the CMS
+    //    result template then 500s ("Cannot read properties of undefined
+    //    (reading 'replace')") because the biotype already exists.
+    //  - `starter_kit` reopens the post-purchase survey, which makes no sense
+    //    for a user who just unlocked with the purchase barcode.
+    // `active` = full access, no pending survey, tools unblocked.
     await _userRepository.updateProfile(<String, dynamic>{
       'has_kit_purchased': true,
-      'profile_status': 'starter_kit',
+      'profile_status': 'active',
     });
   }
 }
