@@ -74,22 +74,23 @@ query BarcodeProducts {
 
   @override
   Future<void> unlockWithProduct(BarcodeProduct product) async {
-    // Backend contract (confirmed 2026-07-08): the app lifts the restriction
-    // directly via `PATCH /profile`. A restricted user who unlocks with a valid
-    // barcode already has a computed biotype, so there is no survey left to run:
-    // we grant full access straight away (`profile_status = active`) and flag
-    // the kit as purchased.
+    // Backend contract (confirmed 2026-07-08): the app lifts the restriction via
+    // `PATCH /profile`. The BE enforces a state machine — `PATCH` only accepts
+    // the *next* allowed status, verified live: from `active_restricted_access`
+    // only `→ starter_kit` (and `initial_survey`) are accepted; jumping straight
+    // to `active` is rejected with `INVALID_PAYLOAD`. So the unlock can only move
+    // the user to `starter_kit`; the BE then requires completing the starter-kit
+    // survey to reach `active`.
     //
-    // NOTE: we deliberately avoid the survey states here.
-    //  - `initial_survey` reopens `type_survey` (the biotype quiz) and the CMS
-    //    result template then 500s ("Cannot read properties of undefined
-    //    (reading 'replace')") because the biotype already exists.
-    //  - `starter_kit` reopens the post-purchase survey, which makes no sense
-    //    for a user who just unlocked with the purchase barcode.
-    // `active` = full access, no pending survey, tools unblocked.
+    // NOTE: `initial_survey` is avoided — it reopens `type_survey` (the biotype
+    // quiz) and the CMS result template 500s for a user who already has a biotype.
+    //
+    // OPEN (BE / design): a restricted user who unlocks with the purchase barcode
+    // already has a biotype, yet is still forced through the starter_kit survey
+    // instead of going straight to `active`. See [[restricted-access-path-gating]].
     await _userRepository.updateProfile(<String, dynamic>{
       'has_kit_purchased': true,
-      'profile_status': 'active',
+      'profile_status': 'starter_kit',
     });
   }
 }

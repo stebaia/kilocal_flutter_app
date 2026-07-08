@@ -65,16 +65,22 @@ product { id title use_for_barcode_check asset { id } } }`. Verified live on cms
     `description`, `avvertenze` → feeds the unlock bottom-sheet copy (product name +
     instructions). Match = codice `_eq` on `products[].barcodes[].codice` OR
     `variants[].barcodes[].codice`.
-  - **Unlock write (BE confirmed 2026-07-08):** the app lifts the restriction directly
-    with `PATCH /profile` (`/cms/profile`) via `UserRepository.updateProfile`, body
-    `{ "has_kit_purchased": true, "profile_status": "active" }`, then reloads the session
-    so gating re-evaluates. **⚠️ Use `active`, NOT a survey state.** A restricted user who
-    unlocks with a valid barcode already has a computed biotype, so there is no survey left
-    to run: reopening one on app restart makes no sense. Specifically:
-    `initial_survey` reopens `type_survey` (biotype quiz) → CMS result template 500s
-    (`Cannot read properties of undefined (reading 'replace')`); `starter_kit` reopens the
-    post-purchase survey (pointless post-unlock). `active` = full access, no pending survey.
-    See [[restricted-access-path-gating]].
+  - **Unlock write (BE confirmed 2026-07-08):** the app lifts the restriction with
+    `PATCH /profile` (`/cms/profile`) via `UserRepository.updateProfile`, body
+    `{ "has_kit_purchased": true, "profile_status": "starter_kit" }`, then reloads the
+    session so gating re-evaluates.
+    - **The BE enforces a state machine** (verified live): the PATCH only accepts the next
+      allowed status. From `active_restricted_access` only `→ starter_kit` (and
+      `initial_survey`) pass; `→ active` is rejected `"profile_status cannot be updated to
+      this value" (INVALID_PAYLOAD)`. So the unlock can only reach `starter_kit`; `active`
+      is reached by completing the starter-kit survey.
+    - `initial_survey` is avoided: it reopens `type_survey` (biotype quiz) → CMS result
+      template 500s (`Cannot read properties of undefined (reading 'replace')`) for a user
+      who already has a biotype.
+    - **OPEN (BE / design):** a restricted user who unlocks with the purchase barcode
+      already has a biotype, yet the state machine still forces them through the whole
+      `starter_kit` survey (17 sections) instead of going straight to `active`.
+      See [[restricted-access-path-gating]].
 
 ## Resolves missing-apis §1.2, §3.2
 

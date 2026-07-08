@@ -17,11 +17,11 @@ abstract class ProgramUnlockRepository {
   /// restricted access.
   ///
   /// Backend contract (confirmed 2026-07-08): `PATCH /profile` with
-  /// `{ "has_kit_purchased": true, "profile_status": "active" }`.
-  /// A restricted user who unlocks with a valid barcode already has a biotype,
-  /// so no survey is left to run — we grant full access (`active`) directly.
-  /// The survey states are avoided on purpose: `initial_survey` reopens the
-  /// biotype quiz (and crashes the CMS result template), `starter_kit` reopens
-  /// the post-purchase survey (pointless here).
+  /// `{ "has_kit_purchased": true, "profile_status": "starter_kit" }`.
+  /// The BE enforces a state machine: from `active_restricted_access` the PATCH
+  /// only accepts `→ starter_kit` (jumping to `active` is rejected with
+  /// `INVALID_PAYLOAD`). The user then reaches `active` by completing the
+  /// starter-kit survey. (`initial_survey` is avoided: it reopens the biotype
+  /// quiz and crashes the CMS result template for a user who already has one.)
   Future<void> unlockWithProduct(BarcodeProduct product);
 }
