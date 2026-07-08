@@ -15,11 +15,16 @@ import 'router.dart';
 import '../features/auth/data/auth_api.dart';
 import '../features/auth/data/auth_repository_impl.dart';
 import '../features/auth/domain/auth_repository.dart';
+import '../features/auth/presentation/cubit/forgot_password_cubit.dart';
 import '../features/auth/presentation/cubit/login_cubit.dart';
 import '../features/auth/presentation/cubit/register_cubit.dart';
 import '../features/benefits/data/benefits_repository_impl.dart';
 import '../features/benefits/domain/benefits_repository.dart';
 import '../features/benefits/presentation/cubit/benefits_cubit.dart';
+import '../features/diary/data/diary_repository_impl.dart';
+import '../features/diary/domain/diary_repository.dart';
+import '../features/diary/presentation/cubit/diary_goals_cubit.dart';
+import '../features/diary/presentation/cubit/diary_history_cubit.dart';
 import '../features/profile/data/profile_page_repository_impl.dart';
 import '../features/profile/domain/profile_page_repository.dart';
 import '../features/profile/presentation/cubit/profile_page_cubit.dart';
@@ -33,16 +38,23 @@ import '../features/momenti/presentation/cubit/momenti_cubit.dart';
 import '../features/notifications/data/notifications_repository_impl.dart';
 import '../features/notifications/domain/notifications_repository.dart';
 import '../features/notifications/presentation/cubit/notifications_cubit.dart';
+import '../features/integrazione/data/integrazione_reminder_service.dart';
+import '../features/integrazione/data/integrazione_repository_impl.dart';
+import '../features/integrazione/domain/integrazione_repository.dart';
+import '../features/integrazione/presentation/cubit/integrazione_cubit.dart';
 import '../features/path/data/path_materials_repository_impl.dart';
 import '../features/path/data/path_repository_impl.dart';
+import '../features/path/data/program_unlock_repository_impl.dart';
 import '../features/path/data/system_timer_service.dart';
 import '../features/path/data/vimeo_oembed_service.dart';
 import '../features/path/domain/path_materials_repository.dart';
 import '../features/path/domain/path_repository.dart';
+import '../features/path/domain/program_unlock_repository.dart';
 import '../features/path/presentation/cubit/path_cubit.dart';
 import '../features/path/presentation/cubit/path_detail_cubit.dart';
 import '../features/path/presentation/cubit/path_material_detail_cubit.dart';
 import '../features/path/presentation/cubit/path_materials_cubit.dart';
+import '../features/path/presentation/cubit/program_unlock_cubit.dart';
 import '../features/settings/data/settings_api.dart';
 import '../features/statistics/data/statistics_repository_impl.dart';
 import '../features/statistics/domain/statistics_repository.dart';
@@ -137,6 +149,9 @@ void configureDependencies() {
   getIt.registerFactory<RegisterCubit>(
     () => RegisterCubit(authRepository: getIt<AuthRepository>()),
   );
+  getIt.registerFactory<ForgotPasswordCubit>(
+    () => ForgotPasswordCubit(authRepository: getIt<AuthRepository>()),
+  );
 
   // --- Feature: Home ---
   getIt.registerLazySingleton<HomeRepository>(
@@ -154,7 +169,10 @@ void configureDependencies() {
     () => PathRepositoryImpl(dio: getIt<Dio>()),
   );
   getIt.registerFactory<PathCubit>(
-    () => PathCubit(pathRepository: getIt<PathRepository>()),
+    () => PathCubit(
+      pathRepository: getIt<PathRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
   );
   getIt.registerFactory<PathDetailCubit>(
     () => PathDetailCubit(
@@ -181,6 +199,24 @@ void configureDependencies() {
       materialsRepository: getIt<PathMaterialsRepository>(),
     ),
   );
+  getIt.registerLazySingleton<ProgramUnlockRepository>(
+    () => ProgramUnlockRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<ProgramUnlockCubit>(
+    () => ProgramUnlockCubit(repository: getIt<ProgramUnlockRepository>()),
+  );
+  getIt.registerLazySingleton<IntegrazioneRepository>(
+    () => IntegrazioneRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+  );
+  getIt.registerLazySingleton<IntegrazioneReminderService>(
+    () => IntegrazioneReminderService(),
+  );
+  getIt.registerFactory<IntegrazioneCubit>(
+    () => IntegrazioneCubit(
+      repository: getIt<IntegrazioneRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
+  );
   getIt.registerLazySingleton<VimeoOembedService>(() => VimeoOembedService());
   getIt.registerLazySingleton<SystemTimerService>(() => SystemTimerService());
 
@@ -204,6 +240,21 @@ void configureDependencies() {
       userRepository: getIt<UserRepository>(),
       userCubit: getIt<UserCubit>(),
     ),
+  );
+
+  // --- Feature: Diary ---
+  // Goals via REST (/journal/goals), history via GraphQL (user_activities).
+  getIt.registerLazySingleton<DiaryRepository>(
+    () => DiaryRepositoryImpl(
+      dio: getIt<Dio>(),
+      graphqlClient: getIt<GraphqlClient>(),
+    ),
+  );
+  getIt.registerFactory<DiaryHistoryCubit>(
+    () => DiaryHistoryCubit(repository: getIt<DiaryRepository>()),
+  );
+  getIt.registerFactory<DiaryGoalsCubit>(
+    () => DiaryGoalsCubit(repository: getIt<DiaryRepository>()),
   );
 
   // --- Feature: Momenti ---

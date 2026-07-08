@@ -12,14 +12,18 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_shadows.dart';
 import '../core/theme/app_spacing.dart';
 import '../features/user/presentation/cubit/user_cubit.dart';
+import '../features/auth/presentation/forgot_password_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
 import '../features/benefits/presentation/benefits_screen.dart';
 import '../features/diary/presentation/diary_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
+import '../features/integrazione/presentation/integrazione_phase_screen.dart';
+import '../features/integrazione/presentation/integrazione_screen.dart';
 import '../features/path/domain/entities/path_area_detail.dart';
 import '../features/path/presentation/path_area_detail_screen.dart';
+import '../features/path/presentation/path_area_group_detail_screen.dart';
 import '../features/path/presentation/path_material_detail_screen.dart';
 import '../features/path/presentation/path_materials_screen.dart';
 import '../features/path/presentation/path_screen.dart';
@@ -52,12 +56,22 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
       path: '/statistics',
       builder: (context, state) => const StatisticsScreen(),
     ),
     GoRoute(
       path: '/notifications',
       builder: (context, state) => const NotificationsScreen(),
+    ),
+    // Benefits is a secondary page reached from the home action card
+    // (not a bottom-nav tab), so it lives outside the shell.
+    GoRoute(
+      path: '/benefits',
+      builder: (context, state) => const BenefitsScreen(),
     ),
     GoRoute(
       path: '/survey',
@@ -93,9 +107,33 @@ final GoRouter appRouter = GoRouter(
               routes: [
                 GoRoute(
                   path: ':area',
-                  builder: (context, state) =>
-                      PathAreaDetailScreen(area: state.pathParameters['area']!),
+                  builder: (context, state) {
+                    final area = state.pathParameters['area']!;
+                    // Integrazione is a phase-based GraphQL area, not a steps
+                    // area — it has its own screen and does not hit /path/*/steps.
+                    if (area == 'integrazione') {
+                      return const IntegrazioneScreen();
+                    }
+                    return PathAreaDetailScreen(area: area);
+                  },
                   routes: [
+                    // Integrazione phase detail (phase-based, GraphQL). Only
+                    // reachable for the `integrazione` area.
+                    GoRoute(
+                      path: 'phase/:phaseId',
+                      builder: (context, state) => IntegrazionePhaseScreen(
+                        phaseId: state.pathParameters['phaseId']!,
+                      ),
+                    ),
+                    // Benessere sub-section detail (Mindfulness / Self care /
+                    // Stili di vita). Only reachable for the `benessere` area.
+                    GoRoute(
+                      path: 'group/:groupId',
+                      builder: (context, state) => PathAreaGroupDetailScreen(
+                        groupId: state.pathParameters['groupId']!,
+                        group: state.extra as PathAreaGroup?,
+                      ),
+                    ),
                     GoRoute(
                       path: 'timeframe/:timeframeId',
                       builder: (context, state) => PathTimeframeStepsScreen(
@@ -118,6 +156,7 @@ final GoRouter appRouter = GoRouter(
                       path: 'materials/:groupId',
                       builder: (context, state) => PathMaterialsScreen(
                         groupId: state.pathParameters['groupId']!,
+                        title: state.extra as String?,
                       ),
                       routes: [
                         GoRoute(
@@ -140,14 +179,6 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/diary',
               builder: (context, state) => const DiaryScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/benefits',
-              builder: (context, state) => const BenefitsScreen(),
             ),
           ],
         ),
@@ -216,7 +247,6 @@ class AppScaffold extends StatelessWidget {
     AppIcons.home,
     AppIcons.path,
     AppIcons.diary,
-    AppIcons.benefits,
     AppIcons.popsicle,
   ];
 

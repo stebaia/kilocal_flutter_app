@@ -19,6 +19,9 @@ abstract final class AppIcons {
   static const String lock = 'lock';
   static const String briefcase = 'briefcase';
   static const String archive = 'archive';
+  static const String mindfulness = 'mindfulness';
+  static const String selfCare = 'self_care';
+  static const String lifestyle = 'lifestyle';
 }
 
 /// Widget generico per le icone SVG dell'app.
