@@ -165,16 +165,75 @@ class PathRepositoryImpl implements PathRepository {
       }
     }
 
+    // Content groups shown as cards on the Benessere screen (Mindfulness /
+    // Self care / Stili di vita). The backend returns these as separate
+    // `percorsi_groups` rows — all with `is_percorso_main_tab: false` — so we
+    // take every titled group here, each with its own completed/total count and
+    // a per-month breakdown (see `_monthsForGroup`).
+    final orderedTimeframes =
+        (dto.timeframes ?? const <PathTimeframeDto>[]).toList()
+          ..sort((a, b) => a.sort.compareTo(b.sort));
+    final groups = <PathAreaGroup>[
+      for (final g in dto.groups)
+        if (g.translations.titleFor(l10n.localeName)?.isNotEmpty ?? false)
+          PathAreaGroup(
+            id: g.id,
+            title: g.translations.titleFor(l10n.localeName) ?? '',
+            completed: g.steps.where((s) => s.completed).length,
+            total: g.steps.length,
+            months: _monthsForGroup(g, orderedTimeframes, l10n),
+          ),
+    ];
+
     return PathAreaDetail(
       area: dto.area,
       percorsoInternalName: dto.percorso.internalName,
       completed: dto.progress.completed,
       total: dto.progress.total,
       timeframeGroups: timeframeGroups,
+      groups: groups,
       hasMaterials: materialsGroup != null,
       materialsGroupId: materialsGroup?.id,
       isLocked: dto.access?.percorsoLocked ?? false,
+      isRestricted: dto.access?.restricted ?? false,
     );
+  }
+
+  /// Builds the per-month breakdown for a content group: one row per area
+  /// timeframe, in order. A month with no steps in this group comes through
+  /// with a 0/0 count and — unless the backend already marks it unlocked —
+  /// locked, so the group detail always shows every month even when empty.
+  List<PathTimeframeGroup> _monthsForGroup(
+    PathGroupDto group,
+    List<PathTimeframeDto> orderedTimeframes,
+    AppLocalizations l10n,
+  ) {
+    final stepsByTimeframe = <int, List<PathStepDto>>{};
+    for (final step in group.steps) {
+      stepsByTimeframe
+          .putIfAbsent(step.timeframe.id, () => <PathStepDto>[])
+          .add(step);
+    }
+
+    return orderedTimeframes.map((tf) {
+      final steps = [...?stepsByTimeframe[tf.id]]
+        ..sort((a, b) => a.sort.compareTo(b.sort));
+      final title = tf.translations.titleFor(l10n.localeName) ?? '';
+      final total = steps.length;
+      final completed = steps.where((s) => s.completed).length;
+      return PathTimeframeGroup(
+        timeframeId: tf.id,
+        title: title,
+        completed: completed,
+        total: total,
+        // A month is locked when the backend marks it locked or when this group
+        // has no steps in it yet — so every month is always listed, empty ones
+        // showing as locked 0/0 rather than disappearing.
+        isLocked: (tf.locked ?? false) || total == 0,
+        isCurrent: tf.isCurrent ?? false,
+        steps: [for (final s in steps) _mapStepDto(s, title, l10n)],
+      );
+    }).toList();
   }
 
   PathStepItem _mapStepDto(

@@ -24,6 +24,7 @@ class PathArea {
     required this.assetName,
     required this.completed,
     required this.total,
+    this.isRestricted = false,
   });
 
   final String id;
@@ -32,5 +33,22 @@ class PathArea {
   final int completed;
   final int total;
 
+  /// Whether the area is locked for a restricted (single-product) user and must
+  /// show the unlock flow instead of opening. Derived from `profile_status`
+  /// (the progress endpoint carries no per-area restriction flag); the
+  /// authoritative per-area truth is `access.restricted` on the area detail.
+  final bool isRestricted;
+
   double get progress => total == 0 ? 0 : completed / total;
+
+  PathArea copyWith({bool? isRestricted}) {
+    return PathArea(
+      id: id,
+      title: title,
+      assetName: assetName,
+      completed: completed,
+      total: total,
+      isRestricted: isRestricted ?? this.isRestricted,
+    );
+  }
 }

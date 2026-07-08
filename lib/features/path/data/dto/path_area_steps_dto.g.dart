@@ -141,6 +141,8 @@ PathStepDto _$PathStepDtoFromJson(Map<String, dynamic> json) => PathStepDto(
   completedOn: json['completed_on'] as String?,
   isCurrent: json['is_current'] as bool,
   locked: json['locked'] as bool,
+  lockedByProgress: json['locked_by_progress'] as bool? ?? false,
+  lockedByRestricted: json['locked_by_restricted'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$PathStepDtoToJson(PathStepDto instance) =>
@@ -156,6 +158,8 @@ Map<String, dynamic> _$PathStepDtoToJson(PathStepDto instance) =>
       'completed': instance.completed,
       'is_current': instance.isCurrent,
       'locked': instance.locked,
+      'locked_by_progress': instance.lockedByProgress,
+      'locked_by_restricted': instance.lockedByRestricted,
     };
 
 PathTimeframeDto _$PathTimeframeDtoFromJson(Map<String, dynamic> json) =>
@@ -179,10 +183,16 @@ Map<String, dynamic> _$PathTimeframeDtoToJson(PathTimeframeDto instance) =>
     };
 
 PathAccessDto _$PathAccessDtoFromJson(Map<String, dynamic> json) =>
-    PathAccessDto(percorsoLocked: json['percorso_locked'] as bool? ?? false);
+    PathAccessDto(
+      restricted: json['restricted'] as bool? ?? false,
+      percorsoLocked: json['percorso_locked'] as bool? ?? false,
+    );
 
 Map<String, dynamic> _$PathAccessDtoToJson(PathAccessDto instance) =>
-    <String, dynamic>{'percorso_locked': instance.percorsoLocked};
+    <String, dynamic>{
+      'restricted': instance.restricted,
+      'percorso_locked': instance.percorsoLocked,
+    };
 
 PathStepAssetDto _$PathStepAssetDtoFromJson(Map<String, dynamic> json) =>
     PathStepAssetDto(

@@ -182,6 +182,8 @@ class PathStepDto {
     this.completedOn,
     required this.isCurrent,
     required this.locked,
+    this.lockedByProgress = false,
+    this.lockedByRestricted = false,
   });
 
   factory PathStepDto.fromJson(Map<String, dynamic> json) =>
@@ -207,6 +209,16 @@ class PathStepDto {
   final bool isCurrent;
 
   final bool locked;
+
+  /// Step is locked because progression hasn't reached it yet
+  /// (`locked_by_progress`). Defaults to false on the older shape.
+  @JsonKey(name: 'locked_by_progress')
+  final bool lockedByProgress;
+
+  /// Step is locked because the user has restricted access
+  /// (`locked_by_restricted`). Defaults to false on the older shape.
+  @JsonKey(name: 'locked_by_restricted')
+  final bool lockedByRestricted;
 
   Map<String, dynamic> toJson() => _$PathStepDtoToJson(this);
 }
@@ -242,12 +254,19 @@ class PathTimeframeDto {
 /// Area-level access flags returned under the top-level `access` key.
 @JsonSerializable()
 class PathAccessDto {
-  const PathAccessDto({this.percorsoLocked = false});
+  const PathAccessDto({this.restricted = false, this.percorsoLocked = false});
 
   factory PathAccessDto.fromJson(Map<String, dynamic> json) =>
       _$PathAccessDtoFromJson(json);
 
-  /// Whether the whole area is locked (`access.percorso_locked`).
+  /// Whether the user has restricted access to this area (`access.restricted`).
+  /// True when `profile_status = active_restricted_access` (single-product
+  /// flow): the backend returns the area with `progress 0/0` and empty
+  /// `groups`, and the app must render it locked with the unlock flow.
+  final bool restricted;
+
+  /// Whether the whole area is locked (`access.percorso_locked`) — set when
+  /// [restricted] AND `percorso.is_locked` in the CMS.
   @JsonKey(name: 'percorso_locked')
   final bool percorsoLocked;
 

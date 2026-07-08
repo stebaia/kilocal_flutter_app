@@ -14,19 +14,38 @@ class PathAreaHeroCard extends StatelessWidget {
     super.key,
     required this.title,
     required this.assetName,
-    required this.completed,
-    required this.total,
+    this.completed,
+    this.total,
     this.iconName,
+    this.onTap,
   });
 
   final String title;
   final String assetName;
-  final int completed;
-  final int total;
+
+  /// Completion figure shown as a `completed/total` badge. Both are null for
+  /// content hubs that have no progression (e.g. the Benessere sub-sections),
+  /// in which case the badge is omitted entirely.
+  final int? completed;
+  final int? total;
+
+  /// SVG icon name from [AppIcons] shown before the title.
   final String? iconName;
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final card = _buildCard();
+    if (onTap == null) return card;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: card,
+    );
+  }
+
+  Widget _buildCard() {
     return Container(
       padding: EdgeInsets.all(24),
       height: 180,
@@ -59,24 +78,25 @@ class PathAreaHeroCard extends StatelessWidget {
                 ],
               ),
               Spacer(),
-              Row(
-                children: [
-                  const AppIcon(
-                    AppIcons.flash,
-                    color: AppColors.neutralWhite,
-                    size: 24,
-                  ),
-                  const SizedBox(width: AppSpacing.spaceXs),
-                  Text(
-                    '$completed/$total',
-                    style: AppTypography.textTheme.headlineSmall?.copyWith(
+              if (completed != null && total != null)
+                Row(
+                  children: [
+                    const AppIcon(
+                      AppIcons.flash,
                       color: AppColors.neutralWhite,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                      size: 24,
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(width: AppSpacing.spaceXs),
+                    Text(
+                      '$completed/$total',
+                      style: AppTypography.textTheme.headlineSmall?.copyWith(
+                        color: AppColors.neutralWhite,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
           Stack(

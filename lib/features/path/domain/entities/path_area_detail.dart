@@ -6,9 +6,11 @@ class PathAreaDetail {
     required this.completed,
     required this.total,
     required this.timeframeGroups,
+    this.groups = const [],
     this.hasMaterials = false,
     this.materialsGroupId,
     this.isLocked = false,
+    this.isRestricted = false,
   });
 
   /// Clean area key (e.g. `allenamento`).
@@ -21,6 +23,11 @@ class PathAreaDetail {
   final int total;
   final List<PathTimeframeGroup> timeframeGroups;
 
+  /// Content groups of the area (e.g. Benessere's Mindfulness / Self care /
+  /// Stili di vita), each with its own completion figure. Only the wellbeing
+  /// screen renders these as cards; other areas ignore them.
+  final List<PathAreaGroup> groups;
+
   /// Whether the area exposes a non-progressive "Materiali" group.
   final bool hasMaterials;
 
@@ -30,6 +37,38 @@ class PathAreaDetail {
 
   /// Whether the whole area is locked (`access.percorso_locked`).
   final bool isLocked;
+
+  /// Whether the user has restricted access to this area (`access.restricted`),
+  /// i.e. a single-product user who must unlock the full programme with a
+  /// starter-kit barcode. Drives the locked card + unlock bottom sheets.
+  final bool isRestricted;
+
+  double get progress => total == 0 ? 0 : completed / total;
+
+  /// Completion as an integer percentage (0-100).
+  int get percent => (progress * 100).round();
+}
+
+/// A content group inside an area (a `percorsi_groups` row), e.g. the three
+/// Benessere sub-sections. Carries the group's own `completed/total` figure.
+class PathAreaGroup {
+  const PathAreaGroup({
+    required this.id,
+    required this.title,
+    required this.completed,
+    required this.total,
+    this.months = const [],
+  });
+
+  final String id;
+  final String title;
+  final int completed;
+  final int total;
+
+  /// The area's months (timeframes) for this group. Always the full set of
+  /// months so the group detail can show every month even when the group has
+  /// no steps yet — such months come through locked with a 0/0 count.
+  final List<PathTimeframeGroup> months;
 
   double get progress => total == 0 ? 0 : completed / total;
 

@@ -16,6 +16,7 @@ import 'widgets/path_area_hero_card.dart';
 import 'widgets/path_materials_row.dart';
 import 'widgets/path_section_header.dart';
 import 'widgets/path_timeframe_row.dart';
+import 'widgets/wellbeing_group_style.dart';
 
 /// Maps an area key to its localized title, illustration asset and header icon.
 class _AreaPresentation {
@@ -146,6 +147,13 @@ class _PathAreaDetailContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    // Benessere is presented as a list of its sub-section cards (Mindfulness,
+    // Self care, Stili di vita) rather than the timeframe layout.
+    if (data.area == 'benessere' && data.groups.isNotEmpty) {
+      return _WellbeingGroupsList(groups: data.groups);
+    }
+
     final groups = data.timeframeGroups;
 
     return ListView(
@@ -213,6 +221,45 @@ class _PathAreaDetailContent extends StatelessWidget {
 
   void _openMaterials(BuildContext context, String groupId) {
     context.push('/path/${data.area}/materials/$groupId');
+  }
+}
+
+/// Wellbeing layout: a vertical list of hero cards, one per sub-section group
+/// (Mindfulness, Self care, Stili di vita), each showing its own progress.
+class _WellbeingGroupsList extends StatelessWidget {
+  const _WellbeingGroupsList({required this.groups});
+
+  final List<PathAreaGroup> groups;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenGutter,
+        vertical: AppSpacing.spaceMd,
+      ),
+      itemCount: groups.length,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.spaceMd),
+      itemBuilder: (context, index) {
+        final group = groups[index];
+        final style = WellbeingGroupStyle.of(group.title, index);
+        // Benessere sub-sections show a completed/total badge, where total is the
+        // number of steps/materials in the group and completed the user's
+        // finished `user_activities` (backend-confirmed, e.g. 7/21). Tapping
+        // opens the group's materials hub (categories: Scopri / Consigli utili).
+        return PathAreaHeroCard(
+          title: group.title,
+          assetName: style.assetName,
+          iconName: style.iconName,
+          completed: group.completed,
+          total: group.total,
+          onTap: () => context.push(
+            '/path/benessere/materials/${group.id}',
+            extra: group.title,
+          ),
+        );
+      },
+    );
   }
 }
 

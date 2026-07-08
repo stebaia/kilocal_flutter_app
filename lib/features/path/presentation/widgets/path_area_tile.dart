@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -9,6 +10,11 @@ import '../../../home/presentation/widgets/action_card_illustration.dart';
 
 /// Square gradient card for a path area (training, nutrition, wellbeing,
 /// integration) shown on the path screen.
+///
+/// When [isRestricted] is true the card renders the locked variant: the
+/// illustration is dimmed, the counter is replaced by a "Bloccato" label and
+/// the play button becomes a dark lock badge. Tapping still fires [onTap] (the
+/// caller opens the unlock bottom sheet).
 class PathAreaTile extends StatelessWidget {
   const PathAreaTile({
     super.key,
@@ -16,6 +22,7 @@ class PathAreaTile extends StatelessWidget {
     required this.assetName,
     required this.completed,
     required this.total,
+    this.isRestricted = false,
     this.onTap,
   });
 
@@ -23,10 +30,13 @@ class PathAreaTile extends StatelessWidget {
   final String assetName;
   final int completed;
   final int total;
+  final bool isRestricted;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -51,54 +61,71 @@ class PathAreaTile extends StatelessWidget {
             SizedBox(
               width: 100,
               height: 100,
-              child: Stack(
-                alignment: Alignment.center,
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    height: 100,
-                    width: 100,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      color: AppColors.kilokalPink,
+              child: Opacity(
+                // Dim the illustration to signal the locked state.
+                opacity: isRestricted ? 0.45 : 1,
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      height: 100,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: AppColors.kilokalPink,
+                      ),
                     ),
-                  ),
-                  OverflowBox(
-                    maxWidth: 200,
-                    maxHeight: 120,
-                    child: PathActionCardImage(
-                      imageUrl: '',
-                      assetName: assetName,
+                    OverflowBox(
+                      maxWidth: 200,
+                      maxHeight: 120,
+                      child: PathActionCardImage(
+                        imageUrl: '',
+                        assetName: assetName,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 18),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '$completed/$total',
-                  style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.neutralWhite,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                Flexible(
+                  child: Text(
+                    isRestricted ? l10n.pathTimeframeLocked : '$completed/$total',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.neutralWhite,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
+                const SizedBox(width: AppSpacing.spaceSm),
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: const BoxDecoration(
-                    color: AppColors.neutralWhite,
+                  decoration: BoxDecoration(
+                    color: isRestricted
+                        ? AppColors.ink
+                        : AppColors.neutralWhite,
                     shape: BoxShape.circle,
                   ),
-                  child: const Center(
-                    child: AppIcon(
-                      AppIcons.playSmall,
-                      size: 10,
-                      color: AppColors.accent,
-                    ),
+                  child: Center(
+                    child: isRestricted
+                        ? const AppIcon(
+                            AppIcons.lock,
+                            size: 16,
+                            color: AppColors.neutralWhite,
+                          )
+                        : const AppIcon(
+                            AppIcons.playSmall,
+                            size: 10,
+                            color: AppColors.accent,
+                          ),
                   ),
                 ),
               ],

@@ -15,6 +15,7 @@ import '../../../core/widgets/app_header.dart';
 import '../../statistics/presentation/statistics_screen.dart';
 import 'cubit/path_cubit.dart';
 import 'widgets/path_area_tile.dart';
+import 'widgets/path_locked_sheets.dart';
 
 class PathScreen extends StatelessWidget {
   const PathScreen({super.key});
@@ -171,7 +172,10 @@ class _PathContent extends StatelessWidget {
                         assetName: area.assetName,
                         completed: area.completed,
                         total: area.total,
-                        onTap: () => context.push('/path/${area.id}'),
+                        isRestricted: area.isRestricted,
+                        onTap: () => area.isRestricted
+                            ? showPathLockedSheet(context, areaTitle: area.title)
+                            : context.push('/path/${area.id}'),
                       ),
                     )
                     .toList(),
