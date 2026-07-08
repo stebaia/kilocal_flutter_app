@@ -90,6 +90,18 @@ class _PathContent extends StatelessWidget {
 
   final PathData data;
 
+  /// Opens the locked-area sheet flow. When the user completes the unlock,
+  /// reloads the path so the (now unrestricted) areas re-render unlocked.
+  Future<void> _onRestrictedTap(
+    BuildContext context,
+    PathArea area,
+    AppLocalizations l10n,
+  ) async {
+    final cubit = context.read<PathCubit>();
+    final unlocked = await showPathLockedSheet(context, areaTitle: area.title);
+    if (unlocked) await cubit.load(l10n);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -174,7 +186,7 @@ class _PathContent extends StatelessWidget {
                         total: area.total,
                         isRestricted: area.isRestricted,
                         onTap: () => area.isRestricted
-                            ? showPathLockedSheet(context, areaTitle: area.title)
+                            ? _onRestrictedTap(context, area, l10n)
                             : context.push('/path/${area.id}'),
                       ),
                     )

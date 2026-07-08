@@ -14,7 +14,10 @@ import '../cubit/program_unlock_cubit.dart';
 /// Shows the "Contenuto bloccato" sheet for a restricted user tapping a locked
 /// path area. Offers dismiss ("Ho capito") or, if the user already bought the
 /// starter kit, continue to the [showProgramUnlockSheet] barcode sheet.
-Future<void> showPathLockedSheet(
+///
+/// Returns `true` when the user completed the unlock (so the caller can refresh
+/// the now-unlocked path), otherwise `false`/`null`.
+Future<bool> showPathLockedSheet(
   BuildContext context, {
   required String areaTitle,
 }) async {
@@ -25,14 +28,17 @@ Future<void> showPathLockedSheet(
     child: _LockedInfoBody(),
   );
   if (wantsUnlock == true && context.mounted) {
-    await showProgramUnlockSheet(context);
+    return await showProgramUnlockSheet(context);
   }
+  return false;
 }
 
 /// The "Sblocca il programma" sheet: enter the starter-kit barcode and unlock.
-Future<void> showProgramUnlockSheet(BuildContext context) {
+///
+/// Returns `true` when the programme was unlocked.
+Future<bool> showProgramUnlockSheet(BuildContext context) async {
   final l10n = AppLocalizations.of(context)!;
-  return showAppBrandBottomSheet<void>(
+  final unlocked = await showAppBrandBottomSheet<bool>(
     context,
     title: l10n.pathUnlockTitle,
     child: BlocProvider(
@@ -40,6 +46,7 @@ Future<void> showProgramUnlockSheet(BuildContext context) {
       child: const _UnlockBody(),
     ),
   );
+  return unlocked ?? false;
 }
 
 /// Dark circular lock badge shown at the top of both sheets.
@@ -147,7 +154,7 @@ class _UnlockBodyState extends State<_UnlockBody> {
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
         if (state.status == ProgramUnlockStatus.unlocked) {
-          Navigator.of(context).pop();
+          Navigator.of(context).pop(true);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.pathUnlockSuccess)),
           );
