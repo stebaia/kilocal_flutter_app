@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,40 +7,38 @@ import '../../../app/di.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/arc_clipper.dart';
 import '../../../l10n/app_localizations.dart';
-import 'cubit/login_cubit.dart';
-import 'widgets/login_form_card.dart';
+import 'cubit/forgot_password_cubit.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatelessWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<LoginCubit>(),
-      child: const _LoginView(),
+      create: (_) => getIt<ForgotPasswordCubit>(),
+      child: const _ForgotPasswordView(),
     );
   }
 }
 
-class _LoginView extends StatelessWidget {
-  const _LoginView();
+class _ForgotPasswordView extends StatelessWidget {
+  const _ForgotPasswordView();
 
-  String _mapLoginError(AppLocalizations l10n, LoginError error) {
+  String _mapError(AppLocalizations l10n, ForgotPasswordError error) {
     switch (error) {
-      case LoginError.missingFields:
-        return l10n.loginErrorMissingFields;
-      case LoginError.invalidCredentials:
-        return l10n.loginErrorUnauthorized;
-      case LoginError.badRequest:
-        return l10n.loginErrorBadRequest;
-      case LoginError.network:
-        return l10n.loginErrorNetwork;
-      case LoginError.server:
-        return l10n.loginErrorServer;
-      case LoginError.unknown:
-        return l10n.loginErrorGeneric;
+      case ForgotPasswordError.missingEmail:
+        return l10n.forgotPasswordErrorMissingEmail;
+      case ForgotPasswordError.badRequest:
+        return l10n.forgotPasswordErrorBadRequest;
+      case ForgotPasswordError.network:
+        return l10n.forgotPasswordErrorNetwork;
+      case ForgotPasswordError.server:
+        return l10n.forgotPasswordErrorServer;
+      case ForgotPasswordError.unknown:
+        return l10n.forgotPasswordErrorGeneric;
     }
   }
 
@@ -51,12 +48,21 @@ class _LoginView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: BlocListener<LoginCubit, LoginState>(
+      body: BlocListener<ForgotPasswordCubit, ForgotPasswordState>(
         listenWhen: (prev, curr) =>
             prev.status != curr.status || prev.error != curr.error,
         listener: (context, state) {
-          if (state.status == LoginStatus.success) {
-            context.go(state.route ?? '/home');
+          if (state.status == ForgotPasswordStatus.success) {
+            toastification.show(
+              context: context,
+              type: ToastificationType.success,
+              style: ToastificationStyle.flat,
+              autoCloseDuration: const Duration(seconds: 5),
+              title: Text(l10n.forgotPasswordSuccessTitle),
+              description: Text(l10n.forgotPasswordSuccessDescription),
+              alignment: Alignment.topCenter,
+            );
+            context.go('/login');
           } else if (state.error != null) {
             toastification.show(
               context: context,
@@ -64,7 +70,7 @@ class _LoginView extends StatelessWidget {
               style: ToastificationStyle.flat,
               autoCloseDuration: const Duration(seconds: 5),
               title: Text(l10n.errorTitle),
-              description: Text(_mapLoginError(l10n, state.error!)),
+              description: Text(_mapError(l10n, state.error!)),
               alignment: Alignment.topCenter,
             );
           }
@@ -84,7 +90,7 @@ class _LoginView extends StatelessWidget {
                     children: [
                       const SizedBox(height: AppSpacing.spaceXl),
                       Text(
-                        l10n.loginTitle,
+                        l10n.forgotPasswordTitle,
                         style: AppTypography.textTheme.headlineMedium?.copyWith(
                           color: AppColors.textPrimary,
                           fontSize: 32,
@@ -93,7 +99,7 @@ class _LoginView extends StatelessWidget {
                       ),
                       const SizedBox(height: AppSpacing.spaceSm),
                       Text(
-                        l10n.loginSubtitle,
+                        l10n.forgotPasswordSubtitle,
                         style: AppTypography.textTheme.bodyLarge?.copyWith(
                           color: AppColors.textPrimary,
                           fontSize: 16,
@@ -101,15 +107,13 @@ class _LoginView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.spaceXl),
-                      const LoginFormCard(),
-                      const SizedBox(height: AppSpacing.spaceXl),
-                      _ForgotPasswordRow(),
+                      const _ForgotPasswordForm(),
                       const SizedBox(height: AppSpacing.spaceXl),
                     ],
                   ),
                 ),
               ),
-              _LoginBottomBar(),
+              _ForgotPasswordBottomBar(),
             ],
           ),
         ),
@@ -118,55 +122,24 @@ class _LoginView extends StatelessWidget {
   }
 }
 
-class _ForgotPasswordRow extends StatefulWidget {
-  @override
-  State<_ForgotPasswordRow> createState() => _ForgotPasswordRowState();
-}
-
-class _ForgotPasswordRowState extends State<_ForgotPasswordRow> {
-  late final TapGestureRecognizer _recognizer;
-
-  @override
-  void initState() {
-    super.initState();
-    _recognizer = TapGestureRecognizer()
-      ..onTap = () => context.go('/forgot-password');
-  }
-
-  @override
-  void dispose() {
-    _recognizer.dispose();
-    super.dispose();
-  }
+class _ForgotPasswordForm extends StatelessWidget {
+  const _ForgotPasswordForm();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return RichText(
-      text: TextSpan(
-        style: AppTypography.textTheme.bodyMedium?.copyWith(
-          color: AppColors.textPrimary,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-        children: [
-          TextSpan(text: '${l10n.loginForgotPrompt} '),
-          TextSpan(
-            text: l10n.loginForgotLink,
-            style: const TextStyle(
-              color: AppColors.accent,
-              decoration: TextDecoration.underline,
-            ),
-            recognizer: _recognizer,
-          ),
-        ],
-      ),
+    return AppTextField(
+      hint: l10n.registerEmail,
+      onChanged: context.read<ForgotPasswordCubit>().emailChanged,
+      keyboardType: TextInputType.emailAddress,
+      textInputAction: TextInputAction.done,
+      onSubmitted: (_) => context.read<ForgotPasswordCubit>().submit(),
     );
   }
 }
 
-class _LoginBottomBar extends StatelessWidget {
+class _ForgotPasswordBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -184,23 +157,21 @@ class _LoginBottomBar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: BlocBuilder<LoginCubit, LoginState>(
-                buildWhen: (prev, curr) => prev.status != curr.status,
-                builder: (context, state) {
-                  final isSubmitting =
-                      state.status == LoginStatus.submitting;
-                  return ElevatedButton(
-                    onPressed: isSubmitting
+            BlocBuilder<ForgotPasswordCubit, ForgotPasswordState>(
+              buildWhen: (prev, curr) => prev.status != curr.status,
+              builder: (context, state) {
+                final submitting =
+                    state.status == ForgotPasswordStatus.submitting;
+                return SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: submitting
                         ? null
-                        : () => context.read<LoginCubit>().login(),
+                        : () => context.read<ForgotPasswordCubit>().submit(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.surface,
                       foregroundColor: AppColors.accent,
-                      disabledBackgroundColor: AppColors.surface,
-                      disabledForegroundColor: AppColors.accent,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32),
@@ -209,28 +180,26 @@ class _LoginBottomBar extends StatelessWidget {
                         horizontal: AppSpacing.spaceMd,
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          l10n.loginButton,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        isSubmitting
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.accent,
-                                  ),
+                    child: submitting
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: AppColors.accent,
+                            ),
+                          )
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                l10n.forgotPasswordButton,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                              )
-                            : Container(
+                              ),
+                              Container(
                                 width: 20,
                                 height: 20,
                                 decoration: const BoxDecoration(
@@ -243,18 +212,18 @@ class _LoginBottomBar extends StatelessWidget {
                                   size: 12,
                                 ),
                               ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                            ],
+                          ),
+                  ),
+                );
+              },
             ),
             const SizedBox(height: AppSpacing.spaceLg),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  l10n.loginNoAccount,
+                  l10n.forgotPasswordBackPrompt,
                   style: AppTypography.textTheme.bodyMedium?.copyWith(
                     color: AppColors.surface,
                     fontSize: 16,
@@ -263,14 +232,14 @@ class _LoginBottomBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 TextButton(
-                  onPressed: () => context.go('/signup'),
+                  onPressed: () => context.go('/login'),
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.surface,
                     padding: EdgeInsets.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
-                    l10n.loginSignUp,
+                    l10n.forgotPasswordBackLink,
                     style: const TextStyle(
                       decoration: TextDecoration.underline,
                       fontSize: 16,
