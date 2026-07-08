@@ -61,8 +61,9 @@ class _NotificationsView extends StatelessWidget {
                 }
 
                 return ListView.separated(
+                  padding: EdgeInsets.zero,
                   separatorBuilder: (context, index) =>
-                      Divider(color: AppColors.divider),
+                      Divider(height: 1, color: AppColors.divider),
                   itemCount: visible.length,
                   itemBuilder: (context, index) {
                     final item = visible[index];

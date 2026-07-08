@@ -16,10 +16,24 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
 
   String _buildQuery({required bool archived}) {
     final archiveFilter = archived ? '_nnull: true' : '_null: true';
+    // Backend requires filtering out e-mails and incomplete jobs, otherwise the
+    // feed leaks non-web_app notifications and unfinished ones.
+    //
+    // Everything the UI needs (title, body, CTA, asset) is read from the
+    // `job_payload` JSON column: it is already compiled with the notification's
+    // variables and, unlike the `notification` relation, it is readable with the
+    // user's own permissions. Selecting `notification { translations ... }`
+    // fails a GraphQL validation error for end users, since the restricted
+    // schema degrades those relations to opaque scalars.
     return '''
-query UserNotifications(\$myId: ID!, \$lang: String!) {
+query UserNotifications(\$myId: ID!) {
   user_notifications(
-    filter: { user: { id: { _eq: \$myId } }, archived_on: { $archiveFilter } }
+    filter: {
+      user: { id: { _eq: \$myId } }
+      archived_on: { $archiveFilter }
+      job_status: { _eq: "completed" }
+      job_channel: { _eq: "web_app" }
+    }
     sort: ["-created_on"]
   ) {
     id
@@ -27,23 +41,7 @@ query UserNotifications(\$myId: ID!, \$lang: String!) {
     archived_on
     created_on
     notification_event
-    notification {
-      asset {
-        id
-        filename_download
-      }
-      translations(filter: { languages_code: { code: { _eq: \$lang } } }) {
-        title
-        subject
-        content
-      }
-      cta {
-        translations(filter: { languages_code: { code: { _eq: \$lang } } }) {
-          label
-          url
-        }
-      }
-    }
+    job_payload
   }
 }
 ''';
@@ -74,7 +72,7 @@ mutation MarkReadUserNotification($id: ID!, $now: Date!) {
       final query = _buildQuery(archived: archived);
       final result = await _graphqlClient.query(
         query,
-        variables: {'myId': myId, 'lang': _resolveLocale()},
+        variables: {'myId': myId},
       );
 
       final data = result['data'] as Map<String, dynamic>?;
@@ -114,29 +112,22 @@ mutation MarkReadUserNotification($id: ID!, $now: Date!) {
   }
 
   NotificationItem _mapDto(NotificationDto dto) {
-    final notification = dto.notification;
-    final translation = notification?.translations.firstOrNull;
-    final asset = notification?.asset;
-
-    final imageUrl = asset?.id != null && asset?.filenameDownload != null
-        ? '${Env.baseUrl}/assets/${asset!.id}/${asset.filenameDownload}'
+    // The whole notification content lives inside the server-compiled
+    // `job_payload` JSON (title, body HTML, CTA, asset), all with variables
+    // already substituted.
+    final assetId = dto.jobPayloadAssetId;
+    final imageUrl = assetId != null && assetId.isNotEmpty
+        ? '${Env.baseUrl}/assets/$assetId'
         : null;
 
-    final ctaTranslation = notification?.cta?.translations.firstOrNull;
     final ctas = <NotificationCta>[];
-    if (ctaTranslation?.url != null && ctaTranslation!.url!.isNotEmpty) {
-      ctas.add(
-        NotificationCta(
-          label: ctaTranslation.label ?? '',
-          url: ctaTranslation.url!,
-        ),
-      );
+    final ctaUrl = dto.jobPayloadCtaUrl;
+    if (ctaUrl != null && ctaUrl.isNotEmpty) {
+      ctas.add(NotificationCta(label: dto.jobPayloadCtaLabel ?? '', url: ctaUrl));
     }
 
     final NotificationType type;
-    if (ctas.isNotEmpty && imageUrl != null) {
-      type = NotificationType.withCta;
-    } else if (ctas.isNotEmpty) {
+    if (ctas.isNotEmpty) {
       type = NotificationType.withCta;
     } else if (imageUrl != null) {
       type = NotificationType.withImage;
@@ -145,9 +136,9 @@ mutation MarkReadUserNotification($id: ID!, $now: Date!) {
     }
 
     return NotificationItem(
-      id: dto.id.toString(),
-      title: translation?.title ?? translation?.subject ?? '',
-      body: translation?.content ?? '',
+      id: dto.id,
+      title: dto.jobPayloadTitle ?? dto.jobPayloadSubject ?? '',
+      body: dto.jobPayloadHtml ?? '',
       timestamp: dto.createdOn,
       type: type,
       category: dto.notificationEvent,
@@ -156,10 +147,5 @@ mutation MarkReadUserNotification($id: ID!, $now: Date!) {
       archived: dto.archivedOn != null,
       read: dto.readOn != null,
     );
-  }
-
-  String _resolveLocale() {
-    // The CMS uses codes like "it-IT" / "en-US". Default to Italian for now.
-    return 'it-IT';
   }
 }
