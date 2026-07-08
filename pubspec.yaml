@@ -33,6 +33,8 @@ dependencies:
   firebase_analytics: ^12.4.1
   firebase_performance: ^0.11.4+1
   firebase_messaging: ^16.2.2
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
 
 dev_dependencies:
   flutter_test:
@@ -42,6 +44,7 @@ dev_dependencies:
   retrofit_generator: ^10.2.6
   build_runner: ^2.15.0
   json_serializable: ^6.14.0
+  flutter_launcher_icons: ^0.14.4
 
 # Local fork of live_activities 2.4.9 with one fix: the upstream iOS plugin has
 # a trailing comma in a function call (LiveActivitiesPlugin.swift:234) that only
@@ -73,4 +76,24 @@ flutter:
     - assets/wellness.png
     - assets/name_logo.png
     - assets/kilokal.png
+    - assets/goal.png
+    - assets/diary.png
+    - assets/mindfulness.png
+    - assets/self_care.png
+    - assets/lifestyle.png
+    - assets/zen.png
     - assets/path_header_ellipse.svg
+
+# App launcher icon — kilocal logo (white) on brand red (#C7153B), matching the
+# splash screen. Regenerate native icons with:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "assets/launcher/icon.png"
+  # iOS: flatten alpha onto the brand background so no black corners appear.
+  ios: true
+  remove_alpha_ios: true
+  background_color_ios: "#C7153B"
+  # Android: legacy icon + adaptive icon (foreground logo over brand background).
+  android: "ic_launcher"
+  adaptive_icon_background: "#C7153B"
+  adaptive_icon_foreground: "assets/launcher/icon_foreground.png"
