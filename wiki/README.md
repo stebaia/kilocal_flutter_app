@@ -3,7 +3,7 @@
 Knowledge base for the **Kilocal mobile app** API. Primary source: Swagger **`/api/docs`** →
 tab *Kilocal App* (`/api/docs/openapi.yaml`, spec v1.2.1) on
 `https://cms-stg.kilocal.thefullproject.it`. The app talks **directly to the Directus CMS**
-with **Bearer JWT**.
+with **Bearer JWT**. Swagger URL + staging credentials + raw-spec fetch: [[swagger]].
 
 > The earlier wiki documented the **Nuxt shop e-commerce** (cookie session) from
 > `raw/KILOCAL DOCUMENTAZIONE TECNICA.pdf`. That is a **different system** — moved to
@@ -106,6 +106,8 @@ Derived from Figma **KILOCAL-PROGRAM** (`figma.com/design/wvV8JURTECntVCsHl5sNLc
 
 ## Contradictions & gaps
 
+- [swagger](swagger.md) — live API docs URL, staging credentials, raw-spec fetch
 - [contradictions](contradictions.md) — PDF (shop) vs Swagger (app), the big realignment
 - [missing-apis](missing-apis.md) — proposals → real endpoints (resolved mapping)
 - [missing-informations](missing-informations.md) — remaining gaps (Italian)
+- [open-gaps-be-design](open-gaps-be-design.md) — **BE/design blockers** (Firebase push, stats period filter, biotype texts, profile image, onboarding copy, …)

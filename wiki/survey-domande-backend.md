@@ -1,9 +1,15 @@
-# Survey — domande al backend (messaggio pronto)
+# Survey — domande al backend (RISOLTE)
 
-Messaggio human-friendly da inoltrare a chi gestisce il backend per sbloccare il
-**submit** della survey. La parte di lettura domande (GraphQL) è già integrata e
-verificata — vedi [[survey]]. Le assunzioni correnti lato app sono marcate
-`TODO(backend)` in `lib/features/survey/data/survey_mapper.dart`.
+> **Stato: chiuso.** Tutte e 6 le domande sono state **confermate dal backend**
+> (con una fixture reale di submit) e recepite in `buildSubmitBody`
+> (`survey_mapper.dart`), con test di regressione in
+> `survey_submit_body_test.dart`. Il contratto finale è documentato in
+> [[survey]] → sezione "Submit contract — confermato dal backend". Questo file è
+> conservato solo come storico del messaggio originale.
+
+Messaggio human-friendly (storico) inoltrato a chi gestisce il backend per
+sbloccare il **submit** della survey. La parte di lettura domande (GraphQL) era
+già integrata e verificata — vedi [[survey]].
 
 ---
 

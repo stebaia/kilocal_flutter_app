@@ -49,7 +49,9 @@ query GetUserDetails($myId: ID!) {
 (`is_default`, `is_billing_address`, …) and `deleted_at` (soft delete).
 
 > **Silhouette / biotype** (missing-apis §9) derives from `gender` + `profile` + percorso
-> fields — no dedicated endpoint.
+> fields — no dedicated endpoint. **Biotype texts** (`profiles_translations`) are auth-role
+> gated, and **profile-image upload** has no app endpoint — both are BE gaps, see
+> [[open-gaps-be-design]] §5 and §7.
 
 ## Related
 

@@ -19,10 +19,10 @@ Legenda stato:
 | 1 | App Flutter nativa iOS/Android, UI conforme al Figma | 🟡 | Basi solide (Clean Architecture, GoRouter, tema). Schermate principali costruite dai design; rifinitura visiva in corso su alcune sezioni. |
 | 2 | Accesso utente: registrazione, login, recupero password | ✅ | Tutti e tre presenti e collegati alle API (`login`, `register`, `password-forgotten`). |
 | 3 | Attivazione tramite codice prodotto | ⚪ | **Non ancora implementata.** Nessun flusso di inserimento/validazione codice a oggi. Da pianificare (serve conferma endpoint backend). |
-| 4 | Onboarding con survey iniziale e finale | 🟡 | Flusso survey CMS-driven **implementato e verificato in lettura** su staging (5 survey pubbliche). L'invio delle risposte è cablato, ma restano **6 domande aperte al backend** prima di considerarlo chiuso. |
+| 4 | Onboarding con survey iniziale e finale | ✅ | Flusso survey CMS-driven **implementato e verificato in lettura** su staging (5 survey pubbliche). **Submit confermato dal backend** (fixture reale) e coperto da test di regressione; le 6 domande aperte sono chiuse. Navigazione tra step verificata (le risposte persistono avanti/indietro). |
 | 5 | Home con momenti, statistiche e benefit personalizzati | 🟡 | Home + Momenti + Benefit + Statistiche presenti. Momenti e Benefit collegati alle API. Statistiche v1 (mese corrente) sbloccata via `GET /path/me/progress`; il selettore di intervallo temporale non ha ancora copertura backend. Filtro Benefit (Attivi/Passati/Coming soon) **bloccato**: mancano campi data/status lato GraphQL. |
 | 6 | Sezione Percorso collegata al prodotto attivato | 🟡 | Schermate Percorso costruite (step, aree, materiali extra, timeframe). La "dinamicizzazione" completa dipende dal collegamento al prodotto attivato → legata al punto 3 (attivazione) e a 4 domande aperte al backend. |
-| 7 | Diario personale dell'utente | 🟡 | Schermata Diario presente lato UI; **manca il collegamento alle API** (persistenza backend da definire). |
+| 7 | Diario personale dell'utente | ✅ | **Collegato alle API e verificato end-to-end su staging.** Feature completa Clean Architecture: tab *Cronologia* (`user_activities` via GraphQL con union `item`→`percorsi_content`, titolo+area risolti inline, sola lettura) e *Traguardi* (`/journal/goals`, CRUD REST) con modale filtri (Tutti/Personali/Kilocal/Completati, client-side), creazione traguardo con **picker categoria reale** dal catalogo `goal_categories`, toggle/delete ottimistici. Contratti reali confermati con token (union `item`, POST ritorna solo id, cataloghi esposti via GraphQL) — vedi correzioni in [`diario-api-analisi-2026-07-03.md`](diario-api-analisi-2026-07-03.md). Cubit coperti da test. |
 | 8 | Profilo e impostazioni | ✅ | Schermate Profilo e Impostazioni presenti. Alcune card CMS del profilo dipendono da sezioni auth-gated ancora da sbloccare lato backend. |
 | 9 | Notifiche push e centro notifiche in-app | 🟡 | **Centro notifiche in-app**: presente e collegato alle API. **Push**: infrastruttura non ancora integrata (nessun provider push configurato — vedi Monitoring qui sotto per Firebase). Da predisporre. |
 | 10 | Build di rilascio e assistenza alla pubblicazione sui due store | ⚪ | Da eseguire a valle del completamento funzionale. Configurazione ambienti via `--dart-define` già predisposta (staging/prod). |
@@ -106,10 +106,9 @@ Passi rimanenti (non eseguibili da codice): vedi `docs/firebase-setup.md` §4 (A
 3. Build di rilascio e pubblicazione store.
 
 **Da completare (🟡):**
-4. Collegamento API del Diario.
-5. Chiusura survey (6 domande aperte al backend).
-6. Filtro Benefit e selettore intervallo Statistiche (dipendenze backend).
-7. Firebase: provisioning progetto (`flutterfire configure`) + APNs iOS — codice pronto, vedi `docs/firebase-setup.md`.
+4. Chiusura survey (6 domande aperte al backend).
+5. Filtro Benefit e selettore intervallo Statistiche (dipendenze backend).
+6. Firebase: solo APNs iOS lato Apple Developer — provisioning progetto (`flutterfire configure`) già fatto, codice pronto, vedi `docs/firebase-setup.md`.
 
 **Già coperto (✅):**
 - Accesso utente completo (registrazione/login/recupero password).
@@ -117,4 +116,23 @@ Passi rimanenti (non eseguibili da codice): vedi `docs/firebase-setup.md` §4 (A
 
 ---
 
-> ⚠️ Diversi punti "parziali" dipendono da **conferme/endpoint lato backend** (attivazione prodotto, survey, filtro benefit, timeframe statistiche, card profilo auth-gated). Queste dipendenze sono già tracciate e vanno chiuse per completare le rispettive feature.
+## Gap BE / design da chiarire col team (verificati su Swagger live, 7 lug 2026)
+
+Verificato contro lo Swagger live (`/api/docs` → tab *Kilocal App* + Directus OAS su `cms-stg`). Questi non sono problemi lato app: servono un endpoint/campo dal **backend** o una definizione dal **design**. Dettaglio completo con contesto e query nel repo: `wiki/open-gaps-be-design.md`; Swagger URL + credenziali staging: `wiki/swagger.md`.
+
+| # | Gap | Owner | Cosa serve / domanda al team |
+|---|-----|:-----:|------|
+| 1 | Firebase push non integrato lato BE | BE | Nessun endpoint di registrazione device-token, nessun canale FCM/APNs (`job_channel: web_app` soltanto). Serve endpoint per registrare il token + canale di delivery. |
+| 2 | Statistiche: nessun filtro per periodo | BE | `GET /path/me/progress` restituisce solo l'aggregato **lifetime** (nessun `month`/`timeframe`). Aggiungere param, oppure confermare aggregazione client su `user_activities`. |
+| 3 | Benessere: come seguire gli step | BE/design | Le 3 card (Mindfullness/Self Care/Stili di vita) sono `is_percorso_main_tab=false`, non contate da `/path/me/progress`. Quale gruppo è "seguibile" e usa `/path/steps/*`? |
+| 4 | Integrazione: immagini non tornano | BE/design | Solo `product.asset { id }` confermato; il dettaglio Figma richiede hero/immagini istruzioni. Definire quale asset alimenta l'header dettaglio e le immagini prodotto. |
+| 5 | Profilo: testi del biotipo | BE | `profiles_translations` (content/content_f) sono auth-role gated. Non ha senso cablarli in app. Il ruolo mobile può leggerli, o serve un endpoint dedicato? |
+| 6 | Profilo: schermate senza Figma/API | design | Tutorial · Contatta assistenza · Valuta app · Privacy · Termini — mancano Figma e target (URL vs pagina CMS `private_pages`, mailto vs form). |
+| 7 | Profilo: "Cambia immagine profilo" — quale API? | BE | `PATCH /profile` non ha campo avatar, nessun endpoint dedicato. Solo Directus generico `/files` + `directus_users.avatar`. Confermare il flusso supportato. |
+| 8 | Onboarding: quali testi? | design | Il Figma mostra ancora "Lorem Ipsum" e nessuna collection CMS onboarding. Fornire la copy finale delle slide + decidere se statica in app o CMS. |
+
+I punti 1, 2, 5, 6, 7 corrispondono agli stati 🟡 dei punti 5, 8, 9 della tabella "Cosa è incluso" e vanno chiusi dal backend/design per completarli.
+
+---
+
+> ⚠️ Diversi punti "parziali" dipendono da **conferme/endpoint lato backend** (attivazione prodotto, survey, filtro benefit, timeframe statistiche, card profilo auth-gated, push Firebase, testi biotipo, immagine profilo). Queste dipendenze sono già tracciate — vedi la tabella "Gap BE / design" sopra — e vanno chiuse per completare le rispettive feature.

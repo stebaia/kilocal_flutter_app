@@ -22,8 +22,10 @@ Header "Statistiche mese corrente" + calendar icon, then one card per area:
 
 ## Data / API
 
-- Per-area, per-month percentages and counts are **not documented** — see [[missing-apis]]
-  (§5).
+- Per-area progress comes from **`GET /path/me/progress`** ([[percorso-read]]) — but that
+  returns a **lifetime** aggregate only. The **"mese corrente" / period filter has no backend
+  support** (no `month`/`timeframe` param). BE gap → [[open-gaps-be-design]] §2. Current-month
+  v1 is unblocked; the timeframe selector is not (memory: statistics-feature-status).
 
 ## Implementation notes
 

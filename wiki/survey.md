@@ -213,6 +213,29 @@ Esempio di body reale (fixture):
   (`single_product_survey`); l'`value_to_store` dell'opzione scelta è l'ID numerico del prodotto
   (es. `Kilocal AGE Menopausa` → `23`).
 
+## Wizard UI — navigazione tra step
+
+Il wizard (`SurveyScreen` / `SurveyCubit`) tiene le risposte in `state.answers`
+keyed by `section.id`; la navigazione avanti/indietro **non** le cancella. Un
+bug di sola presentazione le faceva però "trascinare" tra step consecutivi: i
+campi input (`SurveyTextField`, `SurveyDateField`, il "Specifica" dell'`is_other`)
+e le chip (`SurveyOptionChip` in `AnimatedContainer`) occupavano la stessa
+posizione nell'albero, così Flutter ne riusava `State`/`Element` — il testo del
+passo precedente riappariva e la chip lampeggiava un frame nel vecchio stato
+"selezionato".
+
+**Fix (commit `5e8573a`):** ogni input riceve una key per sezione, così ogni
+step ha un'identità widget distinta:
+
+- `SurveyTextField` / `SurveyDateField` → `ValueKey('survey-text|date-${section.id}')`
+- `SurveyOptionsList` → `ValueKey('survey-options-${section.id}')`; il suo campo
+  libero `is_other` prende un `otherFieldKey` (`survey-other-${section.id}`)
+- ogni chip → `ValueKey('survey-chip-${option.id}')`
+
+Regola generale per nuovi input nel wizard: **keyarli per `section.id`** (o
+`option.id`) per evitare il riuso di stato tra step. Richiede hot **restart** in
+sviluppo (le key cambiano l'albero).
+
 ## Related
 
 - [[survey-domande-backend]]

@@ -33,6 +33,8 @@ text block below, page indicator dots, and a forward/start control.
 
 - Slides may be static (bundled) or CMS-driven. No documented endpoint yet — see
   [[missing-apis]].
+- **Final onboarding copy is missing** (Figma still shows "Lorem Ipsum") and the static-vs-CMS
+  decision is open — design/BE gap, see [[open-gaps-be-design]] §8.
 
 ## Implementation notes
 

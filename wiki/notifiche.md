@@ -1,8 +1,8 @@
 # Notifiche / inbox (GraphQL read + write)
 
 Collection `user_notifications`. App channel: `job_channel: web_app` (push FCM/APNs **not
-implemented**). Read + mark via [[graphql]]. Fields verified against the SDL.
-Source: Swagger *Kilocal App*.
+implemented** — BE gap, see [[open-gaps-be-design]] §1). Read + mark via [[graphql]]. Fields
+verified against the SDL. Source: Swagger *Kilocal App*.
 
 ## Tabs (filters)
 

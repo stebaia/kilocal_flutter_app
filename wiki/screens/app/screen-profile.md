@@ -21,8 +21,11 @@ external redirects.
 
 ## Data / API
 
-- Profile data, body type/silhouette, and affected body parts are **not documented** — see
-  [[missing-apis]] (§9). Authentication via [[authentication]].
+- Profile read via GraphQL `GetUserDetails`, write via `PATCH /profile` ([[profilo-read]],
+  [[profilo]]). Authentication via [[authentication]].
+- **Open BE/design gaps** ([[open-gaps-be-design]]): biotype **texts** (§5, auth-gated
+  `profiles_translations`), **change profile image** API (§7, no app endpoint), and the menu
+  voices with no Figma/API — Tutorial, Contatta assistenza, Valuta app, Privacy, Termini (§6).
 
 ## Implementation notes
 
