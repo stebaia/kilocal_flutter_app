@@ -38,7 +38,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingNext => 'Next';
 
   @override
-  String get onboardingStart => 'Start';
+  String get onboardingStart => 'Let\'s start';
+
+  @override
+  String get onboardingSkip => 'Skip';
 
   @override
   String get loginTitle => 'Login';
@@ -97,10 +100,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get registerButton => 'Sign up';
 
   @override
-  String get registerBottomPrompt => 'Not registered?';
+  String get registerBottomPrompt => 'Already have an account?';
 
   @override
-  String get registerBottomLink => 'Sign up now';
+  String get registerBottomLink => 'Sign in';
 
   @override
   String get registerSuccessTitle => 'Registration completed';
@@ -153,6 +156,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginErrorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get forgotPasswordTitle => 'Recover password';
+
+  @override
+  String get forgotPasswordSubtitle =>
+      'Enter your account email. We\'ll send you a link to reset your password.';
+
+  @override
+  String get forgotPasswordButton => 'Send link';
+
+  @override
+  String get forgotPasswordBackPrompt => 'Remembered your password?';
+
+  @override
+  String get forgotPasswordBackLink => 'Sign in';
+
+  @override
+  String get forgotPasswordSuccessTitle => 'Check your email';
+
+  @override
+  String get forgotPasswordSuccessDescription =>
+      'If the address is linked to an account, you\'ll receive a link to reset your password.';
+
+  @override
+  String get forgotPasswordErrorMissingEmail => 'Please enter your email.';
+
+  @override
+  String get forgotPasswordErrorBadRequest =>
+      'Invalid email. Please check and try again.';
+
+  @override
+  String get forgotPasswordErrorNetwork =>
+      'No connection. Please try again later.';
+
+  @override
+  String get forgotPasswordErrorServer =>
+      'Server error. Please try again later.';
+
+  @override
+  String get forgotPasswordErrorGeneric =>
+      'Something went wrong. Please try again.';
 
   @override
   String homeGreeting(String name) {
@@ -212,7 +257,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathActivitiesCompleted => 'Activities completed';
 
   @override
-  String get diaryTitle => 'Diary';
+  String get pathLockedTitle => 'Locked content';
+
+  @override
+  String get pathLockedBody =>
+      'This content is not available with your current plan. Buy your starter kit to unlock the full programme.';
+
+  @override
+  String get pathLockedUnderstood => 'Got it';
+
+  @override
+  String get pathLockedBoughtKit => 'I bought the Starter kit';
+
+  @override
+  String get pathUnlockTitle => 'Unlock the programme';
+
+  @override
+  String get pathUnlockInstructions =>
+      'Enter the barcode printed on the pack of the Kilocal product you bought. The code is 1 letter followed by 9 digits.';
+
+  @override
+  String get pathUnlockCodeHint => 'Enter proof-of-purchase code…';
+
+  @override
+  String get pathUnlockSubmit => 'Submit';
+
+  @override
+  String get pathUnlockInvalidCode =>
+      'This code doesn\'t match any Kilocal product. Check it and try again.';
+
+  @override
+  String get pathUnlockUnavailable =>
+      'Code verified, but unlocking isn\'t available yet. Please try again later.';
+
+  @override
+  String get pathUnlockSuccess => 'Programme unlocked!';
+
+  @override
+  String get diaryTitle => 'Activity diary';
 
   @override
   String get benefitsTitle => 'Benefits';
@@ -347,6 +429,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get benefitViewDetails => 'View details';
 
   @override
+  String get benefitClaimReward => 'Claim the reward';
+
+  @override
   String get benefitsEmpty => 'No benefits available';
 
   @override
@@ -372,6 +457,227 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get areaIntegration => 'Integration';
+
+  @override
+  String get integrationCurrentPhase => 'Current phase';
+
+  @override
+  String get integrationNotStarted => 'Not started yet';
+
+  @override
+  String get integrationPhasesTitle => 'Your plan';
+
+  @override
+  String get integrationEmpty => 'No supplement plan available.';
+
+  @override
+  String integrationProductDuration(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String integrationProductQuantity(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count per day',
+      one: '1 per day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String integrationPhaseLabel(int number) {
+    return 'Phase $number';
+  }
+
+  @override
+  String integrationCompletePhaseFirst(int number) {
+    return 'Complete phase $number first';
+  }
+
+  @override
+  String integrationPhaseTitle(int number) {
+    return 'Integration Phase $number';
+  }
+
+  @override
+  String integrationMonitoringWeeks(int weeks) {
+    String _temp0 = intl.Intl.pluralLogic(
+      weeks,
+      locale: localeName,
+      other: '$weeks weeks tracking',
+      one: '1 week tracking',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String integrationMonitoringDays(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days tracking',
+      one: '1 day tracking',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get integrationMarkTaken => 'Mark supplement as taken';
+
+  @override
+  String get integrationMarkTakenError =>
+      'Couldn\'t record the intake. Try again later.';
+
+  @override
+  String get integrationMarkedTaken => 'Intake recorded';
+
+  @override
+  String get integrationInstructionsTitle => 'Usage instructions';
+
+  @override
+  String get integrationStartDate => 'Start date:';
+
+  @override
+  String get integrationExpectedEndDate => 'Expected end date:';
+
+  @override
+  String get integrationEnableReminder => 'Enable reminder';
+
+  @override
+  String integrationReminderActiveLabel(String label) {
+    return 'Reminder active: $label';
+  }
+
+  @override
+  String get integrationReminderSnooze2hShort => 'snooze 2 hours';
+
+  @override
+  String get integrationReminderSnooze4hShort => 'snooze 4 hours';
+
+  @override
+  String get integrationReminderSnooze8hShort => 'snooze 8 hours';
+
+  @override
+  String get integrationReminderSnooze1dShort => 'snooze 1 day';
+
+  @override
+  String get integrationReminderEnabled => 'Reminder enabled';
+
+  @override
+  String get integrationReminderError =>
+      'Couldn\'t enable the reminder. Check your notification permissions.';
+
+  @override
+  String get integrationReminderAddTitle => 'Add reminder';
+
+  @override
+  String get integrationReminderEditDeleteTitle => 'Edit or delete reminder';
+
+  @override
+  String get integrationReminderEditTitle => 'Edit reminder';
+
+  @override
+  String get integrationReminderSelectTime => 'Select time';
+
+  @override
+  String get integrationReminderConfirm => 'Confirm';
+
+  @override
+  String get integrationReminderSave => 'Save';
+
+  @override
+  String get integrationReminderCancel => 'Cancel';
+
+  @override
+  String get integrationReminderEdit => 'Edit';
+
+  @override
+  String get integrationReminderDelete => 'Delete';
+
+  @override
+  String get integrationReminderDeleteConfirm =>
+      'Are you sure you want to delete this reminder?';
+
+  @override
+  String get integrationReminderDeleted => 'Reminder deleted';
+
+  @override
+  String integrationReminderMessage(String product) {
+    return 'Take the product \"$product\". This message is generated automatically.';
+  }
+
+  @override
+  String integrationReminderSnoozedLabel(String label) {
+    return 'Snoozed by $label';
+  }
+
+  @override
+  String get integrationReminderSnooze2h => 'Snooze 2 hours';
+
+  @override
+  String get integrationReminderSnooze4h => 'Snooze 4 hours';
+
+  @override
+  String get integrationReminderSnooze8h => 'Snooze 8 hours';
+
+  @override
+  String get integrationReminderSnooze1d => 'Snooze 1 day';
+
+  @override
+  String get diaryTabHistory => 'History';
+
+  @override
+  String get diaryTabGoals => 'Goals';
+
+  @override
+  String get diaryHistoryEmpty => 'No activity recorded yet.';
+
+  @override
+  String get diaryGoalsEmpty => 'You don\'t have any goals yet.';
+
+  @override
+  String get diaryGoalPersonal => 'Personal';
+
+  @override
+  String get diaryGoalKilocal => 'Kilocal';
+
+  @override
+  String get diaryGoalCompleted => 'Achieved';
+
+  @override
+  String get diaryFilterAll => 'All goals';
+
+  @override
+  String get diaryFilterPersonal => 'Personal goals';
+
+  @override
+  String get diaryFilterKilocal => 'Kilocal goals';
+
+  @override
+  String get diaryFilterCompleted => 'Completed';
+
+  @override
+  String get diaryGoalCreateTitle => 'New goal';
+
+  @override
+  String get diaryGoalContentHint => 'Describe your goal';
+
+  @override
+  String get diaryGoalCategory => 'Category';
+
+  @override
+  String get diaryGoalPickDate => 'Add a date';
+
+  @override
+  String get diaryGoalSave => 'Save';
 
   @override
   String get month1 => 'Month 1';

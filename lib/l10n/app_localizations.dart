@@ -155,8 +155,14 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingStart.
   ///
   /// In en, this message translates to:
-  /// **'Start'**
+  /// **'Let\'s start'**
   String get onboardingStart;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get onboardingSkip;
 
   /// No description provided for @loginTitle.
   ///
@@ -269,13 +275,13 @@ abstract class AppLocalizations {
   /// No description provided for @registerBottomPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Not registered?'**
+  /// **'Already have an account?'**
   String get registerBottomPrompt;
 
   /// No description provided for @registerBottomLink.
   ///
   /// In en, this message translates to:
-  /// **'Sign up now'**
+  /// **'Sign in'**
   String get registerBottomLink;
 
   /// No description provided for @registerSuccessTitle.
@@ -373,6 +379,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Something went wrong. Please try again.'**
   String get loginErrorGeneric;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recover password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your account email. We\'ll send you a link to reset your password.'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @forgotPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send link'**
+  String get forgotPasswordButton;
+
+  /// No description provided for @forgotPasswordBackPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remembered your password?'**
+  String get forgotPasswordBackPrompt;
+
+  /// No description provided for @forgotPasswordBackLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get forgotPasswordBackLink;
+
+  /// No description provided for @forgotPasswordSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Check your email'**
+  String get forgotPasswordSuccessTitle;
+
+  /// No description provided for @forgotPasswordSuccessDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'If the address is linked to an account, you\'ll receive a link to reset your password.'**
+  String get forgotPasswordSuccessDescription;
+
+  /// No description provided for @forgotPasswordErrorMissingEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email.'**
+  String get forgotPasswordErrorMissingEmail;
+
+  /// No description provided for @forgotPasswordErrorBadRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email. Please check and try again.'**
+  String get forgotPasswordErrorBadRequest;
+
+  /// No description provided for @forgotPasswordErrorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'No connection. Please try again later.'**
+  String get forgotPasswordErrorNetwork;
+
+  /// No description provided for @forgotPasswordErrorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Server error. Please try again later.'**
+  String get forgotPasswordErrorServer;
+
+  /// No description provided for @forgotPasswordErrorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get forgotPasswordErrorGeneric;
 
   /// Greeting on the home screen
   ///
@@ -482,10 +560,76 @@ abstract class AppLocalizations {
   /// **'Activities completed'**
   String get pathActivitiesCompleted;
 
+  /// Title of the bottom sheet shown when a restricted user taps a locked path area.
+  ///
+  /// In en, this message translates to:
+  /// **'Locked content'**
+  String get pathLockedTitle;
+
+  /// Body copy of the locked-content bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'This content is not available with your current plan. Buy your starter kit to unlock the full programme.'**
+  String get pathLockedBody;
+
+  /// No description provided for @pathLockedUnderstood.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get pathLockedUnderstood;
+
+  /// No description provided for @pathLockedBoughtKit.
+  ///
+  /// In en, this message translates to:
+  /// **'I bought the Starter kit'**
+  String get pathLockedBoughtKit;
+
+  /// Title of the barcode-entry bottom sheet used to unlock the programme.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the programme'**
+  String get pathUnlockTitle;
+
+  /// Instructions above the barcode input in the unlock sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the barcode printed on the pack of the Kilocal product you bought. The code is 1 letter followed by 9 digits.'**
+  String get pathUnlockInstructions;
+
+  /// No description provided for @pathUnlockCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter proof-of-purchase code…'**
+  String get pathUnlockCodeHint;
+
+  /// No description provided for @pathUnlockSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get pathUnlockSubmit;
+
+  /// No description provided for @pathUnlockInvalidCode.
+  ///
+  /// In en, this message translates to:
+  /// **'This code doesn\'t match any Kilocal product. Check it and try again.'**
+  String get pathUnlockInvalidCode;
+
+  /// No description provided for @pathUnlockUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Code verified, but unlocking isn\'t available yet. Please try again later.'**
+  String get pathUnlockUnavailable;
+
+  /// No description provided for @pathUnlockSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Programme unlocked!'**
+  String get pathUnlockSuccess;
+
   /// No description provided for @diaryTitle.
   ///
   /// In en, this message translates to:
-  /// **'Diary'**
+  /// **'Activity diary'**
   String get diaryTitle;
 
   /// No description provided for @benefitsTitle.
@@ -752,6 +896,12 @@ abstract class AppLocalizations {
   /// **'View details'**
   String get benefitViewDetails;
 
+  /// No description provided for @benefitClaimReward.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim the reward'**
+  String get benefitClaimReward;
+
   /// No description provided for @benefitsEmpty.
   ///
   /// In en, this message translates to:
@@ -805,6 +955,354 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Integration'**
   String get areaIntegration;
+
+  /// No description provided for @integrationCurrentPhase.
+  ///
+  /// In en, this message translates to:
+  /// **'Current phase'**
+  String get integrationCurrentPhase;
+
+  /// No description provided for @integrationNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started yet'**
+  String get integrationNotStarted;
+
+  /// No description provided for @integrationPhasesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan'**
+  String get integrationPhasesTitle;
+
+  /// No description provided for @integrationEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No supplement plan available.'**
+  String get integrationEmpty;
+
+  /// No description provided for @integrationProductDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String integrationProductDuration(int days);
+
+  /// No description provided for @integrationProductQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 per day} other{{count} per day}}'**
+  String integrationProductQuantity(int count);
+
+  /// No description provided for @integrationPhaseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phase {number}'**
+  String integrationPhaseLabel(int number);
+
+  /// No description provided for @integrationCompletePhaseFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete phase {number} first'**
+  String integrationCompletePhaseFirst(int number);
+
+  /// No description provided for @integrationPhaseTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Integration Phase {number}'**
+  String integrationPhaseTitle(int number);
+
+  /// No description provided for @integrationMonitoringWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{weeks, plural, =1{1 week tracking} other{{weeks} weeks tracking}}'**
+  String integrationMonitoringWeeks(int weeks);
+
+  /// No description provided for @integrationMonitoringDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day tracking} other{{days} days tracking}}'**
+  String integrationMonitoringDays(int days);
+
+  /// No description provided for @integrationMarkTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark supplement as taken'**
+  String get integrationMarkTaken;
+
+  /// No description provided for @integrationMarkTakenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t record the intake. Try again later.'**
+  String get integrationMarkTakenError;
+
+  /// No description provided for @integrationMarkedTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Intake recorded'**
+  String get integrationMarkedTaken;
+
+  /// No description provided for @integrationInstructionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage instructions'**
+  String get integrationInstructionsTitle;
+
+  /// No description provided for @integrationStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start date:'**
+  String get integrationStartDate;
+
+  /// No description provided for @integrationExpectedEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected end date:'**
+  String get integrationExpectedEndDate;
+
+  /// No description provided for @integrationEnableReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable reminder'**
+  String get integrationEnableReminder;
+
+  /// No description provided for @integrationReminderActiveLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder active: {label}'**
+  String integrationReminderActiveLabel(String label);
+
+  /// No description provided for @integrationReminderSnooze2hShort.
+  ///
+  /// In en, this message translates to:
+  /// **'snooze 2 hours'**
+  String get integrationReminderSnooze2hShort;
+
+  /// No description provided for @integrationReminderSnooze4hShort.
+  ///
+  /// In en, this message translates to:
+  /// **'snooze 4 hours'**
+  String get integrationReminderSnooze4hShort;
+
+  /// No description provided for @integrationReminderSnooze8hShort.
+  ///
+  /// In en, this message translates to:
+  /// **'snooze 8 hours'**
+  String get integrationReminderSnooze8hShort;
+
+  /// No description provided for @integrationReminderSnooze1dShort.
+  ///
+  /// In en, this message translates to:
+  /// **'snooze 1 day'**
+  String get integrationReminderSnooze1dShort;
+
+  /// No description provided for @integrationReminderEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder enabled'**
+  String get integrationReminderEnabled;
+
+  /// No description provided for @integrationReminderError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t enable the reminder. Check your notification permissions.'**
+  String get integrationReminderError;
+
+  /// No description provided for @integrationReminderAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get integrationReminderAddTitle;
+
+  /// No description provided for @integrationReminderEditDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit or delete reminder'**
+  String get integrationReminderEditDeleteTitle;
+
+  /// No description provided for @integrationReminderEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reminder'**
+  String get integrationReminderEditTitle;
+
+  /// No description provided for @integrationReminderSelectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get integrationReminderSelectTime;
+
+  /// No description provided for @integrationReminderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get integrationReminderConfirm;
+
+  /// No description provided for @integrationReminderSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get integrationReminderSave;
+
+  /// No description provided for @integrationReminderCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get integrationReminderCancel;
+
+  /// No description provided for @integrationReminderEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get integrationReminderEdit;
+
+  /// No description provided for @integrationReminderDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get integrationReminderDelete;
+
+  /// No description provided for @integrationReminderDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this reminder?'**
+  String get integrationReminderDeleteConfirm;
+
+  /// No description provided for @integrationReminderDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder deleted'**
+  String get integrationReminderDeleted;
+
+  /// No description provided for @integrationReminderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Take the product \"{product}\". This message is generated automatically.'**
+  String integrationReminderMessage(String product);
+
+  /// No description provided for @integrationReminderSnoozedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Snoozed by {label}'**
+  String integrationReminderSnoozedLabel(String label);
+
+  /// No description provided for @integrationReminderSnooze2h.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze 2 hours'**
+  String get integrationReminderSnooze2h;
+
+  /// No description provided for @integrationReminderSnooze4h.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze 4 hours'**
+  String get integrationReminderSnooze4h;
+
+  /// No description provided for @integrationReminderSnooze8h.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze 8 hours'**
+  String get integrationReminderSnooze8h;
+
+  /// No description provided for @integrationReminderSnooze1d.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze 1 day'**
+  String get integrationReminderSnooze1d;
+
+  /// No description provided for @diaryTabHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get diaryTabHistory;
+
+  /// No description provided for @diaryTabGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get diaryTabGoals;
+
+  /// No description provided for @diaryHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity recorded yet.'**
+  String get diaryHistoryEmpty;
+
+  /// No description provided for @diaryGoalsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have any goals yet.'**
+  String get diaryGoalsEmpty;
+
+  /// No description provided for @diaryGoalPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get diaryGoalPersonal;
+
+  /// No description provided for @diaryGoalKilocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilocal'**
+  String get diaryGoalKilocal;
+
+  /// No description provided for @diaryGoalCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Achieved'**
+  String get diaryGoalCompleted;
+
+  /// No description provided for @diaryFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All goals'**
+  String get diaryFilterAll;
+
+  /// No description provided for @diaryFilterPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal goals'**
+  String get diaryFilterPersonal;
+
+  /// No description provided for @diaryFilterKilocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Kilocal goals'**
+  String get diaryFilterKilocal;
+
+  /// No description provided for @diaryFilterCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get diaryFilterCompleted;
+
+  /// No description provided for @diaryGoalCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New goal'**
+  String get diaryGoalCreateTitle;
+
+  /// No description provided for @diaryGoalContentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your goal'**
+  String get diaryGoalContentHint;
+
+  /// No description provided for @diaryGoalCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get diaryGoalCategory;
+
+  /// No description provided for @diaryGoalPickDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a date'**
+  String get diaryGoalPickDate;
+
+  /// No description provided for @diaryGoalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get diaryGoalSave;
 
   /// No description provided for @month1.
   ///
