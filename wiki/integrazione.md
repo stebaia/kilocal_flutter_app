@@ -56,14 +56,20 @@ product { id title use_for_barcode_check asset { id } } }`. Verified live on cms
 - **Barcode unlock:** query `products` with `use_for_barcode_check: true`, validate
   **client-side** against `barcodes` / `variants.barcodes`, then run survey/profile.
   (`products`: `id`, `title`, `barcodes`, `use_for_barcode_check`, `variants { barcodes }`.)
+  - **BE confirmed (2026-07-08):** the dropdown/catalogue query is `GetBarcodeProductsDropdown`
+    = `products(use_for_barcode_check: true)`; per-product details via
+    `GET /cms/items/products/{productId}` expose `barcodes` and `variants.barcodes`; **the
+    comparison is client-side.** Our `ProgramUnlockRepositoryImpl` matches this exactly.
   - Verified live 2026-07-08 on cms-stg: `barcodes[].codice` are `A` + 9 digits (e.g.
     `A947328593`). `products_translations` carries `title`, `instructions`, `timing`,
     `description`, `avvertenze` → feeds the unlock bottom-sheet copy (product name +
     instructions). Match = codice `_eq` on `products[].barcodes[].codice` OR
     `variants[].barcodes[].codice`.
-  - **OPEN (BE):** the *effect* of a valid match is undocumented. After validation what
-    do we write to lift `active_restricted_access`? (a `update_user_details_item` field?
-    a dedicated mutation/endpoint?) Blocks the "Sblocca il programma" sheet's unlock call.
+  - **OPEN (BE) — only remaining gap:** the *effect* of a valid match is still
+    undocumented. The BE's 2026-07-08 answer covered reading/validating the barcode but
+    NOT the unlock write. After validation what do we write to lift
+    `active_restricted_access`? (a `update_user_details_item` field? a dedicated
+    mutation/endpoint?) Blocks the "Sblocca il programma" sheet's unlock call.
     See [[restricted-access-path-gating]].
 
 ## Resolves missing-apis §1.2, §3.2
