@@ -74,23 +74,20 @@ query BarcodeProducts {
 
   @override
   Future<void> unlockWithProduct(BarcodeProduct product) async {
-    // Backend contract (confirmed 2026-07-08): the app lifts the restriction via
-    // `PATCH /profile`. The BE enforces a state machine — `PATCH` only accepts
-    // the *next* allowed status, verified live: from `active_restricted_access`
-    // only `→ starter_kit` (and `initial_survey`) are accepted; jumping straight
-    // to `active` is rejected with `INVALID_PAYLOAD`. So the unlock can only move
-    // the user to `starter_kit`; the BE then requires completing the starter-kit
-    // survey to reach `active`.
+    // Backend contract (confirmed 2026-07-09): the app lifts the restriction via
+    // `PATCH /profile` with `{ has_kit_purchased: true, profile_status: 'active' }`.
+    // A restricted user who unlocks with the purchase barcode has already done
+    // `type_survey` (so they have a biotype) and the `sp-kilocal` questionnaire,
+    // so the BE now allows the jump straight to `active` — no surveys are replayed.
     //
-    // NOTE: `initial_survey` is avoided — it reopens `type_survey` (the biotype
-    // quiz) and the CMS result template 500s for a user who already has a biotype.
-    //
-    // OPEN (BE / design): a restricted user who unlocks with the purchase barcode
-    // already has a biotype, yet is still forced through the starter_kit survey
-    // instead of going straight to `active`. See [[restricted-access-path-gating]].
+    // History: the `active_restricted_access` state machine previously rejected
+    // `→ active` with `INVALID_PAYLOAD`, forcing a detour through `starter_kit`
+    // (which replays the 17-question survey) or `initial_survey` (which reopens
+    // the biotype quiz and 500s the CMS result template). The BE unblocked the
+    // direct `→ active` transition on staging. See [[restricted-access-path-gating]].
     await _userRepository.updateProfile(<String, dynamic>{
       'has_kit_purchased': true,
-      'profile_status': 'starter_kit',
+      'profile_status': 'active',
     });
   }
 }

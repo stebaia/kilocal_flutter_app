@@ -52,7 +52,7 @@ query KitProducts($kitId: GraphQLStringOrFloat!, $lang: String!) {
           id
           title
           use_for_barcode_check
-          asset { id }
+          asset { id default_asset { id filename_download } }
           translations(filter: { languages_code: { code: { _eq: $lang } } }) {
             languages_code { code }
             instructions
@@ -264,9 +264,13 @@ mutation SetCurrentPhase($id: ID!, $phaseId: Int!) {
     final product = dto.product;
     if (product == null) return null;
 
-    final assetId = product.asset?.id;
-    final imageUrl =
-        assetId != null ? '${Env.baseUrl}/assets/$assetId' : null;
+    // `products.asset` is an `assets` entity, not a file; the actual image file
+    // lives in `asset.default_asset`. Building `/assets/<asset.id>` yields a
+    // broken image (placeholder icon) — the CDN needs the file id.
+    final file = product.asset?.defaultAsset;
+    final imageUrl = file?.id != null
+        ? '${Env.baseUrl}/assets/${file!.id}/${file.filenameDownload ?? ''}'
+        : null;
     final translation = product.translations.firstOrNull;
 
     return IntegrazioneProduct(

@@ -10,4 +10,27 @@ abstract class PathMaterialsRepository {
   /// Fetches the full detail (title, HTML body, asset) of a single material.
   /// Returns `null` when the material does not exist.
   Future<PathMaterialDetail?> fetchMaterialDetail({required String id});
+
+  /// Computes the completed/total figure for each of the given path groups.
+  ///
+  /// The Benessere sub-sections carry no steps in the REST `/steps` payload —
+  /// their content lives in `percorsi_materials`. So the badge (e.g. 7/21) is
+  /// computed here: `total` is the number of materials tied to the group via the
+  /// `percorsi_groups_percorsi_materials` junction, and `completed` is how many
+  /// of those materials the user has finished (a `user_activities` row on
+  /// collection `percorsi_materials` with `completed_on` set).
+  ///
+  /// Returns a map keyed by group id. Groups with no materials come back as 0/0.
+  Future<Map<String, PathGroupProgress>> fetchGroupProgress({
+    required List<String> groupIds,
+  });
+}
+
+/// The completed/total count of a single path group, computed from its
+/// materials and the user's completed activities.
+class PathGroupProgress {
+  const PathGroupProgress({required this.completed, required this.total});
+
+  final int completed;
+  final int total;
 }

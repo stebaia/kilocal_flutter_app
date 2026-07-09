@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../app/di.dart';
+import '../../../core/icons/app_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
@@ -173,6 +174,7 @@ class _StepContent extends StatelessWidget {
         _StepMedia(
           key: ValueKey(step.id),
           step: step,
+          area: area,
           siblings: siblings,
           timerController: timerController,
         ),
@@ -246,11 +248,13 @@ class _StepMedia extends StatefulWidget {
   const _StepMedia({
     super.key,
     required this.step,
+    required this.area,
     required this.siblings,
     required this.timerController,
   });
 
   final PathStepItem step;
+  final String area;
   final List<PathStepItem> siblings;
   final PathTimerController timerController;
 
@@ -315,11 +319,12 @@ class _StepMediaState extends State<_StepMedia> {
           fit: StackFit.expand,
           children: [
             _buildSurface(),
-            // Overlays are hidden once the native player takes over.
-            if (_controller == null) ...[
-              _MediaTopBar(siblings: widget.siblings, step: widget.step),
+            // The top bar (back + activities) stays visible over the player.
+            _MediaTopBar(siblings: widget.siblings, step: widget.step,isActivities: widget.area == 'alimentazione' ),
+            // The timer tools are hidden once the native player takes over,
+            // and never shown in the nutrition area.
+            if (_controller == null && widget.area != 'alimentazione')
               _MediaBottomTools(timerController: widget.timerController),
-            ],
           ],
         ),
       ),
@@ -360,10 +365,11 @@ class _StepMediaState extends State<_StepMedia> {
 
 /// Top overlay on the media: back button (left) + activities button (right).
 class _MediaTopBar extends StatelessWidget {
-  const _MediaTopBar({required this.siblings, required this.step});
+  const _MediaTopBar({required this.siblings, required this.step, required this.isActivities});
 
   final List<PathStepItem> siblings;
   final PathStepItem step;
+  final bool isActivities;
 
   @override
   Widget build(BuildContext context) {
@@ -381,8 +387,12 @@ class _MediaTopBar extends StatelessWidget {
             onTap: () => Navigator.maybePop(context),
           ),
           _RoundButton(
-            dark: true,
-            child: const Icon(Icons.fitness_center, color: Colors.white),
+            color: AppColors.accent,
+            child: AppIcon(
+              isActivities ? AppIcons.activities : AppIcons.training,
+              size: 22,
+              color: Colors.white,
+            ),
             onTap: () => _openActivities(context),
           ),
         ],
@@ -454,11 +464,15 @@ class _RoundButton extends StatelessWidget {
     required this.child,
     required this.onTap,
     this.dark = false,
+    this.color,
   });
 
   final Widget child;
   final VoidCallback onTap;
   final bool dark;
+
+  /// Explicit background color; overrides [dark] when provided.
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -469,7 +483,9 @@ class _RoundButton extends StatelessWidget {
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: dark ? Colors.black.withValues(alpha: 0.4) : Colors.white,
+          color:
+              color ??
+              (dark ? Colors.black.withValues(alpha: 0.4) : Colors.white),
           shape: BoxShape.circle,
         ),
         child: Center(child: child),

@@ -14,6 +14,15 @@ class PathData {
 
   double get overallProgress =>
       overallTotal == 0 ? 0 : overallCompleted / overallTotal;
+
+  PathData copyWith({List<PathArea>? areas}) {
+    return PathData(
+      overallCompleted: overallCompleted,
+      overallTotal: overallTotal,
+      headerAssetName: headerAssetName,
+      areas: areas ?? this.areas,
+    );
+  }
 }
 
 /// A single area inside the user path (e.g. training, nutrition, wellbeing).
@@ -41,13 +50,13 @@ class PathArea {
 
   double get progress => total == 0 ? 0 : completed / total;
 
-  PathArea copyWith({bool? isRestricted}) {
+  PathArea copyWith({int? completed, int? total, bool? isRestricted}) {
     return PathArea(
       id: id,
       title: title,
       assetName: assetName,
-      completed: completed,
-      total: total,
+      completed: completed ?? this.completed,
+      total: total ?? this.total,
       isRestricted: isRestricted ?? this.isRestricted,
     );
   }

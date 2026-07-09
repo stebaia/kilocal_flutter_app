@@ -172,12 +172,14 @@ void configureDependencies() {
   getIt.registerFactory<PathCubit>(
     () => PathCubit(
       pathRepository: getIt<PathRepository>(),
+      materialsRepository: getIt<PathMaterialsRepository>(),
       userCubit: getIt<UserCubit>(),
     ),
   );
   getIt.registerFactory<PathDetailCubit>(
     () => PathDetailCubit(
       pathRepository: getIt<PathRepository>(),
+      materialsRepository: getIt<PathMaterialsRepository>(),
       analytics: getIt<AnalyticsEvents>(),
     ),
   );

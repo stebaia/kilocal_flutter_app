@@ -193,7 +193,29 @@ Map<String, dynamic> _$ProductRefDtoToJson(ProductRefDto instance) =>
     <String, dynamic>{'id': instance.id};
 
 ProductAssetDto _$ProductAssetDtoFromJson(Map<String, dynamic> json) =>
-    ProductAssetDto(id: _nullableIdFromJson(json['id']));
+    ProductAssetDto(
+      id: _nullableIdFromJson(json['id']),
+      defaultAsset: json['default_asset'] == null
+          ? null
+          : ProductFileDto.fromJson(
+              json['default_asset'] as Map<String, dynamic>,
+            ),
+    );
 
 Map<String, dynamic> _$ProductAssetDtoToJson(ProductAssetDto instance) =>
-    <String, dynamic>{'id': instance.id};
+    <String, dynamic>{
+      'id': instance.id,
+      'default_asset': instance.defaultAsset,
+    };
+
+ProductFileDto _$ProductFileDtoFromJson(Map<String, dynamic> json) =>
+    ProductFileDto(
+      id: json['id'] as String?,
+      filenameDownload: json['filename_download'] as String?,
+    );
+
+Map<String, dynamic> _$ProductFileDtoToJson(ProductFileDto instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'filename_download': instance.filenameDownload,
+    };

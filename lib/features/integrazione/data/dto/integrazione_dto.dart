@@ -234,9 +234,12 @@ List<DateTime> _tookDatesFromJson(Object? value) {
   return dates;
 }
 
+/// `products.asset` is an `assets` entity (not a file). The image file lives in
+/// its `default_asset` relation (a `directus_files` row); `id` is only the
+/// entity's own id.
 @JsonSerializable()
 class ProductAssetDto {
-  const ProductAssetDto({this.id});
+  const ProductAssetDto({this.id, this.defaultAsset});
 
   factory ProductAssetDto.fromJson(Map<String, dynamic> json) =>
       _$ProductAssetDtoFromJson(json);
@@ -244,5 +247,25 @@ class ProductAssetDto {
   @JsonKey(fromJson: _nullableIdFromJson)
   final String? id;
 
+  /// The image file (used to build `{baseUrl}/assets/<id>/<filename>`).
+  @JsonKey(name: 'default_asset')
+  final ProductFileDto? defaultAsset;
+
   Map<String, dynamic> toJson() => _$ProductAssetDtoToJson(this);
+}
+
+/// A `directus_files` row: the actual downloadable asset.
+@JsonSerializable()
+class ProductFileDto {
+  const ProductFileDto({this.id, this.filenameDownload});
+
+  factory ProductFileDto.fromJson(Map<String, dynamic> json) =>
+      _$ProductFileDtoFromJson(json);
+
+  final String? id;
+
+  @JsonKey(name: 'filename_download')
+  final String? filenameDownload;
+
+  Map<String, dynamic> toJson() => _$ProductFileDtoToJson(this);
 }

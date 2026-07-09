@@ -47,6 +47,21 @@ class PathAreaDetail {
 
   /// Completion as an integer percentage (0-100).
   int get percent => (progress * 100).round();
+
+  PathAreaDetail copyWith({List<PathAreaGroup>? groups}) {
+    return PathAreaDetail(
+      area: area,
+      percorsoInternalName: percorsoInternalName,
+      completed: completed,
+      total: total,
+      timeframeGroups: timeframeGroups,
+      groups: groups ?? this.groups,
+      hasMaterials: hasMaterials,
+      materialsGroupId: materialsGroupId,
+      isLocked: isLocked,
+      isRestricted: isRestricted,
+    );
+  }
 }
 
 /// A content group inside an area (a `percorsi_groups` row), e.g. the three
@@ -74,6 +89,16 @@ class PathAreaGroup {
 
   /// Completion as an integer percentage (0-100).
   int get percent => (progress * 100).round();
+
+  PathAreaGroup copyWith({int? completed, int? total}) {
+    return PathAreaGroup(
+      id: id,
+      title: title,
+      completed: completed ?? this.completed,
+      total: total ?? this.total,
+      months: months,
+    );
+  }
 }
 
 /// A group of steps sharing the same timeframe (e.g. "1° mese").
