@@ -31,13 +31,7 @@ class _StatisticsView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('${l10n.statisticsTitle} ${l10n.statisticsMonth}'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.calendar_month_outlined),
-            onPressed: () {},
-          ),
-        ],
+        title: Text(l10n.statisticsTitle),
       ),
       body: BlocBuilder<StatisticsCubit, StatisticsState>(
         builder: (context, state) {

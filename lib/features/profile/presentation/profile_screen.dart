@@ -146,11 +146,7 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.spaceSm),
                     ProfileGroupCard(
                       tiles: [
-                        ProfileListTile(
-                          icon: Icons.description_outlined,
-                          title: l10n.profileTutorial,
-                          onTap: () {},
-                        ),
+                        
                         ProfileListTile(
                           icon: Icons.description_outlined,
                           title: l10n.profileContactSupport,

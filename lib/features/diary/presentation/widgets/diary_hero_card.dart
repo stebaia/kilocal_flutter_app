@@ -29,26 +29,7 @@ class DiaryHeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.spaceMd),
       child: Stack(
         children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onInfoTap,
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: AppColors.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.info_outline,
-                  size: 18,
-                  color: AppColors.accent,
-                ),
-              ),
-            ),
-          ),
+          
           Align(
             alignment: Alignment.bottomLeft,
             child: Text(
