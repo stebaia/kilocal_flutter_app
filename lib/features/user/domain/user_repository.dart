@@ -19,4 +19,13 @@ abstract class UserRepository {
   /// `user_addresses` or `user_details`. Throws [ApiException] on failure or if
   /// the API reports `success: false`.
   Future<void> updateProfile(Map<String, dynamic> values);
+
+  /// Uploads [imageBytes] via `POST /files`, then sets it as the current user's
+  /// avatar via `PATCH /users/me`. [filename] names the uploaded file (defaults
+  /// applied by the caller). Returns the uploaded file id. Throws [ApiException]
+  /// on failure. See [[avatar-upload-flow]].
+  Future<String> updateAvatar({
+    required List<int> imageBytes,
+    required String filename,
+  });
 }

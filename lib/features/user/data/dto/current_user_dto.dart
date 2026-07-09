@@ -48,6 +48,10 @@ class CurrentUserDataDto {
   @JsonKey(name: 'last_name')
   final String? lastName;
 
+  /// The user's role. Expanded to `{name}` on `GET /users/me?fields=...role.name`,
+  /// but a plain id string on unqualified responses (e.g. `PATCH /users/me`);
+  /// [_role] tolerates both, yielding `null` when not expanded.
+  @JsonKey(fromJson: _role)
   final UserRoleDto? role;
 
   /// Avatar file id (`directus_users.avatar`), served at `/assets/{id}`.
@@ -59,6 +63,14 @@ class CurrentUserDataDto {
       _$CurrentUserDataDtoFromJson(json);
 
   Map<String, dynamic> toJson() => _$CurrentUserDataDtoToJson(this);
+}
+
+/// `role` arrives as an expanded object `{name}` when requested with
+/// `fields=...role.name`, or as a plain id string otherwise. Parses the object
+/// form and returns `null` for the string form (no name available).
+UserRoleDto? _role(dynamic value) {
+  if (value is Map<String, dynamic>) return UserRoleDto.fromJson(value);
+  return null;
 }
 
 /// `avatar` may arrive as a plain file-id string or, when expanded, as an

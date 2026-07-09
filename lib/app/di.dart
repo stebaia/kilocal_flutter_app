@@ -27,6 +27,7 @@ import '../features/diary/presentation/cubit/diary_goals_cubit.dart';
 import '../features/diary/presentation/cubit/diary_history_cubit.dart';
 import '../features/profile/data/profile_page_repository_impl.dart';
 import '../features/profile/domain/profile_page_repository.dart';
+import '../features/profile/presentation/cubit/avatar_upload_cubit.dart';
 import '../features/profile/presentation/cubit/profile_page_cubit.dart';
 import '../features/profile/presentation/cubit/profile_update_cubit.dart';
 import '../features/home/data/home_repository_impl.dart';
@@ -243,6 +244,12 @@ void configureDependencies() {
   );
   getIt.registerFactory<ProfileUpdateCubit>(
     () => ProfileUpdateCubit(
+      userRepository: getIt<UserRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
+  );
+  getIt.registerFactory<AvatarUploadCubit>(
+    () => AvatarUploadCubit(
       userRepository: getIt<UserRepository>(),
       userCubit: getIt<UserCubit>(),
     ),

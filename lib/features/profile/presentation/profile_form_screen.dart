@@ -13,9 +13,11 @@ import '../../user/domain/user_details.dart';
 import '../../user/presentation/cubit/user_cubit.dart';
 import '../domain/entities/cms_form.dart';
 import '../domain/entities/profile_page.dart';
+import 'cubit/avatar_upload_cubit.dart';
 import 'cubit/profile_page_cubit.dart';
 import 'cubit/profile_update_cubit.dart';
 import 'widgets/cms_form_view.dart';
+import 'widgets/profile_avatar_editor.dart';
 
 /// Single profile form screen (`dashboard-profile`): renders one tab of the CMS
 /// `private_sec_profile` block identified by [tabId] (e.g. personal data, food
@@ -30,6 +32,9 @@ class ProfileFormScreen extends StatelessWidget {
   final String? fallbackTitle;
 
   static const _pageInternalName = 'dashboard-profile';
+
+  /// CMS tab id of the "My account" tab, which hosts the avatar editor.
+  static const _accountTabId = '4';
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +51,8 @@ class ProfileFormScreen extends StatelessWidget {
             create: (_) => getIt<ProfilePageCubit>()..load(_pageInternalName),
           ),
           BlocProvider(create: (_) => getIt<ProfileUpdateCubit>()),
+          if (tabId == _accountTabId)
+            BlocProvider(create: (_) => getIt<AvatarUploadCubit>()),
         ],
         child: BlocBuilder<ProfilePageCubit, ProfilePageState>(
           builder: (context, state) {
@@ -83,7 +90,7 @@ class ProfileFormScreen extends StatelessWidget {
     if (form == null || form.fields.isEmpty) {
       return _Message(text: l10n.errorGeneric);
     }
-    return _FormBody(form: form);
+    return _FormBody(form: form, showAvatarEditor: tabId == _accountTabId);
   }
 
   ProfileFormTab? _tabFor(ProfilePage? page) {
@@ -95,9 +102,12 @@ class ProfileFormScreen extends StatelessWidget {
 }
 
 class _FormBody extends StatelessWidget {
-  const _FormBody({required this.form});
+  const _FormBody({required this.form, this.showAvatarEditor = false});
 
   final CmsForm form;
+
+  /// When true, renders the tappable avatar editor above the form (account tab).
+  final bool showAvatarEditor;
 
   @override
   Widget build(BuildContext context) {
@@ -126,17 +136,23 @@ class _FormBody extends StatelessWidget {
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.screenGutter),
-            child: BlocBuilder<ProfileUpdateCubit, ProfileUpdateState>(
-              builder: (context, updateState) {
-                return CmsFormView(
-                  form: form,
-                  initialValues: initialValues,
-                  submitting: updateState.isSubmitting,
-                  onSubmit: (values) => context
-                      .read<ProfileUpdateCubit>()
-                      .submit(_toProfileBody(values)),
-                );
-              },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (showAvatarEditor) const ProfileAvatarEditor(),
+                BlocBuilder<ProfileUpdateCubit, ProfileUpdateState>(
+                  builder: (context, updateState) {
+                    return CmsFormView(
+                      form: form,
+                      initialValues: initialValues,
+                      submitting: updateState.isSubmitting,
+                      onSubmit: (values) => context
+                          .read<ProfileUpdateCubit>()
+                          .submit(_toProfileBody(values)),
+                    );
+                  },
+                ),
+              ],
             ),
           );
         },

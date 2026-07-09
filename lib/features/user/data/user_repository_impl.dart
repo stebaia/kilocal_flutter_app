@@ -151,6 +151,24 @@ query GetUserDetails($myId: ID!) {
     }
   }
 
+  @override
+  Future<String> updateAvatar({
+    required List<int> imageBytes,
+    required String filename,
+  }) async {
+    try {
+      final file = MultipartFile.fromBytes(imageBytes, filename: filename);
+      final upload = await _userApi.uploadFile(file);
+      final fileId = upload.data.id;
+      // `avatar` lives on `directus_users`; write it via PATCH /users/me. Using
+      // PATCH /profile would route it to `user_details` and fail (500).
+      await _userApi.updateCurrentUser(<String, dynamic>{'avatar': fileId});
+      return fileId;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
   AppUser _mapCurrentUser(CurrentUserDataDto dto) => AppUser(
     id: dto.id,
     email: dto.email,

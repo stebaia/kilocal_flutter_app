@@ -336,6 +336,21 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileSaved => 'Modifiche salvate';
 
   @override
+  String get profileAvatarChange => 'Modifica foto profilo';
+
+  @override
+  String get profileAvatarFromCamera => 'Scatta una foto';
+
+  @override
+  String get profileAvatarFromGallery => 'Scegli dalla galleria';
+
+  @override
+  String get profileAvatarUpdated => 'Foto profilo aggiornata';
+
+  @override
+  String get profileAvatarError => 'Impossibile aggiornare la foto profilo';
+
+  @override
   String get profileFoodPreferences => 'Preferenze alimentari';
 
   @override

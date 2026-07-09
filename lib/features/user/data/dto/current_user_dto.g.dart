@@ -22,9 +22,7 @@ CurrentUserDataDto _$CurrentUserDataDtoFromJson(Map<String, dynamic> json) =>
       email: json['email'] as String?,
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
-      role: json['role'] == null
-          ? null
-          : UserRoleDto.fromJson(json['role'] as Map<String, dynamic>),
+      role: _role(json['role']),
       avatar: _avatarId(json['avatar']),
     );
 

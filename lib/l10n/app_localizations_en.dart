@@ -335,6 +335,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSaved => 'Changes saved';
 
   @override
+  String get profileAvatarChange => 'Change profile photo';
+
+  @override
+  String get profileAvatarFromCamera => 'Take a photo';
+
+  @override
+  String get profileAvatarFromGallery => 'Choose from gallery';
+
+  @override
+  String get profileAvatarUpdated => 'Profile photo updated';
+
+  @override
+  String get profileAvatarError => 'Couldn\'t update the profile photo';
+
+  @override
   String get profileFoodPreferences => 'Food preferences';
 
   @override

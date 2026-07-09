@@ -710,6 +710,36 @@ abstract class AppLocalizations {
   /// **'Changes saved'**
   String get profileSaved;
 
+  /// No description provided for @profileAvatarChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change profile photo'**
+  String get profileAvatarChange;
+
+  /// No description provided for @profileAvatarFromCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get profileAvatarFromCamera;
+
+  /// No description provided for @profileAvatarFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get profileAvatarFromGallery;
+
+  /// No description provided for @profileAvatarUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile photo updated'**
+  String get profileAvatarUpdated;
+
+  /// No description provided for @profileAvatarError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the profile photo'**
+  String get profileAvatarError;
+
   /// No description provided for @profileFoodPreferences.
   ///
   /// In en, this message translates to:
