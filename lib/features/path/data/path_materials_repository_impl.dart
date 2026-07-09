@@ -41,6 +41,9 @@ query GetGroupMaterials($groupId: GraphQLStringOrFloat!, $lang: String!) {
         percorsi_material_categories_id {
           id
           internal_name
+          hero_asset {
+            default_asset { id filename_download }
+          }
           translations(filter: { languages_code: { code: { _eq: $lang } } }) {
             title
           }
@@ -50,6 +53,42 @@ query GetGroupMaterials($groupId: GraphQLStringOrFloat!, $lang: String!) {
   }
 }
 ''';
+
+  /// Materials of a group, reduced to their ids — used to size the group badge
+  /// (denominator) and to know which materials belong to the group when
+  /// intersecting with the user's completed activities.
+  static const _groupMaterialIdsQuery = r'''
+query GetGroupMaterialIds($groupId: GraphQLStringOrFloat!) {
+  percorsi_groups_percorsi_materials(
+    filter: { percorsi_groups_id: { id: { _eq: $groupId } } }
+  ) {
+    percorsi_materials_id { id }
+  }
+}
+''';
+
+  /// The user's completed activities that link a `percorsi_materials` item.
+  /// The M2A `activity` is many-to-any, so the material is reached through an
+  /// inline fragment. Only `completed_on _nnull` is filtered server-side; the
+  /// collection is matched client-side because the nested M2A filter returns
+  /// nothing on this Directus instance (same gotcha as the diary history query).
+  static const _completedMaterialsQuery = r'''
+query GetCompletedMaterials($filter: user_activities_filter) {
+  user_activities(filter: $filter) {
+    activity {
+      collection
+      item {
+        __typename
+        ... on percorsi_materials { id }
+      }
+    }
+  }
+}
+''';
+
+  static const _completedFilter = <String, dynamic>{
+    'completed_on': {'_nnull': true},
+  };
 
   static const _detailQuery = r'''
 query GetMaterial($id: ID!, $lang: String!) {
@@ -78,6 +117,11 @@ query GetMaterial($id: ID!, $lang: String!) {
         variables: {'groupId': groupId, 'lang': lang},
       );
 
+      // Materials the user has completed (across all groups), used to flag each
+      // card so the "Completati" filter can select them — mirrors the web app,
+      // which intersects the material list with the completed-materials list.
+      final completedIds = await _fetchCompletedMaterialIds();
+
       final data = result['data'] as Map<String, dynamic>?;
       final rows =
           data?['percorsi_groups_percorsi_materials'] as List<dynamic>? ??
@@ -96,10 +140,14 @@ query GetMaterial($id: ID!, $lang: String!) {
         if (dto == null) continue;
 
         final categoryIds = <String>[];
+        // Cover image to fall back to when the material carries no asset of its
+        // own: the first category hero we encounter for this material.
+        String? categoryHeroUrl;
         for (final cj in dto.categories) {
           final cat = cj.category;
           if (cat == null) continue;
           categoryIds.add(cat.id);
+          categoryHeroUrl ??= _assetUrl(cat.heroAsset?.defaultAsset);
           categories.putIfAbsent(
             cat.id,
             () => PathMaterialCategory(
@@ -109,7 +157,14 @@ query GetMaterial($id: ID!, $lang: String!) {
           );
         }
 
-        materials.add(_mapMaterial(dto, categoryIds));
+        materials.add(
+          _mapMaterial(
+            dto,
+            categoryIds,
+            isCompleted: completedIds.contains(dto.id),
+            fallbackImageUrl: categoryHeroUrl,
+          ),
+        );
       }
 
       return PathMaterialsData(
@@ -156,17 +211,103 @@ query GetMaterial($id: ID!, $lang: String!) {
     }
   }
 
-  PathMaterial _mapMaterial(PathMaterialDto dto, List<String> categoryIds) {
+  @override
+  Future<Map<String, PathGroupProgress>> fetchGroupProgress({
+    required List<String> groupIds,
+  }) async {
+    if (groupIds.isEmpty) return const {};
+    try {
+      // Set of material ids the user has completed (across all groups): one read
+      // instead of per-group, then intersected with each group's material ids.
+      final completedIds = await _fetchCompletedMaterialIds();
+
+      final progress = <String, PathGroupProgress>{};
+      for (final groupId in groupIds) {
+        final materialIds = await _fetchGroupMaterialIds(groupId);
+        final completed = materialIds.where(completedIds.contains).length;
+        progress[groupId] = PathGroupProgress(
+          completed: completed,
+          total: materialIds.length,
+        );
+      }
+      return progress;
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  /// Ids of the materials tied to [groupId] via the junction (the group total).
+  Future<List<String>> _fetchGroupMaterialIds(String groupId) async {
+    final result = await _graphqlClient.query(
+      _groupMaterialIdsQuery,
+      variables: {'groupId': groupId},
+    );
+    final data = result['data'] as Map<String, dynamic>?;
+    final rows =
+        data?['percorsi_groups_percorsi_materials'] as List<dynamic>? ??
+        const [];
+
+    final ids = <String>[];
+    for (final row in rows) {
+      final material =
+          (row as Map<String, dynamic>)['percorsi_materials_id']
+              as Map<String, dynamic>?;
+      final id = material?['id'];
+      if (id != null) ids.add(id.toString());
+    }
+    return ids;
+  }
+
+  /// Ids of `percorsi_materials` the user has completed (a `user_activities`
+  /// row with `completed_on` set whose activity links a material).
+  Future<Set<String>> _fetchCompletedMaterialIds() async {
+    final result = await _graphqlClient.query(
+      _completedMaterialsQuery,
+      variables: {'filter': _completedFilter},
+    );
+    final data = result['data'] as Map<String, dynamic>?;
+    final rows = data?['user_activities'] as List<dynamic>? ?? const [];
+
+    final ids = <String>{};
+    for (final row in rows) {
+      final links = (row as Map<String, dynamic>)['activity'] as List<dynamic>?;
+      for (final link in links ?? const []) {
+        final item = (link as Map<String, dynamic>)['item']
+            as Map<String, dynamic>?;
+        if (item == null || item['__typename'] != 'percorsi_materials') {
+          continue;
+        }
+        final id = item['id'];
+        if (id != null) ids.add(id.toString());
+      }
+    }
+    return ids;
+  }
+
+  PathMaterial _mapMaterial(
+    PathMaterialDto dto,
+    List<String> categoryIds, {
+    required bool isCompleted,
+    String? fallbackImageUrl,
+  }) {
     final asset = dto.asset;
     final file = asset?.mobileAsset ?? asset?.defaultAsset;
+
+    // Most Benessere materials (consigli and Vimeo videos) carry no image file
+    // of their own; fall back to the category cover so the card is not a bare
+    // placeholder — matching the web app.
+    final imageUrl = _assetUrl(file) ?? fallbackImageUrl;
 
     return PathMaterial(
       id: dto.id,
       title: dto.translations.firstOrNull?.title ?? '',
       isVideo: asset?.assetIsVideo ?? false,
       isAvailable: dto.status == 'published',
+      isCompleted: isCompleted,
       categoryIds: categoryIds,
-      imageUrl: _assetUrl(file),
+      imageUrl: imageUrl,
     );
   }
 

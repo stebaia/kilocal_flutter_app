@@ -45,11 +45,8 @@ class PathMaterialsState extends Equatable {
         return material.isAvailable;
       case PathMaterialFilter.unavailable:
         return !material.isAvailable;
-      // The backend does not yet expose per-user completion on materials, so
-      // "Completati" currently matches nothing. Ready to switch to a real
-      // `isCompleted` flag once the field lands.
       case PathMaterialFilter.completed:
-        return false;
+        return material.isCompleted;
     }
   }
 

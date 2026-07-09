@@ -150,6 +150,7 @@ class PathMaterialCategoryDto {
   const PathMaterialCategoryDto({
     required this.id,
     this.internalName,
+    this.heroAsset,
     this.translations = const [],
   });
 
@@ -162,7 +163,27 @@ class PathMaterialCategoryDto {
   @JsonKey(name: 'internal_name')
   final String? internalName;
 
+  /// Category cover image, used as the card image fallback when a material has
+  /// no asset of its own (e.g. Benessere consigli/video items).
+  @JsonKey(name: 'hero_asset')
+  final PathMaterialHeroAssetDto? heroAsset;
+
   final List<PathMaterialTranslationDto> translations;
 
   Map<String, dynamic> toJson() => _$PathMaterialCategoryDtoToJson(this);
+}
+
+/// The `hero_asset` `assets` wrapper on a category; the image file lives under
+/// `default_asset`.
+@JsonSerializable()
+class PathMaterialHeroAssetDto {
+  const PathMaterialHeroAssetDto({this.defaultAsset});
+
+  factory PathMaterialHeroAssetDto.fromJson(Map<String, dynamic> json) =>
+      _$PathMaterialHeroAssetDtoFromJson(json);
+
+  @JsonKey(name: 'default_asset')
+  final PathMaterialFileDto? defaultAsset;
+
+  Map<String, dynamic> toJson() => _$PathMaterialHeroAssetDtoToJson(this);
 }

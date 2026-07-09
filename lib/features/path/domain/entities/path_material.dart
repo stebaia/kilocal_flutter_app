@@ -11,6 +11,7 @@ class PathMaterial extends Equatable {
     required this.title,
     required this.isVideo,
     required this.isAvailable,
+    required this.isCompleted,
     required this.categoryIds,
     this.imageUrl,
   });
@@ -23,6 +24,11 @@ class PathMaterial extends Equatable {
 
   /// Whether the material is published/available ("Disponibile" badge).
   final bool isAvailable;
+
+  /// Whether the user has completed this material (a `user_activities` row on
+  /// collection `percorsi_materials` with `completed_on` set). Drives the
+  /// "Completati" filter.
+  final bool isCompleted;
 
   /// Ids of the categories this material belongs to; used to filter by tab.
   final List<String> categoryIds;
@@ -37,6 +43,7 @@ class PathMaterial extends Equatable {
     title,
     isVideo,
     isAvailable,
+    isCompleted,
     categoryIds,
     imageUrl,
   ];

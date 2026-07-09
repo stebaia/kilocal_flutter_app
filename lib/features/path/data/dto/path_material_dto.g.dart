@@ -144,6 +144,11 @@ PathMaterialCategoryDto _$PathMaterialCategoryDtoFromJson(
 ) => PathMaterialCategoryDto(
   id: _idFromJson(json['id']),
   internalName: json['internal_name'] as String?,
+  heroAsset: json['hero_asset'] == null
+      ? null
+      : PathMaterialHeroAssetDto.fromJson(
+          json['hero_asset'] as Map<String, dynamic>,
+        ),
   translations:
       (json['translations'] as List<dynamic>?)
           ?.map(
@@ -159,5 +164,20 @@ Map<String, dynamic> _$PathMaterialCategoryDtoToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'internal_name': instance.internalName,
+  'hero_asset': instance.heroAsset,
   'translations': instance.translations,
 };
+
+PathMaterialHeroAssetDto _$PathMaterialHeroAssetDtoFromJson(
+  Map<String, dynamic> json,
+) => PathMaterialHeroAssetDto(
+  defaultAsset: json['default_asset'] == null
+      ? null
+      : PathMaterialFileDto.fromJson(
+          json['default_asset'] as Map<String, dynamic>,
+        ),
+);
+
+Map<String, dynamic> _$PathMaterialHeroAssetDtoToJson(
+  PathMaterialHeroAssetDto instance,
+) => <String, dynamic>{'default_asset': instance.defaultAsset};
