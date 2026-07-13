@@ -2,6 +2,12 @@ import 'package:equatable/equatable.dart';
 
 import 'profile_status.dart';
 
+/// Whether a raw `user_details.gender` value denotes female. The survey stores
+/// `m`/`f`/`other`; `f` (case-insensitive) is female, everything else — `m`,
+/// `other`, null — is treated as non-female. Single source of truth reused by
+/// the data layer and the presentation layer for gender-dependent assets.
+bool genderIsFemale(String? gender) => gender?.toLowerCase() == 'f';
+
 /// Detailed profile data returned by `GetUserDetails`.
 class UserDetails extends Equatable {
   const UserDetails({
@@ -47,6 +53,12 @@ class UserDetails extends Equatable {
 
   bool get isToolBlocked => profileStatus.isToolBlocked;
 
+  /// Whether the user is female, per `user_details.gender` — the survey stores
+  /// `m`/`f`/`other` (see wiki survey). `other` and unknown values are treated
+  /// as non-female (man silhouette) until the backend specifies otherwise.
+  /// Single source of truth for gender-dependent UI (silhouettes, body map).
+  bool get isFemale => genderIsFemale(gender);
+
   @override
   List<Object?> get props => [
     profileStatus,
@@ -84,6 +96,7 @@ class Biotype extends Equatable {
     this.denomination,
     this.iconUrl,
     this.silhouetteAssetName,
+    this.silhouetteCleanAssetName,
     this.description,
     this.mainColor,
     this.secondaryColor,
@@ -99,6 +112,13 @@ class Biotype extends Equatable {
   final String? iconUrl;
 
   final String? silhouetteAssetName;
+
+  /// Full-color, dot-free silhouette asset chosen by gender + biotype number
+  /// (`assets/person/<gender>-type<N>.png`), used by the interactive
+  /// "characteristics" body map where the clickable dots are drawn as widgets
+  /// on top. `null` when no clean asset exists for this type/gender.
+  final String? silhouetteCleanAssetName;
+
   final String? description;
   final String? mainColor;
   final String? secondaryColor;
@@ -134,6 +154,7 @@ class Biotype extends Equatable {
     denomination,
     iconUrl,
     silhouetteAssetName,
+    silhouetteCleanAssetName,
     description,
     mainColor,
     secondaryColor,

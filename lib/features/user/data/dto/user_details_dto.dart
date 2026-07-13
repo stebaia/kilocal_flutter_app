@@ -247,6 +247,12 @@ class BiotypeDto {
         isFemale: isFemale,
         mainColor: mainColor,
       ),
+      // Dot-free, full-color silhouette for the interactive body map, keyed by
+      // biotype number parsed from the label ("Tipo 4" → 4).
+      silhouetteCleanAssetName: _cleanSilhouetteAsset(
+        isFemale: isFemale,
+        displayName: displayName,
+      ),
       description: isFemale
           ? (translation?.contentF ?? translation?.content)
           : translation?.content,
@@ -257,10 +263,8 @@ class BiotypeDto {
   }
 }
 
-bool _isFemale(String? gender) {
-  final g = gender?.toLowerCase();
-  return g == 'female' || g == 'f' || g == 'femmina';
-}
+// Delegates to the domain single source of truth ([genderIsFemale]).
+bool _isFemale(String? gender) => genderIsFemale(gender);
 
 /// Biotype `main_color` hex → `assets/person/` color name. Values are the fixed
 /// palette used by the CMS `profiles` collection.
@@ -281,6 +285,23 @@ String _silhouetteAsset({required bool isFemale, String? mainColor}) {
   final gender = isFemale ? 'woman' : 'man';
   final color = _colorNameFor(mainColor) ?? 'blue';
   return 'assets/person/$gender-$color.png';
+}
+
+/// Dot-free silhouette asset keyed by biotype number
+/// (`assets/person/<gender>-type<N>.png`). Returns `null` when the label has no
+/// number so the caller can fall back gracefully. Only the man variants exist
+/// today (types 1,2,3,4,6,7 — type 5 has no male variant); the woman assets
+/// follow the same naming once available.
+String? _cleanSilhouetteAsset({
+  required bool isFemale,
+  required String displayName,
+}) {
+  final number = int.tryParse(
+    RegExp(r'\d+').firstMatch(displayName)?.group(0) ?? '',
+  );
+  if (number == null) return null;
+  final gender = isFemale ? 'woman' : 'man';
+  return 'assets/person/$gender-type$number.png';
 }
 
 String? _colorNameFor(String? hex) {
