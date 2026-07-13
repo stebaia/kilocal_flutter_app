@@ -31,6 +31,8 @@ import '../features/path/presentation/path_step_screen.dart';
 import '../features/path/presentation/path_timeframe_steps_screen.dart';
 import '../features/profile/presentation/profile_form_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/profile/presentation/profile_kit_screen.dart';
+import '../features/profile/presentation/profile_kit_products_screen.dart';
 import '../features/profile/presentation/profile_type_screen.dart';
 import '../features/profile/presentation/profile_type_percorsi_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
@@ -196,6 +198,21 @@ final GoRouter appRouter = GoRouter(
                       path: 'percorsi',
                       builder: (context, state) =>
                           const ProfileTypePercorsiScreen(),
+                    ),
+                    // "Il mio Kit" plan card; kit id passed via extra (it comes
+                    // from the session biotype, no need to re-resolve it).
+                    GoRoute(
+                      path: 'kit/:kitId',
+                      builder: (context, state) => ProfileKitScreen(
+                        kitId: state.pathParameters['kitId']!,
+                      ),
+                    ),
+                    // "Integrazione e prodotti": the kit's supplement products.
+                    GoRoute(
+                      path: 'products/:kitId',
+                      builder: (context, state) => ProfileKitProductsScreen(
+                        kitId: state.pathParameters['kitId']!,
+                      ),
                     ),
                   ],
                 ),

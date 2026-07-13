@@ -143,6 +143,14 @@
   "profileTypeProductsSection": "Product information",
   "profileTypeMyKit": "My Kit",
   "profileTypeSupplements": "Supplements and products",
+  "profileKitTitle": "Kit {type}",
+  "@profileKitTitle": {
+    "placeholders": {
+      "type": { "type": "String" }
+    }
+  },
+  "profileKitBuy": "Buy",
+  "profileKitEmpty": "No products available.",
   "profileCategorySection": "Section category name",
   "profilePersonalData": "My personal data",
   "profileMyAccount": "My account",

@@ -337,6 +337,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTypeSupplements => 'Supplements and products';
 
   @override
+  String profileKitTitle(String type) {
+    return 'Kit $type';
+  }
+
+  @override
+  String get profileKitBuy => 'Buy';
+
+  @override
+  String get profileKitEmpty => 'No products available.';
+
+  @override
   String get profileCategorySection => 'Section category name';
 
   @override

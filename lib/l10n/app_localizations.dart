@@ -710,6 +710,24 @@ abstract class AppLocalizations {
   /// **'Supplements and products'**
   String get profileTypeSupplements;
 
+  /// No description provided for @profileKitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kit {type}'**
+  String profileKitTitle(String type);
+
+  /// No description provided for @profileKitBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get profileKitBuy;
+
+  /// No description provided for @profileKitEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No products available.'**
+  String get profileKitEmpty;
+
   /// No description provided for @profileCategorySection.
   ///
   /// In en, this message translates to:

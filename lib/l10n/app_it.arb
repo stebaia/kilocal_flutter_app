@@ -117,6 +117,14 @@
   "profileTypeProductsSection": "Informazioni sui prodotti",
   "profileTypeMyKit": "Il mio Kit",
   "profileTypeSupplements": "Integrazioni e prodotti",
+  "profileKitTitle": "Kit {type}",
+  "@profileKitTitle": {
+    "placeholders": {
+      "type": { "type": "String" }
+    }
+  },
+  "profileKitBuy": "Acquista",
+  "profileKitEmpty": "Nessun prodotto disponibile.",
   "profileCategorySection": "Nome categoria sezioni",
   "profilePersonalData": "I miei dati personali",
   "profileMyAccount": "Il mio account",

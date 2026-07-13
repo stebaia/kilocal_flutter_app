@@ -86,6 +86,9 @@ class _Content extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The kit assigned to the biotype (`user_details.profile.kit.id`) drives the
+    // two product cards; null when the profile has no kit yet.
+    final kitId = biotype.kit?.id;
     return BlocBuilder<ProfilePageCubit, ProfilePageState>(
       builder: (context, pageState) {
         final page = pageState.page;
@@ -141,14 +144,20 @@ class _Content extends StatelessWidget {
                 icon: Icons.menu_book_outlined,
                 title: biotype.kit?.title ?? l10n.profileTypeMyKit,
                 badgeColor: colorFromHex(biotype.mainColor),
-                onTap: () {},
+                // "Il mio Kit" opens the kit plan card ("Kit tipo N").
+                onTap: kitId == null
+                    ? null
+                    : () => context.push('/profile/type/kit/$kitId'),
               ),
               const SizedBox(height: AppSpacing.spaceSm),
               ProfileProductTile(
                 icon: Icons.medication_outlined,
                 title: l10n.profileTypeSupplements,
                 badgeColor: colorFromHex(biotype.mainColor),
-                onTap: () {},
+                // "Integrazione e prodotti" opens the kit's supplement products.
+                onTap: kitId == null
+                    ? null
+                    : () => context.push('/profile/type/products/$kitId'),
               ),
             ],
           ),
