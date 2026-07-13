@@ -44,3 +44,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Generated preview artifacts from biotype tooling (not source)
+tools/preview_out/
+tools/figma_texts.json
+tools/biotype_sheets.json

@@ -668,6 +668,30 @@ abstract class AppLocalizations {
   /// **'Discover more'**
   String get profileTypeDiscoverMore;
 
+  /// Title pill on the biotype body-map card; {type} is the biotype label e.g. 'Type 1'.
+  ///
+  /// In en, this message translates to:
+  /// **'{type} - Your starting point'**
+  String profileTypeStartingPoint(String type);
+
+  /// Label above the four path-category buttons on the biotype characteristics screen.
+  ///
+  /// In en, this message translates to:
+  /// **'The path to feel your best'**
+  String get profileTypePathToFeelBest;
+
+  /// Fallback title in the body-map point sheet when a point has no text.
+  ///
+  /// In en, this message translates to:
+  /// **'Body point'**
+  String get profileTypePointTitleFallback;
+
+  /// Fallback body in the body-map point/area sheet when there is no text.
+  ///
+  /// In en, this message translates to:
+  /// **'Content coming soon.'**
+  String get profileTypePointBodyFallback;
+
   /// No description provided for @profileTypeProductsSection.
   ///
   /// In en, this message translates to:

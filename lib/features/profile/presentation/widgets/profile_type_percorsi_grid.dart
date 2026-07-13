@@ -1,18 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'profile_type_percorsi_sheet.dart';
 
 /// The four path-category shortcuts of the "percorsi" section on dashboard-type
-/// (`private_sec_percorsi`, `layout: icons`). Tapping a category opens its path
-/// area (`/path/:area`).
+/// (`private_sec_percorsi`, `layout: icons`). Tapping a category opens a bottom
+/// sheet describing how the path is personalised for the user's biotype.
+///
+/// Pill-shaped buttons (radius 40, 1px border) tinted with the biotype
+/// [accentColor] (`main_color`), under a colored section label.
 class ProfileTypePercorsiGrid extends StatelessWidget {
-  const ProfileTypePercorsiGrid({super.key});
+  const ProfileTypePercorsiGrid({
+    super.key,
+    required this.accentColor,
+    this.areaTexts = const {},
+  });
+
+  /// Biotype `main_color`; tints the label, borders and icons.
+  final Color accentColor;
+
+  /// Per-area silhouette text keyed by area slug; shown in the sheet on tap.
+  final Map<String, String> areaTexts;
 
   static const _categories = <_PercorsoCategory>[
     _PercorsoCategory('allenamento', AppIcons.training),
@@ -24,18 +36,38 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        for (var i = 0; i < _categories.length; i++) ...[
-          if (i != 0) const SizedBox(width: AppSpacing.spaceSm),
-          Expanded(
-            child: _CategoryTile(
-              category: _categories[i],
-              label: _labelFor(_categories[i].area, l10n),
-              onTap: () => context.go('/path/${_categories[i].area}'),
-            ),
+        SizedBox(height: 12,),
+        Text(
+          l10n.profileTypePathToFeelBest,
+          style: AppTypography.textTheme.titleSmall?.copyWith(
+            color: accentColor,
+            fontWeight: FontWeight.w700,
           ),
-        ],
+        ),
+        const SizedBox(height: AppSpacing.spaceSm),
+        Row(
+          children: [
+            for (var i = 0; i < _categories.length; i++) ...[
+              if (i != 0) const SizedBox(width: AppSpacing.spaceSm),
+              Expanded(
+                child: _CategoryTile(
+                  category: _categories[i],
+                  accentColor: accentColor,
+                  onTap: () => showProfileTypePercorsiSheet(
+                    context,
+                    area: _categories[i].area,
+                    title: _labelFor(_categories[i].area, l10n),
+                    body: areaTexts[_categories[i].area],
+                    accentColor: accentColor,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ],
     );
   }
@@ -58,15 +90,16 @@ class _PercorsoCategory {
   final String iconName;
 }
 
+/// A pill-shaped, bordered category button with a centered biotype-colored icon.
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({
     required this.category,
-    required this.label,
+    required this.accentColor,
     required this.onTap,
   });
 
   final _PercorsoCategory category;
-  final String label;
+  final Color accentColor;
   final VoidCallback onTap;
 
   @override
@@ -74,34 +107,15 @@ class _CategoryTile extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              boxShadow: AppShadows.card,
-            ),
-            alignment: Alignment.center,
-            child: AppIcon(
-              category.iconName,
-              size: 26,
-              color: AppColors.accent,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.spaceXs),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: AppTypography.textTheme.labelMedium?.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(color: accentColor, width: 1),
+        ),
+        alignment: Alignment.center,
+        child: AppIcon(category.iconName, size: 26, color: accentColor),
       ),
     );
   }

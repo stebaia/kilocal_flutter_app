@@ -84,6 +84,7 @@ flutter:
     - assets/lifestyle.png
     - assets/zen.png
     - assets/path_header_ellipse.svg
+    - assets/biotype_texts.json
 
 # App launcher icon — kilocal logo (white) on brand red (#C7153B), matching the
 # splash screen. Regenerate native icons with:

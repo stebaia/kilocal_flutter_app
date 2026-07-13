@@ -25,6 +25,7 @@ import '../features/diary/data/diary_repository_impl.dart';
 import '../features/diary/domain/diary_repository.dart';
 import '../features/diary/presentation/cubit/diary_goals_cubit.dart';
 import '../features/diary/presentation/cubit/diary_history_cubit.dart';
+import '../features/profile/data/biotype_texts_loader.dart';
 import '../features/profile/data/profile_page_repository_impl.dart';
 import '../features/profile/domain/profile_page_repository.dart';
 import '../features/profile/presentation/cubit/avatar_upload_cubit.dart';
@@ -241,6 +242,9 @@ void configureDependencies() {
   getIt.registerLazySingleton<ProfilePageRepository>(
     () => ProfilePageRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
   );
+  // Static silhouette texts (body-map points + path areas), bundled as an asset
+  // until the backend exposes them.
+  getIt.registerLazySingleton<BiotypeTextsLoader>(BiotypeTextsLoader.new);
   getIt.registerFactory<ProfilePageCubit>(
     () => ProfilePageCubit(repository: getIt<ProfilePageRepository>()),
   );

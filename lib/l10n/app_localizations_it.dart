@@ -315,6 +315,20 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileTypeDiscoverMore => 'Scopri di più';
 
   @override
+  String profileTypeStartingPoint(String type) {
+    return '$type - Il tuo punto di partenza';
+  }
+
+  @override
+  String get profileTypePathToFeelBest => 'Il percorso per stare al meglio';
+
+  @override
+  String get profileTypePointTitleFallback => 'Punto del corpo';
+
+  @override
+  String get profileTypePointBodyFallback => 'Contenuto in arrivo.';
+
+  @override
   String get profileTypeProductsSection => 'Informazioni sui prodotti';
 
   @override

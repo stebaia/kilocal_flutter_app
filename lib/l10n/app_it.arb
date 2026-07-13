@@ -95,6 +95,25 @@
   "profileTypeUnknown": "Il mio Tipo",
   "profileTypeCharacteristics": "Le tue caratteristiche",
   "profileTypeDiscoverMore": "Scopri di più",
+  "profileTypeStartingPoint": "{type} - Il tuo punto di partenza",
+  "@profileTypeStartingPoint": {
+    "description": "Title pill on the biotype body-map card; {type} is the biotype label e.g. 'Tipo 1'.",
+    "placeholders": {
+      "type": { "type": "String" }
+    }
+  },
+  "profileTypePathToFeelBest": "Il percorso per stare al meglio",
+  "@profileTypePathToFeelBest": {
+    "description": "Label above the four path-category buttons on the biotype characteristics screen."
+  },
+  "profileTypePointTitleFallback": "Punto del corpo",
+  "@profileTypePointTitleFallback": {
+    "description": "Fallback title in the body-map point sheet when a point has no text."
+  },
+  "profileTypePointBodyFallback": "Contenuto in arrivo.",
+  "@profileTypePointBodyFallback": {
+    "description": "Fallback body in the body-map point/area sheet when there is no text."
+  },
   "profileTypeProductsSection": "Informazioni sui prodotti",
   "profileTypeMyKit": "Il mio Kit",
   "profileTypeSupplements": "Integrazioni e prodotti",

@@ -314,6 +314,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTypeDiscoverMore => 'Discover more';
 
   @override
+  String profileTypeStartingPoint(String type) {
+    return '$type - Your starting point';
+  }
+
+  @override
+  String get profileTypePathToFeelBest => 'The path to feel your best';
+
+  @override
+  String get profileTypePointTitleFallback => 'Body point';
+
+  @override
+  String get profileTypePointBodyFallback => 'Content coming soon.';
+
+  @override
   String get profileTypeProductsSection => 'Product information';
 
   @override
