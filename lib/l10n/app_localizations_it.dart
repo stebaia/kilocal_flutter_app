@@ -400,6 +400,17 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileLogout => 'Esci';
 
   @override
+  String get profileAppVersionSection => 'App';
+
+  @override
+  String get profileAppVersion => 'Versione app';
+
+  @override
+  String profileAppVersionValue(String version) {
+    return 'Versione $version';
+  }
+
+  @override
   String get logoutConfirmationTitle => 'Vuoi uscire?';
 
   @override

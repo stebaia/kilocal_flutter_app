@@ -830,6 +830,24 @@ abstract class AppLocalizations {
   /// **'Log out'**
   String get profileLogout;
 
+  /// No description provided for @profileAppVersionSection.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get profileAppVersionSection;
+
+  /// No description provided for @profileAppVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'App version'**
+  String get profileAppVersion;
+
+  /// No description provided for @profileAppVersionValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String profileAppVersionValue(String version);
+
   /// Title of the logout confirmation dialog
   ///
   /// In en, this message translates to:

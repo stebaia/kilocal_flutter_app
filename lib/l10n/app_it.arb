@@ -142,6 +142,16 @@
   "profileTutorial": "Tutorial come usare l'app",
   "profileContactSupport": "Contatta l'assistenza",
   "profileLogout": "Esci",
+  "profileAppVersionSection": "App",
+  "profileAppVersion": "Versione app",
+  "profileAppVersionValue": "Versione {version}",
+  "@profileAppVersionValue": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "logoutConfirmationTitle": "Vuoi uscire?",
   "logoutConfirmationMessage": "Sei sicuro di voler effettuare il logout?",
   "logoutConfirm": "Esci",

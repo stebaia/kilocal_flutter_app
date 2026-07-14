@@ -171,6 +171,16 @@
   "@profileLogout": {
     "description": "Logout action label in the profile screen"
   },
+  "profileAppVersionSection": "App",
+  "profileAppVersion": "App version",
+  "profileAppVersionValue": "Version {version}",
+  "@profileAppVersionValue": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
   "logoutConfirmationTitle": "Log out?",
   "@logoutConfirmationTitle": {
     "description": "Title of the logout confirmation dialog"
