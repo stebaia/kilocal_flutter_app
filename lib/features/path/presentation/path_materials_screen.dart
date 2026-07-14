@@ -46,44 +46,51 @@ class _PathMaterialsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(
-            title: title ?? l10n.pathMaterialsTitle,
-            showBack: true,
-            trailing: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => _showFilter(context, l10n),
-              child: const AppIcon(
-                AppIcons.filter,
-                color: AppColors.textPrimary,
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(
+              title: title ?? l10n.pathMaterialsTitle,
+              showBack: true,
+              trailing: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => _showFilter(context, l10n),
+                child: const AppIcon(
+                  AppIcons.filter,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<PathMaterialsCubit, PathMaterialsState>(
-              builder: (context, state) {
-                switch (state.status) {
-                  case PathMaterialsStatus.initial:
-                  case PathMaterialsStatus.loading:
-                    return const Center(
-                      child: CircularProgressIndicator(color: AppColors.accent),
-                    );
-                  case PathMaterialsStatus.error:
-                    return Center(
-                      child: Text(
-                        l10n.errorGeneric,
-                        style: AppTypography.textTheme.bodyMedium,
-                      ),
-                    );
-                  case PathMaterialsStatus.loaded:
-                    return _MaterialsList(state: state, l10n: l10n);
-                }
-              },
+            Expanded(
+              child: BlocBuilder<PathMaterialsCubit, PathMaterialsState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case PathMaterialsStatus.initial:
+                    case PathMaterialsStatus.loading:
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
+                        ),
+                      );
+                    case PathMaterialsStatus.error:
+                      return Center(
+                        child: Text(
+                          l10n.errorGeneric,
+                          style: AppTypography.textTheme.bodyMedium,
+                        ),
+                      );
+                    case PathMaterialsStatus.loaded:
+                      return _MaterialsList(state: state, l10n: l10n);
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -54,15 +54,20 @@ class _ProfileKitProductsViewState extends State<_ProfileKitProductsView> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        children: [
-          AppHeader(title: l10n.profileTypeSupplements, showBack: true),
-          Expanded(
-            child: BlocBuilder<ProfileKitCubit, ProfileKitState>(
-              builder: (context, state) => _body(context, state, l10n),
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            AppHeader(title: l10n.profileTypeSupplements, showBack: true),
+            Expanded(
+              child: BlocBuilder<ProfileKitCubit, ProfileKitState>(
+                builder: (context, state) => _body(context, state, l10n),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

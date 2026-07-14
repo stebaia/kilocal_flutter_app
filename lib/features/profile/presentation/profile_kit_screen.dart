@@ -51,11 +51,16 @@ class _ProfileKitView extends StatelessWidget {
               ? l10n.profileKitTitle(kit!.typeLabel!)
               : l10n.profileTypeMyKit;
 
-          return Column(
-            children: [
-              AppHeader(title: title, showBack: true),
-              Expanded(child: _body(context, state, l10n)),
-            ],
+          // top: false — AppHeader insets the status bar; SafeArea guards only
+          // the bottom against the Android system navigation bar.
+          return SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                AppHeader(title: title, showBack: true),
+                Expanded(child: _body(context, state, l10n)),
+              ],
+            ),
           );
         },
       ),
@@ -75,7 +80,10 @@ class _ProfileKitView extends StatelessWidget {
         );
       case ProfileKitStatus.error:
         return Center(
-          child: Text(l10n.errorGeneric, style: AppTypography.textTheme.bodyMedium),
+          child: Text(
+            l10n.errorGeneric,
+            style: AppTypography.textTheme.bodyMedium,
+          ),
         );
       case ProfileKitStatus.loaded:
         final kit = state.kit;

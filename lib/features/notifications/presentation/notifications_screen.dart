@@ -32,48 +32,53 @@ class _NotificationsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(
-            title: l10n.notificationsTitle,
-            showBack: true,
-            trailing: GestureDetector(
-              onTap: () => _showFilter(context),
-              child: AppIcon(AppIcons.filter, color: AppColors.textPrimary),
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(
+              title: l10n.notificationsTitle,
+              showBack: true,
+              trailing: GestureDetector(
+                onTap: () => _showFilter(context),
+                child: AppIcon(AppIcons.filter, color: AppColors.textPrimary),
+              ),
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<NotificationsCubit, NotificationsState>(
-              builder: (context, state) {
-                if (state.status == NotificationsStatus.loading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            Expanded(
+              child: BlocBuilder<NotificationsCubit, NotificationsState>(
+                builder: (context, state) {
+                  if (state.status == NotificationsStatus.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (state.status == NotificationsStatus.error) {
-                  return Center(child: Text(l10n.errorGeneric));
-                }
+                  if (state.status == NotificationsStatus.error) {
+                    return Center(child: Text(l10n.errorGeneric));
+                  }
 
-                final visible = _applyFilter(state.items, state.filter);
+                  final visible = _applyFilter(state.items, state.filter);
 
-                if (visible.isEmpty) {
-                  return Center(child: Text(l10n.notificationsEmpty));
-                }
+                  if (visible.isEmpty) {
+                    return Center(child: Text(l10n.notificationsEmpty));
+                  }
 
-                return ListView.separated(
-                  padding: EdgeInsets.zero,
-                  separatorBuilder: (context, index) =>
-                      Divider(height: 1, color: AppColors.divider),
-                  itemCount: visible.length,
-                  itemBuilder: (context, index) {
-                    final item = visible[index];
-                    return NotificationListItem(item: item);
-                  },
-                );
-              },
+                  return ListView.separated(
+                    padding: EdgeInsets.zero,
+                    separatorBuilder: (context, index) =>
+                        Divider(height: 1, color: AppColors.divider),
+                    itemCount: visible.length,
+                    itemBuilder: (context, index) {
+                      final item = visible[index];
+                      return NotificationListItem(item: item);
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

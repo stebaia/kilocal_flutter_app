@@ -60,14 +60,19 @@ class ProfileFormScreen extends StatelessWidget {
 
             return Scaffold(
               backgroundColor: AppColors.background,
-              body: Column(
-                children: [
-                  AppHeader(
-                    title: tab?.title ?? fallbackTitle ?? '',
-                    showBack: true,
-                  ),
-                  Expanded(child: _body(context, state, tab, l10n)),
-                ],
+              // top: false — AppHeader insets the status bar; SafeArea guards
+              // only the bottom against the Android system navigation bar.
+              body: SafeArea(
+                top: false,
+                child: Column(
+                  children: [
+                    AppHeader(
+                      title: tab?.title ?? fallbackTitle ?? '',
+                      showBack: true,
+                    ),
+                    Expanded(child: _body(context, state, tab, l10n)),
+                  ],
+                ),
               ),
             );
           },

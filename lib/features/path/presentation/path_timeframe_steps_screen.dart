@@ -56,35 +56,41 @@ class _PathTimeframeStepsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(title: initialGroup?.title ?? '', showBack: true),
-          Expanded(
-            child: BlocBuilder<PathDetailCubit, PathDetailState>(
-              builder: (context, state) {
-                final group = _resolveGroup(state);
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(title: initialGroup?.title ?? '', showBack: true),
+            Expanded(
+              child: BlocBuilder<PathDetailCubit, PathDetailState>(
+                builder: (context, state) {
+                  final group = _resolveGroup(state);
 
-                if (group == null && state.status == PathDetailStatus.loading) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.accent),
-                  );
-                }
+                  if (group == null &&
+                      state.status == PathDetailStatus.loading) {
+                    return const Center(
+                      child: CircularProgressIndicator(color: AppColors.accent),
+                    );
+                  }
 
-                if (group == null) {
-                  return Center(
-                    child: Text(
-                      l10n.errorGeneric,
-                      style: AppTypography.textTheme.bodyMedium,
-                    ),
-                  );
-                }
+                  if (group == null) {
+                    return Center(
+                      child: Text(
+                        l10n.errorGeneric,
+                        style: AppTypography.textTheme.bodyMedium,
+                      ),
+                    );
+                  }
 
-                return _TimeframeStepsList(group: group, area: area);
-              },
+                  return _TimeframeStepsList(group: group, area: area);
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

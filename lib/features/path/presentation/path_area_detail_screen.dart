@@ -88,48 +88,55 @@ class _PathAreaDetailView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(
-            title: presentation.title,
-            showBack: true,
-            trailing: GestureDetector(
-              onTap: () => context.push(StatisticsScreen.route),
-              child: const AppIcon(
-                AppIcons.chart,
-                color: AppColors.textPrimary,
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(
+              title: presentation.title,
+              showBack: true,
+              trailing: GestureDetector(
+                onTap: () => context.push(StatisticsScreen.route),
+                child: const AppIcon(
+                  AppIcons.chart,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<PathDetailCubit, PathDetailState>(
-              builder: (context, state) {
-                switch (state.status) {
-                  case PathDetailStatus.loading:
-                  case PathDetailStatus.initial:
-                    return const Center(
-                      child: CircularProgressIndicator(color: AppColors.accent),
-                    );
-                  case PathDetailStatus.error:
-                    return Center(
-                      child: Text(
-                        l10n.errorGeneric,
-                        style: AppTypography.textTheme.bodyMedium,
-                      ),
-                    );
-                  case PathDetailStatus.loaded:
-                    final data = state.data;
-                    if (data == null) return const SizedBox.shrink();
-                    return _PathAreaDetailContent(
-                      data: data,
-                      presentation: presentation,
-                    );
-                }
-              },
+            Expanded(
+              child: BlocBuilder<PathDetailCubit, PathDetailState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case PathDetailStatus.loading:
+                    case PathDetailStatus.initial:
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
+                        ),
+                      );
+                    case PathDetailStatus.error:
+                      return Center(
+                        child: Text(
+                          l10n.errorGeneric,
+                          style: AppTypography.textTheme.bodyMedium,
+                        ),
+                      );
+                    case PathDetailStatus.loaded:
+                      final data = state.data;
+                      if (data == null) return const SizedBox.shrink();
+                      return _PathAreaDetailContent(
+                        data: data,
+                        presentation: presentation,
+                      );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

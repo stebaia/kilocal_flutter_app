@@ -56,37 +56,45 @@ class _DiaryViewState extends State<_DiaryView> {
               child: const Icon(Icons.add),
             )
           : null,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(
-            title: l10n.diaryTitle,
-            trailing: isGoals
-                ? GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: _onFilter,
-                    child: const Icon(Icons.tune, color: AppColors.textPrimary),
-                  )
-                : null,
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.screenGutter,
-              AppSpacing.spaceMd,
-              AppSpacing.screenGutter,
-              AppSpacing.spaceSm,
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(
+              title: l10n.diaryTitle,
+              trailing: isGoals
+                  ? GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _onFilter,
+                      child: const Icon(
+                        Icons.tune,
+                        color: AppColors.textPrimary,
+                      ),
+                    )
+                  : null,
             ),
-            child: DiaryTabSwitch(
-              selected: _tab,
-              onChanged: (t) => setState(() => _tab = t),
-              historyLabel: l10n.diaryTabHistory,
-              goalsLabel: l10n.diaryTabGoals,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenGutter,
+                AppSpacing.spaceMd,
+                AppSpacing.screenGutter,
+                AppSpacing.spaceSm,
+              ),
+              child: DiaryTabSwitch(
+                selected: _tab,
+                onChanged: (t) => setState(() => _tab = t),
+                historyLabel: l10n.diaryTabHistory,
+                goalsLabel: l10n.diaryTabGoals,
+              ),
             ),
-          ),
-          Expanded(
-            child: isGoals ? _GoalsTab(l10n: l10n) : _HistoryTab(l10n: l10n),
-          ),
-        ],
+            Expanded(
+              child: isGoals ? _GoalsTab(l10n: l10n) : _HistoryTab(l10n: l10n),
+            ),
+          ],
+        ),
       ),
     );
   }

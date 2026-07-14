@@ -37,63 +37,68 @@ class ProfileTypePercorsiScreen extends StatelessWidget {
         body: Column(
           children: [
             AppHeader(title: l10n.profileTypeCharacteristics, showBack: true),
+            // top: false — AppHeader already insets for the status bar; here we
+            // only guard the bottom against the Android system navigation bar.
             Expanded(
-              child: BlocBuilder<UserCubit, UserState>(
-                bloc: getIt<UserCubit>(),
-                builder: (context, state) {
-                  final details = state.details;
-                  final biotype = details?.biotype;
-                  if (biotype == null) return const SizedBox.shrink();
+              child: SafeArea(
+                top: false,
+                child: BlocBuilder<UserCubit, UserState>(
+                  bloc: getIt<UserCubit>(),
+                  builder: (context, state) {
+                    final details = state.details;
+                    final biotype = details?.biotype;
+                    if (biotype == null) return const SizedBox.shrink();
 
-                  final accent =
-                      colorFromHex(biotype.mainColor) ?? AppColors.accent;
-                  final isFemale = details!.isFemale;
+                    final accent =
+                        colorFromHex(biotype.mainColor) ?? AppColors.accent;
+                    final isFemale = details!.isFemale;
 
-                  return FutureBuilder<BiotypeTexts?>(
-                    future: getIt<BiotypeTextsLoader>().forBiotype(
-                      number: biotype.number,
-                      isFemale: isFemale,
-                    ),
-                    builder: (context, snapshot) {
-                      final texts = snapshot.data;
-                      return Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.screenGutter,
-                          AppSpacing.spaceLg,
-                          AppSpacing.screenGutter,
-                          AppSpacing.spaceLg,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Body map takes 4/5 of the available height, the
-                            // category buttons the remaining 1/5, with no gap.
-                            Expanded(
-                              flex: 4,
-                              child: _BiotypeBodyMap(
-                                biotype: biotype,
-                                isFemale: isFemale,
-                                accentColor: accent,
-                                texts: texts,
-                                l10n: l10n,
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Align(
-                                alignment: Alignment.topCenter,
-                                child: ProfileTypePercorsiGrid(
+                    return FutureBuilder<BiotypeTexts?>(
+                      future: getIt<BiotypeTextsLoader>().forBiotype(
+                        number: biotype.number,
+                        isFemale: isFemale,
+                      ),
+                      builder: (context, snapshot) {
+                        final texts = snapshot.data;
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            AppSpacing.screenGutter,
+                            AppSpacing.spaceLg,
+                            AppSpacing.screenGutter,
+                            AppSpacing.spaceLg,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Body map takes 4/5 of the available height, the
+                              // category buttons the remaining 1/5, with no gap.
+                              Expanded(
+                                flex: 4,
+                                child: _BiotypeBodyMap(
+                                  biotype: biotype,
+                                  isFemale: isFemale,
                                   accentColor: accent,
-                                  areaTexts: texts?.areas ?? const {},
+                                  texts: texts,
+                                  l10n: l10n,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
+                              Expanded(
+                                flex: 1,
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: ProfileTypePercorsiGrid(
+                                    accentColor: accent,
+                                    areaTexts: texts?.areas ?? const {},
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ),
           ],

@@ -35,29 +35,34 @@ class _BenefitsView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(title: l10n.benefitsTitle, showBack: true),
-          Expanded(
-            child: BlocBuilder<BenefitsCubit, BenefitsState>(
-              builder: (context, state) {
-                switch (state.status) {
-                  case BenefitsStatus.initial:
-                  case BenefitsStatus.loading:
-                    return const Center(child: CircularProgressIndicator());
-                  case BenefitsStatus.error:
-                    return Center(child: Text(l10n.benefitsEmpty));
-                  case BenefitsStatus.loaded:
-                    if (state.benefits.isEmpty) {
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(title: l10n.benefitsTitle, showBack: true),
+            Expanded(
+              child: BlocBuilder<BenefitsCubit, BenefitsState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case BenefitsStatus.initial:
+                    case BenefitsStatus.loading:
+                      return const Center(child: CircularProgressIndicator());
+                    case BenefitsStatus.error:
                       return Center(child: Text(l10n.benefitsEmpty));
-                    }
-                    return _BenefitsList(state: state);
-                }
-              },
+                    case BenefitsStatus.loaded:
+                      if (state.benefits.isEmpty) {
+                        return Center(child: Text(l10n.benefitsEmpty));
+                      }
+                      return _BenefitsList(state: state);
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

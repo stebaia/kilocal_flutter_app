@@ -39,52 +39,59 @@ class _IntegrazioneView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(
-            title: l10n.areaIntegration,
-            showBack: true,
-            trailing: GestureDetector(
-              onTap: () => context.push(StatisticsScreen.route),
-              child: const AppIcon(
-                AppIcons.chart,
-                color: AppColors.textPrimary,
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(
+              title: l10n.areaIntegration,
+              showBack: true,
+              trailing: GestureDetector(
+                onTap: () => context.push(StatisticsScreen.route),
+                child: const AppIcon(
+                  AppIcons.chart,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<IntegrazioneCubit, IntegrazioneState>(
-              builder: (context, state) {
-                switch (state.status) {
-                  case IntegrazioneStatus.loading:
-                  case IntegrazioneStatus.initial:
-                    return const Center(
-                      child: CircularProgressIndicator(color: AppColors.accent),
-                    );
-                  case IntegrazioneStatus.error:
-                    return Center(
-                      child: Text(
-                        l10n.errorGeneric,
-                        style: AppTypography.textTheme.bodyMedium,
-                      ),
-                    );
-                  case IntegrazioneStatus.loaded:
-                    final data = state.data;
-                    if (data == null || data.phases.isEmpty) {
+            Expanded(
+              child: BlocBuilder<IntegrazioneCubit, IntegrazioneState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case IntegrazioneStatus.loading:
+                    case IntegrazioneStatus.initial:
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
+                        ),
+                      );
+                    case IntegrazioneStatus.error:
                       return Center(
                         child: Text(
-                          l10n.integrationEmpty,
+                          l10n.errorGeneric,
                           style: AppTypography.textTheme.bodyMedium,
                         ),
                       );
-                    }
-                    return _IntegrazioneContent(data: data);
-                }
-              },
+                    case IntegrazioneStatus.loaded:
+                      final data = state.data;
+                      if (data == null || data.phases.isEmpty) {
+                        return Center(
+                          child: Text(
+                            l10n.integrationEmpty,
+                            style: AppTypography.textTheme.bodyMedium,
+                          ),
+                        );
+                      }
+                      return _IntegrazioneContent(data: data);
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -105,8 +112,7 @@ class _IntegrazioneContent extends StatelessWidget {
         vertical: AppSpacing.spaceLg,
       ),
       itemCount: phases.length,
-      separatorBuilder: (_, _) =>
-          const SizedBox(height: AppSpacing.spaceLg),
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.spaceLg),
       itemBuilder: (context, index) {
         final phase = phases[index];
         final locked = data.isPhaseLocked(index);

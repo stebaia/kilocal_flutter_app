@@ -53,22 +53,27 @@ class ProfileTypeScreen extends StatelessWidget {
 
             return Scaffold(
               backgroundColor: AppColors.background,
-              body: Column(
-                children: [
-                  AppHeader(
-                    title: title,
-                    showBack: true,
-                    trailing: _TypeBadge(
-                      iconUrl: biotype?.iconUrl,
-                      badgeColor: colorFromHex(biotype?.mainColor),
+              // top: false — AppHeader insets the status bar; SafeArea guards
+              // only the bottom against the Android system navigation bar.
+              body: SafeArea(
+                top: false,
+                child: Column(
+                  children: [
+                    AppHeader(
+                      title: title,
+                      showBack: true,
+                      trailing: _TypeBadge(
+                        iconUrl: biotype?.iconUrl,
+                        badgeColor: colorFromHex(biotype?.mainColor),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: biotype == null
-                        ? _EmptyState(message: l10n.errorGeneric)
-                        : _Content(biotype: biotype, l10n: l10n),
-                  ),
-                ],
+                    Expanded(
+                      child: biotype == null
+                          ? _EmptyState(message: l10n.errorGeneric)
+                          : _Content(biotype: biotype, l10n: l10n),
+                    ),
+                  ],
+                ),
               ),
             );
           },

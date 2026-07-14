@@ -40,57 +40,71 @@ class _PhaseView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          BlocBuilder<IntegrazioneCubit, IntegrazioneState>(
-            buildWhen: (a, b) => a.data != b.data,
-            builder: (context, state) {
-              final index = state.data?.phases
-                  .indexWhere((p) => p.id == phaseId);
-              final number = (index == null || index < 0) ? 1 : index + 1;
-              return AppHeader(
-                title: l10n.integrationPhaseTitle(number),
-                showBack: true,
-              );
-            },
-          ),
-          Expanded(
-            child: BlocConsumer<IntegrazioneCubit, IntegrazioneState>(
-              listenWhen: (a, b) => a.error != b.error && b.error != null,
-              listener: (context, state) {
-                toastification.show(
-                  context: context,
-                  type: ToastificationType.error,
-                  style: ToastificationStyle.flat,
-                  title: Text(l10n.integrationMarkTakenError),
-                  autoCloseDuration: const Duration(seconds: 3),
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BlocBuilder<IntegrazioneCubit, IntegrazioneState>(
+              buildWhen: (a, b) => a.data != b.data,
+              builder: (context, state) {
+                final index = state.data?.phases.indexWhere(
+                  (p) => p.id == phaseId,
+                );
+                final number = (index == null || index < 0) ? 1 : index + 1;
+                return AppHeader(
+                  title: l10n.integrationPhaseTitle(number),
+                  showBack: true,
                 );
               },
-              builder: (context, state) {
-                switch (state.status) {
-                  case IntegrazioneStatus.loading:
-                  case IntegrazioneStatus.initial:
-                    return const Center(
-                      child: CircularProgressIndicator(color: AppColors.accent),
-                    );
-                  case IntegrazioneStatus.error:
-                    if (state.data == null) {
-                      return Center(
-                        child: Text(
-                          l10n.errorGeneric,
-                          style: AppTypography.textTheme.bodyMedium,
+            ),
+            Expanded(
+              child: BlocConsumer<IntegrazioneCubit, IntegrazioneState>(
+                listenWhen: (a, b) => a.error != b.error && b.error != null,
+                listener: (context, state) {
+                  toastification.show(
+                    context: context,
+                    type: ToastificationType.error,
+                    style: ToastificationStyle.flat,
+                    title: Text(l10n.integrationMarkTakenError),
+                    autoCloseDuration: const Duration(seconds: 3),
+                  );
+                },
+                builder: (context, state) {
+                  switch (state.status) {
+                    case IntegrazioneStatus.loading:
+                    case IntegrazioneStatus.initial:
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
                         ),
                       );
-                    }
-                    return _PhaseProducts(phaseId: phaseId, data: state.data!);
-                  case IntegrazioneStatus.loaded:
-                    return _PhaseProducts(phaseId: phaseId, data: state.data!);
-                }
-              },
+                    case IntegrazioneStatus.error:
+                      if (state.data == null) {
+                        return Center(
+                          child: Text(
+                            l10n.errorGeneric,
+                            style: AppTypography.textTheme.bodyMedium,
+                          ),
+                        );
+                      }
+                      return _PhaseProducts(
+                        phaseId: phaseId,
+                        data: state.data!,
+                      );
+                    case IntegrazioneStatus.loaded:
+                      return _PhaseProducts(
+                        phaseId: phaseId,
+                        data: state.data!,
+                      );
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -106,12 +120,8 @@ class _PhaseProducts extends StatelessWidget {
   Widget build(BuildContext context) {
     final phase = data.phases.firstWhere(
       (p) => p.id == phaseId,
-      orElse: () => const IntegrazionePhase(
-        id: '',
-        title: '',
-        sort: 0,
-        products: [],
-      ),
+      orElse: () =>
+          const IntegrazionePhase(id: '', title: '', sort: 0, products: []),
     );
 
     return ListView.separated(

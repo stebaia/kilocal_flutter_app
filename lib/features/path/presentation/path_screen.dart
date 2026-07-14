@@ -39,47 +39,54 @@ class _PathView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // White header (extends behind the status bar).
-          AppHeader(
-            title: l10n.pathTitle,
-            trailing: GestureDetector(
-              onTap: () => context.push(StatisticsScreen.route),
-              child: const AppIcon(
-                AppIcons.chart,
-                color: AppColors.textPrimary,
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // White header (extends behind the status bar).
+            AppHeader(
+              title: l10n.pathTitle,
+              trailing: GestureDetector(
+                onTap: () => context.push(StatisticsScreen.route),
+                child: const AppIcon(
+                  AppIcons.chart,
+                  color: AppColors.textPrimary,
+                ),
               ),
             ),
-          ),
-          // Scrollable content with red band behind the progress card.
-          Expanded(
-            child: BlocBuilder<PathCubit, PathState>(
-              builder: (context, state) {
-                switch (state.status) {
-                  case PathStatus.loading:
-                    return const Center(
-                      child: CircularProgressIndicator(color: AppColors.accent),
-                    );
-                  case PathStatus.error:
-                    return Center(
-                      child: Text(
-                        l10n.errorGeneric,
-                        style: AppTypography.textTheme.bodyMedium,
-                      ),
-                    );
-                  case PathStatus.loaded:
-                    final data = state.data;
-                    if (data == null) return const SizedBox.shrink();
-                    return _PathContent(data: data);
-                  case PathStatus.initial:
-                    return const SizedBox.shrink();
-                }
-              },
+            // Scrollable content with red band behind the progress card.
+            Expanded(
+              child: BlocBuilder<PathCubit, PathState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case PathStatus.loading:
+                      return const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
+                        ),
+                      );
+                    case PathStatus.error:
+                      return Center(
+                        child: Text(
+                          l10n.errorGeneric,
+                          style: AppTypography.textTheme.bodyMedium,
+                        ),
+                      );
+                    case PathStatus.loaded:
+                      final data = state.data;
+                      if (data == null) return const SizedBox.shrink();
+                      return _PathContent(data: data);
+                    case PathStatus.initial:
+                      return const SizedBox.shrink();
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

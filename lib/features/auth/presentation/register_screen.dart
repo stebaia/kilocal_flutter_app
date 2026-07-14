@@ -161,15 +161,20 @@ class _RegisterBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // The accent banner bleeds to the screen edge (the parent SafeArea has
+    // bottom: false), so add the system bottom inset here to keep the sign-in
+    // row clear of the Android navigation bar.
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+
     return ClipPath(
       clipper: const ArcClipper(),
       child: Container(
         color: AppColors.accent,
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           top: 70,
           left: AppSpacing.screenGutter,
           right: AppSpacing.screenGutter,
-          bottom: 32,
+          bottom: 32 + bottomInset,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

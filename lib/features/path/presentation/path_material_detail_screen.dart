@@ -102,22 +102,27 @@ class _VideoDetail extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       // The player floats under the status bar, so the body reaches the top.
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: AppSpacing.spaceXl),
-        children: [
-          PathMaterialVideo(
-            key: ValueKey(material.id),
-            embedUrl: material.vimeoEmbedUrl,
-            vimeoUrl: material.vimeoUrl,
-            posterUrl: material.imageUrl,
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenGutter,
+      // top: false keeps that full-bleed top while still guarding the bottom
+      // against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: AppSpacing.spaceXl),
+          children: [
+            PathMaterialVideo(
+              key: ValueKey(material.id),
+              embedUrl: material.vimeoEmbedUrl,
+              vimeoUrl: material.vimeoUrl,
+              posterUrl: material.imageUrl,
             ),
-            child: _TitleAndBody(material: material),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenGutter,
+              ),
+              child: _TitleAndBody(material: material),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -134,37 +139,42 @@ class _TextDetail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(title: categoryTitle ?? '', showBack: true),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                if (material.imageUrl != null)
-                  AspectRatio(
-                    aspectRatio: 1.1,
-                    child: Image.network(
-                      material.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) =>
-                          const ColoredBox(color: AppColors.background),
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(title: categoryTitle ?? '', showBack: true),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  if (material.imageUrl != null)
+                    AspectRatio(
+                      aspectRatio: 1.1,
+                      child: Image.network(
+                        material.imageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) =>
+                            const ColoredBox(color: AppColors.background),
+                      ),
                     ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.screenGutter,
+                      AppSpacing.spaceLg,
+                      AppSpacing.screenGutter,
+                      AppSpacing.spaceXl,
+                    ),
+                    child: _TitleAndBody(material: material),
                   ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.screenGutter,
-                    AppSpacing.spaceLg,
-                    AppSpacing.screenGutter,
-                    AppSpacing.spaceXl,
-                  ),
-                  child: _TitleAndBody(material: material),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -38,37 +38,42 @@ class _MomentiView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.surface,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppHeader(
-            title: l10n.momentiTitle,
-            showBack: true,
-            trailing: const Icon(
-              Icons.info_outline,
-              color: AppColors.textPrimary,
+      // top: false — AppHeader insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AppHeader(
+              title: l10n.momentiTitle,
+              showBack: true,
+              trailing: const Icon(
+                Icons.info_outline,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<MomentiCubit, MomentiState>(
-              builder: (context, state) {
-                switch (state.status) {
-                  case MomentiStatus.initial:
-                  case MomentiStatus.loading:
-                    return const Center(child: CircularProgressIndicator());
-                  case MomentiStatus.error:
-                    return Center(child: Text(l10n.momentiEmpty));
-                  case MomentiStatus.loaded:
-                    final data = state.data;
-                    if (data == null) {
+            Expanded(
+              child: BlocBuilder<MomentiCubit, MomentiState>(
+                builder: (context, state) {
+                  switch (state.status) {
+                    case MomentiStatus.initial:
+                    case MomentiStatus.loading:
+                      return const Center(child: CircularProgressIndicator());
+                    case MomentiStatus.error:
                       return Center(child: Text(l10n.momentiEmpty));
-                    }
-                    return _MomentiContent(data: data);
-                }
-              },
+                    case MomentiStatus.loaded:
+                      final data = state.data;
+                      if (data == null) {
+                        return Center(child: Text(l10n.momentiEmpty));
+                      }
+                      return _MomentiContent(data: data);
+                  }
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

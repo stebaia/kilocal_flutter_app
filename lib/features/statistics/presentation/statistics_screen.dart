@@ -30,46 +30,49 @@ class _StatisticsView extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.statisticsTitle),
-      ),
-      body: BlocBuilder<StatisticsCubit, StatisticsState>(
-        builder: (context, state) {
-          if (state.status == StatisticsStatus.loading ||
-              state.status == StatisticsStatus.initial) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      appBar: AppBar(title: Text(l10n.statisticsTitle)),
+      // top: false — the AppBar insets the status bar; SafeArea guards only the
+      // bottom against the Android system navigation bar.
+      body: SafeArea(
+        top: false,
+        child: BlocBuilder<StatisticsCubit, StatisticsState>(
+          builder: (context, state) {
+            if (state.status == StatisticsStatus.loading ||
+                state.status == StatisticsStatus.initial) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state.status == StatisticsStatus.error && state.stats.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.screenGutter),
-                child: Text(l10n.errorGeneric, textAlign: TextAlign.center),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenGutter,
-              vertical: AppSpacing.spaceMd,
-            ),
-            itemCount: state.stats.length,
-            itemBuilder: (context, index) {
-              final stat = state.stats[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
-                child: StatisticsCard(
-                  stat: stat,
-                  activitiesCount: l10n.activitiesCount(
-                    stat.completed,
-                    stat.total,
-                  ),
+            if (state.status == StatisticsStatus.error && state.stats.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.screenGutter),
+                  child: Text(l10n.errorGeneric, textAlign: TextAlign.center),
                 ),
               );
-            },
-          );
-        },
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenGutter,
+                vertical: AppSpacing.spaceMd,
+              ),
+              itemCount: state.stats.length,
+              itemBuilder: (context, index) {
+                final stat = state.stats[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
+                  child: StatisticsCard(
+                    stat: stat,
+                    activitiesCount: l10n.activitiesCount(
+                      stat.completed,
+                      stat.total,
+                    ),
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
