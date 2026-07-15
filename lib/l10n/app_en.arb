@@ -216,6 +216,7 @@
   "benefitsSecondaryPartners": "Secondary Partners",
   "benefitViewDetails": "View details",
   "benefitClaimReward": "Claim the reward",
+  "benefitClaimRewardError": "Unable to open the reward link",
   "benefitsEmpty": "No benefits available",
   "momentiTitle": "Moments",
   "momentiEmpty": "No moments available",

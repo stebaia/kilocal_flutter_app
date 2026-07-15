@@ -481,6 +481,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get benefitClaimReward => 'Ottieni il premio';
 
   @override
+  String get benefitClaimRewardError => 'Impossibile aprire il link del premio';
+
+  @override
   String get benefitsEmpty => 'Nessun benefit disponibile';
 
   @override

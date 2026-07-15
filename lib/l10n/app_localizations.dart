@@ -986,6 +986,12 @@ abstract class AppLocalizations {
   /// **'Claim the reward'**
   String get benefitClaimReward;
 
+  /// No description provided for @benefitClaimRewardError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open the reward link'**
+  String get benefitClaimRewardError;
+
   /// No description provided for @benefitsEmpty.
   ///
   /// In en, this message translates to:
