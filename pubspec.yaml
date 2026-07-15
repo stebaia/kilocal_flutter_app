@@ -1,7 +1,7 @@
 name: kilocal_flutter_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.1.1+2
 
 environment:
   sdk: ^3.11.3
@@ -86,6 +86,7 @@ flutter:
     - assets/zen.png
     - assets/path_header_ellipse.svg
     - assets/biotype_texts.json
+    - assets/strumenti/
 
 # App launcher icon — kilocal logo (white) on brand red (#C7153B), matching the
 # splash screen. Regenerate native icons with:

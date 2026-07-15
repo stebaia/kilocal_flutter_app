@@ -839,4 +839,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pathAreaLocked => 'This path is not available yet.';
+
+  @override
+  String get strumentiTitle => 'Tools';
+
+  @override
+  String get strumentiLaunch => 'Launch tool';
+
+  @override
+  String get strumentiPromemoria => 'Reminders';
+
+  @override
+  String get strumentiTimer => 'Timer';
+
+  @override
+  String get strumentiGlossario => 'Glossary';
+
+  @override
+  String get strumentiGallery => 'Gallery';
+
+  @override
+  String get strumentiComingSoon => 'This tool will be available soon.';
+
+  @override
+  String get promemoriaViewList => 'List';
+
+  @override
+  String get promemoriaViewCalendar => 'Calendar';
+
+  @override
+  String get promemoriaEmpty => 'No reminders for this month.';
+
+  @override
+  String get promemoriaLoadError => 'Couldn\'t load reminders.';
+
+  @override
+  String get promemoriaAddTitle => 'Add reminder';
+
+  @override
+  String get promemoriaMessageLabel => 'Message';
+
+  @override
+  String get promemoriaMessageHint => 'Enter the reminder text here';
+
+  @override
+  String get promemoriaDateLabel => 'Date';
+
+  @override
+  String get promemoriaTimeLabel => 'Time';
+
+  @override
+  String get promemoriaSelectDate => 'Select date';
+
+  @override
+  String get promemoriaSelectTime => 'Select time';
+
+  @override
+  String get promemoriaConfirm => 'Confirm';
+
+  @override
+  String get promemoriaSave => 'Save reminder';
+
+  @override
+  String get promemoriaEditTitle => 'Edit reminder';
+
+  @override
+  String get promemoriaEdit => 'Edit';
+
+  @override
+  String get promemoriaSaveShort => 'Save';
+
+  @override
+  String get promemoriaDelete => 'Delete';
+
+  @override
+  String get promemoriaDeleteTitle => 'Delete reminder';
+
+  @override
+  String get promemoriaCancel => 'Cancel';
+
+  @override
+  String get promemoriaDeleteConfirm =>
+      'Are you sure you want to delete the reminder?';
 }

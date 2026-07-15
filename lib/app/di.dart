@@ -68,6 +68,11 @@ import '../features/survey/data/survey_repository_impl.dart';
 import '../features/survey/domain/survey_repository.dart';
 import '../features/survey/presentation/cubit/survey_cubit.dart';
 import '../features/splash/presentation/cubit/splash_cubit.dart';
+import '../features/strumenti/promemoria/data/promemoria_api.dart';
+import '../features/strumenti/promemoria/data/promemoria_notification_service.dart';
+import '../features/strumenti/promemoria/data/promemoria_repository_impl.dart';
+import '../features/strumenti/promemoria/domain/promemoria_repository.dart';
+import '../features/strumenti/promemoria/presentation/cubit/promemoria_cubit.dart';
 import '../features/user/data/user_api.dart';
 import '../features/user/data/user_repository_impl.dart';
 import '../features/user/domain/user_repository.dart';
@@ -324,6 +329,25 @@ void configureDependencies() {
       repository: getIt<SurveyRepository>(),
       analytics: getIt<AnalyticsEvents>(),
     ),
+  );
+
+  // --- Feature: Strumenti / Promemoria ---
+  // Backend-backed calendar reminders (GET/POST/DELETE /tools/reminders) with a
+  // best-effort local notification scheduled per future reminder.
+  getIt.registerLazySingleton<PromemoriaApi>(
+    () => PromemoriaApi(getIt<Dio>()),
+  );
+  getIt.registerLazySingleton<PromemoriaNotificationService>(
+    () => PromemoriaNotificationService(),
+  );
+  getIt.registerLazySingleton<PromemoriaRepository>(
+    () => PromemoriaRepositoryImpl(
+      api: getIt<PromemoriaApi>(),
+      notifications: getIt<PromemoriaNotificationService>(),
+    ),
+  );
+  getIt.registerFactory<PromemoriaCubit>(
+    () => PromemoriaCubit(repository: getIt<PromemoriaRepository>()),
   );
 
   // --- Feature: Settings API ---

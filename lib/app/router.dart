@@ -36,6 +36,10 @@ import '../features/profile/presentation/profile_kit_products_screen.dart';
 import '../features/profile/presentation/profile_type_screen.dart';
 import '../features/profile/presentation/profile_type_percorsi_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
+import '../features/strumenti/domain/entities/strumento.dart';
+import '../features/strumenti/presentation/strumenti_screen.dart';
+import '../features/strumenti/presentation/strumento_detail_screen.dart';
+import '../features/strumenti/promemoria/presentation/promemoria_screen.dart';
 import '../features/momenti/presentation/momenti_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/statistics/presentation/statistics_screen.dart';
@@ -187,6 +191,34 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: '/strumenti',
+              builder: (context, state) => const StrumentiScreen(),
+              routes: [
+                // Promemoria has its own tool screen; the other tools still
+                // land on the "coming soon" placeholder.
+                GoRoute(
+                  path: 'promemoria',
+                  builder: (context, state) => const PromemoriaScreen(),
+                ),
+                // Launched-tool destination. `:id` is a StrumentoId name;
+                // unknown values fall back to the first tool.
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) {
+                    final id = StrumentoId.values.firstWhere(
+                      (e) => e.name == state.pathParameters['id'],
+                      orElse: () => StrumentoId.promemoria,
+                    );
+                    return StrumentoDetailScreen(id: id);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
               path: '/profile',
               builder: (context, state) => const ProfileScreen(),
               routes: [
@@ -264,6 +296,7 @@ class AppScaffold extends StatelessWidget {
     AppIcons.home,
     AppIcons.path,
     AppIcons.diary,
+    AppIcons.strumenti,
     AppIcons.popsicle,
   ];
 

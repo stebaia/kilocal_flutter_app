@@ -1579,6 +1579,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This path is not available yet.'**
   String get pathAreaLocked;
+
+  /// No description provided for @strumentiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get strumentiTitle;
+
+  /// No description provided for @strumentiLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch tool'**
+  String get strumentiLaunch;
+
+  /// No description provided for @strumentiPromemoria.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get strumentiPromemoria;
+
+  /// No description provided for @strumentiTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get strumentiTimer;
+
+  /// No description provided for @strumentiGlossario.
+  ///
+  /// In en, this message translates to:
+  /// **'Glossary'**
+  String get strumentiGlossario;
+
+  /// No description provided for @strumentiGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get strumentiGallery;
+
+  /// No description provided for @strumentiComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'This tool will be available soon.'**
+  String get strumentiComingSoon;
+
+  /// No description provided for @promemoriaViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get promemoriaViewList;
+
+  /// No description provided for @promemoriaViewCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get promemoriaViewCalendar;
+
+  /// No description provided for @promemoriaEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders for this month.'**
+  String get promemoriaEmpty;
+
+  /// No description provided for @promemoriaLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load reminders.'**
+  String get promemoriaLoadError;
+
+  /// No description provided for @promemoriaAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get promemoriaAddTitle;
+
+  /// No description provided for @promemoriaMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get promemoriaMessageLabel;
+
+  /// No description provided for @promemoriaMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the reminder text here'**
+  String get promemoriaMessageHint;
+
+  /// No description provided for @promemoriaDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get promemoriaDateLabel;
+
+  /// No description provided for @promemoriaTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get promemoriaTimeLabel;
+
+  /// No description provided for @promemoriaSelectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get promemoriaSelectDate;
+
+  /// No description provided for @promemoriaSelectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get promemoriaSelectTime;
+
+  /// No description provided for @promemoriaConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get promemoriaConfirm;
+
+  /// No description provided for @promemoriaSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save reminder'**
+  String get promemoriaSave;
+
+  /// No description provided for @promemoriaEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reminder'**
+  String get promemoriaEditTitle;
+
+  /// No description provided for @promemoriaEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get promemoriaEdit;
+
+  /// No description provided for @promemoriaSaveShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get promemoriaSaveShort;
+
+  /// No description provided for @promemoriaDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get promemoriaDelete;
+
+  /// No description provided for @promemoriaDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete reminder'**
+  String get promemoriaDeleteTitle;
+
+  /// No description provided for @promemoriaCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get promemoriaCancel;
+
+  /// No description provided for @promemoriaDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the reminder?'**
+  String get promemoriaDeleteConfirm;
 }
 
 class _AppLocalizationsDelegate
