@@ -32,6 +32,15 @@ abstract final class AppColors {
   static const Color textSecondary = Color(0xFF6B6B72);
   static const Color divider = Color(0xFFEDEDED);
 
+  /// Fill/border used to highlight a profile field the user still has to fill in
+  /// (e.g. province, city, phone), so empty fields stand out at a glance.
+  static const Color fieldToFillBorder = Color(0xFFE5A200);
+  static const Color fieldToFillFill = Color(0xFFFFF7E6);
+
+  /// Muted grey fill for read-only (non-editable) profile fields such as name,
+  /// surname and gender.
+  static const Color fieldReadOnlyFill = Color(0xFFF0F0F2);
+
   /// Green used for a past/completed Promemoria time label.
   static const Color reminderPast = Color(0xFF1CA05A);
 
