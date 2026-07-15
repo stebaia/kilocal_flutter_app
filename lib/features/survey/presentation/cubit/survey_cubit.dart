@@ -227,7 +227,20 @@ class SurveyCubit extends Cubit<SurveyState> {
       for (final a in answers.values) ...a.selectedOptionIds,
     };
 
+    // TODO(survey-menopausa): rimuovere questo filtro età hardcoded quando il
+    // backend aggiunge la condition età alle section menopausa nel CMS (oggi
+    // hanno solo la condition genere==Femmina). La regola richiesta è: mostrare
+    // la domanda menopausa SOLO a profili femminili con età > 35. Il vincolo
+    // "femminile" arriva già dalle condition dell'API; qui aggiungiamo solo il
+    // gate età>35 finché il CMS non lo esprime da sé (vedi survey-feature-status).
+    final age = _ageFromAnswers(survey, answers);
+
     return survey.sections.where((section) {
+      // Gate età>35 additivo per la menopausa (temporaneo, vedi TODO sopra).
+      // Se non conosciamo ancora l'età (DOB non risposta) o è <= 35, nascondi.
+      if (section.isMenopausaQuestion && (age == null || age <= 35)) {
+        return false;
+      }
       if (section.conditions.isEmpty) return true;
       final matched = section.conditions.any(
         (c) => _conditionMatches(c, selectedIds),
@@ -236,6 +249,29 @@ class SurveyCubit extends Cubit<SurveyState> {
       // inverse.
       return section.conditionAction == 'hide' ? !matched : matched;
     }).toList();
+  }
+
+  /// TODO(survey-menopausa): rimuovere insieme al filtro età hardcoded sopra.
+  /// Deriva l'età in anni interi dalla risposta alla section DOB
+  /// ([SurveySection.isDobQuestion]), o null se non ancora risposta / non
+  /// parsabile. Stessa logica di `_computeAge` nel mapper del submit.
+  static int? _ageFromAnswers(Survey survey, Map<String, SurveyAnswer> answers) {
+    final dobSection = survey.sections
+        .where((s) => s.isDobQuestion)
+        .cast<SurveySection?>()
+        .firstWhere((s) => s != null, orElse: () => null);
+    if (dobSection == null) return null;
+    final raw = answers[dobSection.id]?.textValue;
+    if (raw == null || raw.isEmpty) return null;
+    final dob = DateTime.tryParse(raw);
+    if (dob == null) return null;
+    final now = DateTime.now();
+    var age = now.year - dob.year;
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
+      age--;
+    }
+    return age;
   }
 
   static bool _conditionMatches(SurveyCondition c, Set<String> selectedIds) {
