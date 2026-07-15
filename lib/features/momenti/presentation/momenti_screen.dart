@@ -48,10 +48,7 @@ class _MomentiView extends StatelessWidget {
             AppHeader(
               title: l10n.momentiTitle,
               showBack: true,
-              trailing: const Icon(
-                Icons.info_outline,
-                color: AppColors.textPrimary,
-              ),
+              
             ),
             Expanded(
               child: BlocBuilder<MomentiCubit, MomentiState>(
