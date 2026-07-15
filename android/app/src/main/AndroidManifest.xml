@@ -49,5 +49,17 @@
         <intent>
             <action android:name="android.intent.action.SET_TIMER"/>
         </intent>
+        <!-- So canLaunchUrl()/launchUrl() can resolve a browser for web links
+             (e.g. the benefit "Ottieni il premio" CTA) on Android 11+ (API 30). -->
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:scheme="https"/>
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW"/>
+            <category android:name="android.intent.category.BROWSABLE"/>
+            <data android:scheme="http"/>
+        </intent>
     </queries>
 </manifest>

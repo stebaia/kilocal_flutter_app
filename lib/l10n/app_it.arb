@@ -175,6 +175,7 @@
   "benefitsSecondaryPartners": "Partner Secondari",
   "benefitViewDetails": "Visualizza dettagli",
   "benefitClaimReward": "Ottieni il premio",
+  "benefitClaimRewardError": "Impossibile aprire il link del premio",
   "benefitsEmpty": "Nessun benefit disponibile",
   "momentiTitle": "Momenti",
   "momentiEmpty": "Nessun momento disponibile",
