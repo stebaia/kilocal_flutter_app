@@ -845,4 +845,86 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get pathAreaLocked => 'Questo percorso non è ancora disponibile.';
+
+  @override
+  String get strumentiTitle => 'Strumenti';
+
+  @override
+  String get strumentiLaunch => 'Avvia strumento';
+
+  @override
+  String get strumentiPromemoria => 'Promemoria';
+
+  @override
+  String get strumentiTimer => 'Timer';
+
+  @override
+  String get strumentiGlossario => 'Glossario';
+
+  @override
+  String get strumentiGallery => 'Gallery';
+
+  @override
+  String get strumentiComingSoon => 'Questo strumento sarà presto disponibile.';
+
+  @override
+  String get promemoriaViewList => 'Lista';
+
+  @override
+  String get promemoriaViewCalendar => 'Calendario';
+
+  @override
+  String get promemoriaEmpty => 'Nessun promemoria per questo mese.';
+
+  @override
+  String get promemoriaLoadError => 'Impossibile caricare i promemoria.';
+
+  @override
+  String get promemoriaAddTitle => 'Aggiungi promemoria';
+
+  @override
+  String get promemoriaMessageLabel => 'Messaggio';
+
+  @override
+  String get promemoriaMessageHint => 'Inserisci qui il testo del promemoria';
+
+  @override
+  String get promemoriaDateLabel => 'Data';
+
+  @override
+  String get promemoriaTimeLabel => 'Ora';
+
+  @override
+  String get promemoriaSelectDate => 'Seleziona data';
+
+  @override
+  String get promemoriaSelectTime => 'Seleziona orario';
+
+  @override
+  String get promemoriaConfirm => 'Conferma';
+
+  @override
+  String get promemoriaSave => 'Salva promemoria';
+
+  @override
+  String get promemoriaEditTitle => 'Modifica Promemoria';
+
+  @override
+  String get promemoriaEdit => 'Modifica';
+
+  @override
+  String get promemoriaSaveShort => 'Salva';
+
+  @override
+  String get promemoriaDelete => 'Elimina';
+
+  @override
+  String get promemoriaDeleteTitle => 'Elimina promemoria';
+
+  @override
+  String get promemoriaCancel => 'Annulla';
+
+  @override
+  String get promemoriaDeleteConfirm =>
+      'Sicuro di voler eliminare il promemoria?';
 }

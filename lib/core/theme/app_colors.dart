@@ -31,6 +31,12 @@ abstract final class AppColors {
   static const Color textPrimary = ink;
   static const Color textSecondary = Color(0xFF6B6B72);
   static const Color divider = Color(0xFFEDEDED);
+
+  /// Green used for a past/completed Promemoria time label.
+  static const Color reminderPast = Color(0xFF1CA05A);
+
+  /// Light grey fill for the Promemoria calendar day columns.
+  static const Color calendarColumn = Color(0xFFF5F5F5);
   static const Color dividerStrong = Color(0xFF606060);
   static const Color unreadBackground = Color(0xFFFFF9FA);
 
