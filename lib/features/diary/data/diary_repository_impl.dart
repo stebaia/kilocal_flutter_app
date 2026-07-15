@@ -29,12 +29,13 @@ class DiaryRepositoryImpl implements DiaryRepository {
   // `activity.item` is a typed M2A union (articles | percorsi_content |
   // percorsi_materials), so it must be selected with an inline fragment. The
   // step title + path root are read directly here — no second query needed.
-  // Verified against staging (authenticated). Only `completed_on _nnull` is
-  // filtered server-side; the collection is matched client-side because the
-  // nested M2A filter returns nothing on this instance.
+  // Verified against staging (authenticated). No `completed_on` filter: the list
+  // shows both started-only steps (no green check, completable from the sheet)
+  // and completed ones. The collection is matched client-side because the nested
+  // M2A filter returns nothing on this instance.
   static const _activitiesQuery = r'''
-query GetDiaryActivities($filter: user_activities_filter, $lang: String!, $page: Int = 1) {
-  user_activities(filter: $filter, page: $page, sort: ["-completed_on"]) {
+query GetDiaryActivities($lang: String!, $page: Int = 1) {
+  user_activities(page: $page, sort: ["-started_on"]) {
     id
     started_on
     completed_on
@@ -70,9 +71,7 @@ query GetGoalCategories($lang: String!) {
 }
 ''';
 
-  static const _activitiesFilter = <String, dynamic>{
-    'completed_on': {'_nnull': true},
-  };
+  static const _stepsBasePath = '/path/steps';
 
   // --- History (GraphQL, read-only) ---------------------------------------
 
@@ -81,7 +80,7 @@ query GetGoalCategories($lang: String!) {
     try {
       final result = await _graphqlClient.query(
         _activitiesQuery,
-        variables: {'filter': _activitiesFilter, 'lang': _resolveLocale()},
+        variables: {'lang': _resolveLocale()},
       );
       final data = result['data'] as Map<String, dynamic>?;
       final rows = data?['user_activities'] as List<dynamic>? ?? const [];
@@ -89,11 +88,13 @@ query GetGoalCategories($lang: String!) {
       final activities = <DiaryActivity>[];
       for (final row in rows.cast<Map<String, dynamic>>()) {
         final content = _percorsiContentOf(row);
-        // Diary shows only completed path steps; skip articles/materials.
+        // The diary lists path steps; skip activities linked to articles or
+        // materials (those have no completable step here).
         if (content == null) continue;
         activities.add(
           DiaryActivity(
             id: row['id'].toString(),
+            stepId: content['id']?.toString(),
             area: DiaryArea.fromInternalName(_areaOf(content)),
             title: _titleOf(content),
             startedOn: _parseDate(row['started_on'] as String?),
@@ -102,6 +103,26 @@ query GetGoalCategories($lang: String!) {
         );
       }
       return activities;
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  @override
+  Future<void> completeActivity({
+    required String stepId,
+    required DiaryArea area,
+  }) async {
+    // Steps are completed through the path endpoint (not a direct PATCH): it
+    // also advances `percorso_*_curr_step` and the active timeframe, which a
+    // raw `user_activities` write would leave inconsistent (see Swagger).
+    try {
+      await _dio.post<Map<String, dynamic>>(
+        '$_stepsBasePath/$stepId/complete',
+        data: <String, dynamic>{'percorsoInternalName': area.internalName},
+      );
     } on ApiException {
       rethrow;
     } on DioException catch (e) {

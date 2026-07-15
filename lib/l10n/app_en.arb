@@ -313,6 +313,20 @@
   "diaryGoalCategory": "Category",
   "diaryGoalPickDate": "Add a date",
   "diaryGoalSave": "Save",
+  "diaryActivityDetailTitle": "Activity details",
+  "diaryActivityCategory": "Category: {category}",
+  "@diaryActivityCategory": {
+    "placeholders": { "category": { "type": "String" } }
+  },
+  "diaryActivityPlannedOn": "Planned completion: {date}",
+  "@diaryActivityPlannedOn": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "diaryActivityToComplete": "To complete: {date}",
+  "@diaryActivityToComplete": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "diaryActivityCompleteError": "Couldn't complete the activity. Try again.",
   "month1": "Month 1",
   "phase1": "Phase 1",
   "activitiesCount": "{completed}/{total} activities",

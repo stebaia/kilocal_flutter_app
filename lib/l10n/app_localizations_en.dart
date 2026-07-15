@@ -727,6 +727,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryGoalSave => 'Save';
 
   @override
+  String get diaryActivityDetailTitle => 'Activity details';
+
+  @override
+  String diaryActivityCategory(String category) {
+    return 'Category: $category';
+  }
+
+  @override
+  String diaryActivityPlannedOn(String date) {
+    return 'Planned completion: $date';
+  }
+
+  @override
+  String diaryActivityToComplete(String date) {
+    return 'To complete: $date';
+  }
+
+  @override
+  String get diaryActivityCompleteError =>
+      'Couldn\'t complete the activity. Try again.';
+
+  @override
   String get month1 => 'Month 1';
 
   @override

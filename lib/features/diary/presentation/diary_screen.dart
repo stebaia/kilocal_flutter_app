@@ -7,9 +7,11 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_header.dart';
+import '../domain/entities/diary_activity.dart';
 import 'cubit/diary_goals_cubit.dart';
 import 'cubit/diary_history_cubit.dart';
 import 'widgets/create_goal_sheet.dart';
+import 'widgets/diary_activity_sheet.dart';
 import 'widgets/diary_filter_sheet.dart';
 import 'widgets/diary_goal_card.dart';
 import 'widgets/diary_hero_card.dart';
@@ -149,7 +151,14 @@ class _HistoryTab extends StatelessWidget {
                 children.add(
                   Padding(
                     padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
-                    child: DiaryHistoryCard(activity: activity),
+                    child: DiaryHistoryCard(
+                      activity: activity,
+                      // Only actionable (started, not-yet-completed) steps open
+                      // the detail sheet; done entries stay display-only.
+                      onTap: activity.canComplete
+                          ? () => _onActivityTap(context, activity)
+                          : null,
+                    ),
                   ),
                 );
               }
@@ -167,6 +176,23 @@ class _HistoryTab extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _onActivityTap(
+    BuildContext context,
+    DiaryActivity activity,
+  ) async {
+    final cubit = context.read<DiaryHistoryCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showDiaryActivitySheet(context, activity: activity);
+    if (confirmed != true) return;
+
+    final ok = await cubit.completeActivity(activity);
+    if (!ok) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.diaryActivityCompleteError)),
+      );
+    }
   }
 }
 

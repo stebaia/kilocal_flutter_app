@@ -194,7 +194,10 @@ void configureDependencies() {
     () => StatisticsCubit(statisticsRepository: getIt<StatisticsRepository>()),
   );
   getIt.registerLazySingleton<PathMaterialsRepository>(
-    () => PathMaterialsRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+    () => PathMaterialsRepositoryImpl(
+      graphqlClient: getIt<GraphqlClient>(),
+      dio: getIt<Dio>(),
+    ),
   );
   getIt.registerFactory<PathMaterialsCubit>(
     () => PathMaterialsCubit(
@@ -204,6 +207,7 @@ void configureDependencies() {
   getIt.registerFactory<PathMaterialDetailCubit>(
     () => PathMaterialDetailCubit(
       materialsRepository: getIt<PathMaterialsRepository>(),
+      userCubit: getIt<UserCubit>(),
     ),
   );
   getIt.registerLazySingleton<ProgramUnlockRepository>(
