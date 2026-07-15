@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -30,7 +31,13 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
     _PercorsoCategory('allenamento', AppIcons.training),
     _PercorsoCategory('alimentazione', AppIcons.food),
     _PercorsoCategory('benessere', AppIcons.wellness),
-    _PercorsoCategory('integrazione', AppIcons.flash),
+    // Integrazione is a phase-based area with its own screen: the tile jumps
+    // straight to it instead of opening the biotype description sheet.
+    _PercorsoCategory(
+      'integrazione',
+      AppIcons.supplement,
+      route: '/path/integrazione',
+    ),
   ];
 
   @override
@@ -56,13 +63,20 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
                 child: _CategoryTile(
                   category: _categories[i],
                   accentColor: accentColor,
-                  onTap: () => showProfileTypePercorsiSheet(
-                    context,
-                    area: _categories[i].area,
-                    title: _labelFor(_categories[i].area, l10n),
-                    body: areaTexts[_categories[i].area],
-                    accentColor: accentColor,
-                  ),
+                  onTap: () {
+                    final route = _categories[i].route;
+                    if (route != null) {
+                      context.push(route);
+                      return;
+                    }
+                    showProfileTypePercorsiSheet(
+                      context,
+                      area: _categories[i].area,
+                      title: _labelFor(_categories[i].area, l10n),
+                      body: areaTexts[_categories[i].area],
+                      accentColor: accentColor,
+                    );
+                  },
                 ),
               ),
             ],
@@ -84,10 +98,14 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
 }
 
 class _PercorsoCategory {
-  const _PercorsoCategory(this.area, this.iconName);
+  const _PercorsoCategory(this.area, this.iconName, {this.route});
 
   final String area;
   final String iconName;
+
+  /// When set, tapping the tile navigates to this route instead of opening the
+  /// biotype description sheet.
+  final String? route;
 }
 
 /// A pill-shaped, bordered category button with a centered biotype-colored icon.

@@ -23,6 +23,7 @@ abstract final class AppIcons {
   static const String selfCare = 'self_care';
   static const String lifestyle = 'lifestyle';
   static const String activities = 'activities';
+  static const String supplement = 'stat_supplement';
 }
 
 /// Widget generico per le icone SVG dell'app.
