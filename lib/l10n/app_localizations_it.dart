@@ -733,6 +733,28 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diaryGoalSave => 'Salva';
 
   @override
+  String get diaryActivityDetailTitle => 'Dettagli Attività';
+
+  @override
+  String diaryActivityCategory(String category) {
+    return 'Categoria: $category';
+  }
+
+  @override
+  String diaryActivityPlannedOn(String date) {
+    return 'Completamento previsto: $date';
+  }
+
+  @override
+  String diaryActivityToComplete(String date) {
+    return 'Da completare: $date';
+  }
+
+  @override
+  String get diaryActivityCompleteError =>
+      'Impossibile completare l\'attività. Riprova.';
+
+  @override
   String get month1 => 'Mese 1';
 
   @override

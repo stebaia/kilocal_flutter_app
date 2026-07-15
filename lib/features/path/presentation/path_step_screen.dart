@@ -35,7 +35,11 @@ class PathStepScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return BlocProvider(
-      create: (_) => getIt<PathDetailCubit>()..load(area: area, l10n: l10n),
+      create: (_) => getIt<PathDetailCubit>()
+        // `startStep` registers the "started" activity (idempotent) and then
+        // reloads the area, so it doubles as the initial load. Locked steps are
+        // never opened from the list, so no extra guard is needed here.
+        ..startStep(stepId: stepId, area: area, l10n: l10n),
       child: _PathStepView(area: area, stepId: stepId, initialStep: step),
     );
   }
@@ -320,7 +324,11 @@ class _StepMediaState extends State<_StepMedia> {
           children: [
             _buildSurface(),
             // The top bar (back + activities) stays visible over the player.
-            _MediaTopBar(siblings: widget.siblings, step: widget.step,isActivities: widget.area == 'alimentazione' ),
+            _MediaTopBar(
+              siblings: widget.siblings,
+              step: widget.step,
+              isActivities: widget.area == 'alimentazione',
+            ),
             // The timer tools are hidden once the native player takes over,
             // and never shown in the nutrition area.
             if (_controller == null && widget.area != 'alimentazione')
@@ -365,7 +373,11 @@ class _StepMediaState extends State<_StepMedia> {
 
 /// Top overlay on the media: back button (left) + activities button (right).
 class _MediaTopBar extends StatelessWidget {
-  const _MediaTopBar({required this.siblings, required this.step, required this.isActivities});
+  const _MediaTopBar({
+    required this.siblings,
+    required this.step,
+    required this.isActivities,
+  });
 
   final List<PathStepItem> siblings;
   final PathStepItem step;

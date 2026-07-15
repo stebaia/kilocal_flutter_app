@@ -10,10 +10,14 @@ import 'diary_area_style.dart';
 
 /// A single Cronologia entry: completion checkbox, coloured category label with
 /// icon, time, and the activity text.
+///
+/// [onTap] opens the "Dettagli Attività" sheet; passed only for entries that can
+/// still be acted on (started-but-not-completed steps).
 class DiaryHistoryCard extends StatelessWidget {
-  const DiaryHistoryCard({super.key, required this.activity});
+  const DiaryHistoryCard({super.key, required this.activity, this.onTap});
 
   final DiaryActivity activity;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +26,7 @@ class DiaryHistoryCard extends StatelessWidget {
     final time = _formatTime(activity.completedOn ?? activity.startedOn);
 
     return AppCard(
+      onTap: onTap,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

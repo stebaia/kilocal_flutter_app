@@ -15,10 +15,18 @@ import 'dto/path_material_dto.dart';
 /// by the group id and map the nested materials. Category tabs are derived from
 /// the categories present on the returned materials, de-duplicated by id.
 class PathMaterialsRepositoryImpl implements PathMaterialsRepository {
-  PathMaterialsRepositoryImpl({required GraphqlClient graphqlClient})
-    : _graphqlClient = graphqlClient;
+  PathMaterialsRepositoryImpl({
+    required GraphqlClient graphqlClient,
+    required Dio dio,
+  }) : _graphqlClient = graphqlClient,
+       _dio = dio;
 
   final GraphqlClient _graphqlClient;
+
+  /// Directus REST is used only for the completion write: `user_activities` has
+  /// no dedicated app endpoint and the many-to-any create is awkward over
+  /// GraphQL, so we POST the plain JSON body the backend documented.
+  final Dio _dio;
 
   static const _query = r'''
 query GetGroupMaterials($groupId: GraphQLStringOrFloat!, $lang: String!) {
@@ -212,6 +220,37 @@ query GetMaterial($id: ID!, $lang: String!) {
   }
 
   @override
+  Future<void> markMaterialCompleted({
+    required String materialId,
+    required String userId,
+  }) async {
+    try {
+      // Idempotent: never duplicate a completion the user already has.
+      final completedIds = await _fetchCompletedMaterialIds();
+      if (completedIds.contains(materialId)) return;
+
+      final now = DateTime.now().toUtc().toIso8601String();
+      await _dio.post<Map<String, dynamic>>(
+        '/items/user_activities',
+        data: <String, dynamic>{
+          'user': userId,
+          // Both timestamps set so the completed-materials query (which filters
+          // on `completed_on`) and the diary Cronologia pick the row up.
+          'started_on': now,
+          'completed_on': now,
+          'activity': [
+            {'collection': 'percorsi_materials', 'item': materialId},
+          ],
+        },
+      );
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  @override
   Future<Map<String, PathGroupProgress>> fetchGroupProgress({
     required List<String> groupIds,
   }) async {
@@ -274,8 +313,8 @@ query GetMaterial($id: ID!, $lang: String!) {
     for (final row in rows) {
       final links = (row as Map<String, dynamic>)['activity'] as List<dynamic>?;
       for (final link in links ?? const []) {
-        final item = (link as Map<String, dynamic>)['item']
-            as Map<String, dynamic>?;
+        final item =
+            (link as Map<String, dynamic>)['item'] as Map<String, dynamic>?;
         if (item == null || item['__typename'] != 'percorsi_materials') {
           continue;
         }

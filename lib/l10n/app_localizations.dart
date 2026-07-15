@@ -1394,6 +1394,36 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get diaryGoalSave;
 
+  /// No description provided for @diaryActivityDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity details'**
+  String get diaryActivityDetailTitle;
+
+  /// No description provided for @diaryActivityCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category: {category}'**
+  String diaryActivityCategory(String category);
+
+  /// No description provided for @diaryActivityPlannedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned completion: {date}'**
+  String diaryActivityPlannedOn(String date);
+
+  /// No description provided for @diaryActivityToComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete: {date}'**
+  String diaryActivityToComplete(String date);
+
+  /// No description provided for @diaryActivityCompleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t complete the activity. Try again.'**
+  String get diaryActivityCompleteError;
+
   /// No description provided for @month1.
   ///
   /// In en, this message translates to:

@@ -29,7 +29,6 @@ class DiaryHeroCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.spaceMd),
       child: Stack(
         children: [
-          
           Align(
             alignment: Alignment.bottomLeft,
             child: Text(

@@ -28,4 +28,19 @@ class DiaryHistoryCubit extends Cubit<DiaryHistoryState> {
       emit(state.copyWith(status: DiaryHistoryStatus.error));
     }
   }
+
+  /// Completes a started step from the detail sheet, then reloads the history so
+  /// the card flips to its completed (green-check) state. Returns whether the
+  /// completion succeeded so the caller can surface an error.
+  Future<bool> completeActivity(DiaryActivity activity) async {
+    final stepId = activity.stepId;
+    if (stepId == null) return false;
+    try {
+      await _repository.completeActivity(stepId: stepId, area: activity.area);
+      await load();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 }
