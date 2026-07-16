@@ -32,6 +32,7 @@ class PathMaterialDto {
     this.article,
     this.translations = const [],
     this.categories = const [],
+    this.ctas = const [],
   });
 
   factory PathMaterialDto.fromJson(Map<String, dynamic> json) =>
@@ -55,7 +56,81 @@ class PathMaterialDto {
   final List<PathMaterialTranslationDto> translations;
   final List<PathMaterialCategoryJunctionDto> categories;
 
+  /// Call-to-action links; the downloadable PDF of a "schede" material lives
+  /// here rather than on [asset]. Only fetched on the detail query.
+  final List<PathMaterialCtaJunctionDto> ctas;
+
   Map<String, dynamic> toJson() => _$PathMaterialDtoToJson(this);
+}
+
+/// Junction row of the `percorsi_materials_links` many-to-many.
+@JsonSerializable()
+class PathMaterialCtaJunctionDto {
+  const PathMaterialCtaJunctionDto({this.link});
+
+  factory PathMaterialCtaJunctionDto.fromJson(Map<String, dynamic> json) =>
+      _$PathMaterialCtaJunctionDtoFromJson(json);
+
+  @JsonKey(name: 'links_id')
+  final PathMaterialLinkDto? link;
+
+  Map<String, dynamic> toJson() => _$PathMaterialCtaJunctionDtoToJson(this);
+}
+
+/// DTO for a `links` row: either an external url (on the translation) or a
+/// downloadable file (on [attachmentTranslations]). Both are per-language.
+@JsonSerializable()
+class PathMaterialLinkDto {
+  const PathMaterialLinkDto({
+    this.downloadOnClick = false,
+    this.translations = const [],
+    this.attachmentTranslations = const [],
+  });
+
+  factory PathMaterialLinkDto.fromJson(Map<String, dynamic> json) =>
+      _$PathMaterialLinkDtoFromJson(json);
+
+  @JsonKey(name: 'download_on_click')
+  final bool downloadOnClick;
+
+  final List<PathMaterialLinkTranslationDto> translations;
+
+  /// The CMS field is misspelled (`attachemnt_translations`); the JSON key must
+  /// match it verbatim.
+  @JsonKey(name: 'attachemnt_translations')
+  final List<PathMaterialAttachmentTranslationDto> attachmentTranslations;
+
+  Map<String, dynamic> toJson() => _$PathMaterialLinkDtoToJson(this);
+}
+
+@JsonSerializable()
+class PathMaterialLinkTranslationDto {
+  const PathMaterialLinkTranslationDto({this.label, this.url});
+
+  factory PathMaterialLinkTranslationDto.fromJson(Map<String, dynamic> json) =>
+      _$PathMaterialLinkTranslationDtoFromJson(json);
+
+  /// CTA text, e.g. "Scarica il file".
+  final String? label;
+
+  /// External url; null for attachment-backed CTAs.
+  final String? url;
+
+  Map<String, dynamic> toJson() => _$PathMaterialLinkTranslationDtoToJson(this);
+}
+
+@JsonSerializable()
+class PathMaterialAttachmentTranslationDto {
+  const PathMaterialAttachmentTranslationDto({this.attachment});
+
+  factory PathMaterialAttachmentTranslationDto.fromJson(
+    Map<String, dynamic> json,
+  ) => _$PathMaterialAttachmentTranslationDtoFromJson(json);
+
+  final PathMaterialFileDto? attachment;
+
+  Map<String, dynamic> toJson() =>
+      _$PathMaterialAttachmentTranslationDtoToJson(this);
 }
 
 /// DTO for the `articles` row linked by a material via `connect_to_article`.

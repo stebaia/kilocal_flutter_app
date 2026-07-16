@@ -103,6 +103,10 @@ query GetCompletedMaterials($filter: user_activities_filter) {
   /// whose text is split across `plot` (intro) and the `blocks` many-to-any.
   /// Only `block_text` is requested — on staging the article blocks of every
   /// linked material are `block_text`, bar a single `block_aside_asset`.
+  ///
+  /// The downloadable PDF of a "Scheda" is not part of `asset` (which is null on
+  /// those materials): it hangs off the `ctas` links, whose `attachment` is
+  /// per-language. `attachemnt_translations` is misspelled in the CMS schema.
   static const _detailQuery = r'''
 query GetMaterial($id: ID!, $lang: String!) {
   percorsi_materials_by_id(id: $id) {
@@ -116,6 +120,20 @@ query GetMaterial($id: ID!, $lang: String!) {
     translations(filter: { languages_code: { code: { _eq: $lang } } }) {
       title
       content
+    }
+    ctas {
+      links_id {
+        download_on_click
+        translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+          label
+          url
+        }
+        attachemnt_translations(
+          filter: { languages_code: { code: { _eq: $lang } } }
+        ) {
+          attachment { id filename_download }
+        }
+      }
     }
     article {
       id
@@ -251,6 +269,7 @@ query GetMaterial($id: ID!, $lang: String!) {
         content: content,
         imageUrl: _assetUrl(file),
         vimeoUrl: asset?.vimeoUrl,
+        attachments: _attachments(dto),
       );
     } on ApiException {
       rethrow;
@@ -392,13 +411,45 @@ query GetMaterial($id: ID!, $lang: String!) {
 
   String? _assetUrl(PathMaterialFileDto? file) {
     if (file?.id == null) return null;
-    return '${Env.baseUrl}/assets/${file!.id}/${file.filenameDownload ?? ''}';
+    // Attachment file names contain spaces ("Obiettivo della settimana.pdf"),
+    // which would make the url unparseable for url_launcher.
+    final filename = Uri.encodeComponent(file!.filenameDownload ?? '');
+    return '${Env.baseUrl}/assets/${file.id}/$filename';
   }
 
   String? _nonEmpty(String? value) {
     if (value == null) return null;
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// Downloadable files offered by the material's CTAs. A `links` row can also
+  /// carry an external `url` instead of a file; those are skipped, since the
+  /// detail screen only renders downloads.
+  List<PathMaterialAttachment> _attachments(PathMaterialDto dto) {
+    final attachments = <PathMaterialAttachment>[];
+
+    for (final junction in dto.ctas) {
+      final link = junction.link;
+      if (link == null) continue;
+
+      final label = _nonEmpty(link.translations.firstOrNull?.label);
+
+      for (final translation in link.attachmentTranslations) {
+        final file = translation.attachment;
+        final url = _assetUrl(file);
+        if (url == null) continue;
+
+        attachments.add(
+          PathMaterialAttachment(
+            url: url,
+            label: label ?? file?.filenameDownload ?? '',
+          ),
+        );
+      }
+    }
+
+    return attachments;
   }
 
   /// HTML body of a material that links an article: the article's `plot` intro
