@@ -17,6 +17,14 @@ abstract interface class SurveyRepository {
   /// (`POST /survey/me/ensure-details`). Call early in onboarding.
   Future<void> ensureDetails();
 
+  /// Pending month-end survey, or `null` if none
+  /// (`GET /survey/me/month-end-status`).
+  ///
+  /// Has a **side-effect**: when a survey is pending the backend creates the
+  /// matching `traguardo_mese_N` goal, so this must run before listing goals or
+  /// the predefined Kilocal ones never show up.
+  Future<SurveyMonthEndPending?> fetchMonthEndStatus();
+
   /// Searches the `pharmacies` collection (22k+ rows → server-side [search]).
   /// Used by the Kilocal Point picker in pharmacy onboarding.
   Future<List<Pharmacy>> searchPharmacies(String query, {int limit = 20});

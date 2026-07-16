@@ -296,7 +296,10 @@ void configureDependencies() {
     () => DiaryHistoryCubit(repository: getIt<DiaryRepository>()),
   );
   getIt.registerFactory<DiaryGoalsCubit>(
-    () => DiaryGoalsCubit(repository: getIt<DiaryRepository>()),
+    () => DiaryGoalsCubit(
+      repository: getIt<DiaryRepository>(),
+      surveyRepository: getIt<SurveyRepository>(),
+    ),
   );
 
   // --- Feature: Momenti ---
