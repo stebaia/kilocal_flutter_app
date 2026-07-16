@@ -177,6 +177,14 @@
   },
   "profilePasswordMismatch": "The two passwords don't match",
   "profileFoodPreferences": "Food preferences",
+  "profileFoodPreferencesEdit": "Add or edit",
+  "@profileFoodPreferencesEdit": {
+    "description": "Expander that reveals the full checkbox list of options for a food-preference multi-select (e.g. intolerances)."
+  },
+  "profileFoodPreferencesEmpty": "No selection",
+  "@profileFoodPreferencesEmpty": {
+    "description": "Shown in place of the chips when the user has not picked any option for a food-preference multi-select."
+  },
   "profileNotificationsSection": "Notifications",
   "profilePushNotifications": "Push notifications",
   "profilePushNotificationsStatus": "Active",

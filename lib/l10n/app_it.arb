@@ -151,6 +151,8 @@
   },
   "profilePasswordMismatch": "Le due password non coincidono",
   "profileFoodPreferences": "Preferenze alimentari",
+  "profileFoodPreferencesEdit": "Aggiungi o modifica",
+  "profileFoodPreferencesEmpty": "Nessuna selezione",
   "profileNotificationsSection": "Notifiche",
   "profilePushNotifications": "Notifiche push",
   "profilePushNotificationsStatus": "Attive",
