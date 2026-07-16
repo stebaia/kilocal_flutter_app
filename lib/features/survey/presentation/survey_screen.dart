@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../user/presentation/cubit/user_cubit.dart';
 import '../domain/entities/survey_answer.dart';
+import '../domain/entities/survey_outcome.dart';
 import '../domain/entities/survey_step.dart';
 import 'cubit/survey_cubit.dart';
 import 'widgets/survey_answer_input.dart';
@@ -143,7 +144,7 @@ class _SectionBody extends StatelessWidget {
     // no MultiBlocProvider above the router), so read it from the locator.
     final placeholders = isResult
         ? _outcomePlaceholders(
-            state.submitResult,
+            state.outcomeProfile,
             getIt<UserCubit>().state.user?.firstName,
           )
         : const <String, String>{};
@@ -183,7 +184,7 @@ class _SectionBody extends StatelessWidget {
         ],
         if (isResult) ...[
           const SizedBox(height: AppSpacing.spaceLg),
-          SurveyKitCard(outcome: state.submitResult?.biotype),
+          SurveyKitCard(outcome: state.outcomeProfile),
           const SizedBox(height: AppSpacing.spaceLg),
           SurveyResultActions(kitShopUrl: state.submitResult?.kitShopUrl),
         ],
@@ -211,25 +212,24 @@ class _SectionBody extends StatelessWidget {
   /// Builds the result-screen placeholders the CMS copy expects.
   ///
   /// The CMS `type_survey` result section uses `{{name}}`, `{{type}}` and
-  /// `{{outcome_profile}}` — names that do *not* match the submit response's
-  /// own keys, so they must be mapped explicitly rather than copied across.
-  /// `{{type}}` → "Tipo 3 - Pera" and `{{outcome_profile}}` → the personalized
-  /// biotype copy, both from `outcome.profile` ([SurveyOutcome]).
+  /// `{{outcome_profile}}` — names that match neither the submit response's own
+  /// keys nor each other, so they are mapped explicitly. `{{type}}` →
+  /// "Tipo 2 - Mela" and `{{outcome_profile}}` → the personalized biotype copy,
+  /// both from the hydrated [biotype]; `{{name}}` is the logged-in user's.
   ///
   /// Any placeholder left unmapped is stripped by [SurveyHtml], so a partial
   /// outcome degrades to plain copy instead of leaking `{{…}}`.
   Map<String, String> _outcomePlaceholders(
-    SurveySubmitResult? result,
+    SurveyOutcome? biotype,
     String? firstName,
   ) {
-    final biotype = result?.biotype;
-    final outcome = result?.outcome;
+    final rawOutcome = state.submitResult?.outcome;
     return {
       // Scalar top-level keys first, so other surveys' result copy keeps
       // resolving against its own placeholders — the explicit mappings below
       // take precedence on collision.
-      if (outcome != null)
-        for (final entry in outcome.entries)
+      if (rawOutcome != null)
+        for (final entry in rawOutcome.entries)
           if (entry.value is String || entry.value is num)
             entry.key: '${entry.value}',
       if (firstName != null && firstName.isNotEmpty) 'name': firstName,

@@ -18,6 +18,7 @@ class SurveyState extends Equatable {
     this.answers = const {},
     this.selectedPharmacy,
     this.submitResult,
+    this.outcomeProfile,
     this.errorMessage,
   });
 
@@ -38,6 +39,12 @@ class SurveyState extends Equatable {
   final Pharmacy? selectedPharmacy;
 
   final SurveySubmitResult? submitResult;
+
+  /// The biotype from [submitResult], hydrated with its `profiles` copy. The
+  /// submit response only carries the profile id, so the result screen reads
+  /// this rather than `submitResult.biotype`.
+  final SurveyOutcome? outcomeProfile;
+
   final String? errorMessage;
 
   SurveySection? get currentSection =>
@@ -65,6 +72,7 @@ class SurveyState extends Equatable {
     Map<String, SurveyAnswer>? answers,
     Pharmacy? selectedPharmacy,
     SurveySubmitResult? submitResult,
+    SurveyOutcome? outcomeProfile,
     String? errorMessage,
   }) {
     return SurveyState(
@@ -75,6 +83,7 @@ class SurveyState extends Equatable {
       answers: answers ?? this.answers,
       selectedPharmacy: selectedPharmacy ?? this.selectedPharmacy,
       submitResult: submitResult ?? this.submitResult,
+      outcomeProfile: outcomeProfile ?? this.outcomeProfile,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -88,6 +97,7 @@ class SurveyState extends Equatable {
     answers,
     selectedPharmacy,
     submitResult,
+    outcomeProfile,
     errorMessage,
   ];
 }

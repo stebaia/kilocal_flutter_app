@@ -1,21 +1,20 @@
 import 'package:equatable/equatable.dart';
 
-/// The biotype result carried by `outcome.profile` in the submit response.
+/// The biotype result of a survey submit.
 ///
-/// Backend (Daniele Pastori) confirmed the result data lives at
-/// `outcome.profile`, but not the shape of the value. Three encodings are
-/// plausible and all appear in the wider CMS, so [SurveyOutcome.fromJson]
-/// accepts each and normalizes to this entity:
+/// Confirmed against a live `POST /survey/submit/type_survey` (2026-07-16): the
+/// response's `outcome.profile` is only a **reference**, not the copy —
+/// `{"id": 4, "kit_slug": "kit-tipo-2"}`. The display texts (title, name,
+/// content) live in the `profiles` collection and must be hydrated from [id]
+/// via GraphQL; see `SurveyRepository.fetchOutcomeProfile`.
 ///
-///  - an expanded `profiles` row (the collection behind "Il mio Tipo");
-///  - a bare profile id, which needs a follow-up read of `profiles`;
-///  - a ready-made HTML string to inject into `{{outcome_profile}}`.
-///
-/// See `wiki/survey.md`. Once backend pins the contract down, the unused
-/// branches can go.
+/// The same submit response also carries the full expanded profile under
+/// `legacy`, but that field is documented as "compatibilità client web in
+/// migrazione" and will go away — do not read it.
 class SurveyOutcome extends Equatable {
   const SurveyOutcome({
-    this.profileId,
+    required this.id,
+    this.kitSlug,
     this.typeLabel,
     this.denomination,
     this.description,
@@ -23,34 +22,32 @@ class SurveyOutcome extends Equatable {
     this.iconId,
   });
 
-  /// `profiles.id` — set for the expanded-row and bare-id encodings.
-  final int? profileId;
+  /// `profiles.id`, the only identity the submit response gives us.
+  final int id;
 
-  /// The type label, e.g. "Tipo 3" (`profiles.translations.title`).
+  /// The kit's SEO slug (`kit_slug`), e.g. `kit-tipo-2`.
+  final String? kitSlug;
+
+  /// The type label, e.g. "Tipo 2" (`profiles.translations.title`).
   final String? typeLabel;
 
-  /// The biotype denomination, e.g. "Pera" (`profiles.translations.name`).
+  /// The biotype denomination, e.g. "Mela" (`profiles.translations.name`).
   final String? denomination;
 
-  /// Personalized copy about the user's type (HTML). This is what fills
+  /// Personalized copy about the user's type (HTML), gender-aware. Fills
   /// `{{outcome_profile}}` on the result screen.
   final String? description;
 
-  /// `profiles.kit` asset for the pink Starter Kit card.
+  /// Kit image file id, resolved from `profiles.kit.asset.default_asset`.
   final String? kitImageId;
 
-  /// `profiles.icon` (SVG file id) for the silhouette badge.
+  /// `profiles.icon` (an SVG file id) for the badge.
   final String? iconId;
 
-  /// True when nothing usable was parsed, so the UI can degrade instead of
-  /// rendering an empty shell.
-  bool get isEmpty =>
-      typeLabel == null &&
-      denomination == null &&
-      description == null &&
-      kitImageId == null;
+  /// True until the profile has been hydrated with its CMS copy.
+  bool get isEmpty => typeLabel == null && denomination == null;
 
-  /// "Tipo 3 - Pera" for `{{type}}`, falling back to whichever half exists.
+  /// "Tipo 2 - Mela" for `{{type}}`, falling back to whichever half exists.
   String? get typeDisplay {
     final label = typeLabel;
     final name = denomination;
@@ -59,69 +56,38 @@ class SurveyOutcome extends Equatable {
     return '$label - $name';
   }
 
-  /// Parses `outcome.profile` across the three candidate encodings. Returns
-  /// `null` when `outcome` carries no `profile` at all.
-  static SurveyOutcome? fromJson(Map<String, dynamic>? outcome) {
-    if (outcome == null) return null;
-    final profile = outcome['profile'];
-
-    // Encoding 3: pre-rendered HTML copy.
-    if (profile is String) {
-      final html = profile.trim();
-      return html.isEmpty ? null : SurveyOutcome(description: html);
-    }
-
-    // Encoding 2: a bare id — only the id is knowable here; the caller
-    // hydrates the rest from `profiles`.
-    if (profile is num) return SurveyOutcome(profileId: profile.toInt());
-
-    // Encoding 1: an expanded `profiles` row.
-    if (profile is Map<String, dynamic>) return _fromProfileRow(profile);
-
-    return null;
-  }
-
-  static SurveyOutcome _fromProfileRow(Map<String, dynamic> row) {
-    final tr = _firstTranslation(row['translations']);
+  SurveyOutcome copyWith({
+    String? typeLabel,
+    String? denomination,
+    String? description,
+    String? kitImageId,
+    String? iconId,
+  }) {
     return SurveyOutcome(
-      profileId: (row['id'] as num?)?.toInt(),
-      typeLabel: _string(tr?['title']),
-      denomination: _string(tr?['name']),
-      // `content_f` is the female-specific variant; the API returns the row
-      // already resolved for the user, so prefer whichever is populated.
-      description: _string(tr?['content']) ?? _string(tr?['content_f']),
-      kitImageId: _assetId(row['kit']),
-      iconId: _assetId(row['icon']),
+      id: id,
+      kitSlug: kitSlug,
+      typeLabel: typeLabel ?? this.typeLabel,
+      denomination: denomination ?? this.denomination,
+      description: description ?? this.description,
+      kitImageId: kitImageId ?? this.kitImageId,
+      iconId: iconId ?? this.iconId,
     );
   }
 
-  static Map<String, dynamic>? _firstTranslation(dynamic raw) {
-    if (raw is List && raw.isNotEmpty) {
-      final first = raw.first;
-      if (first is Map<String, dynamic>) return first;
-    }
-    if (raw is Map<String, dynamic>) return raw;
-    return null;
-  }
-
-  /// Directus relations arrive either expanded (`{ id: … }`) or as a raw
-  /// id/uuid, depending on the query's `fields`.
-  static String? _assetId(dynamic raw) {
-    if (raw is Map<String, dynamic>) {
-      return _assetId(raw['image']) ?? _assetId(raw['id']);
-    }
-    if (raw is num) return raw.toString();
-    return _string(raw);
-  }
-
-  static String? _string(dynamic raw) {
-    if (raw is String && raw.trim().isNotEmpty) return raw.trim();
-    return null;
+  /// Reads the `outcome.profile` reference from a submit response. Returns
+  /// `null` when the outcome carries no usable profile id.
+  static SurveyOutcome? fromJson(Map<String, dynamic>? outcome) {
+    final profile = outcome?['profile'];
+    if (profile is! Map<String, dynamic>) return null;
+    final id = (profile['id'] as num?)?.toInt();
+    if (id == null) return null;
+    return SurveyOutcome(id: id, kitSlug: profile['kit_slug'] as String?);
   }
 
   @override
   List<Object?> get props => [
-    profileId,
+    id,
+    kitSlug,
     typeLabel,
     denomination,
     description,
