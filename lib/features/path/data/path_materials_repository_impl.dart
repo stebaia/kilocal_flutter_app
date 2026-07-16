@@ -6,6 +6,7 @@ import '../../../core/network/graphql_client.dart';
 import '../domain/entities/path_material.dart';
 import '../domain/path_materials_repository.dart';
 import 'dto/path_material_dto.dart';
+import 'vimeo_oembed_service.dart';
 
 /// GraphQL-backed implementation of [PathMaterialsRepository].
 ///
@@ -18,10 +19,16 @@ class PathMaterialsRepositoryImpl implements PathMaterialsRepository {
   PathMaterialsRepositoryImpl({
     required GraphqlClient graphqlClient,
     required Dio dio,
+    required VimeoOembedService vimeoOembedService,
   }) : _graphqlClient = graphqlClient,
-       _dio = dio;
+       _dio = dio,
+       _vimeoOembedService = vimeoOembedService;
 
   final GraphqlClient _graphqlClient;
+
+  /// Video materials carry no cover file in the CMS — the poster lives on Vimeo,
+  /// so the card thumbnails are resolved through oEmbed (cached in the service).
+  final VimeoOembedService _vimeoOembedService;
 
   /// Directus REST is used only for the completion write: `user_activities` has
   /// no dedicated app endpoint and the many-to-any create is awkward over
@@ -39,6 +46,7 @@ query GetGroupMaterials($groupId: GraphQLStringOrFloat!, $lang: String!) {
       connect_to_article
       asset {
         asset_is_video
+        vimeo_url
         default_asset { id filename_download }
         mobile_asset { id filename_download }
       }
@@ -184,17 +192,30 @@ query GetMaterial($id: ID!, $lang: String!) {
           data?['percorsi_groups_percorsi_materials'] as List<dynamic>? ??
           const [];
 
-      final materials = <PathMaterial>[];
-      // Preserve first-seen order of categories across all materials so the tab
-      // order is stable.
-      final categories = <String, PathMaterialCategory>{};
-
+      final dtos = <PathMaterialDto>[];
       for (final row in rows) {
         final junction = PathMaterialJunctionDto.fromJson(
           row as Map<String, dynamic>,
         );
         final dto = junction.material;
-        if (dto == null) continue;
+        if (dto != null) dtos.add(dto);
+      }
+
+      // Vimeo posters for the video materials, resolved in one concurrent pass
+      // so the cards don't fall back to the category hero.
+      final posters = await _vimeoOembedService.fetchAll(
+        dtos
+            .where((dto) => dto.asset?.assetIsVideo ?? false)
+            .map((dto) => dto.asset?.vimeoUrl)
+            .whereType<String>(),
+      );
+
+      final materials = <PathMaterial>[];
+      // Preserve first-seen order of categories across all materials so the tab
+      // order is stable.
+      final categories = <String, PathMaterialCategory>{};
+
+      for (final dto in dtos) {
 
         final categoryIds = <String>[];
         // Cover image to fall back to when the material carries no asset of its
@@ -214,11 +235,15 @@ query GetMaterial($id: ID!, $lang: String!) {
           );
         }
 
+        final vimeoUrl = dto.asset?.vimeoUrl;
         materials.add(
           _mapMaterial(
             dto,
             categoryIds,
             isCompleted: completedIds.contains(dto.id),
+            vimeoPosterUrl: vimeoUrl == null
+                ? null
+                : posters[vimeoUrl]?.thumbnailUrl,
             fallbackImageUrl: categoryHeroUrl,
           ),
         );
@@ -388,15 +413,16 @@ query GetMaterial($id: ID!, $lang: String!) {
     PathMaterialDto dto,
     List<String> categoryIds, {
     required bool isCompleted,
+    String? vimeoPosterUrl,
     String? fallbackImageUrl,
   }) {
     final asset = dto.asset;
     final file = asset?.mobileAsset ?? asset?.defaultAsset;
 
-    // Most Benessere materials (consigli and Vimeo videos) carry no image file
-    // of their own; fall back to the category cover so the card is not a bare
-    // placeholder — matching the web app.
-    final imageUrl = _assetUrl(file) ?? fallbackImageUrl;
+    // Video materials carry no image file of their own, so their cover is the
+    // Vimeo poster; the remaining ones (consigli) fall back to the category
+    // cover so the card is not a bare placeholder — matching the web app.
+    final imageUrl = _assetUrl(file) ?? vimeoPosterUrl ?? fallbackImageUrl;
 
     return PathMaterial(
       id: dto.id,

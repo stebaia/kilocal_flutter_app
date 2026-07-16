@@ -203,6 +203,7 @@ void configureDependencies() {
     () => PathMaterialsRepositoryImpl(
       graphqlClient: getIt<GraphqlClient>(),
       dio: getIt<Dio>(),
+      vimeoOembedService: getIt<VimeoOembedService>(),
     ),
   );
   getIt.registerFactory<PathMaterialsCubit>(
