@@ -106,10 +106,7 @@ class _PromemoriaView extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.spaceMd),
-              TextButton(
-                onPressed: cubit.load,
-                child: Text(l10n.retry),
-              ),
+              TextButton(onPressed: cubit.load, child: Text(l10n.retry)),
             ],
           ),
         ),
@@ -184,67 +181,65 @@ class _ReminderPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
-        children: [
-          // Brand red ellipse behind everything, at the very top of the stack.
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SvgPicture.asset(
-              
-              'assets/path_header_ellipse.svg',
-              fit: BoxFit.fitWidth,
-              height: 200,
-              alignment: Alignment.topCenter,
+      children: [
+        // Brand red ellipse behind everything, at the very top of the stack.
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: SvgPicture.asset(
+            'assets/path_header_ellipse.svg',
+            fit: BoxFit.fitWidth,
+            height: 200,
+            alignment: Alignment.topCenter,
+          ),
+        ),
+        // The panel content sits on top of the ellipse, pushed down just
+        // enough for the ellipse's top arc to peek above it. It owns its own
+        // rounded top + 1px hairline border (the "table" frame); the stack
+        // above does not account for that border.
+        Padding(
+          // No bottom padding: the panel runs to the bottom edge of the
+          // screen with no bottom border (the body is "unlimited"). Only the
+          // top corners are rounded; the side borders run down off-screen.
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.spaceLg,
+            AppSpacing.spaceLg,
+            AppSpacing.spaceLg,
+            0,
+          ),
+          // The hairline frame is a foregroundDecoration so it paints *on top*
+          // of the child backgrounds (day strip, columns, day headers) — a
+          // plain border would be covered by their edge-to-edge fills.
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppRadius.lg),
+              ),
+            ),
+            foregroundDecoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(AppRadius.lg),
+              ),
+              // Top + left + right only; no bottom border.
+              border: Border(
+                top: BorderSide(color: AppColors.dividerStrong, width: 0.5),
+                left: BorderSide(color: AppColors.dividerStrong, width: 0.5),
+                right: BorderSide(color: AppColors.dividerStrong, width: 0.5),
+              ),
+            ),
+            child: Column(
+              children: [
+                header,
+                const Divider(height: 0.5, color: AppColors.dividerStrong),
+                Expanded(child: child),
+              ],
             ),
           ),
-          // The panel content sits on top of the ellipse, pushed down just
-          // enough for the ellipse's top arc to peek above it. It owns its own
-          // rounded top + 1px hairline border (the "table" frame); the stack
-          // above does not account for that border.
-          Padding(
-            // No bottom padding: the panel runs to the bottom edge of the
-            // screen with no bottom border (the body is "unlimited"). Only the
-            // top corners are rounded; the side borders run down off-screen.
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.spaceLg,
-              AppSpacing.spaceLg,
-              AppSpacing.spaceLg,
-              0,
-            ),
-            // The hairline frame is a foregroundDecoration so it paints *on top*
-            // of the child backgrounds (day strip, columns, day headers) — a
-            // plain border would be covered by their edge-to-edge fills.
-            child: Container(
-              clipBehavior: Clip.antiAlias,
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.lg),
-                ),
-              ),
-              foregroundDecoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(AppRadius.lg),
-                ),
-                // Top + left + right only; no bottom border.
-                border: Border(
-                  top: BorderSide(color: AppColors.dividerStrong, width: 0.5),
-                  left: BorderSide(color: AppColors.dividerStrong, width: 0.5),
-                  right: BorderSide(color: AppColors.dividerStrong, width: 0.5),
-                ),
-              ),
-              child: Column(
-                children: [
-                  header,
-                  const Divider(height: 0.5, color: AppColors.dividerStrong),
-                  Expanded(child: child),
-                ],
-              ),
-            ),
-          ),
-        ],
-      
+        ),
+      ],
     );
   }
 }

@@ -216,7 +216,6 @@ query GetMaterial($id: ID!, $lang: String!) {
       final categories = <String, PathMaterialCategory>{};
 
       for (final dto in dtos) {
-
         final categoryIds = <String>[];
         // Cover image to fall back to when the material carries no asset of its
         // own: the first category hero we encounter for this material.

@@ -171,9 +171,7 @@ class ProfileScreen extends StatelessWidget {
                       // --- Versione app (non cliccabile) ---
                       ProfileSectionLabel(text: l10n.profileAppVersionSection),
                       const SizedBox(height: AppSpacing.spaceSm),
-                      const ProfileGroupCard(
-                        tiles: [_ProfileAppVersionTile()],
-                      ),
+                      const ProfileGroupCard(tiles: [_ProfileAppVersionTile()]),
                     ],
                   ),
                 ),

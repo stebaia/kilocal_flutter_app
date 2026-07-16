@@ -12,12 +12,15 @@ void main() {
     final texts = await loader.forBiotype(number: 1, isFemale: false);
     expect(texts, isNotNull);
     expect(texts!.points, hasLength(4));
-    expect(texts.areas.keys, containsAll(<String>[
-      'allenamento',
-      'alimentazione',
-      'benessere',
-      'integrazione',
-    ]));
+    expect(
+      texts.areas.keys,
+      containsAll(<String>[
+        'allenamento',
+        'alimentazione',
+        'benessere',
+        'integrazione',
+      ]),
+    );
   });
 
   test('point 0 is the head text (title + non-empty body)', () async {
@@ -39,8 +42,9 @@ void main() {
 
   test('woman type 1 addome body matches the source copy', () async {
     final texts = await loader.forBiotype(number: 1, isFemale: true);
-    final addome =
-        texts!.points.firstWhere((p) => p.zone == 'ADDOME SUL FIANCO');
+    final addome = texts!.points.firstWhere(
+      (p) => p.zone == 'ADDOME SUL FIANCO',
+    );
     expect(addome.title, 'Addome e zona epatica');
     expect(addome.body, contains('gonfiore e pesantezza'));
   });

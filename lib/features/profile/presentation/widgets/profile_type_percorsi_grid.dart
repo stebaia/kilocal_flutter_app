@@ -46,7 +46,7 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: 12,),
+        SizedBox(height: 12),
         Text(
           l10n.profileTypePathToFeelBest,
           style: AppTypography.textTheme.titleSmall?.copyWith(

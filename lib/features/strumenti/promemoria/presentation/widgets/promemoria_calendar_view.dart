@@ -117,7 +117,10 @@ class _PromemoriaCalendarViewState extends State<PromemoriaCalendarView> {
                       border: Border(
                         right: day == week.last
                             ? BorderSide.none
-                            : const BorderSide(color: AppColors.divider, width: 0.5),
+                            : const BorderSide(
+                                color: AppColors.divider,
+                                width: 0.5,
+                              ),
                       ),
                     ),
                     padding: const EdgeInsets.symmetric(

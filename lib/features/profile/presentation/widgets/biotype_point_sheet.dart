@@ -41,7 +41,8 @@ class _BiotypePointSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final hasContent = (title != null && title!.isNotEmpty) ||
+    final hasContent =
+        (title != null && title!.isNotEmpty) ||
         (body != null && body!.isNotEmpty);
 
     return SafeArea(

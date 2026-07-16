@@ -1004,6 +1004,78 @@ abstract class AppLocalizations {
   /// **'Enter proof of purchase'**
   String get surveyEnterProofOfPurchase;
 
+  /// No description provided for @surveyErrorNotANumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get surveyErrorNotANumber;
+
+  /// No description provided for @surveyErrorNotAnInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number'**
+  String get surveyErrorNotAnInteger;
+
+  /// No description provided for @surveyErrorTooSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'That value is too low'**
+  String get surveyErrorTooSmall;
+
+  /// No description provided for @surveyErrorTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'That value is too high'**
+  String get surveyErrorTooLarge;
+
+  /// No description provided for @surveyErrorNotADate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid date'**
+  String get surveyErrorNotADate;
+
+  /// No description provided for @surveyErrorDateTooLate.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be at least 18'**
+  String get surveyErrorDateTooLate;
+
+  /// No description provided for @surveyErrorDateTooEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid date'**
+  String get surveyErrorDateTooEarly;
+
+  /// No description provided for @surveyErrorBmiTooLow.
+  ///
+  /// In en, this message translates to:
+  /// **'That weight is not compatible with your height'**
+  String get surveyErrorBmiTooLow;
+
+  /// No description provided for @surveyErrorInvalidZipCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid postcode (5 digits)'**
+  String get surveyErrorInvalidZipCode;
+
+  /// No description provided for @surveyErrorInvalidPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get surveyErrorInvalidPhone;
+
+  /// No description provided for @surveyErrorInvalidBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode not recognised. Check the code on your Starter Kit pack.'**
+  String get surveyErrorInvalidBarcode;
+
+  /// No description provided for @surveyBarcodeChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the code…'**
+  String get surveyBarcodeChecking;
+
   /// No description provided for @notificationsEmpty.
   ///
   /// In en, this message translates to:

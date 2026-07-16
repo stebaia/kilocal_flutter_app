@@ -139,8 +139,7 @@ mutation SetCurrentPhase($id: ID!, $phaseId: Int!) {
         variables: {'myId': myId},
       );
       final details =
-          (contextResult['data']
-                  as Map<String, dynamic>?)?['user_details']
+          (contextResult['data'] as Map<String, dynamic>?)?['user_details']
               as List<dynamic>?;
       final detail = details?.firstOrNull as Map<String, dynamic>?;
       if (detail == null) {
@@ -157,7 +156,10 @@ mutation SetCurrentPhase($id: ID!, $phaseId: Int!) {
               ?.toString();
 
       if (kitId == null) {
-        return IntegrazioneData(phases: const [], currentPhaseId: currentPhaseId);
+        return IntegrazioneData(
+          phases: const [],
+          currentPhaseId: currentPhaseId,
+        );
       }
 
       final kitResult = await _graphqlClient.query(
@@ -189,8 +191,7 @@ mutation SetCurrentPhase($id: ID!, $phaseId: Int!) {
       final phases =
           rawRows
               ?.map(
-                (json) =>
-                    KitProductDto.fromJson(json as Map<String, dynamic>),
+                (json) => KitProductDto.fromJson(json as Map<String, dynamic>),
               )
               .map((dto) => _mapPhase(dto, lang, trackingByProduct))
               .whereType<IntegrazionePhase>()

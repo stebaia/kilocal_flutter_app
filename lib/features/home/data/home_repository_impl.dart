@@ -187,7 +187,7 @@ query HomeMoments($now: String!, $lang: String!) {
           title: 'Momenti',
           imageUrl: momentImage,
           route: '/momenti/home',
-          assetName:  _momentFallbackImage,
+          assetName: _momentFallbackImage,
         ),
         HomeActionCard(
           title: 'Benefit',

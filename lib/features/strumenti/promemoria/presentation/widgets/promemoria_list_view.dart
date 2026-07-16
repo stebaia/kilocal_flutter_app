@@ -69,8 +69,7 @@ class _PromemoriaListViewState extends State<PromemoriaListView> {
   /// Returns 0 when the focused month isn't the current one.
   double _estimatedTodayOffset() {
     final today = DateTime.now();
-    if (widget.month.year != today.year ||
-        widget.month.month != today.month) {
+    if (widget.month.year != today.year || widget.month.month != today.month) {
       return 0;
     }
     final byDay = <int, int>{};

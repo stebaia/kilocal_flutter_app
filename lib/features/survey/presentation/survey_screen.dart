@@ -7,11 +7,13 @@ import '../../../app/di.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../user/presentation/cubit/user_cubit.dart';
 import '../domain/entities/survey_answer.dart';
 import '../domain/entities/survey_outcome.dart';
 import '../domain/entities/survey_step.dart';
 import 'cubit/survey_cubit.dart';
+import 'survey_validation_l10n.dart';
 import 'widgets/survey_answer_input.dart';
 import 'widgets/survey_html.dart';
 import 'widgets/survey_kit_card.dart';
@@ -102,9 +104,15 @@ class _StepView extends StatelessWidget {
       currentIndex: state.currentIndex,
       stepLabel: '$stepNumber. ${_stepLabel(section)}',
       ctaLabel: _ctaLabel(section, state),
-      ctaEnabled: _canProceed(section, state),
+      ctaEnabled: state.canLeaveCurrentStep,
       busy: state.status == SurveyStatus.submitting,
-      errorMessage: state.errorMessage,
+      // A live validation failure takes precedence: it tells the user why the
+      // CTA is disabled, whereas errorMessage reports a failed request.
+      errorMessage:
+          state.currentValidationError?.message(
+            AppLocalizations.of(context)!,
+          ) ??
+          state.errorMessage,
       // No back arrow on the first step.
       onBack: state.isFirstStep ? null : cubit.previous,
       onCta: cubit.next,
@@ -124,15 +132,6 @@ class _StepView extends StatelessWidget {
     return (note != null && note.trim().isNotEmpty)
         ? note.trim()
         : 'Scritta solo per step corrente';
-  }
-
-  /// Blocks the CTA until a required question is answered / a pharmacy chosen.
-  bool _canProceed(SurveySection section, SurveyState state) {
-    if (section.loadKilocalPoints) return state.selectedPharmacy != null;
-    final question = section.question;
-    if (question == null || !question.required) return true;
-    final answer = state.currentAnswer;
-    return answer != null && !answer.isEmpty;
   }
 }
 
