@@ -51,6 +51,14 @@ PathMaterialDto _$PathMaterialDtoFromJson(
           )
           .toList() ??
       const [],
+  ctas:
+      (json['ctas'] as List<dynamic>?)
+          ?.map(
+            (e) =>
+                PathMaterialCtaJunctionDto.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$PathMaterialDtoToJson(PathMaterialDto instance) =>
@@ -62,7 +70,76 @@ Map<String, dynamic> _$PathMaterialDtoToJson(PathMaterialDto instance) =>
       'article': instance.article,
       'translations': instance.translations,
       'categories': instance.categories,
+      'ctas': instance.ctas,
     };
+
+PathMaterialCtaJunctionDto _$PathMaterialCtaJunctionDtoFromJson(
+  Map<String, dynamic> json,
+) => PathMaterialCtaJunctionDto(
+  link: json['links_id'] == null
+      ? null
+      : PathMaterialLinkDto.fromJson(json['links_id'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$PathMaterialCtaJunctionDtoToJson(
+  PathMaterialCtaJunctionDto instance,
+) => <String, dynamic>{'links_id': instance.link};
+
+PathMaterialLinkDto _$PathMaterialLinkDtoFromJson(Map<String, dynamic> json) =>
+    PathMaterialLinkDto(
+      downloadOnClick: json['download_on_click'] as bool? ?? false,
+      translations:
+          (json['translations'] as List<dynamic>?)
+              ?.map(
+                (e) => PathMaterialLinkTranslationDto.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          const [],
+      attachmentTranslations:
+          (json['attachemnt_translations'] as List<dynamic>?)
+              ?.map(
+                (e) => PathMaterialAttachmentTranslationDto.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          const [],
+    );
+
+Map<String, dynamic> _$PathMaterialLinkDtoToJson(
+  PathMaterialLinkDto instance,
+) => <String, dynamic>{
+  'download_on_click': instance.downloadOnClick,
+  'translations': instance.translations,
+  'attachemnt_translations': instance.attachmentTranslations,
+};
+
+PathMaterialLinkTranslationDto _$PathMaterialLinkTranslationDtoFromJson(
+  Map<String, dynamic> json,
+) => PathMaterialLinkTranslationDto(
+  label: json['label'] as String?,
+  url: json['url'] as String?,
+);
+
+Map<String, dynamic> _$PathMaterialLinkTranslationDtoToJson(
+  PathMaterialLinkTranslationDto instance,
+) => <String, dynamic>{'label': instance.label, 'url': instance.url};
+
+PathMaterialAttachmentTranslationDto
+_$PathMaterialAttachmentTranslationDtoFromJson(Map<String, dynamic> json) =>
+    PathMaterialAttachmentTranslationDto(
+      attachment: json['attachment'] == null
+          ? null
+          : PathMaterialFileDto.fromJson(
+              json['attachment'] as Map<String, dynamic>,
+            ),
+    );
+
+Map<String, dynamic> _$PathMaterialAttachmentTranslationDtoToJson(
+  PathMaterialAttachmentTranslationDto instance,
+) => <String, dynamic>{'attachment': instance.attachment};
 
 PathMaterialArticleDto _$PathMaterialArticleDtoFromJson(
   Map<String, dynamic> json,

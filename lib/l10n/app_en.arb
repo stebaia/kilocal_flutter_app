@@ -413,6 +413,7 @@
   "pathMaterialsFilterAvailable": "Available",
   "pathMaterialsFilterCompleted": "Completed",
   "pathMaterialsFilterUnavailable": "Unavailable",
+  "pathMaterialDownloadError": "Could not open the file. Please try again.",
   "pathTimeframeStepsCount": "{count, plural, =1{1 activity} other{{count} activities}}",
   "@pathTimeframeStepsCount": {
     "placeholders": {

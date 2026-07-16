@@ -1658,6 +1658,12 @@ abstract class AppLocalizations {
   /// **'Unavailable'**
   String get pathMaterialsFilterUnavailable;
 
+  /// No description provided for @pathMaterialDownloadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the file. Please try again.'**
+  String get pathMaterialDownloadError;
+
   /// No description provided for @pathTimeframeStepsCount.
   ///
   /// In en, this message translates to:

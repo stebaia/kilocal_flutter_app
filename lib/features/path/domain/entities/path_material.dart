@@ -66,6 +66,7 @@ class PathMaterialDetail extends Equatable {
     this.content,
     this.imageUrl,
     this.vimeoUrl,
+    this.attachments = const [],
   });
 
   final String id;
@@ -86,6 +87,10 @@ class PathMaterialDetail extends Equatable {
 
   /// Vimeo url for video materials (`asset.vimeo_url`).
   final String? vimeoUrl;
+
+  /// Downloadable files offered by the material's CTAs — the PDFs of the
+  /// "Schede" materials. Empty for materials that offer no download.
+  final List<PathMaterialAttachment> attachments;
 
   /// Embed url for the Vimeo player, preserving query parameters.
   String? get vimeoEmbedUrl {
@@ -115,7 +120,23 @@ class PathMaterialDetail extends Equatable {
     content,
     imageUrl,
     vimeoUrl,
+    attachments,
   ];
+}
+
+/// A downloadable file attached to a material through a CTA (`links` row with
+/// a per-language `attachment`), e.g. the PDF of a "Scheda".
+class PathMaterialAttachment extends Equatable {
+  const PathMaterialAttachment({required this.url, required this.label});
+
+  /// Direct `/assets` url of the file; served without authentication.
+  final String url;
+
+  /// CTA text from the CMS ("Scarica il file"), falling back to the file name.
+  final String label;
+
+  @override
+  List<Object?> get props => [url, label];
 }
 
 /// A category tab shown at the top of the materials hub

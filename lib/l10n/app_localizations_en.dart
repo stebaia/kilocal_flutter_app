@@ -882,6 +882,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathMaterialsFilterUnavailable => 'Unavailable';
 
   @override
+  String get pathMaterialDownloadError =>
+      'Could not open the file. Please try again.';
+
+  @override
   String pathTimeframeStepsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
