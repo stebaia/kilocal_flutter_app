@@ -986,6 +986,24 @@ abstract class AppLocalizations {
   /// **'Start'**
   String get surveyStart;
 
+  /// No description provided for @surveyFindPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a Kilocal Point pharmacy'**
+  String get surveyFindPharmacy;
+
+  /// No description provided for @surveyGoToShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the shop'**
+  String get surveyGoToShop;
+
+  /// No description provided for @surveyEnterProofOfPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter proof of purchase'**
+  String get surveyEnterProofOfPurchase;
+
   /// No description provided for @notificationsEmpty.
   ///
   /// In en, this message translates to:

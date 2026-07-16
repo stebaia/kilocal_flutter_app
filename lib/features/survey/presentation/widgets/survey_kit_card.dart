@@ -3,31 +3,24 @@ import 'package:flutter/material.dart';
 import '../../../../core/config/env.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/cms_svg_icon.dart';
+import '../../domain/entities/survey_outcome.dart';
 
 /// The magenta kit card on the biotype result screen: the recommended Starter
-/// Kit image on a pink gradient, with the biotype silhouette badge top-right.
+/// Kit image on a pink gradient, with the biotype icon badge top-right.
 ///
-/// The kit image and silhouette come from the submit `outcome`. Its exact keys
-/// are not yet confirmed by backend (see wiki/survey.md), so we read a set of
-/// likely keys defensively and degrade gracefully when absent.
+/// Both images come from `outcome.profile` (see [SurveyOutcome]); the card
+/// hides itself when the outcome carries no kit image, rather than rendering an
+/// empty pink box.
 class SurveyKitCard extends StatelessWidget {
   const SurveyKitCard({super.key, required this.outcome});
 
-  final Map<String, dynamic>? outcome;
+  final SurveyOutcome? outcome;
 
   @override
   Widget build(BuildContext context) {
-    final kitImage = _assetUrl(
-      _firstString(outcome, const [
-        'kit_image',
-        'kit_asset',
-        'starter_kit_image',
-        'image',
-      ]),
-    );
-    final silhouette = _assetUrl(
-      _firstString(outcome, const ['silhouette', 'type_asset', 'icon']),
-    );
+    final kitImage = _assetUrl(outcome?.kitImageId);
+    if (kitImage == null) return const SizedBox.shrink();
 
     return AspectRatio(
       aspectRatio: 328 / 220,
@@ -44,33 +37,23 @@ class SurveyKitCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (kitImage != null)
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.spaceMd),
-                child: Image.network(
-                  kitImage,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.spaceMd),
+              child: Image.network(
+                kitImage,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),
+            ),
             Positioned(
               top: AppSpacing.spaceSm,
               right: AppSpacing.spaceSm,
-              child: _SilhouetteBadge(imageUrl: silhouette),
+              child: _SilhouetteBadge(imageUrl: _assetUrl(outcome?.iconId)),
             ),
           ],
         ),
       ),
     );
-  }
-
-  String? _firstString(Map<String, dynamic>? map, List<String> keys) {
-    if (map == null) return null;
-    for (final k in keys) {
-      final v = map[k];
-      if (v is String && v.isNotEmpty) return v;
-    }
-    return null;
   }
 
   /// Resolves a Directus asset id/path to an absolute URL.
@@ -97,17 +80,18 @@ class _SilhouetteBadge extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       padding: const EdgeInsets.all(6),
-      child: imageUrl != null
-          ? Image.network(
-              imageUrl!,
-              fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => const Icon(
-                Icons.spa,
-                color: AppColors.typeHighlight,
-                size: 20,
-              ),
-            )
-          : const Icon(Icons.spa, color: AppColors.typeHighlight, size: 20),
+      // `profiles.icon` is an SVG, so it needs SvgPicture rather than
+      // Image.network (which cannot decode it).
+      child: CmsSvgIcon(
+        url: imageUrl,
+        size: 20,
+        color: AppColors.typeHighlight,
+        fallback: const Icon(
+          Icons.spa,
+          color: AppColors.typeHighlight,
+          size: 20,
+        ),
+      ),
     );
   }
 }
