@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../user/presentation/cubit/user_cubit.dart';
@@ -41,12 +42,23 @@ class _SurveyView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<SurveyCubit, SurveyState>(
       listenWhen: (p, c) => p.status != c.status,
-      listener: (context, state) {
-        if (state.status == SurveyStatus.completed) {
-          // The outcome is shown on the in-wizard result section (submitted on
-          // the way in), so completing means the user dismissed it.
-          context.go('/home');
+      listener: (context, state) async {
+        if (state.status != SurveyStatus.completed) return;
+        // The outcome is shown on the in-wizard result section (submitted on
+        // the way in), so completing means the user dismissed it.
+        //
+        // Where to go next is the backend's call, not ours: the submit moves
+        // `profile_status` on (type_survey → starter_kit), which may require a
+        // further survey — the starter kit's proof of purchase. Reload the
+        // session and follow the status, so finishing here cannot skip a gate.
+        final user = getIt<UserCubit>();
+        try {
+          await user.loadSession();
+        } on ApiException {
+          // Keep the user moving; the gate is re-evaluated on the next launch.
         }
+        if (!context.mounted) return;
+        context.go(user.state.route ?? '/home');
       },
       builder: (context, state) {
         switch (state.status) {
