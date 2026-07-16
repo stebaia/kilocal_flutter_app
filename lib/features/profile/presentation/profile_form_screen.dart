@@ -36,6 +36,10 @@ class ProfileFormScreen extends StatelessWidget {
   /// CMS tab id of the "My account" tab, which hosts the avatar editor.
   static const _accountTabId = '4';
 
+  /// CMS tab id of the "Food preferences" tab, the only one that collapses its
+  /// multi-selects down to the user's own picks.
+  static const _foodPreferencesTabId = '3';
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -95,7 +99,11 @@ class ProfileFormScreen extends StatelessWidget {
     if (form == null || form.fields.isEmpty) {
       return _Message(text: l10n.errorGeneric);
     }
-    return _FormBody(form: form, showAvatarEditor: tabId == _accountTabId);
+    return _FormBody(
+      form: form,
+      showAvatarEditor: tabId == _accountTabId,
+      collapseMultiSelects: tabId == _foodPreferencesTabId,
+    );
   }
 
   ProfileFormTab? _tabFor(ProfilePage? page) {
@@ -107,12 +115,19 @@ class ProfileFormScreen extends StatelessWidget {
 }
 
 class _FormBody extends StatelessWidget {
-  const _FormBody({required this.form, this.showAvatarEditor = false});
+  const _FormBody({
+    required this.form,
+    this.showAvatarEditor = false,
+    this.collapseMultiSelects = false,
+  });
 
   final CmsForm form;
 
   /// When true, renders the tappable avatar editor above the form (account tab).
   final bool showAvatarEditor;
+
+  /// Forwarded to [CmsFormView.collapseMultiSelects] (food-preferences tab).
+  final bool collapseMultiSelects;
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +166,7 @@ class _FormBody extends StatelessWidget {
                       form: form,
                       initialValues: initialValues,
                       submitting: updateState.isSubmitting,
+                      collapseMultiSelects: collapseMultiSelects,
                       onSubmit: (values) => context
                           .read<ProfileUpdateCubit>()
                           .submit(_toProfileBody(values)),

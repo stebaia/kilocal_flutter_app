@@ -135,6 +135,8 @@
   "profileAvatarUpdated": "Foto profilo aggiornata",
   "profileAvatarError": "Impossibile aggiornare la foto profilo",
   "profileFoodPreferences": "Preferenze alimentari",
+  "profileFoodPreferencesEdit": "Aggiungi o modifica",
+  "profileFoodPreferencesEmpty": "Nessuna selezione",
   "profileNotificationsSection": "Notifiche",
   "profilePushNotifications": "Notifiche push",
   "profilePushNotificationsStatus": "Attive",

@@ -788,6 +788,18 @@ abstract class AppLocalizations {
   /// **'Food preferences'**
   String get profileFoodPreferences;
 
+  /// Expander that reveals the full checkbox list of options for a food-preference multi-select (e.g. intolerances).
+  ///
+  /// In en, this message translates to:
+  /// **'Add or edit'**
+  String get profileFoodPreferencesEdit;
+
+  /// Shown in place of the chips when the user has not picked any option for a food-preference multi-select.
+  ///
+  /// In en, this message translates to:
+  /// **'No selection'**
+  String get profileFoodPreferencesEmpty;
+
   /// No description provided for @profileNotificationsSection.
   ///
   /// In en, this message translates to:

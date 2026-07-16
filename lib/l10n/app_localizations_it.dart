@@ -379,6 +379,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileFoodPreferences => 'Preferenze alimentari';
 
   @override
+  String get profileFoodPreferencesEdit => 'Aggiungi o modifica';
+
+  @override
+  String get profileFoodPreferencesEmpty => 'Nessuna selezione';
+
+  @override
   String get profileNotificationsSection => 'Notifiche';
 
   @override

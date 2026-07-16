@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/cms_form.dart';
 
 /// Generic renderer for a [CmsForm] parsed from the CMS FormKit schema.
@@ -19,12 +20,19 @@ class CmsFormView extends StatefulWidget {
     required this.onSubmit,
     this.initialValues = const {},
     this.submitting = false,
+    this.collapseMultiSelects = false,
   });
 
   final CmsForm form;
   final Map<String, dynamic> initialValues;
   final bool submitting;
   final ValueChanged<Map<String, dynamic>> onSubmit;
+
+  /// When true, multi-selects list only the options the user actually picked and
+  /// hide the full catalogue behind an expandable checkbox list. Opt-in: the
+  /// food-preferences tab sets it so the screen reads as "your intolerances",
+  /// not "every intolerance that exists". Other CMS forms keep the flat chips.
+  final bool collapseMultiSelects;
 
   @override
   State<CmsFormView> createState() => _CmsFormViewState();
@@ -116,7 +124,10 @@ class _CmsFormViewState extends State<CmsFormView> {
       case CmsFormFieldType.checkbox:
         return _buildCheckbox(field);
       case CmsFormFieldType.select:
-        return field.multiple ? _buildMultiSelect(field) : _buildSelect(field);
+        if (!field.multiple) return _buildSelect(field);
+        return widget.collapseMultiSelects
+            ? _buildCollapsibleMultiSelect(field)
+            : _buildMultiSelect(field);
       case CmsFormFieldType.text:
       case CmsFormFieldType.email:
       case CmsFormFieldType.number:
@@ -191,6 +202,127 @@ class _CmsFormViewState extends State<CmsFormView> {
                     },
                   ),
               ],
+            ),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.space2xs),
+                child: Text(
+                  state.errorText ?? '',
+                  style: AppTypography.textTheme.labelMedium?.copyWith(
+                    color: AppColors.accent,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Multi-select showing only the picked options, with the full option list
+  /// collapsed into an [ExpansionTile] of checkboxes. Used by the
+  /// food-preferences tab via [CmsFormView.collapseMultiSelects].
+  Widget _buildCollapsibleMultiSelect(CmsFormField field) {
+    final l10n = AppLocalizations.of(context)!;
+    final selected = _multiSelect[field.key] ?? <String>{};
+    return FormField<Set<String>>(
+      initialValue: selected,
+      validator: (value) =>
+          field.required && (value?.isEmpty ?? true) ? _errorText(field) : null,
+      builder: (state) {
+        void toggle(String value, bool on) {
+          setState(() => on ? selected.add(value) : selected.remove(value));
+          state.didChange(selected);
+        }
+
+        final chosen = field.options
+            .where((o) => selected.contains(o.value))
+            .toList();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (field.label != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.spaceXs),
+                child: Text(
+                  field.label!,
+                  style: AppTypography.textTheme.labelLarge,
+                ),
+              ),
+            if (chosen.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.spaceXs),
+                child: Text(
+                  l10n.profileFoodPreferencesEmpty,
+                  style: AppTypography.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.spaceXs),
+                child: Wrap(
+                  spacing: AppSpacing.spaceXs,
+                  runSpacing: AppSpacing.spaceXs,
+                  children: [
+                    for (final option in chosen)
+                      InputChip(
+                        label: Text(option.label),
+                        onDeleted: () => toggle(option.value, false),
+                      ),
+                  ],
+                ),
+              ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.borderCard),
+              ),
+              child: Theme(
+                // ExpansionTile draws its own divider lines; drop them so only
+                // the container's own border outlines the white panel.
+                data: Theme.of(
+                  context,
+                ).copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  backgroundColor: AppColors.surface,
+                  collapsedBackgroundColor: AppColors.surface,
+                  // Round the tile's own ink/background to match the container,
+                  // so its white fill stops short of the border at the corners.
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  collapsedShape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                  ),
+                  tilePadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.spaceSm,
+                  ),
+                  childrenPadding: const EdgeInsets.only(
+                    left: AppSpacing.spaceSm,
+                    right: AppSpacing.spaceSm,
+                    bottom: AppSpacing.spaceXs,
+                  ),
+                  title: Text(
+                    l10n.profileFoodPreferencesEdit,
+                    style: AppTypography.textTheme.labelLarge,
+                  ),
+                  children: [
+                    for (final option in field.options)
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        controlAffinity: ListTileControlAffinity.leading,
+                        dense: true,
+                        value: selected.contains(option.value),
+                        title: Text(option.label),
+                        onChanged: (on) => toggle(option.value, on ?? false),
+                      ),
+                  ],
+                ),
+              ),
             ),
             if (state.hasError)
               Padding(

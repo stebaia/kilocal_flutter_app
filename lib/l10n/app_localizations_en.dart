@@ -378,6 +378,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileFoodPreferences => 'Food preferences';
 
   @override
+  String get profileFoodPreferencesEdit => 'Add or edit';
+
+  @override
+  String get profileFoodPreferencesEmpty => 'No selection';
+
+  @override
   String get profileNotificationsSection => 'Notifications';
 
   @override
