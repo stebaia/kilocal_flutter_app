@@ -22,8 +22,7 @@ class IntegrazioneData {
   final String? kitId;
 
   /// Index of [currentPhaseId] within [phases], or `-1` when unknown.
-  int get currentPhaseIndex =>
-      phases.indexWhere((p) => p.id == currentPhaseId);
+  int get currentPhaseIndex => phases.indexWhere((p) => p.id == currentPhaseId);
 
   bool get hasStarted => currentPhaseId != null;
 

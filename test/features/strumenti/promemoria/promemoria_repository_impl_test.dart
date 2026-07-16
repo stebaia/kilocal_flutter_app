@@ -68,13 +68,17 @@ void main() {
 
   group('PromemoriaRepositoryImpl formatters', () {
     test('formatDate is zero-padded YYYY-MM-DD', () {
-      expect(PromemoriaRepositoryImpl.formatDate(DateTime(2026, 3, 5)),
-          '2026-03-05');
+      expect(
+        PromemoriaRepositoryImpl.formatDate(DateTime(2026, 3, 5)),
+        '2026-03-05',
+      );
     });
 
     test('formatTime is zero-padded HH:mm', () {
-      expect(PromemoriaRepositoryImpl.formatTime(DateTime(2026, 3, 5, 9, 7)),
-          '09:07');
+      expect(
+        PromemoriaRepositoryImpl.formatTime(DateTime(2026, 3, 5, 9, 7)),
+        '09:07',
+      );
     });
   });
 }

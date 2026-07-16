@@ -28,10 +28,7 @@ abstract class PromemoriaApi {
 
   /// `PATCH /tools/reminders/{id}` — update fields of an existing reminder.
   @PATCH('/tools/reminders/{id}')
-  Future<void> update(
-    @Path('id') String id,
-    @Body() Map<String, dynamic> body,
-  );
+  Future<void> update(@Path('id') String id, @Body() Map<String, dynamic> body);
 
   /// `DELETE /tools/reminders/{id}` — remove a reminder (`204`).
   @DELETE('/tools/reminders/{id}')

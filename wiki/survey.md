@@ -131,10 +131,40 @@ Two things enforce it:
 > chaining one survey onto another keeps the same path, so without the key GoRouter reuses
 > the Element and the finished survey stays on screen.
 
-> ⚠️ **`other_validations` is parsed but never enforced** (`SurveyQuestion.otherValidations`).
-> The barcode step carries `other_validations: "barcode"` and height/weight carry
-> `number|int|gte:100|lte:300`, but the app validates none of them — any text is accepted.
-> Needs a backend answer on what `"barcode"` should validate against before implementing.
+### `other_validations` — enforced (2026-07-16)
+
+`survey_question.other_validations` is a `|`-separated rule list. The CMS only uses six
+(enumerated live across every question):
+
+| Rule | Question | Enforced by |
+|------|----------|-------------|
+| `number\|int\|gte:100\|lte:300` | height (cm) | `SurveyValidationRule` |
+| `number\|lte:300\|gte:30\|bmi:17.5` | weight (kg) | `SurveyValidationRule` |
+| `date\|max:{-18years}\|min:1900-01-01` | date of birth | `SurveyValidationRule` |
+| `zip_code` | CAP (5 digits) | `SurveyValidationRule` |
+| `phone` | phone | `SurveyValidationRule` |
+| `barcode` | starter kit proof of purchase | products catalogue (async) |
+
+Sync rules run as the user types (`SurveyState.currentValidationError`) and disable the CTA
+with the reason shown in the footer. Unknown tokens are ignored on purpose — a rule the app
+cannot interpret must never block the user.
+
+**`bmi:17.5`** needs the height answered earlier in the same survey (located by
+`user_data_field_name == 'height'`, as `buildSubmitBody` does). Without it the BMI bound is
+skipped rather than guessed.
+
+**`barcode` is not a format check.** It means "matches a code in `products` where
+`use_for_barcode_check = true`" — the same rule the restricted-access unlock sheet applies,
+so `SurveyCubit` reuses `ProgramUnlockRepository.fetchBarcodeProducts()` rather than
+duplicating the query. It is checked when the CTA is pressed (it needs the network), and a
+catalogue read failure **does not** let the user through: failing open would defeat the gate.
+
+> `SurveyState.canLeaveCurrentStep` is the single source of truth for both the CTA's enabled
+> state and the cubit's own guard in `next()`, so the button cannot promise something the
+> cubit will refuse.
+
+> ⚠️ `SurveyState.copyWith(errorMessage: null)` **cannot clear the error** — a null argument
+> is indistinguishable from "not passed". Use `clearError: true`.
 
 > ⚠️ The disclaimer ("Attenzione: le informazioni e i consigli…") appears **twice** on the
 > result screen: once hardcoded in the CMS `content` field after `{{outcome_profile}}`, and

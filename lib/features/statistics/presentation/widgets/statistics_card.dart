@@ -52,7 +52,7 @@ class StatisticsCard extends StatelessWidget {
               ],
             ),
           ),
-          CircularProgress(value: stat.percent, isHome: false,),
+          CircularProgress(value: stat.percent, isHome: false),
         ],
       ),
     );

@@ -23,11 +23,9 @@ class PromemoriaRepositoryImpl implements PromemoriaRepository {
   Future<List<PromemoriaReminder>> getAll() async {
     try {
       final response = await _api.list();
-      final reminders = response.data
-          .map(_toEntity)
-          .whereType<PromemoriaReminder>()
-          .toList()
-        ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
+      final reminders =
+          response.data.map(_toEntity).whereType<PromemoriaReminder>().toList()
+            ..sort((a, b) => a.dateTime.compareTo(b.dateTime));
       return reminders;
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
@@ -48,8 +46,7 @@ class PromemoriaRepositoryImpl implements PromemoriaRepository {
       final reminders = await getAll();
       final created = reminders
           .where(
-            (r) =>
-                r.message == input.message && r.dateTime == input.dateTime,
+            (r) => r.message == input.message && r.dateTime == input.dateTime,
           )
           .lastOrNull;
       if (created != null) await _notifications.schedule(created);

@@ -190,10 +190,7 @@ class _BiotypeDescriptionHtml extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,
         ),
-        'b': Style(
-          fontWeight: FontWeight.w700,
-          color: AppColors.textPrimary,
-        ),
+        'b': Style(fontWeight: FontWeight.w700, color: AppColors.textPrimary),
       },
     );
   }

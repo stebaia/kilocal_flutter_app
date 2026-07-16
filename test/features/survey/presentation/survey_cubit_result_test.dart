@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kilocal_flutter_app/core/monitoring/analytics_events.dart';
 import 'package:kilocal_flutter_app/core/network/api_exception.dart';
+import 'package:kilocal_flutter_app/features/path/domain/entities/barcode_product.dart';
+import 'package:kilocal_flutter_app/features/path/domain/program_unlock_repository.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_answer.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_outcome.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_step.dart';
@@ -12,6 +14,9 @@ class MockSurveyRepository extends Mock implements SurveyRepository {}
 
 class MockAnalyticsEvents extends Mock implements AnalyticsEvents {}
 
+class MockProgramUnlockRepository extends Mock
+    implements ProgramUnlockRepository {}
+
 /// Guards when `type_survey` is submitted relative to its result section.
 ///
 /// In the CMS the result section (id 9) is the **last visible step**, not a
@@ -21,6 +26,7 @@ class MockAnalyticsEvents extends Mock implements AnalyticsEvents {}
 void main() {
   late MockSurveyRepository repository;
   late MockAnalyticsEvents analytics;
+  late MockProgramUnlockRepository unlockRepository;
 
   // Verbatim from a live submit: the profile is a reference, not the copy.
   const submitResult = SurveySubmitResult(
@@ -87,6 +93,10 @@ void main() {
   setUp(() {
     repository = MockSurveyRepository();
     analytics = MockAnalyticsEvents();
+    unlockRepository = MockProgramUnlockRepository();
+    when(
+      () => unlockRepository.fetchBarcodeProducts(),
+    ).thenAnswer((_) async => const <BarcodeProduct>[]);
 
     when(() => repository.ensureDetails()).thenAnswer((_) async {});
     when(() => repository.fetchSurvey(any())).thenAnswer((_) async => survey);
@@ -106,8 +116,11 @@ void main() {
     ).thenAnswer((_) async => hydrated);
   });
 
-  SurveyCubit build() =>
-      SurveyCubit(repository: repository, analytics: analytics);
+  SurveyCubit build() => SurveyCubit(
+    repository: repository,
+    analytics: analytics,
+    unlockRepository: unlockRepository,
+  );
 
   test(
     'submits when advancing into the result section, not on leaving',

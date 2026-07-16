@@ -5,11 +5,13 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../path/domain/program_unlock_repository.dart';
 import '../../domain/entities/pharmacy.dart';
 import '../../domain/entities/survey_answer.dart';
 import '../../domain/entities/survey_outcome.dart';
 import '../../domain/entities/survey_step.dart';
 import '../../domain/survey_repository.dart';
+import '../../domain/survey_validation.dart';
 
 part 'survey_state.dart';
 
@@ -19,16 +21,29 @@ class SurveyCubit extends Cubit<SurveyState> {
   SurveyCubit({
     required SurveyRepository repository,
     required AnalyticsEvents analytics,
+    required ProgramUnlockRepository unlockRepository,
   }) : _repository = repository,
        _analytics = analytics,
+       _unlockRepository = unlockRepository,
        super(const SurveyState());
 
   final SurveyRepository _repository;
   final AnalyticsEvents _analytics;
 
+  /// Supplies the `use_for_barcode_check` catalogue for `other_validations:
+  /// "barcode"` steps. Shared with the restricted-access unlock sheet so both
+  /// accept exactly the same codes.
+  final ProgramUnlockRepository _unlockRepository;
+
+  // Matches the other cubit-level messages, which are Italian literals because
+  // a Cubit has no BuildContext to reach AppLocalizations from.
+  static const _invalidBarcodeMessage =
+      'Codice a barre non riconosciuto. Controlla il codice sulla confezione '
+      'del tuo Starter Kit.';
+
   /// Loads the survey [internalName] and starts the wizard.
   Future<void> start(String internalName) async {
-    emit(state.copyWith(status: SurveyStatus.loading, errorMessage: null));
+    emit(state.copyWith(status: SurveyStatus.loading, clearError: true));
     unawaited(_analytics.onboardingStarted());
     try {
       // Ensure the user_details row exists before collecting answers.
@@ -170,6 +185,15 @@ class SurveyCubit extends Cubit<SurveyState> {
   // --- Navigation ------------------------------------------------------------
 
   Future<void> next() async {
+    // The UI disables the CTA for these, but the cubit owns the invariant: an
+    // unanswered required step or a failed `other_validations` rule must never
+    // advance, whatever calls next().
+    if (!state.canLeaveCurrentStep) return;
+
+    // A `barcode` step is only valid against the products catalogue, so it is
+    // checked here rather than while typing.
+    if (!await _barcodeAccepted()) return;
+
     if (state.isLastStep) {
       // Already on the final screen: a result section has had its outcome since
       // we advanced onto it, so there is nothing left to send.
@@ -205,7 +229,7 @@ class SurveyCubit extends Cubit<SurveyState> {
   Future<bool> _submit({bool advanceOnly = false}) async {
     final survey = state.survey;
     if (survey == null) return false;
-    emit(state.copyWith(status: SurveyStatus.submitting, errorMessage: null));
+    emit(state.copyWith(status: SurveyStatus.submitting, clearError: true));
     try {
       final result = await _repository.submit(
         internalName: survey.internalName,
@@ -233,6 +257,48 @@ class SurveyCubit extends Cubit<SurveyState> {
         state.copyWith(
           status: SurveyStatus.inProgress,
           errorMessage: e.message ?? "Errore nell'invio del questionario",
+        ),
+      );
+      return false;
+    }
+  }
+
+  /// Validates an `other_validations: "barcode"` step against the products
+  /// flagged `use_for_barcode_check` — the proof of purchase for the starter
+  /// kit. Returns whether the wizard may advance.
+  ///
+  /// Format alone proves nothing here, so the code must match the catalogue,
+  /// exactly as the restricted-access unlock sheet requires. On a mismatch the
+  /// user stays on the step with an error.
+  Future<bool> _barcodeAccepted() async {
+    final question = state.currentSection?.question;
+    if (question == null) return true;
+    if (!SurveyValidationRule.parse(question.otherValidations).isBarcode) {
+      return true;
+    }
+
+    final code = state.currentAnswer?.textValue?.trim().toUpperCase() ?? '';
+    // An empty code is the `required` check's business, not ours.
+    if (code.isEmpty) return true;
+
+    emit(state.copyWith(status: SurveyStatus.submitting, clearError: true));
+    try {
+      final products = await _unlockRepository.fetchBarcodeProducts();
+      final matches = products.any((p) => p.codes.contains(code));
+      emit(
+        state.copyWith(
+          status: SurveyStatus.inProgress,
+          errorMessage: matches ? null : _invalidBarcodeMessage,
+          // A newly valid code must clear the previous "not recognised".
+          clearError: matches,
+        ),
+      );
+      return matches;
+    } on ApiException catch (e) {
+      emit(
+        state.copyWith(
+          status: SurveyStatus.inProgress,
+          errorMessage: e.message ?? _invalidBarcodeMessage,
         ),
       );
       return false;

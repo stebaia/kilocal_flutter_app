@@ -36,7 +36,9 @@ abstract class UserApi {
   /// unknown fields to `user_details`). See [[avatar-upload-flow]].
   @POST('/files')
   @MultiPart()
-  Future<DirectusFileResponseDto> uploadFile(@Part(name: 'file') MultipartFile file);
+  Future<DirectusFileResponseDto> uploadFile(
+    @Part(name: 'file') MultipartFile file,
+  );
 
   /// `PATCH /users/me` — updates the authenticated `directus_users` row. Used to
   /// set `avatar` to the uploaded file id.

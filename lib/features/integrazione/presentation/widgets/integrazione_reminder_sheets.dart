@@ -363,8 +363,11 @@ class _OffsetRow extends StatelessWidget {
                     color: checked ? AppColors.accent : Colors.transparent,
                   ),
                   child: checked
-                      ? const Icon(Icons.check,
-                          size: 16, color: AppColors.neutralWhite)
+                      ? const Icon(
+                          Icons.check,
+                          size: 16,
+                          color: AppColors.neutralWhite,
+                        )
                       : null,
                 ),
                 const SizedBox(width: AppSpacing.spaceMd),
@@ -403,9 +406,7 @@ class _EditOrDeleteBody extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _ReadonlyBox(
-            text: l10n.integrationReminderMessage(product.title),
-          ),
+          _ReadonlyBox(text: l10n.integrationReminderMessage(product.title)),
           const SizedBox(height: AppSpacing.spaceMd),
           _ReadonlyBox(
             text: l10n.integrationReminderSnoozedLabel(

@@ -491,6 +491,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get surveyEnterProofOfPurchase => 'Enter proof of purchase';
 
   @override
+  String get surveyErrorNotANumber => 'Enter a valid number';
+
+  @override
+  String get surveyErrorNotAnInteger => 'Enter a whole number';
+
+  @override
+  String get surveyErrorTooSmall => 'That value is too low';
+
+  @override
+  String get surveyErrorTooLarge => 'That value is too high';
+
+  @override
+  String get surveyErrorNotADate => 'Enter a valid date';
+
+  @override
+  String get surveyErrorDateTooLate => 'You must be at least 18';
+
+  @override
+  String get surveyErrorDateTooEarly => 'Enter a valid date';
+
+  @override
+  String get surveyErrorBmiTooLow =>
+      'That weight is not compatible with your height';
+
+  @override
+  String get surveyErrorInvalidZipCode => 'Enter a valid postcode (5 digits)';
+
+  @override
+  String get surveyErrorInvalidPhone => 'Enter a valid phone number';
+
+  @override
+  String get surveyErrorInvalidBarcode =>
+      'Barcode not recognised. Check the code on your Starter Kit pack.';
+
+  @override
+  String get surveyBarcodeChecking => 'Checking the code…';
+
+  @override
   String get notificationsEmpty => 'No notifications';
 
   @override

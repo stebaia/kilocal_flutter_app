@@ -65,8 +65,9 @@ void main() {
 
   /// Stubs the junction query with [rows] and an empty completed-activities list.
   void stubMaterials(List<Map<String, dynamic>> rows) {
-    when(() => client.query(any(), variables: any(named: 'variables')))
-        .thenAnswer((invocation) async {
+    when(
+      () => client.query(any(), variables: any(named: 'variables')),
+    ).thenAnswer((invocation) async {
       final query = invocation.positionalArguments.first as String;
       if (query.contains('user_activities')) {
         return {

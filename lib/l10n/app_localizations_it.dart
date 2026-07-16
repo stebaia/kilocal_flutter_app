@@ -493,6 +493,45 @@ class AppLocalizationsIt extends AppLocalizations {
   String get surveyEnterProofOfPurchase => 'Inserisci prova d\'acquisto';
 
   @override
+  String get surveyErrorNotANumber => 'Inserisci un numero valido';
+
+  @override
+  String get surveyErrorNotAnInteger => 'Inserisci un numero intero';
+
+  @override
+  String get surveyErrorTooSmall => 'Il valore inserito è troppo basso';
+
+  @override
+  String get surveyErrorTooLarge => 'Il valore inserito è troppo alto';
+
+  @override
+  String get surveyErrorNotADate => 'Inserisci una data valida';
+
+  @override
+  String get surveyErrorDateTooLate => 'Devi avere almeno 18 anni';
+
+  @override
+  String get surveyErrorDateTooEarly => 'Inserisci una data valida';
+
+  @override
+  String get surveyErrorBmiTooLow =>
+      'Il peso inserito non è compatibile con la tua altezza';
+
+  @override
+  String get surveyErrorInvalidZipCode => 'Inserisci un CAP valido (5 cifre)';
+
+  @override
+  String get surveyErrorInvalidPhone =>
+      'Inserisci un numero di telefono valido';
+
+  @override
+  String get surveyErrorInvalidBarcode =>
+      'Codice a barre non riconosciuto. Controlla il codice sulla confezione del tuo Starter Kit.';
+
+  @override
+  String get surveyBarcodeChecking => 'Verifica del codice in corso…';
+
+  @override
   String get notificationsEmpty => 'Nessuna notifica';
 
   @override

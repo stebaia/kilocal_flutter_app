@@ -45,11 +45,7 @@ class _MomentiView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            AppHeader(
-              title: l10n.momentiTitle,
-              showBack: true,
-              
-            ),
+            AppHeader(title: l10n.momentiTitle, showBack: true),
             Expanded(
               child: BlocBuilder<MomentiCubit, MomentiState>(
                 builder: (context, state) {

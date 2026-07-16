@@ -54,8 +54,7 @@ class NotificationDto {
   /// Asset (image) id, when present. Directus returns it as the bare file id.
   String? get jobPayloadAssetId => jobPayload?['asset'] as String?;
 
-  Map<String, dynamic>? get _cta =>
-      jobPayload?['cta'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _cta => jobPayload?['cta'] as Map<String, dynamic>?;
 
   /// CTA url. The `{{publicUrl}}` placeholder is not always compiled in this
   /// field, so resolve it from the payload's own `publicUrl`.

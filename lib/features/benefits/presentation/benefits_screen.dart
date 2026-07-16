@@ -130,7 +130,8 @@ class _BenefitsList extends StatelessWidget {
     AppLocalizations l10n,
   ) async {
     final uri = Uri.tryParse(url);
-    final opened = uri != null &&
+    final opened =
+        uri != null &&
         await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!opened) {
       messenger.showSnackBar(

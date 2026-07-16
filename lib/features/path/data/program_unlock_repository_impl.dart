@@ -35,7 +35,8 @@ query BarcodeProducts {
   Future<List<BarcodeProduct>> fetchBarcodeProducts() async {
     final result = await _graphqlClient.query(_barcodeProductsQuery);
     final products =
-        (result['data'] as Map<String, dynamic>?)?['products'] as List<dynamic>?;
+        (result['data'] as Map<String, dynamic>?)?['products']
+            as List<dynamic>?;
     if (products == null) return const [];
 
     return products

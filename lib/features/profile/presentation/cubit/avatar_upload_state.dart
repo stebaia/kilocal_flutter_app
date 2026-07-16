@@ -10,7 +10,10 @@ class AvatarUploadState extends Equatable {
 
   bool get isUploading => status == AvatarUploadStatus.uploading;
 
-  AvatarUploadState copyWith({AvatarUploadStatus? status, ApiException? error}) {
+  AvatarUploadState copyWith({
+    AvatarUploadStatus? status,
+    ApiException? error,
+  }) {
     return AvatarUploadState(
       status: status ?? this.status,
       error: error ?? this.error,

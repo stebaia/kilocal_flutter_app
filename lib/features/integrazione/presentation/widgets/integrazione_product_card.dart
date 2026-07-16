@@ -58,16 +58,16 @@ class IntegrazioneProductCard extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: '$taken',
-                            style: AppTypography.textTheme.titleMedium?.copyWith(
-                              color: AppColors.accent,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            style: AppTypography.textTheme.titleMedium
+                                ?.copyWith(
+                                  color: AppColors.accent,
+                                  fontWeight: FontWeight.w700,
+                                ),
                           ),
                           TextSpan(
                             text: '/$total',
-                            style: AppTypography.textTheme.titleMedium?.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                            style: AppTypography.textTheme.titleMedium
+                                ?.copyWith(color: AppColors.textSecondary),
                           ),
                         ],
                       ),
@@ -251,7 +251,9 @@ class _MarkTakenButton extends StatelessWidget {
             Text(
               label,
               style: AppTypography.textTheme.titleSmall?.copyWith(
-                color: enabledToday ? AppColors.accent : AppColors.textSecondary,
+                color: enabledToday
+                    ? AppColors.accent
+                    : AppColors.textSecondary,
                 fontWeight: FontWeight.w700,
               ),
             ),

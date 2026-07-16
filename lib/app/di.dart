@@ -340,15 +340,15 @@ void configureDependencies() {
     () => SurveyCubit(
       repository: getIt<SurveyRepository>(),
       analytics: getIt<AnalyticsEvents>(),
+      // Shared with the unlock sheet so both accept the same barcodes.
+      unlockRepository: getIt<ProgramUnlockRepository>(),
     ),
   );
 
   // --- Feature: Strumenti / Promemoria ---
   // Backend-backed calendar reminders (GET/POST/DELETE /tools/reminders) with a
   // best-effort local notification scheduled per future reminder.
-  getIt.registerLazySingleton<PromemoriaApi>(
-    () => PromemoriaApi(getIt<Dio>()),
-  );
+  getIt.registerLazySingleton<PromemoriaApi>(() => PromemoriaApi(getIt<Dio>()));
   getIt.registerLazySingleton<PromemoriaNotificationService>(
     () => PromemoriaNotificationService(),
   );

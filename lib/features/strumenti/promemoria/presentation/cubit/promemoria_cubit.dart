@@ -19,10 +19,7 @@ class PromemoriaCubit extends Cubit<PromemoriaState> {
     try {
       final reminders = await _repository.getAll();
       emit(
-        state.copyWith(
-          status: PromemoriaStatus.loaded,
-          reminders: reminders,
-        ),
+        state.copyWith(status: PromemoriaStatus.loaded, reminders: reminders),
       );
     } on ApiException {
       emit(state.copyWith(status: PromemoriaStatus.error));

@@ -94,7 +94,9 @@ class PathAreaTile extends StatelessWidget {
               children: [
                 Flexible(
                   child: Text(
-                    isRestricted ? l10n.pathTimeframeLocked : '$completed/$total',
+                    isRestricted
+                        ? l10n.pathTimeframeLocked
+                        : '$completed/$total',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.textTheme.bodyMedium?.copyWith(

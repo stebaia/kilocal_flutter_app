@@ -105,8 +105,10 @@ class IntegrazioneReminderService {
     await _ensureInitialized();
     final granted = await _requestPermission();
     // ignore: avoid_print
-    print('[REMINDER] scheduleReminder product=${product.id} '
-        'offset=${offset.key} granted=$granted');
+    print(
+      '[REMINDER] scheduleReminder product=${product.id} '
+      'offset=${offset.key} granted=$granted',
+    );
     if (!granted) return false;
 
     final id = _notificationId(product.id);
@@ -114,7 +116,8 @@ class IntegrazioneReminderService {
     await _plugin.cancel(id);
 
     final scheduled = tz.TZDateTime.now(tz.local).add(offset.duration);
-    final payload = '${offset.key}$_payloadSeparator'
+    final payload =
+        '${offset.key}$_payloadSeparator'
         '${scheduled.toIso8601String()}';
 
     await _plugin.zonedSchedule(
@@ -149,8 +152,10 @@ class IntegrazioneReminderService {
   Future<ActiveReminder?> getReminder(String productId) async {
     final stored = await _storage.read(key: _storageKey(productId));
     // ignore: avoid_print
-    print('[REMINDER] getReminder key=${_storageKey(productId)} '
-        'stored=$stored');
+    print(
+      '[REMINDER] getReminder key=${_storageKey(productId)} '
+      'stored=$stored',
+    );
     if (stored == null) return null;
 
     final parts = stored.split(_payloadSeparator);

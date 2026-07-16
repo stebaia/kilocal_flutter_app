@@ -40,7 +40,8 @@ class StrumentiScreen extends StatelessWidget {
                   final strumento = strumenti[index];
                   return StrumentoCard(
                     strumento: strumento,
-                    onTap: () => context.push('/strumenti/${strumento.id.name}'),
+                    onTap: () =>
+                        context.push('/strumenti/${strumento.id.name}'),
                   );
                 },
               ),

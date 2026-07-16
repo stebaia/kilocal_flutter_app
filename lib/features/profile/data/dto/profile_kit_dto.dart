@@ -41,11 +41,7 @@ class ProfileKitDto {
 
 @JsonSerializable()
 class KitTranslationDto {
-  const KitTranslationDto({
-    this.languagesCode,
-    this.tipoKit,
-    this.description,
-  });
+  const KitTranslationDto({this.languagesCode, this.tipoKit, this.description});
 
   factory KitTranslationDto.fromJson(Map<String, dynamic> json) =>
       _$KitTranslationDtoFromJson(json);

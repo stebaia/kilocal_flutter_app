@@ -104,7 +104,13 @@ class _LockedInfoBody extends StatelessWidget {
             child: FilledButton(
               style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
               onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.pathLockedUnderstood,  style: AppTypography.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700)),
+              child: Text(
+                l10n.pathLockedUnderstood,
+                style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.spaceSm),
@@ -117,7 +123,7 @@ class _LockedInfoBody extends StatelessWidget {
                 side: const BorderSide(color: AppColors.accent),
               ),
               onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.pathLockedBoughtKit,),
+              child: Text(l10n.pathLockedBoughtKit),
             ),
           ),
         ],
@@ -155,9 +161,9 @@ class _UnlockBodyState extends State<_UnlockBody> {
       listener: (context, state) {
         if (state.status == ProgramUnlockStatus.unlocked) {
           Navigator.of(context).pop(true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.pathUnlockSuccess)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(l10n.pathUnlockSuccess)));
         }
       },
       child: Padding(
@@ -188,7 +194,6 @@ class _UnlockBodyState extends State<_UnlockBody> {
                 return Column(
                   children: [
                     TextField(
-                      
                       controller: _controller,
                       textCapitalization: TextCapitalization.characters,
                       textInputAction: TextInputAction.done,
@@ -204,7 +209,6 @@ class _UnlockBodyState extends State<_UnlockBody> {
                         LengthLimitingTextInputFormatter(10),
                       ],
                       decoration: InputDecoration(
-                        
                         hintText: l10n.pathUnlockCodeHint,
                         errorText: errorText,
                         filled: true,

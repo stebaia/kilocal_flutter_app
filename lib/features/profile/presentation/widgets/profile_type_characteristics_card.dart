@@ -57,12 +57,11 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
               child: Opacity(
                 opacity: 0.7,
                 child: SvgPicture.asset(
-                    'assets/icons/line.svg',
-                    width: 300,
-                    height:300,
-                  ),
+                  'assets/icons/line.svg',
+                  width: 300,
+                  height: 300,
+                ),
               ),
-              
             ),
             // Silhouette illustration anchored bottom-right.
             Positioned(
