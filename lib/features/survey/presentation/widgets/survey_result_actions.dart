@@ -3,15 +3,21 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/app_localizations.dart';
-import '../../../path/presentation/widgets/path_locked_sheets.dart';
 import 'survey_cta_button.dart';
 
 /// The kit actions under the Starter Kit card on the biotype result screen.
 ///
-/// "Vai allo shop" opens `kit_shop_url` from the submit response, and
-/// "Inserisci prova d'acquisto" reuses the existing barcode unlock sheet. Each
-/// button is omitted when it has no destination, so the row degrades instead of
-/// showing a dead control.
+/// "Vai allo shop" opens `kit_shop_url` from the submit response. The button is
+/// omitted when it has no destination, so the row degrades instead of showing a
+/// dead control.
+///
+/// **No "Inserisci prova d'acquisto" here.** It looks like it belongs — the web
+/// design shows it — but the proof of purchase is collected by the `starter_kit`
+/// survey, which `profile_status` sends the user to next. An unlock button here
+/// would be both redundant and wrong: it opens the restricted-access sheet,
+/// whose `PATCH /profile` jumps straight to `active` and would skip the
+/// `starter_kit` survey entirely. It also sat beside "Fine", reading as
+/// mandatory while being optional. See `wiki/survey.md`.
 ///
 /// TODO(backend): "Trova una Farmacia Kilocal Point" has no confirmed
 /// destination yet — the web survey links out to a store locator, but no URL
@@ -42,10 +48,6 @@ class SurveyResultActions extends StatelessWidget {
           label: l10n.surveyGoToShop,
           onPressed: () => launchUrl(uri, mode: LaunchMode.externalApplication),
         ),
-      SurveyCtaButton(
-        label: l10n.surveyEnterProofOfPurchase,
-        onPressed: () => showProgramUnlockSheet(context),
-      ),
     ];
 
     return Column(

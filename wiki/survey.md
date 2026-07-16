@@ -117,6 +117,14 @@ the survey's own copy rather than failing.
 "Hai completato il profilo!". So a user cannot reach the app without a proof of purchase,
 provided the app honours the status.
 
+> ⚠️ **The result screen must not offer a proof-of-purchase button.** It looks like it
+> belongs (the web design shows one) but it is wrong twice over: it sits beside "Fine",
+> reading as mandatory while being optional — press "Fine" and the survey simply ends — and
+> it opens the restricted-access unlock sheet, whose `PATCH /profile → active` would skip the
+> `starter_kit` survey entirely. The proof of purchase is collected **by that survey**
+> (section 11, the only one flagged `show_single_product_cta`), which `profile_status` routes
+> the user to next. Removed 2026-07-16 after it let a user press "Fine" and enter the app.
+
 Two things enforce it:
 
 1. **`appRouter.redirect`** (`onboardingRedirectFor`, `lib/app/router.dart`) — while

@@ -27,7 +27,7 @@ void main() {
     );
   }
 
-  testWidgets('renders shop and proof-of-purchase actions', (tester) async {
+  testWidgets('renders the shop action', (tester) async {
     await pump(
       tester,
       const SurveyResultActions(kitShopUrl: 'https://shop.kilocal.it/kit/3'),
@@ -35,7 +35,19 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Vai allo shop'), findsOneWidget);
-    expect(find.text("Inserisci prova d'acquisto"), findsOneWidget);
+  });
+
+  testWidgets('never offers a proof-of-purchase shortcut', (tester) async {
+    await pump(
+      tester,
+      const SurveyResultActions(kitShopUrl: 'https://shop.kilocal.it/kit/3'),
+    );
+
+    // The proof of purchase belongs to the starter_kit survey. A button here
+    // sat next to "Fine" looking mandatory while being optional, and opened the
+    // restricted-access sheet, whose PATCH jumps to `active` and would skip
+    // that survey altogether.
+    expect(find.text("Inserisci prova d'acquisto"), findsNothing);
   });
 
   testWidgets('omits the shop action when there is no url', (tester) async {
@@ -43,8 +55,6 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.text('Vai allo shop'), findsNothing);
-    // The barcode action always has a destination, so it stays.
-    expect(find.text("Inserisci prova d'acquisto"), findsOneWidget);
   });
 
   testWidgets('omits the shop action when the url is unusable', (tester) async {
