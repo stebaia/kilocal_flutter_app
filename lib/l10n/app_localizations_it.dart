@@ -376,6 +376,36 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileAvatarError => 'Impossibile aggiornare la foto profilo';
 
   @override
+  String get profileChangePassword => 'Cambia password';
+
+  @override
+  String get profileChangePasswordHint =>
+      'Scegli una nuova password per il tuo account.';
+
+  @override
+  String get profileNewPassword => 'Nuova password';
+
+  @override
+  String get profileConfirmPassword => 'Conferma nuova password';
+
+  @override
+  String get profileChangePasswordSubmit => 'Aggiorna password';
+
+  @override
+  String get profilePasswordUpdated => 'Password aggiornata';
+
+  @override
+  String get profilePasswordError => 'Impossibile aggiornare la password';
+
+  @override
+  String profilePasswordTooShort(int count) {
+    return 'La password deve avere almeno $count caratteri';
+  }
+
+  @override
+  String get profilePasswordMismatch => 'Le due password non coincidono';
+
+  @override
   String get profileFoodPreferences => 'Preferenze alimentari';
 
   @override

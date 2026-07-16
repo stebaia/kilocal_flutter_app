@@ -375,6 +375,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileAvatarError => 'Couldn\'t update the profile photo';
 
   @override
+  String get profileChangePassword => 'Change password';
+
+  @override
+  String get profileChangePasswordHint =>
+      'Choose a new password for your account.';
+
+  @override
+  String get profileNewPassword => 'New password';
+
+  @override
+  String get profileConfirmPassword => 'Confirm new password';
+
+  @override
+  String get profileChangePasswordSubmit => 'Update password';
+
+  @override
+  String get profilePasswordUpdated => 'Password updated';
+
+  @override
+  String get profilePasswordError => 'Couldn\'t update the password';
+
+  @override
+  String profilePasswordTooShort(int count) {
+    return 'Password must be at least $count characters';
+  }
+
+  @override
+  String get profilePasswordMismatch => 'The two passwords don\'t match';
+
+  @override
   String get profileFoodPreferences => 'Food preferences';
 
   @override

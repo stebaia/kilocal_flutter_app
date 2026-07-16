@@ -29,6 +29,7 @@ import '../features/path/presentation/path_materials_screen.dart';
 import '../features/path/presentation/path_screen.dart';
 import '../features/path/presentation/path_step_screen.dart';
 import '../features/path/presentation/path_timeframe_steps_screen.dart';
+import '../features/profile/presentation/change_password_screen.dart';
 import '../features/profile/presentation/profile_form_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/profile_kit_screen.dart';
@@ -277,6 +278,10 @@ final GoRouter appRouter = GoRouter(
                       context,
                     )!.profileFoodPreferences,
                   ),
+                ),
+                GoRoute(
+                  path: 'change-password',
+                  builder: (context, state) => const ChangePasswordScreen(),
                 ),
               ],
             ),

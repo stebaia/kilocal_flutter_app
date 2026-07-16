@@ -134,6 +134,22 @@
   "profileAvatarFromGallery": "Scegli dalla galleria",
   "profileAvatarUpdated": "Foto profilo aggiornata",
   "profileAvatarError": "Impossibile aggiornare la foto profilo",
+  "profileChangePassword": "Cambia password",
+  "profileChangePasswordHint": "Scegli una nuova password per il tuo account.",
+  "profileNewPassword": "Nuova password",
+  "profileConfirmPassword": "Conferma nuova password",
+  "profileChangePasswordSubmit": "Aggiorna password",
+  "profilePasswordUpdated": "Password aggiornata",
+  "profilePasswordError": "Impossibile aggiornare la password",
+  "profilePasswordTooShort": "La password deve avere almeno {count} caratteri",
+  "@profilePasswordTooShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profilePasswordMismatch": "Le due password non coincidono",
   "profileFoodPreferences": "Preferenze alimentari",
   "profileNotificationsSection": "Notifiche",
   "profilePushNotifications": "Notifiche push",

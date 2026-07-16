@@ -31,6 +31,7 @@ import '../features/profile/data/profile_page_repository_impl.dart';
 import '../features/profile/domain/profile_kit_repository.dart';
 import '../features/profile/domain/profile_page_repository.dart';
 import '../features/profile/presentation/cubit/avatar_upload_cubit.dart';
+import '../features/profile/presentation/cubit/change_password_cubit.dart';
 import '../features/profile/presentation/cubit/profile_kit_cubit.dart';
 import '../features/profile/presentation/cubit/profile_page_cubit.dart';
 import '../features/profile/presentation/cubit/profile_update_cubit.dart';
@@ -271,6 +272,9 @@ void configureDependencies() {
       userRepository: getIt<UserRepository>(),
       userCubit: getIt<UserCubit>(),
     ),
+  );
+  getIt.registerFactory<ChangePasswordCubit>(
+    () => ChangePasswordCubit(userRepository: getIt<UserRepository>()),
   );
   // Kit + supplement products ("Il mio Kit" / "Integrazione e prodotti").
   getIt.registerLazySingleton<ProfileKitRepository>(

@@ -782,6 +782,60 @@ abstract class AppLocalizations {
   /// **'Couldn\'t update the profile photo'**
   String get profileAvatarError;
 
+  /// No description provided for @profileChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get profileChangePassword;
+
+  /// No description provided for @profileChangePasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password for your account.'**
+  String get profileChangePasswordHint;
+
+  /// No description provided for @profileNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get profileNewPassword;
+
+  /// No description provided for @profileConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get profileConfirmPassword;
+
+  /// No description provided for @profileChangePasswordSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Update password'**
+  String get profileChangePasswordSubmit;
+
+  /// No description provided for @profilePasswordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get profilePasswordUpdated;
+
+  /// No description provided for @profilePasswordError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the password'**
+  String get profilePasswordError;
+
+  /// No description provided for @profilePasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least {count} characters'**
+  String profilePasswordTooShort(int count);
+
+  /// No description provided for @profilePasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The two passwords don\'t match'**
+  String get profilePasswordMismatch;
+
   /// No description provided for @profileFoodPreferences.
   ///
   /// In en, this message translates to:
