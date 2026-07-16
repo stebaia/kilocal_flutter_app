@@ -268,6 +268,11 @@ class _StepMedia extends StatefulWidget {
 }
 
 class _StepMediaState extends State<_StepMedia> {
+  /// Videos and their Vimeo posters are 16:9; a taller box would crop the sides
+  /// of the poster away (the CMS covers carry titles near the edges).
+  static const double _mediaAspectRatio = 16 / 9;
+
+  /// Height for non-video media, which has no intrinsic ratio to honour.
   static const double _mediaHeight = 417;
 
   /// oEmbed poster + duration for the video; null until fetched (or no video).
@@ -312,28 +317,33 @@ class _StepMediaState extends State<_StepMedia> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: _mediaHeight,
-      width: double.infinity,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            _buildSurface(),
-            // The top bar (back + activities) stays visible over the player.
-            _MediaTopBar(
-              siblings: widget.siblings,
-              step: widget.step,
-              isActivities: widget.area == 'alimentazione',
-            ),
-            // The timer tools are hidden once the native player takes over,
-            // and never shown in the nutrition area.
-            if (_controller == null && widget.area != 'alimentazione')
-              _MediaBottomTools(timerController: widget.timerController),
-          ],
-        ),
+    final stack = ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildSurface(),
+          // The top bar (back + activities) stays visible over the player.
+          _MediaTopBar(
+            siblings: widget.siblings,
+            step: widget.step,
+            isActivities: widget.area == 'alimentazione',
+          ),
+          // The timer tools are hidden once the native player takes over,
+          // and never shown in the nutrition area.
+          if (_controller == null && widget.area != 'alimentazione')
+            _MediaBottomTools(timerController: widget.timerController),
+        ],
       ),
+    );
+
+    // Videos size themselves to the 16:9 poster/player; images keep the fixed
+    // header height.
+    return SizedBox(
+      width: double.infinity,
+      child: _isVideo
+          ? AspectRatio(aspectRatio: _mediaAspectRatio, child: stack)
+          : SizedBox(height: _mediaHeight, child: stack),
     );
   }
 
@@ -351,7 +361,6 @@ class _StepMediaState extends State<_StepMedia> {
       return _VideoPoster(
         thumbnailUrl: _oembed?.thumbnailUrl,
         duration: _oembed?.duration,
-        height: _mediaHeight,
         onPlay: _play,
       );
     }
@@ -510,22 +519,18 @@ class _VideoPoster extends StatelessWidget {
   const _VideoPoster({
     required this.thumbnailUrl,
     required this.duration,
-    required this.height,
     required this.onPlay,
   });
 
   final String? thumbnailUrl;
   final Duration? duration;
-  final double height;
   final VoidCallback onPlay;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPlay,
-      child: SizedBox(
-        height: height,
-        width: double.infinity,
+      child: SizedBox.expand(
         child: Stack(
           fit: StackFit.expand,
           children: [

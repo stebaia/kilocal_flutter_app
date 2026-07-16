@@ -17,7 +17,10 @@ class PathMaterialCard extends StatelessWidget {
   final PathMaterial material;
   final VoidCallback? onTap;
 
-  static const double _imageHeight = 168;
+  /// Covers are 16:9 (the Vimeo poster for videos, the CMS/category hero
+  /// otherwise), so the card image honours that ratio instead of cropping to a
+  /// fixed height.
+  static const double _imageAspectRatio = 16 / 9;
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +36,8 @@ class PathMaterialCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Stack(
               children: [
-                SizedBox(
-                  height: _imageHeight,
-                  width: double.infinity,
+                AspectRatio(
+                  aspectRatio: _imageAspectRatio,
                   child: _MaterialImage(url: material.imageUrl),
                 ),
                 Positioned(

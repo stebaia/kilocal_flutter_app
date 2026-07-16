@@ -32,6 +32,11 @@ class PathMaterialVideo extends StatefulWidget {
 }
 
 class _PathMaterialVideoState extends State<PathMaterialVideo> {
+  /// Videos and their Vimeo posters are 16:9; a taller box would crop the sides
+  /// of the poster away (the CMS covers carry titles near the edges).
+  static const double _mediaAspectRatio = 16 / 9;
+
+  /// Height for non-video media, which has no intrinsic ratio to honour.
   static const double _mediaHeight = 417;
 
   VimeoOembed? _oembed;
@@ -69,19 +74,24 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: _mediaHeight,
-      width: double.infinity,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            _buildSurface(),
-            if (_controller == null) const _BackButtonOverlay(),
-          ],
-        ),
+    final stack = ClipRRect(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          _buildSurface(),
+          if (_controller == null) const _BackButtonOverlay(),
+        ],
       ),
+    );
+
+    // Videos size themselves to the 16:9 poster/player; images keep the fixed
+    // header height.
+    return SizedBox(
+      width: double.infinity,
+      child: _isVideo
+          ? AspectRatio(aspectRatio: _mediaAspectRatio, child: stack)
+          : SizedBox(height: _mediaHeight, child: stack),
     );
   }
 
@@ -93,7 +103,6 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
       return _VideoPoster(
         thumbnailUrl: _oembed?.thumbnailUrl ?? widget.posterUrl,
         duration: _oembed?.duration,
-        height: _mediaHeight,
         onPlay: _play,
       );
     }
@@ -144,22 +153,18 @@ class _VideoPoster extends StatelessWidget {
   const _VideoPoster({
     required this.thumbnailUrl,
     required this.duration,
-    required this.height,
     required this.onPlay,
   });
 
   final String? thumbnailUrl;
   final Duration? duration;
-  final double height;
   final VoidCallback onPlay;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPlay,
-      child: SizedBox(
-        height: height,
-        width: double.infinity,
+      child: SizedBox.expand(
         child: Stack(
           fit: StackFit.expand,
           children: [

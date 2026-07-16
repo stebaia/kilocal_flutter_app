@@ -2,11 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kilocal_flutter_app/core/network/graphql_client.dart';
 import 'package:kilocal_flutter_app/features/path/data/path_materials_repository_impl.dart';
+import 'package:kilocal_flutter_app/features/path/data/vimeo_oembed_service.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockGraphqlClient extends Mock implements GraphqlClient {}
 
 class _MockDio extends Mock implements Dio {}
+
+class _MockVimeoOembedService extends Mock implements VimeoOembedService {}
 
 /// GraphQL response for the group→materials junction query, one row per id.
 Map<String, dynamic> _junction(List<String> materialIds) => {
@@ -49,11 +52,13 @@ void main() {
 
   setUp(() {
     client = _MockGraphqlClient();
-    // These tests only exercise the GraphQL reads; the Dio dependency is only
-    // used by the completion write, so an unstubbed mock is enough.
+    // These tests only exercise the group-progress GraphQL reads: Dio is only
+    // used by the completion write and the oEmbed service only by the materials
+    // list, so unstubbed mocks are enough.
     repository = PathMaterialsRepositoryImpl(
       graphqlClient: client,
       dio: _MockDio(),
+      vimeoOembedService: _MockVimeoOembedService(),
     );
   });
 
