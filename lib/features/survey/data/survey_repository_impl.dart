@@ -4,6 +4,7 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
 import '../domain/entities/pharmacy.dart';
 import '../domain/entities/survey_answer.dart';
+import '../domain/entities/survey_outcome.dart';
 import '../domain/entities/survey_step.dart';
 import '../domain/survey_repository.dart';
 import 'survey_mapper.dart';
@@ -218,6 +219,58 @@ query SearchPharmacies($search: String!, $limit: Int!) {
       final data = result['data'] as Map<String, dynamic>?;
       final rows = data?['pharmacies'] as List<dynamic>? ?? const [];
       return rows.map((e) => mapPharmacy(e as Map<String, dynamic>)).toList();
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  /// The submit response references the biotype by id only, so the result
+  /// screen's copy and images come from `profiles`. `kit.asset.default_asset`
+  /// is the real image file — `asset` is only the wrapper (see
+  /// [[cms-asset-url-pattern]]).
+  static const _outcomeProfileQuery = r'''
+query GetOutcomeProfile($id: GraphQLStringOrFloat!, $lang: String!) {
+  profiles(filter: { id: { _eq: $id } }, limit: 1) {
+    id
+    icon { id }
+    kit {
+      asset {
+        default_asset { id }
+      }
+    }
+    translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+      title
+      name
+      content
+      content_f
+    }
+  }
+}
+''';
+
+  @override
+  Future<SurveyOutcome> fetchOutcomeProfile(
+    SurveyOutcome outcome, {
+    String? gender,
+  }) async {
+    try {
+      final result = await _graphqlClient.query(
+        _outcomeProfileQuery,
+        variables: <String, dynamic>{'id': outcome.id, 'lang': _lang},
+      );
+      final rows =
+          (result['data'] as Map<String, dynamic>?)?['profiles']
+              as List<dynamic>?;
+      // A missing profile is not fatal: the result screen degrades to the copy
+      // it already has rather than failing the whole submit.
+      if (rows == null || rows.isEmpty) return outcome;
+      return mapOutcomeProfile(
+        outcome,
+        rows.first as Map<String, dynamic>,
+        gender: gender,
+      );
     } on ApiException {
       rethrow;
     } on DioException catch (e) {

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kilocal_flutter_app/core/monitoring/analytics_events.dart';
 import 'package:kilocal_flutter_app/core/network/api_exception.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_answer.dart';
+import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_outcome.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_step.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/survey_repository.dart';
 import 'package:kilocal_flutter_app/features/survey/presentation/cubit/survey_cubit.dart';
@@ -21,17 +22,23 @@ void main() {
   late MockSurveyRepository repository;
   late MockAnalyticsEvents analytics;
 
+  // Verbatim from a live submit: the profile is a reference, not the copy.
   const submitResult = SurveySubmitResult(
     surveySubmitId: 'sub-1',
     profileStatus: 'starter_kit',
     outcome: {
-      'profile': {
-        'id': 5,
-        'translations': [
-          {'title': 'Tipo 3', 'name': 'Peperone'},
-        ],
-      },
+      'id': 2,
+      'majority_of_values': '2',
+      'profile': {'id': 4, 'kit_slug': 'kit-tipo-2'},
     },
+  );
+
+  // What the follow-up `profiles` read adds.
+  const hydrated = SurveyOutcome(
+    id: 4,
+    kitSlug: 'kit-tipo-2',
+    typeLabel: 'Tipo 2',
+    denomination: 'Mela',
   );
 
   SurveySection section(String id, {required bool isResult}) {
@@ -70,10 +77,11 @@ void main() {
   );
 
   setUpAll(() {
-    // mocktail needs a fallback for the non-primitive `any(named: 'survey')`.
+    // mocktail needs fallbacks for the non-primitive `any()` arguments.
     registerFallbackValue(
       const Survey(id: '0', internalName: 'fallback', sections: []),
     );
+    registerFallbackValue(const SurveyOutcome(id: 0));
   });
 
   setUp(() {
@@ -93,6 +101,9 @@ void main() {
         pharmacy: any(named: 'pharmacy'),
       ),
     ).thenAnswer((_) async => submitResult);
+    when(
+      () => repository.fetchOutcomeProfile(any(), gender: any(named: 'gender')),
+    ).thenAnswer((_) async => hydrated);
   });
 
   SurveyCubit build() =>
@@ -106,14 +117,13 @@ void main() {
 
       await cubit.next();
 
-      // The outcome is available while the result section is on screen.
+      // The outcome is available, and hydrated, while the result is on screen.
       expect(cubit.state.currentSection?.kind, SurveySectionKind.result);
       expect(cubit.state.status, SurveyStatus.inProgress);
       expect(cubit.state.submitResult, submitResult);
-      expect(
-        cubit.state.submitResult?.biotype?.typeDisplay,
-        'Tipo 3 - Peperone',
-      );
+      // The submit alone cannot fill {{type}} — only the hydrated profile can.
+      expect(cubit.state.submitResult?.biotype?.typeDisplay, isNull);
+      expect(cubit.state.outcomeProfile?.typeDisplay, 'Tipo 2 - Mela');
       verify(
         () => repository.submit(
           internalName: any(named: 'internalName'),
@@ -146,6 +156,24 @@ void main() {
       ).called(1);
     },
   );
+
+  test('still shows the result when hydrating the profile fails', () async {
+    when(
+      () => repository.fetchOutcomeProfile(any(), gender: any(named: 'gender')),
+    ).thenThrow(
+      const ApiException(type: ApiErrorType.unknown, statusCode: 500),
+    );
+
+    final cubit = build();
+    await cubit.start('type_survey');
+    await cubit.next();
+
+    // The submit already succeeded server-side, so losing the copy must not
+    // block the user on the last question.
+    expect(cubit.state.currentSection?.kind, SurveySectionKind.result);
+    expect(cubit.state.outcomeProfile?.id, 4);
+    expect(cubit.state.outcomeProfile?.typeDisplay, isNull);
+  });
 
   test('stays on the last question when the submit fails', () async {
     when(

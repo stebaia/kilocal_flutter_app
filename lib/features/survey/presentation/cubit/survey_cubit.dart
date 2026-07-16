@@ -7,6 +7,7 @@ import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/pharmacy.dart';
 import '../../domain/entities/survey_answer.dart';
+import '../../domain/entities/survey_outcome.dart';
 import '../../domain/entities/survey_step.dart';
 import '../../domain/survey_repository.dart';
 
@@ -223,6 +224,7 @@ class SurveyCubit extends Cubit<SurveyState> {
               ? SurveyStatus.inProgress
               : SurveyStatus.completed,
           submitResult: result,
+          outcomeProfile: await _hydrateOutcome(result),
         ),
       );
       return true;
@@ -235,6 +237,41 @@ class SurveyCubit extends Cubit<SurveyState> {
       );
       return false;
     }
+  }
+
+  /// Loads the biotype's CMS copy for the result screen.
+  ///
+  /// The submit response references the profile by id only, so the texts and
+  /// images need a second read. A failure here is swallowed: the result screen
+  /// still shows the survey's own copy, and losing the biotype text is better
+  /// than failing a submit that already succeeded server-side.
+  Future<SurveyOutcome?> _hydrateOutcome(SurveySubmitResult result) async {
+    final outcome = result.biotype;
+    if (outcome == null) return null;
+    try {
+      return await _repository.fetchOutcomeProfile(
+        outcome,
+        gender: _genderFromAnswers(),
+      );
+    } on ApiException {
+      return outcome;
+    }
+  }
+
+  /// The gender answer (`value_to_store` of the `is_gender_question` section),
+  /// which selects the `content` / `content_f` variant. Read from the answers
+  /// rather than `user_details`, which the submit has only just written.
+  String? _genderFromAnswers() {
+    final survey = state.survey;
+    if (survey == null) return null;
+    for (final section in survey.sections) {
+      if (!section.isGenderQuestion) continue;
+      final values = state.answers[section.id]?.optionValuesToStore;
+      if (values != null && values.isNotEmpty && values.first.isNotEmpty) {
+        return values.first;
+      }
+    }
+    return null;
   }
 
   // --- Conditions ------------------------------------------------------------

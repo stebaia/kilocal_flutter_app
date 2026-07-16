@@ -146,12 +146,11 @@ class SurveySubmitResult extends Equatable {
   final String surveySubmitId;
   final String profileStatus;
 
-  /// Scoring outcome (biotype/kit). Shape is CMS-defined — kept as a raw map
-  /// until the contract is confirmed with backend.
+  /// Raw scoring outcome (`{id, majority_of_values, profile}`).
   final Map<String, dynamic>? outcome;
 
-  /// The biotype result parsed out of `outcome.profile`, or `null` when the
-  /// response carries none.
+  /// The biotype reference from `outcome.profile` — id only, no copy. Hydrate
+  /// it via `SurveyRepository.fetchOutcomeProfile` before displaying.
   SurveyOutcome? get biotype => SurveyOutcome.fromJson(outcome);
 
   /// Suggested kit checkout URL.

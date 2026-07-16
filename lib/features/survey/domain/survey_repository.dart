@@ -1,5 +1,6 @@
 import 'entities/pharmacy.dart';
 import 'entities/survey_answer.dart';
+import 'entities/survey_outcome.dart';
 import 'entities/survey_step.dart';
 
 /// Read + write access to the survey/onboarding flow.
@@ -35,5 +36,15 @@ abstract interface class SurveyRepository {
     required List<SurveyAnswer> answers,
     required Survey survey,
     Pharmacy? pharmacy,
+  });
+
+  /// Hydrates the biotype [outcome] with its CMS copy from `profiles`.
+  ///
+  /// The submit response only references the profile by id, so the result
+  /// screen's texts and images have to be read separately. [gender] selects
+  /// between the `content` / `content_f` variants.
+  Future<SurveyOutcome> fetchOutcomeProfile(
+    SurveyOutcome outcome, {
+    String? gender,
   });
 }

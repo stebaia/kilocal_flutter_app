@@ -66,22 +66,48 @@ Response (`SurveySubmitResponse`):
 `kit_shop_url` → suggested kit checkout (the recommended kit/biotype outcome). `legacy` is
 web-client migration compatibility — ignore in the app.
 
-### `outcome.profile` — result screen data (partially confirmed)
+### `outcome.profile` — result screen data (CONFIRMED, live 2026-07-16)
 
-Backend confirmed (2026-07-16) that the biotype result data is in the submit response under
-**`outcome.profile`**. The **shape of the value is still unconfirmed**, so
-`SurveyOutcome.fromJson` accepts all three plausible encodings and normalizes them:
+The `outcome` is **`{id, majority_of_values, profile}`**, and `profile` is only a
+**reference** — it carries no copy:
 
-| Encoding | Value | Handling |
-|----------|-------|----------|
-| Expanded row | a `profiles` row (`id`, `kit`, `icon`, `translations{title,name,content,content_f}`) | parsed directly — the assumed case, mirrors `BiotypeDto` |
-| Bare id | `5` | only `profileId`; needs a follow-up `profiles` read to hydrate |
-| Pre-rendered | HTML string | injected straight into `{{outcome_profile}}` |
+```json
+"outcome": { "id": 2, "majority_of_values": "2",
+             "profile": { "id": 4, "kit_slug": "kit-tipo-2" } }
+```
+
+So the result screen's texts and images **must be hydrated** from the `profiles` collection
+(`SurveyRepository.fetchOutcomeProfile` → `mapOutcomeProfile`), keyed by `profile.id`:
+
+```graphql
+profiles(filter: { id: { _eq: $id } }, limit: 1) {
+  id
+  icon { id }                            # SVG → CmsSvgIcon, not Image.network
+  kit { asset { default_asset { id } } } # the real file; `asset` is only the wrapper
+  translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+    title      # "Tipo 2"  → the display label
+    name       # "Mela"    → the denomination
+    content content_f      # gender-specific copy
+  }
+}
+```
+
+`{{type}}` = `"$title - $name"` ("Tipo 2 - Mela"); `content_f` is used for female profiles
+(via `genderIsFemale`), with the gender read from the survey's own `is_gender_question`
+answer rather than `user_details` — the submit has only just written it.
+
+> ⚠️ The same submit response *also* carries the fully expanded profile under
+> **`legacy.create_survey_submits_item.outcome.profile`** (translations, icon, kit, colors).
+> **Do not read it**: `legacy` is documented in the OpenAPI spec as "compatibilità client web
+> in migrazione" and will be removed. Hydrate from `profiles` instead.
 
 The result section (CMS id 9, `type_survey`) templates its copy with **`{{name}}`, `{{type}}`
-and `{{outcome_profile}}`** — names that do *not* match the response's own keys, so they are
-mapped explicitly in `_outcomePlaceholders` (`survey_screen.dart`). `{{name}}` comes from the
-logged-in `AppUser.firstName`, not the outcome.
+and `{{outcome_profile}}`** — names that match neither the response's keys nor each other, so
+they are mapped explicitly in `_outcomePlaceholders` (`survey_screen.dart`). `{{name}}` comes
+from the logged-in `AppUser.firstName`, not the outcome.
+
+A failed hydrate is swallowed: the submit already succeeded server-side, so the screen shows
+the survey's own copy rather than failing.
 
 > ⚠️ The disclaimer ("Attenzione: le informazioni e i consigli…") appears **twice** on the
 > result screen: once hardcoded in the CMS `content` field after `{{outcome_profile}}`, and
