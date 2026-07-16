@@ -158,6 +158,25 @@ query GetSurvey($internalName: String!, $lang: String!) {
   }
 
   @override
+  Future<SurveyMonthEndPending?> fetchMonthEndStatus() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/survey/me/month-end-status',
+        options: Options(headers: _originHeader),
+      );
+      final data = response.data?['data'] as Map<String, dynamic>?;
+      final pending = data?['pending'] as Map<String, dynamic>?;
+      // `pending: null` means no month-end survey is due — not an error.
+      if (pending == null) return null;
+      return mapMonthEndPending(pending);
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  @override
   Future<void> ensureDetails() async {
     try {
       await _dio.post<Map<String, dynamic>>(

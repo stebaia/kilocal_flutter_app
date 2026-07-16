@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../survey/domain/survey_repository.dart';
 import '../../domain/diary_repository.dart';
 import '../../domain/entities/diary_goal.dart';
 import '../../domain/entities/goal_category.dart';
@@ -9,14 +10,25 @@ part 'diary_goals_state.dart';
 
 /// Loads and mutates diary **goals** (Traguardi), plus the client-side filter.
 class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
-  DiaryGoalsCubit({required DiaryRepository repository})
-    : _repository = repository,
-      super(const DiaryGoalsState());
+  DiaryGoalsCubit({
+    required DiaryRepository repository,
+    required SurveyRepository surveyRepository,
+  }) : _repository = repository,
+       _surveyRepository = surveyRepository,
+       super(const DiaryGoalsState());
 
   final DiaryRepository _repository;
+  final SurveyRepository _surveyRepository;
 
   Future<void> load() async {
     emit(state.copyWith(status: DiaryGoalsStatus.loading));
+    // The predefined Kilocal goals (`traguardo_mese_N`) are materialised by the
+    // backend as a side-effect of the month-end check, so it must run *before*
+    // fetchGoals or they'd be missing until the next visit. A failure here only
+    // costs this month's Kilocal goal, so it must not block the list.
+    try {
+      await _surveyRepository.fetchMonthEndStatus();
+    } catch (_) {}
     try {
       final goals = await _repository.fetchGoals();
       emit(state.copyWith(status: DiaryGoalsStatus.loaded, goals: goals));

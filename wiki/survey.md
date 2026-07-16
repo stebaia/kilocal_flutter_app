@@ -8,6 +8,7 @@ required; send `X-Kilocal-Origin: app`. Source: Swagger *Kilocal App*.
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/survey/me/status` | onboarding state + completed surveys |
+| GET | `/survey/me/month-end-status` | integrazione phase stats + pending month-end survey — **creates the Kilocal goal as a side-effect**, see [[diario]] |
 | POST | `/survey/me/ensure-details` | create the `user_details` row if missing |
 | POST | `/survey/submit/{internalName}` | submit survey answers |
 

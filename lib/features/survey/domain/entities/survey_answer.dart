@@ -75,6 +75,43 @@ class SurveyAnswer extends Equatable {
   ];
 }
 
+/// The month-end survey still to be filled in, as reported by
+/// `GET /survey/me/month-end-status`. When this is non-null the backend has
+/// already created (or reused) the matching Kilocal goal.
+class SurveyMonthEndPending extends Equatable {
+  const SurveyMonthEndPending({
+    required this.month,
+    required this.internalName,
+    required this.goalInternalName,
+    this.slug,
+    this.userReminderId,
+  });
+
+  /// 1–3.
+  final int month;
+
+  /// `month_end_survey_1|2|3`.
+  final String internalName;
+
+  /// `traguardo_mese_1|2|3`.
+  final String goalInternalName;
+
+  /// Survey slug (e.g. `survey-fine-mese-1`) for navigation.
+  final String? slug;
+
+  /// Id of the `user_reminders` row created/reused by the backend.
+  final String? userReminderId;
+
+  @override
+  List<Object?> get props => [
+    month,
+    internalName,
+    goalInternalName,
+    slug,
+    userReminderId,
+  ];
+}
+
 /// Onboarding status returned by `GET /survey/me/status`.
 class SurveyStatusInfo extends Equatable {
   const SurveyStatusInfo({

@@ -141,6 +141,16 @@ SurveyStatusInfo mapStatus(Map<String, dynamic> json) {
   );
 }
 
+SurveyMonthEndPending mapMonthEndPending(Map<String, dynamic> json) {
+  return SurveyMonthEndPending(
+    month: (json['month'] as num?)?.toInt() ?? 0,
+    internalName: json['internal_name'] as String? ?? '',
+    goalInternalName: json['goal_internal_name'] as String? ?? '',
+    slug: json['slug'] as String?,
+    userReminderId: json['user_reminder_id']?.toString(),
+  );
+}
+
 Pharmacy mapPharmacy(Map<String, dynamic> json) {
   return Pharmacy(
     id: json['id']?.toString() ?? '',

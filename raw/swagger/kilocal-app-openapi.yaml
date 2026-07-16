@@ -374,6 +374,42 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
 
+  /survey/me/month-end-status:
+    get:
+      tags: [Survey]
+      summary: Survey fine mese e traguardi Kilocal
+      description: |
+        Restituisce lo stato delle fasi integrazione e l’eventuale survey fine mese
+        in pending (`month_end_survey_1|2|3`).
+
+        **Side-effect:** se c’è una survey pending, crea (idempotente) il
+        `user_reminders` Kilocal collegato a `traguardo_mese_N` (`related_goal`,
+        senza `completed_at`). Chiamare **prima** di `GET /journal/goals` sulla
+        pagina Traguardi, altrimenti i traguardi predefiniti non compaiono.
+
+        Il completamento del mese è la **fase integrazione al 100%**, non il solo
+        avanzamento step allenamento/alimentazione. Dopo
+        `POST /survey/submit/month_end_survey_N` il reminder riceve `completed_at`.
+      operationId: surveyMeMonthEndStatus
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/KilocalOrigin'
+      responses:
+        '200':
+          description: Stato fine mese
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SurveyMonthEndStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
   /survey/submit/{internalName}:
     post:
       tags: [Survey]
@@ -778,6 +814,9 @@ paths:
       description: |
         Obiettivi diario: `user_reminders` con `category` **oppure** `related_goal`
         (esclusi i promemoria calendario — quelli sono su `/tools/reminders`).
+
+        I traguardi Kilocal (`related_goal` → `traguardo_mese_N`) sono creati dal
+        backend in `GET /survey/me/month-end-status` — chiamarlo prima di questa lista.
 
         **Cronologia attività** (step completati): GraphQL su `user_activities`
         con filtro `completed_on` not null e `activity.collection = percorsi_content`.
@@ -1256,6 +1295,61 @@ components:
         user_details_id:
           type: string
           nullable: true
+
+    SurveyMonthEndStatus:
+      type: object
+      required: [phase_stats, pending]
+      properties:
+        phase_stats:
+          type: array
+          description: Completamento fasi integrazione (`user_integratori`)
+          items:
+            type: object
+            required: [phaseId, sort, completionPercent]
+            properties:
+              phaseId:
+                type: integer
+              sort:
+                type: integer
+              completionPercent:
+                type: number
+                description: 0–100; fase eleggibile a survey fine mese se ≥ 100
+        pending:
+          nullable: true
+          description: |
+            Survey fine mese da compilare, oppure `null` se nessuna pending.
+            Se valorizzato, il backend ha già creato/riusato il traguardo Kilocal.
+          allOf:
+            - $ref: '#/components/schemas/SurveyMonthEndPending'
+
+    SurveyMonthEndPending:
+      type: object
+      required: [month, internal_name, goal_internal_name]
+      properties:
+        month:
+          type: integer
+          minimum: 1
+          maximum: 3
+          example: 1
+        internal_name:
+          type: string
+          enum: [month_end_survey_1, month_end_survey_2, month_end_survey_3]
+          example: month_end_survey_1
+        slug:
+          type: string
+          nullable: true
+          description: Slug survey (es. `survey-fine-mese-1`) per navigazione
+          example: survey-fine-mese-1
+        goal_internal_name:
+          type: string
+          enum: [traguardo_mese_1, traguardo_mese_2, traguardo_mese_3]
+          example: traguardo_mese_1
+        user_reminder_id:
+          oneOf:
+            - type: integer
+            - type: string
+          nullable: true
+          description: Id del `user_reminders` Kilocal creato/riusato
 
     SurveySubmitBody:
       type: object
