@@ -89,12 +89,14 @@ class SurveyState extends Equatable {
     if (question == null) return null;
     final rule = SurveyValidationRule.parse(question.otherValidations);
     if (rule.isEmpty || rule.isBarcode) return null;
-    return rule.validate(currentAnswer?.textValue, heightCm: _answeredHeightCm);
+    return rule.validate(currentAnswer?.textValue, heightCm: answeredHeightCm);
   }
 
   /// The height answered earlier in this survey, for the weight's `bmi` bound.
   /// Located by `user_data_field_name`, as `buildSubmitBody` does.
-  double? get _answeredHeightCm {
+  ///
+  /// Public so the cubit can re-check every step before submitting.
+  double? get answeredHeightCm {
     final survey = this.survey;
     if (survey == null) return null;
     for (final section in survey.sections) {

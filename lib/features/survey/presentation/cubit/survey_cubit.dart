@@ -40,6 +40,8 @@ class SurveyCubit extends Cubit<SurveyState> {
   static const _invalidBarcodeMessage =
       'Codice a barre non riconosciuto. Controlla il codice sulla confezione '
       'del tuo Starter Kit.';
+  static const _requiredMessage = 'Rispondi a questa domanda per continuare.';
+  static const _validationMessage = 'Controlla la risposta per continuare.';
 
   /// Loads the survey [internalName] and starts the wizard.
   Future<void> start(String internalName) async {
@@ -229,6 +231,23 @@ class SurveyCubit extends Cubit<SurveyState> {
   Future<bool> _submit({bool advanceOnly = false}) async {
     final survey = state.survey;
     if (survey == null) return false;
+
+    // Guard the whole survey, not just the step being left: next() only ever
+    // validates the current step, so a step walked back past — or edited after
+    // being passed — would otherwise reach the submit unchecked. This is what
+    // let "Fine" through with an unsatisfied barcode.
+    final blocking = await _firstUnsatisfiedStep();
+    if (blocking != null) {
+      emit(
+        state.copyWith(
+          status: SurveyStatus.inProgress,
+          currentIndex: blocking.$1,
+          errorMessage: blocking.$2,
+        ),
+      );
+      return false;
+    }
+
     emit(state.copyWith(status: SurveyStatus.submitting, clearError: true));
     try {
       final result = await _repository.submit(
@@ -282,25 +301,60 @@ class SurveyCubit extends Cubit<SurveyState> {
     if (code.isEmpty) return true;
 
     emit(state.copyWith(status: SurveyStatus.submitting, clearError: true));
+    final matches = await _isKnownBarcode(code);
+    emit(
+      state.copyWith(
+        status: SurveyStatus.inProgress,
+        errorMessage: matches ? null : _invalidBarcodeMessage,
+        // A newly valid code must clear the previous "not recognised".
+        clearError: matches,
+      ),
+    );
+    return matches;
+  }
+
+  /// Scans every visible step for one that must not reach the submit, and
+  /// returns its `(index, message)` so the wizard can send the user back to it.
+  ///
+  /// Covers the same rules as [SurveyState.canLeaveCurrentStep] plus the async
+  /// `barcode` catalogue check — the point being that the proof of purchase has
+  /// to hold when the survey is *sent*, not merely when its step was passed.
+  Future<(int, String)?> _firstUnsatisfiedStep() async {
+    final sections = state.visibleSections;
+    for (var i = 0; i < sections.length; i++) {
+      final section = sections[i];
+      final question = section.question;
+      if (question == null) continue;
+
+      final answer = state.answers[section.id];
+      if (question.required && (answer == null || answer.isEmpty)) {
+        return (i, _requiredMessage);
+      }
+
+      final raw = answer?.textValue;
+      final rule = SurveyValidationRule.parse(question.otherValidations);
+      if (rule.isBarcode) {
+        final code = raw?.trim().toUpperCase() ?? '';
+        // Empty is the `required` check's business, handled above.
+        if (code.isEmpty) continue;
+        if (!await _isKnownBarcode(code)) return (i, _invalidBarcodeMessage);
+        continue;
+      }
+
+      if (rule.validate(raw, heightCm: state.answeredHeightCm) != null) {
+        return (i, _validationMessage);
+      }
+    }
+    return null;
+  }
+
+  /// Whether [code] is in the `use_for_barcode_check` catalogue. A failed read
+  /// returns false: letting an unverified code through would defeat the gate.
+  Future<bool> _isKnownBarcode(String code) async {
     try {
       final products = await _unlockRepository.fetchBarcodeProducts();
-      final matches = products.any((p) => p.codes.contains(code));
-      emit(
-        state.copyWith(
-          status: SurveyStatus.inProgress,
-          errorMessage: matches ? null : _invalidBarcodeMessage,
-          // A newly valid code must clear the previous "not recognised".
-          clearError: matches,
-        ),
-      );
-      return matches;
-    } on ApiException catch (e) {
-      emit(
-        state.copyWith(
-          status: SurveyStatus.inProgress,
-          errorMessage: e.message ?? _invalidBarcodeMessage,
-        ),
-      );
+      return products.any((p) => p.codes.contains(code));
+    } on ApiException {
       return false;
     }
   }
