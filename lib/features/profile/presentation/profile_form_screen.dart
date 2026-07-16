@@ -103,7 +103,7 @@ class ProfileFormScreen extends StatelessWidget {
     }
     return _FormBody(
       form: form,
-      showAvatarEditor: tabId == _accountTabId,
+      isAccountTab: tabId == _accountTabId,
       collapseMultiSelects: tabId == _foodPreferencesTabId,
     );
   }
@@ -119,7 +119,7 @@ class ProfileFormScreen extends StatelessWidget {
 class _FormBody extends StatelessWidget {
   const _FormBody({
     required this.form,
-    this.showAvatarEditor = false,
+    this.isAccountTab = false,
     this.collapseMultiSelects = false,
   });
 

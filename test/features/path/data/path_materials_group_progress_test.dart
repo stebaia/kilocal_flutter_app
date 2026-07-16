@@ -1,9 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kilocal_flutter_app/core/network/graphql_client.dart';
 import 'package:kilocal_flutter_app/features/path/data/path_materials_repository_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class _MockGraphqlClient extends Mock implements GraphqlClient {}
+
+class _MockDio extends Mock implements Dio {}
 
 /// GraphQL response for the group→materials junction query, one row per id.
 Map<String, dynamic> _junction(List<String> materialIds) => {
@@ -27,7 +30,9 @@ Map<String, dynamic> _completed(List<String?> materialIds) => {
         {
           'activity': [
             {
-              'collection': id == null ? 'percorsi_content' : 'percorsi_materials',
+              'collection': id == null
+                  ? 'percorsi_content'
+                  : 'percorsi_materials',
               'item': id == null
                   ? {'__typename': 'percorsi_content', 'id': '999'}
                   : {'__typename': 'percorsi_materials', 'id': id},
@@ -44,7 +49,12 @@ void main() {
 
   setUp(() {
     client = _MockGraphqlClient();
-    repository = PathMaterialsRepositoryImpl(graphqlClient: client);
+    // These tests only exercise the GraphQL reads; the Dio dependency is only
+    // used by the completion write, so an unstubbed mock is enough.
+    repository = PathMaterialsRepositoryImpl(
+      graphqlClient: client,
+      dio: _MockDio(),
+    );
   });
 
   /// Stubs the client so the completed-materials query and each group's
@@ -69,25 +79,27 @@ void main() {
     });
   }
 
-  test('total is the group material count; completed is the intersection',
-      () async {
-    stub(
-      completed: ['m1', 'm3', 'm9'],
-      groupMaterials: {
-        'g1': ['m1', 'm2', 'm3'], // 2 of 3 completed
-        'g2': ['m4', 'm5'], // 0 completed
-      },
-    );
+  test(
+    'total is the group material count; completed is the intersection',
+    () async {
+      stub(
+        completed: ['m1', 'm3', 'm9'],
+        groupMaterials: {
+          'g1': ['m1', 'm2', 'm3'], // 2 of 3 completed
+          'g2': ['m4', 'm5'], // 0 completed
+        },
+      );
 
-    final progress = await repository.fetchGroupProgress(
-      groupIds: ['g1', 'g2'],
-    );
+      final progress = await repository.fetchGroupProgress(
+        groupIds: ['g1', 'g2'],
+      );
 
-    expect(progress['g1']!.completed, 2);
-    expect(progress['g1']!.total, 3);
-    expect(progress['g2']!.completed, 0);
-    expect(progress['g2']!.total, 2);
-  });
+      expect(progress['g1']!.completed, 2);
+      expect(progress['g1']!.total, 3);
+      expect(progress['g2']!.completed, 0);
+      expect(progress['g2']!.total, 2);
+    },
+  );
 
   test('ignores completed activities on other collections', () async {
     // The completed feed carries a percorsi_content activity (null) alongside a
@@ -106,10 +118,7 @@ void main() {
   });
 
   test('a group with no materials is 0/0', () async {
-    stub(
-      completed: ['m1'],
-      groupMaterials: {'g1': <String>[]},
-    );
+    stub(completed: ['m1'], groupMaterials: {'g1': <String>[]});
 
     final progress = await repository.fetchGroupProgress(groupIds: ['g1']);
 
