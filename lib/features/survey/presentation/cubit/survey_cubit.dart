@@ -170,8 +170,23 @@ class SurveyCubit extends Cubit<SurveyState> {
 
   Future<void> next() async {
     if (state.isLastStep) {
+      // Already on the final screen: a result section has had its outcome since
+      // we advanced onto it, so there is nothing left to send.
+      if (state.currentSection?.kind == SurveySectionKind.result) {
+        emit(state.copyWith(status: SurveyStatus.completed));
+        return;
+      }
       await _submit();
       return;
+    }
+
+    // The result section renders the biotype outcome, so the answers must be
+    // submitted *before* it is shown — not when leaving it (which would land
+    // the user on a blank result and only fetch the data on the way out).
+    final next = state.visibleSections[state.currentIndex + 1];
+    if (next.kind == SurveySectionKind.result && state.submitResult == null) {
+      final submitted = await _submit(advanceOnly: true);
+      if (!submitted) return;
     }
     emit(state.copyWith(currentIndex: state.currentIndex + 1));
   }
@@ -182,9 +197,13 @@ class SurveyCubit extends Cubit<SurveyState> {
     }
   }
 
-  Future<void> _submit() async {
+  /// Sends the answers. When [advanceOnly] the wizard stays in progress so the
+  /// result section can render the outcome; otherwise the survey is finished.
+  ///
+  /// Returns whether the submit succeeded.
+  Future<bool> _submit({bool advanceOnly = false}) async {
     final survey = state.survey;
-    if (survey == null) return;
+    if (survey == null) return false;
     emit(state.copyWith(status: SurveyStatus.submitting, errorMessage: null));
     try {
       final result = await _repository.submit(
@@ -199,8 +218,14 @@ class SurveyCubit extends Cubit<SurveyState> {
       await _analytics.surveySubmitted(survey.internalName);
       await _analytics.onboardingCompleted();
       emit(
-        state.copyWith(status: SurveyStatus.completed, submitResult: result),
+        state.copyWith(
+          status: advanceOnly
+              ? SurveyStatus.inProgress
+              : SurveyStatus.completed,
+          submitResult: result,
+        ),
       );
+      return true;
     } on ApiException catch (e) {
       emit(
         state.copyWith(
@@ -208,6 +233,7 @@ class SurveyCubit extends Cubit<SurveyState> {
           errorMessage: e.message ?? "Errore nell'invio del questionario",
         ),
       );
+      return false;
     }
   }
 
@@ -255,7 +281,10 @@ class SurveyCubit extends Cubit<SurveyState> {
   /// Deriva l'età in anni interi dalla risposta alla section DOB
   /// ([SurveySection.isDobQuestion]), o null se non ancora risposta / non
   /// parsabile. Stessa logica di `_computeAge` nel mapper del submit.
-  static int? _ageFromAnswers(Survey survey, Map<String, SurveyAnswer> answers) {
+  static int? _ageFromAnswers(
+    Survey survey,
+    Map<String, SurveyAnswer> answers,
+  ) {
     final dobSection = survey.sections
         .where((s) => s.isDobQuestion)
         .cast<SurveySection?>()

@@ -66,6 +66,33 @@ Response (`SurveySubmitResponse`):
 `kit_shop_url` → suggested kit checkout (the recommended kit/biotype outcome). `legacy` is
 web-client migration compatibility — ignore in the app.
 
+### `outcome.profile` — result screen data (partially confirmed)
+
+Backend confirmed (2026-07-16) that the biotype result data is in the submit response under
+**`outcome.profile`**. The **shape of the value is still unconfirmed**, so
+`SurveyOutcome.fromJson` accepts all three plausible encodings and normalizes them:
+
+| Encoding | Value | Handling |
+|----------|-------|----------|
+| Expanded row | a `profiles` row (`id`, `kit`, `icon`, `translations{title,name,content,content_f}`) | parsed directly — the assumed case, mirrors `BiotypeDto` |
+| Bare id | `5` | only `profileId`; needs a follow-up `profiles` read to hydrate |
+| Pre-rendered | HTML string | injected straight into `{{outcome_profile}}` |
+
+The result section (CMS id 9, `type_survey`) templates its copy with **`{{name}}`, `{{type}}`
+and `{{outcome_profile}}`** — names that do *not* match the response's own keys, so they are
+mapped explicitly in `_outcomePlaceholders` (`survey_screen.dart`). `{{name}}` comes from the
+logged-in `AppUser.firstName`, not the outcome.
+
+> ⚠️ The disclaimer ("Attenzione: le informazioni e i consigli…") appears **twice** on the
+> result screen: once hardcoded in the CMS `content` field after `{{outcome_profile}}`, and
+> once inside the profile copy itself. Backend said the duplicate is being removed on their
+> side ("è a post"); the app renders whatever the CMS returns.
+
+**Open question:** "Trova una Farmacia Kilocal Point" (present in the web survey result) has
+no destination in the app contract — no URL in the CMS response, and the `pharmacies`
+collection has no public finder page. The button is hidden until backend supplies one; see
+`SurveyResultActions.pharmacyFinderUrl`.
+
 > **Survey questions** (sections, options, conditions) are **read** via [[graphql]] on the
 > `surveys` / `survey_sections` / `survey_question` collections — there is no dedicated REST
 > GET. This resolves the proposed `GET /api/survey/{type}` in [[missing-apis]] §1.

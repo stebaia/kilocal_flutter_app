@@ -484,6 +484,15 @@ class AppLocalizationsIt extends AppLocalizations {
   String get surveyStart => 'Inizia';
 
   @override
+  String get surveyFindPharmacy => 'Trova una Farmacia Kilocal Point';
+
+  @override
+  String get surveyGoToShop => 'Vai allo shop';
+
+  @override
+  String get surveyEnterProofOfPurchase => 'Inserisci prova d\'acquisto';
+
+  @override
   String get notificationsEmpty => 'Nessuna notifica';
 
   @override

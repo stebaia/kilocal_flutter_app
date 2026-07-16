@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'survey_outcome.dart';
+
 /// A user's answer to a single survey section, held in memory while the wizard
 /// is in progress. Serialized into a `SurveyStep` for
 /// `POST /survey/submit/{internalName}` at the end.
@@ -147,6 +149,10 @@ class SurveySubmitResult extends Equatable {
   /// Scoring outcome (biotype/kit). Shape is CMS-defined — kept as a raw map
   /// until the contract is confirmed with backend.
   final Map<String, dynamic>? outcome;
+
+  /// The biotype result parsed out of `outcome.profile`, or `null` when the
+  /// response carries none.
+  SurveyOutcome? get biotype => SurveyOutcome.fromJson(outcome);
 
   /// Suggested kit checkout URL.
   final String? kitShopUrl;

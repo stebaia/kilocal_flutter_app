@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/di.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../user/presentation/cubit/user_cubit.dart';
 import '../domain/entities/survey_answer.dart';
 import '../domain/entities/survey_step.dart';
 import 'cubit/survey_cubit.dart';
@@ -13,6 +14,7 @@ import 'widgets/survey_answer_input.dart';
 import 'widgets/survey_html.dart';
 import 'widgets/survey_kit_card.dart';
 import 'widgets/survey_pharmacy_picker.dart';
+import 'widgets/survey_result_actions.dart';
 import 'widgets/survey_scaffold.dart';
 
 /// Entry point for the CMS-driven survey wizard. Pass the CMS `internalName`
@@ -40,8 +42,8 @@ class _SurveyView extends StatelessWidget {
       listenWhen: (p, c) => p.status != c.status,
       listener: (context, state) {
         if (state.status == SurveyStatus.completed) {
-          // TODO(backend): route to the outcome/result destination once the
-          // `outcome` / kit_shop_url contract is confirmed. For now, land home.
+          // The outcome is shown on the in-wizard result section (submitted on
+          // the way in), so completing means the user dismissed it.
           context.go('/home');
         }
       },
@@ -135,11 +137,15 @@ class _SectionBody extends StatelessWidget {
     final answer = state.currentAnswer;
 
     final isResult = section.kind == SurveySectionKind.result;
-    // Result screens fill {{name}}/{{type}}/{{product}}/{{outcome_profile}} from
-    // the submit outcome. TODO(backend): confirm the exact outcome keys once a
-    // real submit response is available (see wiki/survey.md).
+    // Result screens fill {{name}}/{{type}}/{{outcome_profile}} from the submit
+    // outcome plus the logged-in user's first name.
+    // UserCubit is a get_it singleton rather than a tree-provided bloc (there is
+    // no MultiBlocProvider above the router), so read it from the locator.
     final placeholders = isResult
-        ? _outcomePlaceholders(state.submitResult)
+        ? _outcomePlaceholders(
+            state.submitResult,
+            getIt<UserCubit>().state.user?.firstName,
+          )
         : const <String, String>{};
 
     return Column(
@@ -161,6 +167,7 @@ class _SectionBody extends StatelessWidget {
             html: section.subtitle!,
             baseFontSize: 15,
             color: AppColors.textPrimary,
+            lineHeight: 1.45,
             placeholders: placeholders,
           ),
         ],
@@ -169,12 +176,16 @@ class _SectionBody extends StatelessWidget {
           SurveyHtml(
             html: section.content!,
             baseFontSize: 15,
+            lineHeight: 1.45,
             placeholders: placeholders,
+            emphasisKeys: const {'outcome_profile'},
           ),
         ],
         if (isResult) ...[
           const SizedBox(height: AppSpacing.spaceLg),
-          SurveyKitCard(outcome: state.submitResult?.outcome),
+          SurveyKitCard(outcome: state.submitResult?.biotype),
+          const SizedBox(height: AppSpacing.spaceLg),
+          SurveyResultActions(kitShopUrl: state.submitResult?.kitShopUrl),
         ],
         if (section.loadKilocalPoints) ...[
           const SizedBox(height: AppSpacing.spaceXl),
@@ -197,16 +208,34 @@ class _SectionBody extends StatelessWidget {
     );
   }
 
-  /// Flattens the submit outcome into string placeholders for result-screen
-  /// templating (`{{name}}`, `{{type}}`, …). Values are best-effort until the
-  /// outcome contract is confirmed with backend.
-  Map<String, String> _outcomePlaceholders(SurveySubmitResult? result) {
+  /// Builds the result-screen placeholders the CMS copy expects.
+  ///
+  /// The CMS `type_survey` result section uses `{{name}}`, `{{type}}` and
+  /// `{{outcome_profile}}` — names that do *not* match the submit response's
+  /// own keys, so they must be mapped explicitly rather than copied across.
+  /// `{{type}}` → "Tipo 3 - Pera" and `{{outcome_profile}}` → the personalized
+  /// biotype copy, both from `outcome.profile` ([SurveyOutcome]).
+  ///
+  /// Any placeholder left unmapped is stripped by [SurveyHtml], so a partial
+  /// outcome degrades to plain copy instead of leaking `{{…}}`.
+  Map<String, String> _outcomePlaceholders(
+    SurveySubmitResult? result,
+    String? firstName,
+  ) {
+    final biotype = result?.biotype;
     final outcome = result?.outcome;
-    if (outcome == null) return const {};
     return {
-      for (final entry in outcome.entries)
-        if (entry.value is String || entry.value is num)
-          entry.key: '${entry.value}',
+      // Scalar top-level keys first, so other surveys' result copy keeps
+      // resolving against its own placeholders — the explicit mappings below
+      // take precedence on collision.
+      if (outcome != null)
+        for (final entry in outcome.entries)
+          if (entry.value is String || entry.value is num)
+            entry.key: '${entry.value}',
+      if (firstName != null && firstName.isNotEmpty) 'name': firstName,
+      if (biotype?.typeDisplay != null) 'type': biotype!.typeDisplay!,
+      if (biotype?.description != null)
+        'outcome_profile': biotype!.description!,
     };
   }
 }
