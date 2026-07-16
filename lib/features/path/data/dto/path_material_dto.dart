@@ -29,6 +29,7 @@ class PathMaterialDto {
     this.status,
     this.connectToArticle = false,
     this.asset,
+    this.article,
     this.translations = const [],
     this.categories = const [],
   });
@@ -46,10 +47,86 @@ class PathMaterialDto {
   final bool connectToArticle;
 
   final PathMaterialAssetDto? asset;
+
+  /// Linked article; holds the body when [connectToArticle] is set. Only
+  /// fetched on the detail query.
+  final PathMaterialArticleDto? article;
+
   final List<PathMaterialTranslationDto> translations;
   final List<PathMaterialCategoryJunctionDto> categories;
 
   Map<String, dynamic> toJson() => _$PathMaterialDtoToJson(this);
+}
+
+/// DTO for the `articles` row linked by a material via `connect_to_article`.
+@JsonSerializable()
+class PathMaterialArticleDto {
+  const PathMaterialArticleDto({
+    this.cover,
+    this.translations = const [],
+    this.blocks = const [],
+  });
+
+  factory PathMaterialArticleDto.fromJson(Map<String, dynamic> json) =>
+      _$PathMaterialArticleDtoFromJson(json);
+
+  final PathMaterialAssetDto? cover;
+  final List<PathMaterialArticleTranslationDto> translations;
+  final List<PathMaterialBlockDto> blocks;
+
+  Map<String, dynamic> toJson() => _$PathMaterialArticleDtoToJson(this);
+}
+
+@JsonSerializable()
+class PathMaterialArticleTranslationDto {
+  const PathMaterialArticleTranslationDto({
+    this.title,
+    this.subtitle,
+    this.plot,
+  });
+
+  factory PathMaterialArticleTranslationDto.fromJson(
+    Map<String, dynamic> json,
+  ) => _$PathMaterialArticleTranslationDtoFromJson(json);
+
+  final String? title;
+
+  /// Rarely populated (2 of the 38 linked articles on staging).
+  final String? subtitle;
+
+  /// HTML intro shown above the blocks; the main body for most articles.
+  final String? plot;
+
+  Map<String, dynamic> toJson() =>
+      _$PathMaterialArticleTranslationDtoToJson(this);
+}
+
+/// A row of the `articles_blocks` many-to-any. [item] is null for block
+/// collections the detail query does not select (only `block_text` is asked
+/// for), so callers must skip null items rather than assume a text block.
+@JsonSerializable()
+class PathMaterialBlockDto {
+  const PathMaterialBlockDto({this.collection, this.item});
+
+  factory PathMaterialBlockDto.fromJson(Map<String, dynamic> json) =>
+      _$PathMaterialBlockDtoFromJson(json);
+
+  final String? collection;
+  final PathMaterialBlockItemDto? item;
+
+  Map<String, dynamic> toJson() => _$PathMaterialBlockDtoToJson(this);
+}
+
+@JsonSerializable()
+class PathMaterialBlockItemDto {
+  const PathMaterialBlockItemDto({this.translations = const []});
+
+  factory PathMaterialBlockItemDto.fromJson(Map<String, dynamic> json) =>
+      _$PathMaterialBlockItemDtoFromJson(json);
+
+  final List<PathMaterialTranslationDto> translations;
+
+  Map<String, dynamic> toJson() => _$PathMaterialBlockItemDtoToJson(this);
 }
 
 @JsonSerializable()

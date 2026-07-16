@@ -53,11 +53,16 @@ class PathMaterial extends Equatable {
 ///
 /// A material is either a **video** (Vimeo player, reusing the path-step video
 /// layout) or a **text/image** material (hero image + title + HTML body).
+///
+/// Materials flagged `connect_to_article` carry no body of their own: [content]
+/// is then composed from the linked article's `plot` and its `block_text`
+/// blocks, and [subtitle]/[imageUrl] likewise fall back to the article.
 class PathMaterialDetail extends Equatable {
   const PathMaterialDetail({
     required this.id,
     required this.title,
     required this.isVideo,
+    this.subtitle,
     this.content,
     this.imageUrl,
     this.vimeoUrl,
@@ -68,6 +73,10 @@ class PathMaterialDetail extends Equatable {
 
   /// Whether the material is a video (`asset.asset_is_video`).
   final bool isVideo;
+
+  /// Optional subtitle shown under the title; only linked articles carry one,
+  /// and rarely.
+  final String? subtitle;
 
   /// HTML body shown under the title for text materials.
   final String? content;
@@ -98,7 +107,15 @@ class PathMaterialDetail extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, title, isVideo, content, imageUrl, vimeoUrl];
+  List<Object?> get props => [
+    id,
+    title,
+    isVideo,
+    subtitle,
+    content,
+    imageUrl,
+    vimeoUrl,
+  ];
 }
 
 /// A category tab shown at the top of the materials hub

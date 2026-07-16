@@ -98,6 +98,11 @@ query GetCompletedMaterials($filter: user_activities_filter) {
     'completed_on': {'_nnull': true},
   };
 
+  /// Detail of one material. Materials with `connect_to_article` carry no body
+  /// of their own: their title/subtitle/body live on the linked `articles` row,
+  /// whose text is split across `plot` (intro) and the `blocks` many-to-any.
+  /// Only `block_text` is requested — on staging the article blocks of every
+  /// linked material are `block_text`, bar a single `block_aside_asset`.
   static const _detailQuery = r'''
 query GetMaterial($id: ID!, $lang: String!) {
   percorsi_materials_by_id(id: $id) {
@@ -111,6 +116,32 @@ query GetMaterial($id: ID!, $lang: String!) {
     translations(filter: { languages_code: { code: { _eq: $lang } } }) {
       title
       content
+    }
+    article {
+      id
+      cover {
+        asset_is_video
+        vimeo_url
+        default_asset { id filename_download }
+        mobile_asset { id filename_download }
+      }
+      translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+        title
+        subtitle
+        plot
+      }
+      blocks(sort: ["sort"]) {
+        collection
+        item {
+          ... on block_text {
+            id
+            translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+              title
+              content
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -200,15 +231,24 @@ query GetMaterial($id: ID!, $lang: String!) {
       if (raw == null) return null;
 
       final dto = PathMaterialDto.fromJson(raw);
-      final asset = dto.asset;
-      final file = asset?.defaultAsset ?? asset?.mobileAsset;
       final translation = dto.translations.firstOrNull;
+      final articleTranslation = dto.article?.translations.firstOrNull;
+
+      // Materials that link an article have no body/asset of their own, so we
+      // fall back to the article for the body, the subtitle and the hero image.
+      final content = _nonEmpty(translation?.content) ?? _articleContent(dto);
+      final asset = dto.asset ?? dto.article?.cover;
+      final file = asset?.defaultAsset ?? asset?.mobileAsset;
 
       return PathMaterialDetail(
         id: dto.id,
-        title: translation?.title ?? '',
+        title:
+            _nonEmpty(translation?.title) ??
+            _nonEmpty(articleTranslation?.title) ??
+            '',
         isVideo: asset?.assetIsVideo ?? false,
-        content: translation?.content,
+        subtitle: _nonEmpty(articleTranslation?.subtitle),
+        content: content,
         imageUrl: _assetUrl(file),
         vimeoUrl: asset?.vimeoUrl,
       );
@@ -353,6 +393,38 @@ query GetMaterial($id: ID!, $lang: String!) {
   String? _assetUrl(PathMaterialFileDto? file) {
     if (file?.id == null) return null;
     return '${Env.baseUrl}/assets/${file!.id}/${file.filenameDownload ?? ''}';
+  }
+
+  String? _nonEmpty(String? value) {
+    if (value == null) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// HTML body of a material that links an article: the article's `plot` intro
+  /// followed by its `block_text` blocks, already sorted by the query. Blocks of
+  /// other collections resolve to a null `item` and are skipped.
+  String? _articleContent(PathMaterialDto dto) {
+    final article = dto.article;
+    if (article == null) return null;
+
+    final parts = <String>[];
+
+    final plot = _nonEmpty(article.translations.firstOrNull?.plot);
+    if (plot != null) parts.add(plot);
+
+    for (final block in article.blocks) {
+      final translation = block.item?.translations.firstOrNull;
+      if (translation == null) continue;
+
+      final title = _nonEmpty(translation.title);
+      if (title != null) parts.add('<h3>$title</h3>');
+
+      final content = _nonEmpty(translation.content);
+      if (content != null) parts.add(content);
+    }
+
+    return parts.isEmpty ? null : parts.join('\n');
   }
 
   String _resolveLocale() {

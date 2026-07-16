@@ -189,6 +189,7 @@ class _TitleAndBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = material.content;
+    final subtitle = material.subtitle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,6 +200,15 @@ class _TitleAndBody extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (subtitle != null && subtitle.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.spaceXs),
+          Text(
+            subtitle,
+            style: AppTypography.textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
         if (content != null && content.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.spaceMd),
           Html(
