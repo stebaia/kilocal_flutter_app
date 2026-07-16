@@ -50,7 +50,10 @@ class SurveyCtaButton extends StatelessWidget {
       width: double.infinity,
       child: Material(
         color: background,
-        borderRadius: radius,
+        // Material asserts shape and borderRadius are mutually exclusive, so the
+        // outlined variant carries its radius inside the shape that draws the
+        // border, and the filled one uses borderRadius alone.
+        borderRadius: filled ? radius : null,
         shape: filled
             ? null
             : RoundedRectangleBorder(
