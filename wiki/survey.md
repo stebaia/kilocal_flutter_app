@@ -109,6 +109,33 @@ from the logged-in `AppUser.firstName`, not the outcome.
 A failed hydrate is swallowed: the submit already succeeded server-side, so the screen shows
 the survey's own copy rather than failing.
 
+## Onboarding gate — proof of purchase is mandatory
+
+`user_details.profile_status` **is** the gate; the app must not invent its own. Submitting
+`type_survey` moves the status to `starter_kit`, and that survey opens (sort 1, section id
+11) with **"Inserisci il codice a barre"** — a `required: true` input — and only ends with
+"Hai completato il profilo!". So a user cannot reach the app without a proof of purchase,
+provided the app honours the status.
+
+Two things enforce it:
+
+1. **`appRouter.redirect`** (`onboardingRedirectFor`, `lib/app/router.dart`) — while
+   `profileStatus.surveyInternalName != null`, any navigation is redirected onto that survey.
+   Exempt: the auth routes (no session to gate — redirecting would bounce the user off
+   `/login`) and `/survey` itself. Only applies once `UserStatus.loaded`.
+2. **The survey's own exit** — on completion the screen reloads the session and follows
+   `UserState.route` instead of hardcoding `/home`, so finishing `type_survey` chains
+   straight into `starter_kit`.
+
+> The `/survey` route is keyed by `internalName` (`ValueKey('survey-$internalName')`):
+> chaining one survey onto another keeps the same path, so without the key GoRouter reuses
+> the Element and the finished survey stays on screen.
+
+> ⚠️ **`other_validations` is parsed but never enforced** (`SurveyQuestion.otherValidations`).
+> The barcode step carries `other_validations: "barcode"` and height/weight carry
+> `number|int|gte:100|lte:300`, but the app validates none of them — any text is accepted.
+> Needs a backend answer on what `"barcode"` should validate against before implementing.
+
 > ⚠️ The disclaimer ("Attenzione: le informazioni e i consigli…") appears **twice** on the
 > result screen: once hardcoded in the CMS `content` field after `{{outcome_profile}}`, and
 > once inside the profile copy itself. Backend said the duplicate is being removed on their
