@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/vimeo_oembed_service.dart';
 import '../../../../app/di.dart';
+import 'vimeo_player_controller.dart';
 
 /// Full-bleed video header for a material detail, mirroring the path-step video
 /// layout: a custom poster (Vimeo oEmbed thumbnail + play button + duration)
@@ -62,10 +63,7 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
     );
 
     setState(() {
-      _controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(Colors.black)
-        ..loadRequest(autoplayUrl);
+      _controller = buildVimeoController(autoplayUrl);
     });
   }
 

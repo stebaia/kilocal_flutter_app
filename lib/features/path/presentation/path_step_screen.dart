@@ -18,6 +18,7 @@ import 'cubit/path_detail_cubit.dart';
 import 'widgets/path_activities_sheet.dart';
 import 'widgets/path_timer_pill.dart';
 import 'widgets/path_timer_sheet.dart';
+import 'widgets/vimeo_player_controller.dart';
 
 class PathStepScreen extends StatelessWidget {
   const PathStepScreen({
@@ -305,10 +306,7 @@ class _StepMediaState extends State<_StepMedia> {
     );
 
     setState(() {
-      _controller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setBackgroundColor(Colors.black)
-        ..loadRequest(autoplayUrl);
+      _controller = buildVimeoController(autoplayUrl);
     });
   }
 
