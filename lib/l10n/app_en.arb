@@ -160,6 +160,22 @@
   "profileAvatarFromGallery": "Choose from gallery",
   "profileAvatarUpdated": "Profile photo updated",
   "profileAvatarError": "Couldn't update the profile photo",
+  "profileChangePassword": "Change password",
+  "profileChangePasswordHint": "Choose a new password for your account.",
+  "profileNewPassword": "New password",
+  "profileConfirmPassword": "Confirm new password",
+  "profileChangePasswordSubmit": "Update password",
+  "profilePasswordUpdated": "Password updated",
+  "profilePasswordError": "Couldn't update the password",
+  "profilePasswordTooShort": "Password must be at least {count} characters",
+  "@profilePasswordTooShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profilePasswordMismatch": "The two passwords don't match",
   "profileFoodPreferences": "Food preferences",
   "profileNotificationsSection": "Notifications",
   "profilePushNotifications": "Push notifications",

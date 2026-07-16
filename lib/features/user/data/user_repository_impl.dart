@@ -169,6 +169,21 @@ query GetUserDetails($myId: ID!) {
     }
   }
 
+  @override
+  Future<void> changePassword(String newPassword) async {
+    try {
+      // `password` lives on `directus_users`, so it goes through PATCH /users/me
+      // like `avatar` above. Directus authorises this on the access token alone
+      // and exposes no current-password check, so this deliberately sends only
+      // the new password. See [[password-change-no-reauth]].
+      await _userApi.updateCurrentUser(<String, dynamic>{
+        'password': newPassword,
+      });
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
   AppUser _mapCurrentUser(CurrentUserDataDto dto) => AppUser(
     id: dto.id,
     email: dto.email,
