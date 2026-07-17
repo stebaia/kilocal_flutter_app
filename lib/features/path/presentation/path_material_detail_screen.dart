@@ -129,7 +129,9 @@ class _VideoDetail extends StatelessWidget {
   }
 }
 
-/// Text / image material matching the design: header + hero image + body.
+/// Text / image material matching the design: header + hero image + body. The
+/// "Consigli utili" ([PathMaterialDetail.hidesImage]) drop the hero and open
+/// straight on the title.
 class _TextDetail extends StatelessWidget {
   const _TextDetail({required this.material, this.categoryTitle});
 
@@ -152,7 +154,7 @@ class _TextDetail extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  if (material.imageUrl != null)
+                  if (material.imageUrl != null && !material.hidesImage)
                     AspectRatio(
                       aspectRatio: 1.1,
                       child: Image.network(

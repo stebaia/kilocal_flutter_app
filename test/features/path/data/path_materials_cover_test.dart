@@ -19,6 +19,7 @@ Map<String, dynamic> _material({
   required String id,
   Map<String, dynamic>? asset,
   String? categoryHeroId,
+  String categoryInternalName = 'cat',
 }) => {
   'percorsi_materials_id': {
     'id': id,
@@ -32,7 +33,7 @@ Map<String, dynamic> _material({
         {
           'percorsi_material_categories_id': {
             'id': 'cat-1',
-            'internal_name': 'cat',
+            'internal_name': categoryInternalName,
             'hero_asset': {
               'default_asset': {
                 'id': categoryHeroId,
@@ -131,5 +132,63 @@ void main() {
     final data = await repository.fetchMaterials(groupId: 'g1');
 
     expect(data.materials.single.imageUrl, contains('own-file'));
+  });
+
+  test('a "Consigli utili" material is flagged image-less', () async {
+    stubMaterials([
+      _material(
+        id: '1',
+        asset: {
+          'asset_is_video': false,
+          'default_asset': {'id': 'own-file', 'filename_download': 'own.jpg'},
+        },
+        categoryHeroId: 'hero-file',
+        categoryInternalName: 'consigli-utili',
+      ),
+    ]);
+    when(() => oembed.fetchAll(any())).thenAnswer((_) async => {});
+
+    final data = await repository.fetchMaterials(groupId: 'g1');
+
+    expect(data.materials.single.hidesImage, isTrue);
+    expect(data.categories.single.isAdvice, isTrue);
+  });
+
+  test('a material outside "Consigli utili" keeps its image', () async {
+    stubMaterials([_material(id: '1', categoryHeroId: 'hero-file')]);
+    when(() => oembed.fetchAll(any())).thenAnswer((_) async => {});
+
+    final data = await repository.fetchMaterials(groupId: 'g1');
+
+    expect(data.materials.single.hidesImage, isFalse);
+  });
+
+  test('a "Consigli utili" detail is flagged image-less', () async {
+    when(
+      () => client.query(any(), variables: any(named: 'variables')),
+    ).thenAnswer(
+      (_) async => {
+        'data': {
+          'percorsi_materials_by_id': {
+            'id': '1',
+            'translations': [
+              {'title': 'Consiglio', 'content': '<p>Corpo</p>'},
+            ],
+            'categories': [
+              {
+                'percorsi_material_categories_id': {
+                  'id': 'cat-1',
+                  'internal_name': 'consigli-utili',
+                },
+              },
+            ],
+          },
+        },
+      },
+    );
+
+    final detail = await repository.fetchMaterialDetail(id: '1');
+
+    expect(detail!.hidesImage, isTrue);
   });
 }
