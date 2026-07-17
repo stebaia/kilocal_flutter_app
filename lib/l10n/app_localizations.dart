@@ -1166,6 +1166,18 @@ abstract class AppLocalizations {
   /// **'No moments available'**
   String get momentiEmpty;
 
+  /// No description provided for @momentiInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get momentiInfoTitle;
+
+  /// No description provided for @momentiInfoTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Information about this moment'**
+  String get momentiInfoTooltip;
+
   /// No description provided for @diaryCompleted.
   ///
   /// In en, this message translates to:

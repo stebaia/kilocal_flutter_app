@@ -212,6 +212,8 @@
   "benefitsEmpty": "Nessun benefit disponibile",
   "momentiTitle": "Momenti",
   "momentiEmpty": "Nessun momento disponibile",
+  "momentiInfoTitle": "Informazioni",
+  "momentiInfoTooltip": "Informazioni sul momento",
   "diaryCompleted": "Completato",
   "diaryPending": "In attesa",
   "areaTraining": "Allenamento",

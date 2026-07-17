@@ -7,6 +7,7 @@ import '../../../app/di.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_bottom_sheet.dart';
 import '../../../core/widgets/app_header.dart';
 import '../domain/entities/momenti_data.dart';
 import 'cubit/momenti_cubit.dart';
@@ -42,33 +43,72 @@ class _MomentiView extends StatelessWidget {
       // bottom against the Android system navigation bar.
       body: SafeArea(
         top: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppHeader(title: l10n.momentiTitle, showBack: true),
-            Expanded(
-              child: BlocBuilder<MomentiCubit, MomentiState>(
-                builder: (context, state) {
-                  switch (state.status) {
-                    case MomentiStatus.initial:
-                    case MomentiStatus.loading:
-                      return const Center(child: CircularProgressIndicator());
-                    case MomentiStatus.error:
-                      return Center(child: Text(l10n.momentiEmpty));
-                    case MomentiStatus.loaded:
-                      final data = state.data;
-                      if (data == null) {
-                        return Center(child: Text(l10n.momentiEmpty));
-                      }
-                      return _MomentiContent(data: data);
-                  }
-                },
-              ),
-            ),
-          ],
+        child: BlocBuilder<MomentiCubit, MomentiState>(
+          builder: (context, state) {
+            // The info action renders the loaded moment's `plot`, so the header
+            // lives inside the builder and only grows the action once it's there.
+            final plot = state.data?.plot;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppHeader(
+                  title: l10n.momentiTitle,
+                  showBack: true,
+                  trailing: plot == null
+                      ? null
+                      : IconButton(
+                          icon: const Icon(
+                            Icons.info_outline,
+                            color: AppColors.textPrimary,
+                          ),
+                          tooltip: l10n.momentiInfoTooltip,
+                          onPressed: () => showAppBottomSheet<void>(
+                            context: context,
+                            title: l10n.momentiInfoTitle,
+                            child: Text(
+                              plot,
+                              style: AppTypography.textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    height: 1.5,
+                                  ),
+                            ),
+                          ),
+                        ),
+                ),
+                Expanded(child: _MomentiBody(state: state)),
+              ],
+            );
+          },
         ),
       ),
     );
+  }
+}
+
+class _MomentiBody extends StatelessWidget {
+  const _MomentiBody({required this.state});
+
+  final MomentiState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    switch (state.status) {
+      case MomentiStatus.initial:
+      case MomentiStatus.loading:
+        return const Center(child: CircularProgressIndicator());
+      case MomentiStatus.error:
+        return Center(child: Text(l10n.momentiEmpty));
+      case MomentiStatus.loaded:
+        final data = state.data;
+        if (data == null) {
+          return Center(child: Text(l10n.momentiEmpty));
+        }
+        return _MomentiContent(data: data);
+    }
   }
 }
 
