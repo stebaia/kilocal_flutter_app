@@ -14,6 +14,7 @@ class PathMaterial extends Equatable {
     required this.isCompleted,
     required this.categoryIds,
     this.imageUrl,
+    this.hidesImage = false,
   });
 
   final String id;
@@ -37,6 +38,10 @@ class PathMaterial extends Equatable {
   /// (e.g. it links to an article instead).
   final String? imageUrl;
 
+  /// Whether the card must be rendered without its cover image: the editorial
+  /// "Consigli utili" are text-only by design.
+  final bool hidesImage;
+
   @override
   List<Object?> get props => [
     id,
@@ -46,6 +51,7 @@ class PathMaterial extends Equatable {
     isCompleted,
     categoryIds,
     imageUrl,
+    hidesImage,
   ];
 }
 
@@ -67,6 +73,7 @@ class PathMaterialDetail extends Equatable {
     this.imageUrl,
     this.vimeoUrl,
     this.attachments = const [],
+    this.hidesImage = false,
   });
 
   final String id;
@@ -91,6 +98,10 @@ class PathMaterialDetail extends Equatable {
   /// Downloadable files offered by the material's CTAs — the PDFs of the
   /// "Schede" materials. Empty for materials that offer no download.
   final List<PathMaterialAttachment> attachments;
+
+  /// Whether the detail must be rendered without its hero image: the editorial
+  /// "Consigli utili" are text-only by design.
+  final bool hidesImage;
 
   /// Embed url for the Vimeo player, preserving query parameters.
   String? get vimeoEmbedUrl {
@@ -121,6 +132,7 @@ class PathMaterialDetail extends Equatable {
     imageUrl,
     vimeoUrl,
     attachments,
+    hidesImage,
   ];
 }
 
@@ -142,13 +154,32 @@ class PathMaterialAttachment extends Equatable {
 /// A category tab shown at the top of the materials hub
 /// (`percorsi_material_categories`).
 class PathMaterialCategory extends Equatable {
-  const PathMaterialCategory({required this.id, required this.title});
+  const PathMaterialCategory({
+    required this.id,
+    required this.title,
+    this.internalName,
+  });
 
   final String id;
   final String title;
 
+  /// Stable CMS slug (`internal_name`), e.g. `consigli-utili`. Unlike [title] it
+  /// is not translated, so it is what feature checks key off.
+  final String? internalName;
+
+  /// The editorial "Consigli utili" category, whose items are shown without any
+  /// cover image.
+  bool get isAdvice => internalName == PathMaterialCategories.advice;
+
   @override
-  List<Object?> get props => [id, title];
+  List<Object?> get props => [id, title, internalName];
+}
+
+/// Known `percorsi_material_categories.internal_name` values the app keys off.
+abstract final class PathMaterialCategories {
+  /// "Consigli utili" — its materials are rendered text-only, with no image in
+  /// the list card nor in the detail.
+  static const advice = 'consigli-utili';
 }
 
 /// The full materials hub payload for one area: the available category tabs and

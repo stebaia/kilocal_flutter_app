@@ -129,6 +129,12 @@ query GetMaterial($id: ID!, $lang: String!) {
       title
       content
     }
+    categories {
+      percorsi_material_categories_id {
+        id
+        internal_name
+      }
+    }
     ctas {
       links_id {
         download_on_click
@@ -220,18 +226,21 @@ query GetMaterial($id: ID!, $lang: String!) {
         // Cover image to fall back to when the material carries no asset of its
         // own: the first category hero we encounter for this material.
         String? categoryHeroUrl;
+        var hidesImage = false;
         for (final cj in dto.categories) {
           final cat = cj.category;
           if (cat == null) continue;
           categoryIds.add(cat.id);
           categoryHeroUrl ??= _assetUrl(cat.heroAsset?.defaultAsset);
-          categories.putIfAbsent(
+          final category = categories.putIfAbsent(
             cat.id,
             () => PathMaterialCategory(
               id: cat.id,
               title: cat.translations.firstOrNull?.title ?? '',
+              internalName: cat.internalName,
             ),
           );
+          hidesImage = hidesImage || category.isAdvice;
         }
 
         final vimeoUrl = dto.asset?.vimeoUrl;
@@ -244,6 +253,7 @@ query GetMaterial($id: ID!, $lang: String!) {
                 ? null
                 : posters[vimeoUrl]?.thumbnailUrl,
             fallbackImageUrl: categoryHeroUrl,
+            hidesImage: hidesImage,
           ),
         );
       }
@@ -294,6 +304,7 @@ query GetMaterial($id: ID!, $lang: String!) {
         imageUrl: _assetUrl(file),
         vimeoUrl: asset?.vimeoUrl,
         attachments: _attachments(dto),
+        hidesImage: _isAdvice(dto),
       );
     } on ApiException {
       rethrow;
@@ -412,6 +423,7 @@ query GetMaterial($id: ID!, $lang: String!) {
     PathMaterialDto dto,
     List<String> categoryIds, {
     required bool isCompleted,
+    required bool hidesImage,
     String? vimeoPosterUrl,
     String? fallbackImageUrl,
   }) {
@@ -431,8 +443,15 @@ query GetMaterial($id: ID!, $lang: String!) {
       isCompleted: isCompleted,
       categoryIds: categoryIds,
       imageUrl: imageUrl,
+      hidesImage: hidesImage,
     );
   }
+
+  /// Whether the material belongs to the "Consigli utili" category, which is
+  /// rendered text-only.
+  bool _isAdvice(PathMaterialDto dto) => dto.categories.any(
+    (cj) => cj.category?.internalName == PathMaterialCategories.advice,
+  );
 
   String? _assetUrl(PathMaterialFileDto? file) {
     if (file?.id == null) return null;
