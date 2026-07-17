@@ -228,6 +228,11 @@ class _SearchBar extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.ink,
             foregroundColor: AppColors.neutralWhite,
+            // The app theme makes buttons full-width (minimumSize
+            // Size.fromHeight = infinite width). Inside a Row, whose non-flex
+            // children get unbounded width, that forces an infinite layout and
+            // takes the whole screen down — so pin a finite minimum here.
+            minimumSize: const Size(0, 44),
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.spaceMd,
               vertical: AppSpacing.spaceSm + 2,

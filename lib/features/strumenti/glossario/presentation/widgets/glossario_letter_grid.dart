@@ -6,6 +6,11 @@ import '../../../../../core/theme/app_typography.dart';
 
 /// The A-Z filter grid. The selected letter is a filled brand tile; letters
 /// with no terms are dimmed and inert.
+///
+/// Laid out as plain Rows rather than a shrink-wrapped GridView: a nested
+/// scrollable inside the screen's CustomScrollView trips a semantics
+/// assertion (`!semantics.parentDataDirty`) on every frame, and 26 fixed
+/// tiles never needed to scroll in the first place.
 class GlossarioLetterGrid extends StatelessWidget {
   const GlossarioLetterGrid({
     super.key,
@@ -24,24 +29,38 @@ class GlossarioLetterGrid extends StatelessWidget {
 
   static const _letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+  /// Seven per row, as in the design.
+  static const _perRow = 7;
+
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
-      // Seven per row, as in the design.
-      crossAxisCount: 7,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.zero,
-      crossAxisSpacing: AppSpacing.spaceXs,
-      mainAxisSpacing: AppSpacing.spaceXs,
+    final letters = _letters.split('');
+
+    return Column(
       children: [
-        for (final letter in _letters.split(''))
-          _LetterTile(
-            letter: letter,
-            isSelected: letter == selected,
-            isEnabled: available.contains(letter),
-            onTap: () => onSelected(letter),
+        for (var row = 0; row * _perRow < letters.length; row++) ...[
+          if (row > 0) const SizedBox(height: AppSpacing.spaceXs),
+          Row(
+            children: [
+              for (var col = 0; col < _perRow; col++) ...[
+                if (col > 0) const SizedBox(width: AppSpacing.spaceXs),
+                Expanded(
+                  child: row * _perRow + col < letters.length
+                      ? _LetterTile(
+                          letter: letters[row * _perRow + col],
+                          isSelected: letters[row * _perRow + col] == selected,
+                          isEnabled:
+                              available.contains(letters[row * _perRow + col]),
+                          onTap: () => onSelected(letters[row * _perRow + col]),
+                        )
+                      // Blank filler so the last row's tiles keep the same
+                      // width as the full rows.
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ],
           ),
+        ],
       ],
     );
   }
@@ -72,23 +91,28 @@ class _LetterTile extends StatelessWidget {
       foreground = isEnabled ? AppColors.textPrimary : AppColors.borderCard;
     }
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: isEnabled ? onTap : null,
-      child: Container(
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: isSelected
-              ? null
-              : Border.all(color: AppColors.divider),
-        ),
-        child: Center(
-          child: Text(
-            letter,
-            style: AppTypography.textTheme.titleMedium?.copyWith(
-              color: foreground,
-              fontWeight: FontWeight.w600,
+    // Square tile: the Row gives it a width, the aspect ratio sets the height
+    // (the GridView cell used to do this).
+    return AspectRatio(
+      aspectRatio: 1,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: isEnabled ? onTap : null,
+        child: Container(
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            border: isSelected
+                ? null
+                : Border.all(color: AppColors.divider),
+          ),
+          child: Center(
+            child: Text(
+              letter,
+              style: AppTypography.textTheme.titleMedium?.copyWith(
+                color: foreground,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
