@@ -1850,6 +1850,36 @@ abstract class AppLocalizations {
   /// **'This tool will be available soon.'**
   String get strumentiComingSoon;
 
+  /// No description provided for @glossarioSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get glossarioSearch;
+
+  /// No description provided for @glossarioSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyword'**
+  String get glossarioSearchHint;
+
+  /// No description provided for @glossarioResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching results'**
+  String get glossarioResults;
+
+  /// No description provided for @glossarioEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for this search.'**
+  String get glossarioEmpty;
+
+  /// No description provided for @glossarioLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the glossary.'**
+  String get glossarioLoadError;
+
   /// No description provided for @galleryPhotosTitle.
   ///
   /// In en, this message translates to:

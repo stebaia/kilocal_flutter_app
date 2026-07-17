@@ -73,6 +73,9 @@ import '../features/strumenti/gallery/data/gallery_api.dart';
 import '../features/strumenti/gallery/data/gallery_repository_impl.dart';
 import '../features/strumenti/gallery/domain/gallery_repository.dart';
 import '../features/strumenti/gallery/presentation/cubit/gallery_cubit.dart';
+import '../features/strumenti/glossario/data/glossario_repository_impl.dart';
+import '../features/strumenti/glossario/domain/glossario_repository.dart';
+import '../features/strumenti/glossario/presentation/cubit/glossario_cubit.dart';
 import '../features/strumenti/promemoria/data/promemoria_api.dart';
 import '../features/strumenti/promemoria/data/promemoria_notification_service.dart';
 import '../features/strumenti/promemoria/data/promemoria_repository_impl.dart';
@@ -378,6 +381,16 @@ void configureDependencies() {
   );
   getIt.registerFactory<GalleryCubit>(
     () => GalleryCubit(repository: getIt<GalleryRepository>()),
+  );
+
+  // --- Feature: Strumenti / Glossario ---
+  // GraphQL-only: the glossary terms and the tool's copy. See
+  // [[glossario-schema]].
+  getIt.registerLazySingleton<GlossarioRepository>(
+    () => GlossarioRepositoryImpl(graphql: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<GlossarioCubit>(
+    () => GlossarioCubit(repository: getIt<GlossarioRepository>()),
   );
 
   // --- Feature: Settings API ---

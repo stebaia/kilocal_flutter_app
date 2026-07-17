@@ -993,6 +993,21 @@ class AppLocalizationsIt extends AppLocalizations {
   String get strumentiComingSoon => 'Questo strumento sarà presto disponibile.';
 
   @override
+  String get glossarioSearch => 'Cerca';
+
+  @override
+  String get glossarioSearchHint => 'Parola chiave';
+
+  @override
+  String get glossarioResults => 'Risultati corrispondenti';
+
+  @override
+  String get glossarioEmpty => 'Nessun risultato per questa ricerca.';
+
+  @override
+  String get glossarioLoadError => 'Impossibile caricare il glossario.';
+
+  @override
   String get galleryPhotosTitle => 'Le mie foto';
 
   @override

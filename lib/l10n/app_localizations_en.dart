@@ -989,6 +989,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get strumentiComingSoon => 'This tool will be available soon.';
 
   @override
+  String get glossarioSearch => 'Search';
+
+  @override
+  String get glossarioSearchHint => 'Keyword';
+
+  @override
+  String get glossarioResults => 'Matching results';
+
+  @override
+  String get glossarioEmpty => 'No results for this search.';
+
+  @override
+  String get glossarioLoadError => 'Could not load the glossary.';
+
+  @override
   String get galleryPhotosTitle => 'My photos';
 
   @override
