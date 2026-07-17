@@ -259,6 +259,8 @@
   "benefitsEmpty": "No benefits available",
   "momentiTitle": "Moments",
   "momentiEmpty": "No moments available",
+  "momentiInfoTitle": "Information",
+  "momentiInfoTooltip": "Information about this moment",
   "diaryCompleted": "Completed",
   "diaryPending": "Pending",
   "areaTraining": "Training",

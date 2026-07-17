@@ -574,6 +574,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get momentiEmpty => 'No moments available';
 
   @override
+  String get momentiInfoTitle => 'Information';
+
+  @override
+  String get momentiInfoTooltip => 'Information about this moment';
+
+  @override
   String get diaryCompleted => 'Completed';
 
   @override

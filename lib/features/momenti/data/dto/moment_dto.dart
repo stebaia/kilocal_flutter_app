@@ -19,13 +19,16 @@ class MomentDto {
 
 @JsonSerializable()
 class MomentTranslationDto {
-  const MomentTranslationDto({this.title, this.description});
+  const MomentTranslationDto({this.title, this.description, this.plot});
 
   factory MomentTranslationDto.fromJson(Map<String, dynamic> json) =>
       _$MomentTranslationDtoFromJson(json);
 
   final String? title;
   final String? description;
+
+  /// Short plain-text abstract of the moment, shown in the info sheet.
+  final String? plot;
 
   Map<String, dynamic> toJson() => _$MomentTranslationDtoToJson(this);
 }
