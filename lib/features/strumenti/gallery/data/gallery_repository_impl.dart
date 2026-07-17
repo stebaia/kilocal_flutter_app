@@ -85,7 +85,11 @@ class GalleryRepositoryImpl implements GalleryRepository {
     String? str(String key) => t?[key] as String?;
 
     return GalleryContent(
-      isToolBlocked: gallery['is_tool_blocked'] as bool? ?? false,
+      // Staging ships the tool blocked, so debug builds ignore the flag to keep
+      // it testable; release always honours the CMS. See [Env.ignoreToolBlocked].
+      isToolBlocked: Env.ignoreToolBlocked
+          ? false
+          : gallery['is_tool_blocked'] as bool? ?? false,
       title: str('title'),
       photosTitle: str('sec_photos_title'),
       splitViewTitle: str('split_view_title'),

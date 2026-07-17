@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Environment configuration (base URLs per flavor).
 ///
 /// The mobile app talks directly to the Directus CMS with Bearer JWT.
@@ -19,4 +21,17 @@ abstract final class Env {
 
   /// Network timeout for connect/receive/send.
   static const Duration timeout = Duration(seconds: 30);
+
+  /// Ignores the CMS `is_tool_blocked` kill-switch, so a tool the backend has
+  /// switched off can still be opened and tested.
+  ///
+  /// Debug builds ignore the flag by default (staging ships tools blocked,
+  /// which would leave them untestable). Release builds always honour the CMS —
+  /// `kReleaseMode` gates this so a tool the backend disabled can never be
+  /// shipped open. Override either way with
+  /// `--dart-define=IGNORE_TOOL_BLOCKED=true|false`.
+  static const bool ignoreToolBlocked = bool.fromEnvironment(
+    'IGNORE_TOOL_BLOCKED',
+    defaultValue: !kReleaseMode,
+  );
 }
