@@ -422,6 +422,9 @@
       }
     }
   },
+  "pathTimerStop": "stop",
+  "pathTimerPause": "Pause",
+  "pathTimerResume": "Resume",
   "pathAreaProgressLabel": "Your path",
   "pathMaterialsTitle": "Extra materials",
   "pathMaterialsSubtitle": "Useful resources for your path",

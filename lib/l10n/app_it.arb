@@ -363,6 +363,9 @@
       }
     }
   },
+  "pathTimerStop": "interrompi",
+  "pathTimerPause": "Pausa",
+  "pathTimerResume": "Riprendi",
   "pathAreaProgressLabel": "Il tuo percorso",
   "pathMaterialsTitle": "Materiali extra",
   "pathMaterialsSubtitle": "Risorse utili per il tuo percorso",

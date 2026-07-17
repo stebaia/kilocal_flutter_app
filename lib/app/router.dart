@@ -41,6 +41,7 @@ import '../features/strumenti/domain/entities/strumento.dart';
 import '../features/strumenti/presentation/strumenti_screen.dart';
 import '../features/strumenti/presentation/strumento_detail_screen.dart';
 import '../features/strumenti/promemoria/presentation/promemoria_screen.dart';
+import '../features/strumenti/timer/presentation/timer_screen.dart';
 import '../features/momenti/presentation/momenti_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/statistics/presentation/statistics_screen.dart';
@@ -247,11 +248,15 @@ final GoRouter appRouter = GoRouter(
               path: '/strumenti',
               builder: (context, state) => const StrumentiScreen(),
               routes: [
-                // Promemoria has its own tool screen; the other tools still
-                // land on the "coming soon" placeholder.
+                // Promemoria and Timer have their own tool screens; the other
+                // tools still land on the "coming soon" placeholder.
                 GoRoute(
                   path: 'promemoria',
                   builder: (context, state) => const PromemoriaScreen(),
+                ),
+                GoRoute(
+                  path: 'timer',
+                  builder: (context, state) => const TimerScreen(),
                 ),
                 // Launched-tool destination. `:id` is a StrumentoId name;
                 // unknown values fall back to the first tool.

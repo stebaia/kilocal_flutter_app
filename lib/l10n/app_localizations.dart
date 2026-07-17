@@ -1712,6 +1712,24 @@ abstract class AppLocalizations {
   /// **'Timer: {time}'**
   String pathTimerPill(String time);
 
+  /// No description provided for @pathTimerStop.
+  ///
+  /// In en, this message translates to:
+  /// **'stop'**
+  String get pathTimerStop;
+
+  /// No description provided for @pathTimerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pathTimerPause;
+
+  /// No description provided for @pathTimerResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get pathTimerResume;
+
   /// No description provided for @pathAreaProgressLabel.
   ///
   /// In en, this message translates to:

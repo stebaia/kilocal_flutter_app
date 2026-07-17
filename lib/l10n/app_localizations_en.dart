@@ -911,6 +911,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get pathTimerStop => 'stop';
+
+  @override
+  String get pathTimerPause => 'Pause';
+
+  @override
+  String get pathTimerResume => 'Resume';
+
+  @override
   String get pathAreaProgressLabel => 'Your path';
 
   @override
