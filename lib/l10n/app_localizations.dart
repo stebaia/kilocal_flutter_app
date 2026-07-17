@@ -1850,6 +1850,120 @@ abstract class AppLocalizations {
   /// **'This tool will be available soon.'**
   String get strumentiComingSoon;
 
+  /// No description provided for @galleryPhotosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My photos'**
+  String get galleryPhotosTitle;
+
+  /// No description provided for @galleryUploadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload image'**
+  String get galleryUploadTitle;
+
+  /// No description provided for @galleryUploadInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the button to upload content from your device'**
+  String get galleryUploadInfo;
+
+  /// No description provided for @galleryUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get galleryUpload;
+
+  /// No description provided for @galleryTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get galleryTakePhoto;
+
+  /// No description provided for @galleryRetakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get galleryRetakePhoto;
+
+  /// No description provided for @galleryConfirmUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and upload'**
+  String get galleryConfirmUpload;
+
+  /// No description provided for @galleryUploadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload the photo. Try again.'**
+  String get galleryUploadError;
+
+  /// No description provided for @galleryDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete the photo. Try again.'**
+  String get galleryDeleteError;
+
+  /// No description provided for @galleryLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your photos.'**
+  String get galleryLoadError;
+
+  /// No description provided for @galleryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t uploaded any photos yet.'**
+  String get galleryEmpty;
+
+  /// No description provided for @galleryToolBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This tool is not available right now.'**
+  String get galleryToolBlocked;
+
+  /// No description provided for @galleryDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get galleryDelete;
+
+  /// No description provided for @galleryCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get galleryCancel;
+
+  /// No description provided for @gallerySplitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Split image'**
+  String get gallerySplitTitle;
+
+  /// No description provided for @gallerySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get gallerySave;
+
+  /// No description provided for @galleryShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get galleryShare;
+
+  /// No description provided for @gallerySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Image saved'**
+  String get gallerySaved;
+
+  /// No description provided for @gallerySaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the image.'**
+  String get gallerySaveError;
+
   /// No description provided for @promemoriaViewList.
   ///
   /// In en, this message translates to:
