@@ -38,6 +38,12 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
           )
         : AppColors.brandGradientVertical;
 
+    // The CTA pill picks up the biotype's own `main_color` so it stays on
+    // theme with the card gradient; brand accent when the CMS omits it.
+    final ctaColor = _readableOnWhite(
+      gradientColors?.firstOrNull ?? AppColors.accent,
+    );
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -106,17 +112,13 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
                     Text(
                       ctaLabel,
                       style: AppTypography.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.accent,
+                        color: ctaColor,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.space2xs),
-                    const Icon(
-                      Icons.chevron_right,
-                      color: AppColors.accent,
-                      size: 20,
-                    ),
+                    Icon(Icons.chevron_right, color: ctaColor, size: 20),
                   ],
                 ),
               ),
@@ -127,6 +129,25 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
     );
   }
 }
+
+/// Darkens [color] until it clears the WCAG AA 4.5:1 ratio for 14px text on
+/// the white pill.
+///
+/// Several CMS biotype colors are too light to read on white — the cyan
+/// (#00ACAC), orange (#EF7900) and light blue (#009FE3) types all sit below
+/// 3:1 — so we walk the HSL lightness down instead of hardcoding per-type
+/// overrides, which keeps the hue (and the biotype's identity) intact.
+Color _readableOnWhite(Color color) {
+  const target = 4.5;
+  var hsl = HSLColor.fromColor(color);
+  while (_contrastOnWhite(hsl.toColor()) < target && hsl.lightness > 0.05) {
+    hsl = hsl.withLightness((hsl.lightness - 0.02).clamp(0.0, 1.0));
+  }
+  return hsl.toColor();
+}
+
+double _contrastOnWhite(Color color) =>
+    1.05 / (color.computeLuminance() + 0.05);
 
 /// Renders the biotype silhouette from a local asset with a graceful fallback
 /// (empty space) when the asset is missing or fails to load.
