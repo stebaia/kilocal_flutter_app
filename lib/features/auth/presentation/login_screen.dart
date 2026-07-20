@@ -49,6 +49,11 @@ class _LoginView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
+    // When the soft keyboard is open the viewport shrinks and the arc-clipped
+    // bottom bar rides up over the last input. Hide it while typing; it comes
+    // back as soon as the keyboard is dismissed.
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: BlocListener<LoginCubit, LoginState>(
@@ -69,48 +74,53 @@ class _LoginView extends StatelessWidget {
             );
           }
         },
-        child: SafeArea(
-          bottom: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.screenGutter,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: AppSpacing.spaceXl),
-                      Text(
-                        l10n.loginTitle,
-                        style: AppTypography.textTheme.headlineMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                          fontSize: 32,
-                          fontWeight: FontWeight.w600,
+        child: GestureDetector(
+          // Tapping outside the text fields dismisses the keyboard.
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.screenGutter,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: AppSpacing.spaceXl),
+                        Text(
+                          l10n.loginTitle,
+                          style: AppTypography.textTheme.headlineMedium
+                              ?.copyWith(
+                                color: AppColors.textPrimary,
+                                fontSize: 32,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.spaceSm),
-                      Text(
-                        l10n.loginSubtitle,
-                        style: AppTypography.textTheme.bodyLarge?.copyWith(
-                          color: AppColors.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                        const SizedBox(height: AppSpacing.spaceSm),
+                        Text(
+                          l10n.loginSubtitle,
+                          style: AppTypography.textTheme.bodyLarge?.copyWith(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.spaceXl),
-                      const LoginFormCard(),
-                      const SizedBox(height: AppSpacing.spaceXl),
-                      _ForgotPasswordRow(),
-                      const SizedBox(height: AppSpacing.spaceXl),
-                    ],
+                        const SizedBox(height: AppSpacing.spaceXl),
+                        const LoginFormCard(),
+                        const SizedBox(height: AppSpacing.spaceXl),
+                        _ForgotPasswordRow(),
+                        const SizedBox(height: AppSpacing.spaceXl),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              _LoginBottomBar(),
-            ],
+                if (!isKeyboardOpen) _LoginBottomBar(),
+              ],
+            ),
           ),
         ),
       ),
