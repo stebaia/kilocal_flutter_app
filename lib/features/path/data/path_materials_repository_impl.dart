@@ -248,7 +248,7 @@ query GetMaterial($id: ID!, $lang: String!) {
               internalName: cat.internalName,
             ),
           );
-          hidesImage = hidesImage || category.isAdvice;
+          hidesImage = hidesImage || category.hidesImage;
         }
 
         final vimeoUrl = dto.asset?.vimeoUrl;

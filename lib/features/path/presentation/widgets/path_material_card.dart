@@ -12,8 +12,8 @@ import '../../domain/entities/path_material.dart';
 /// media-type badge (play for video, document otherwise) and an "available"
 /// pill, with the title underneath.
 ///
-/// Materials flagged [PathMaterial.hidesImage] (the "Consigli utili") are
-/// text-only: the badges move next to the title and no cover is shown.
+/// Materials flagged [PathMaterial.hidesImage] ("Consigli utili" and "Schede")
+/// are text-only: the badges move next to the title and no cover is shown.
 class PathMaterialCard extends StatelessWidget {
   const PathMaterialCard({super.key, required this.material, this.onTap});
 
