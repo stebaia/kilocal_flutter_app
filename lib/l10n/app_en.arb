@@ -256,6 +256,15 @@
   "benefitViewDetails": "View details",
   "benefitClaimReward": "Claim the reward",
   "benefitClaimRewardError": "Unable to open the reward link",
+  "benefitVisitSite": "Visit the {partner} website",
+  "@benefitVisitSite": {
+    "placeholders": {
+      "partner": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitCouponCopied": "Discount code copied",
   "benefitsEmpty": "No benefits available",
   "momentiTitle": "Moments",
   "momentiEmpty": "No moments available",

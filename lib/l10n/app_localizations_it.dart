@@ -568,6 +568,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get benefitClaimRewardError => 'Impossibile aprire il link del premio';
 
   @override
+  String benefitVisitSite(String partner) {
+    return 'Visita il sito di $partner';
+  }
+
+  @override
+  String get benefitCouponCopied => 'Codice sconto copiato';
+
+  @override
   String get benefitsEmpty => 'Nessun benefit disponibile';
 
   @override

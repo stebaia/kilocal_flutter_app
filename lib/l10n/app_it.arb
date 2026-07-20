@@ -209,6 +209,15 @@
   "benefitViewDetails": "Visualizza dettagli",
   "benefitClaimReward": "Ottieni il premio",
   "benefitClaimRewardError": "Impossibile aprire il link del premio",
+  "benefitVisitSite": "Visita il sito di {partner}",
+  "@benefitVisitSite": {
+    "placeholders": {
+      "partner": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitCouponCopied": "Codice sconto copiato",
   "benefitsEmpty": "Nessun benefit disponibile",
   "momentiTitle": "Momenti",
   "momentiEmpty": "Nessun momento disponibile",
