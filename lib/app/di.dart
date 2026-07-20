@@ -31,6 +31,7 @@ import '../features/profile/data/profile_page_repository_impl.dart';
 import '../features/profile/domain/profile_kit_repository.dart';
 import '../features/profile/domain/profile_page_repository.dart';
 import '../features/profile/presentation/cubit/avatar_upload_cubit.dart';
+import '../features/profile/presentation/cubit/change_password_cubit.dart';
 import '../features/profile/presentation/cubit/profile_kit_cubit.dart';
 import '../features/profile/presentation/cubit/profile_page_cubit.dart';
 import '../features/profile/presentation/cubit/profile_update_cubit.dart';
@@ -68,6 +69,18 @@ import '../features/survey/data/survey_repository_impl.dart';
 import '../features/survey/domain/survey_repository.dart';
 import '../features/survey/presentation/cubit/survey_cubit.dart';
 import '../features/splash/presentation/cubit/splash_cubit.dart';
+import '../features/strumenti/gallery/data/gallery_api.dart';
+import '../features/strumenti/gallery/data/gallery_repository_impl.dart';
+import '../features/strumenti/gallery/domain/gallery_repository.dart';
+import '../features/strumenti/gallery/presentation/cubit/gallery_cubit.dart';
+import '../features/strumenti/glossario/data/glossario_repository_impl.dart';
+import '../features/strumenti/glossario/domain/glossario_repository.dart';
+import '../features/strumenti/glossario/presentation/cubit/glossario_cubit.dart';
+import '../features/strumenti/promemoria/data/promemoria_api.dart';
+import '../features/strumenti/promemoria/data/promemoria_notification_service.dart';
+import '../features/strumenti/promemoria/data/promemoria_repository_impl.dart';
+import '../features/strumenti/promemoria/domain/promemoria_repository.dart';
+import '../features/strumenti/promemoria/presentation/cubit/promemoria_cubit.dart';
 import '../features/user/data/user_api.dart';
 import '../features/user/data/user_repository_impl.dart';
 import '../features/user/domain/user_repository.dart';
@@ -194,7 +207,11 @@ void configureDependencies() {
     () => StatisticsCubit(statisticsRepository: getIt<StatisticsRepository>()),
   );
   getIt.registerLazySingleton<PathMaterialsRepository>(
-    () => PathMaterialsRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+    () => PathMaterialsRepositoryImpl(
+      graphqlClient: getIt<GraphqlClient>(),
+      dio: getIt<Dio>(),
+      vimeoOembedService: getIt<VimeoOembedService>(),
+    ),
   );
   getIt.registerFactory<PathMaterialsCubit>(
     () => PathMaterialsCubit(
@@ -204,6 +221,7 @@ void configureDependencies() {
   getIt.registerFactory<PathMaterialDetailCubit>(
     () => PathMaterialDetailCubit(
       materialsRepository: getIt<PathMaterialsRepository>(),
+      userCubit: getIt<UserCubit>(),
     ),
   );
   getIt.registerLazySingleton<ProgramUnlockRepository>(
@@ -263,6 +281,9 @@ void configureDependencies() {
       userCubit: getIt<UserCubit>(),
     ),
   );
+  getIt.registerFactory<ChangePasswordCubit>(
+    () => ChangePasswordCubit(userRepository: getIt<UserRepository>()),
+  );
   // Kit + supplement products ("Il mio Kit" / "Integrazione e prodotti").
   getIt.registerLazySingleton<ProfileKitRepository>(
     () => ProfileKitRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
@@ -283,7 +304,10 @@ void configureDependencies() {
     () => DiaryHistoryCubit(repository: getIt<DiaryRepository>()),
   );
   getIt.registerFactory<DiaryGoalsCubit>(
-    () => DiaryGoalsCubit(repository: getIt<DiaryRepository>()),
+    () => DiaryGoalsCubit(
+      repository: getIt<DiaryRepository>(),
+      surveyRepository: getIt<SurveyRepository>(),
+    ),
   );
 
   // --- Feature: Momenti ---
@@ -323,7 +347,50 @@ void configureDependencies() {
     () => SurveyCubit(
       repository: getIt<SurveyRepository>(),
       analytics: getIt<AnalyticsEvents>(),
+      // Shared with the unlock sheet so both accept the same barcodes.
+      unlockRepository: getIt<ProgramUnlockRepository>(),
     ),
+  );
+
+  // --- Feature: Strumenti / Promemoria ---
+  // Backend-backed calendar reminders (GET/POST/DELETE /tools/reminders) with a
+  // best-effort local notification scheduled per future reminder.
+  getIt.registerLazySingleton<PromemoriaApi>(() => PromemoriaApi(getIt<Dio>()));
+  getIt.registerLazySingleton<PromemoriaNotificationService>(
+    () => PromemoriaNotificationService(),
+  );
+  getIt.registerLazySingleton<PromemoriaRepository>(
+    () => PromemoriaRepositoryImpl(
+      api: getIt<PromemoriaApi>(),
+      notifications: getIt<PromemoriaNotificationService>(),
+    ),
+  );
+  getIt.registerFactory<PromemoriaCubit>(
+    () => PromemoriaCubit(repository: getIt<PromemoriaRepository>()),
+  );
+
+  // --- Feature: Strumenti / Foto Gallery ---
+  // Writes are REST (POST/DELETE /tools/photo-gallery); the photo list and the
+  // tool's copy are read over GraphQL. See [[photo-gallery-schema]].
+  getIt.registerLazySingleton<GalleryApi>(() => GalleryApi(getIt<Dio>()));
+  getIt.registerLazySingleton<GalleryRepository>(
+    () => GalleryRepositoryImpl(
+      api: getIt<GalleryApi>(),
+      graphql: getIt<GraphqlClient>(),
+    ),
+  );
+  getIt.registerFactory<GalleryCubit>(
+    () => GalleryCubit(repository: getIt<GalleryRepository>()),
+  );
+
+  // --- Feature: Strumenti / Glossario ---
+  // GraphQL-only: the glossary terms and the tool's copy. See
+  // [[glossario-schema]].
+  getIt.registerLazySingleton<GlossarioRepository>(
+    () => GlossarioRepositoryImpl(graphql: getIt<GraphqlClient>()),
+  );
+  getIt.registerFactory<GlossarioCubit>(
+    () => GlossarioCubit(repository: getIt<GlossarioRepository>()),
   );
 
   // --- Feature: Settings API ---

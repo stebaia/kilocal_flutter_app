@@ -105,9 +105,7 @@ class _OnboardingViewState extends State<_OnboardingView> {
               ),
               // White lower panel with a convex (dome) top edge, fading out on
               // the final step.
-              Positioned.fill(
-                child: _WhitePanel(redProgress: redProgress),
-              ),
+              Positioned.fill(child: _WhitePanel(redProgress: redProgress)),
               SafeArea(
                 child: Column(
                   children: [

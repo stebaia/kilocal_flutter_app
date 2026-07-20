@@ -5,10 +5,13 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../path/domain/program_unlock_repository.dart';
 import '../../domain/entities/pharmacy.dart';
 import '../../domain/entities/survey_answer.dart';
+import '../../domain/entities/survey_outcome.dart';
 import '../../domain/entities/survey_step.dart';
 import '../../domain/survey_repository.dart';
+import '../../domain/survey_validation.dart';
 
 part 'survey_state.dart';
 
@@ -18,16 +21,31 @@ class SurveyCubit extends Cubit<SurveyState> {
   SurveyCubit({
     required SurveyRepository repository,
     required AnalyticsEvents analytics,
+    required ProgramUnlockRepository unlockRepository,
   }) : _repository = repository,
        _analytics = analytics,
+       _unlockRepository = unlockRepository,
        super(const SurveyState());
 
   final SurveyRepository _repository;
   final AnalyticsEvents _analytics;
 
+  /// Supplies the `use_for_barcode_check` catalogue for `other_validations:
+  /// "barcode"` steps. Shared with the restricted-access unlock sheet so both
+  /// accept exactly the same codes.
+  final ProgramUnlockRepository _unlockRepository;
+
+  // Matches the other cubit-level messages, which are Italian literals because
+  // a Cubit has no BuildContext to reach AppLocalizations from.
+  static const _invalidBarcodeMessage =
+      'Codice a barre non riconosciuto. Controlla il codice sulla confezione '
+      'del tuo Starter Kit.';
+  static const _requiredMessage = 'Rispondi a questa domanda per continuare.';
+  static const _validationMessage = 'Controlla la risposta per continuare.';
+
   /// Loads the survey [internalName] and starts the wizard.
   Future<void> start(String internalName) async {
-    emit(state.copyWith(status: SurveyStatus.loading, errorMessage: null));
+    emit(state.copyWith(status: SurveyStatus.loading, clearError: true));
     unawaited(_analytics.onboardingStarted());
     try {
       // Ensure the user_details row exists before collecting answers.
@@ -169,9 +187,33 @@ class SurveyCubit extends Cubit<SurveyState> {
   // --- Navigation ------------------------------------------------------------
 
   Future<void> next() async {
+    // The UI disables the CTA for these, but the cubit owns the invariant: an
+    // unanswered required step or a failed `other_validations` rule must never
+    // advance, whatever calls next().
+    if (!state.canLeaveCurrentStep) return;
+
+    // A `barcode` step is only valid against the products catalogue, so it is
+    // checked here rather than while typing.
+    if (!await _barcodeAccepted()) return;
+
     if (state.isLastStep) {
+      // Already on the final screen: a result section has had its outcome since
+      // we advanced onto it, so there is nothing left to send.
+      if (state.currentSection?.kind == SurveySectionKind.result) {
+        emit(state.copyWith(status: SurveyStatus.completed));
+        return;
+      }
       await _submit();
       return;
+    }
+
+    // The result section renders the biotype outcome, so the answers must be
+    // submitted *before* it is shown — not when leaving it (which would land
+    // the user on a blank result and only fetch the data on the way out).
+    final next = state.visibleSections[state.currentIndex + 1];
+    if (next.kind == SurveySectionKind.result && state.submitResult == null) {
+      final submitted = await _submit(advanceOnly: true);
+      if (!submitted) return;
     }
     emit(state.copyWith(currentIndex: state.currentIndex + 1));
   }
@@ -182,10 +224,31 @@ class SurveyCubit extends Cubit<SurveyState> {
     }
   }
 
-  Future<void> _submit() async {
+  /// Sends the answers. When [advanceOnly] the wizard stays in progress so the
+  /// result section can render the outcome; otherwise the survey is finished.
+  ///
+  /// Returns whether the submit succeeded.
+  Future<bool> _submit({bool advanceOnly = false}) async {
     final survey = state.survey;
-    if (survey == null) return;
-    emit(state.copyWith(status: SurveyStatus.submitting, errorMessage: null));
+    if (survey == null) return false;
+
+    // Guard the whole survey, not just the step being left: next() only ever
+    // validates the current step, so a step walked back past — or edited after
+    // being passed — would otherwise reach the submit unchecked. This is what
+    // let "Fine" through with an unsatisfied barcode.
+    final blocking = await _firstUnsatisfiedStep();
+    if (blocking != null) {
+      emit(
+        state.copyWith(
+          status: SurveyStatus.inProgress,
+          currentIndex: blocking.$1,
+          errorMessage: blocking.$2,
+        ),
+      );
+      return false;
+    }
+
+    emit(state.copyWith(status: SurveyStatus.submitting, clearError: true));
     try {
       final result = await _repository.submit(
         internalName: survey.internalName,
@@ -199,8 +262,15 @@ class SurveyCubit extends Cubit<SurveyState> {
       await _analytics.surveySubmitted(survey.internalName);
       await _analytics.onboardingCompleted();
       emit(
-        state.copyWith(status: SurveyStatus.completed, submitResult: result),
+        state.copyWith(
+          status: advanceOnly
+              ? SurveyStatus.inProgress
+              : SurveyStatus.completed,
+          submitResult: result,
+          outcomeProfile: await _hydrateOutcome(result),
+        ),
       );
+      return true;
     } on ApiException catch (e) {
       emit(
         state.copyWith(
@@ -208,7 +278,120 @@ class SurveyCubit extends Cubit<SurveyState> {
           errorMessage: e.message ?? "Errore nell'invio del questionario",
         ),
       );
+      return false;
     }
+  }
+
+  /// Validates an `other_validations: "barcode"` step against the products
+  /// flagged `use_for_barcode_check` — the proof of purchase for the starter
+  /// kit. Returns whether the wizard may advance.
+  ///
+  /// Format alone proves nothing here, so the code must match the catalogue,
+  /// exactly as the restricted-access unlock sheet requires. On a mismatch the
+  /// user stays on the step with an error.
+  Future<bool> _barcodeAccepted() async {
+    final question = state.currentSection?.question;
+    if (question == null) return true;
+    if (!SurveyValidationRule.parse(question.otherValidations).isBarcode) {
+      return true;
+    }
+
+    final code = state.currentAnswer?.textValue?.trim().toUpperCase() ?? '';
+    // An empty code is the `required` check's business, not ours.
+    if (code.isEmpty) return true;
+
+    emit(state.copyWith(status: SurveyStatus.submitting, clearError: true));
+    final matches = await _isKnownBarcode(code);
+    emit(
+      state.copyWith(
+        status: SurveyStatus.inProgress,
+        errorMessage: matches ? null : _invalidBarcodeMessage,
+        // A newly valid code must clear the previous "not recognised".
+        clearError: matches,
+      ),
+    );
+    return matches;
+  }
+
+  /// Scans every visible step for one that must not reach the submit, and
+  /// returns its `(index, message)` so the wizard can send the user back to it.
+  ///
+  /// Covers the same rules as [SurveyState.canLeaveCurrentStep] plus the async
+  /// `barcode` catalogue check — the point being that the proof of purchase has
+  /// to hold when the survey is *sent*, not merely when its step was passed.
+  Future<(int, String)?> _firstUnsatisfiedStep() async {
+    final sections = state.visibleSections;
+    for (var i = 0; i < sections.length; i++) {
+      final section = sections[i];
+      final question = section.question;
+      if (question == null) continue;
+
+      final answer = state.answers[section.id];
+      if (question.required && (answer == null || answer.isEmpty)) {
+        return (i, _requiredMessage);
+      }
+
+      final raw = answer?.textValue;
+      final rule = SurveyValidationRule.parse(question.otherValidations);
+      if (rule.isBarcode) {
+        final code = raw?.trim().toUpperCase() ?? '';
+        // Empty is the `required` check's business, handled above.
+        if (code.isEmpty) continue;
+        if (!await _isKnownBarcode(code)) return (i, _invalidBarcodeMessage);
+        continue;
+      }
+
+      if (rule.validate(raw, heightCm: state.answeredHeightCm) != null) {
+        return (i, _validationMessage);
+      }
+    }
+    return null;
+  }
+
+  /// Whether [code] is in the `use_for_barcode_check` catalogue. A failed read
+  /// returns false: letting an unverified code through would defeat the gate.
+  Future<bool> _isKnownBarcode(String code) async {
+    try {
+      final products = await _unlockRepository.fetchBarcodeProducts();
+      return products.any((p) => p.codes.contains(code));
+    } on ApiException {
+      return false;
+    }
+  }
+
+  /// Loads the biotype's CMS copy for the result screen.
+  ///
+  /// The submit response references the profile by id only, so the texts and
+  /// images need a second read. A failure here is swallowed: the result screen
+  /// still shows the survey's own copy, and losing the biotype text is better
+  /// than failing a submit that already succeeded server-side.
+  Future<SurveyOutcome?> _hydrateOutcome(SurveySubmitResult result) async {
+    final outcome = result.biotype;
+    if (outcome == null) return null;
+    try {
+      return await _repository.fetchOutcomeProfile(
+        outcome,
+        gender: _genderFromAnswers(),
+      );
+    } on ApiException {
+      return outcome;
+    }
+  }
+
+  /// The gender answer (`value_to_store` of the `is_gender_question` section),
+  /// which selects the `content` / `content_f` variant. Read from the answers
+  /// rather than `user_details`, which the submit has only just written.
+  String? _genderFromAnswers() {
+    final survey = state.survey;
+    if (survey == null) return null;
+    for (final section in survey.sections) {
+      if (!section.isGenderQuestion) continue;
+      final values = state.answers[section.id]?.optionValuesToStore;
+      if (values != null && values.isNotEmpty && values.first.isNotEmpty) {
+        return values.first;
+      }
+    }
+    return null;
   }
 
   // --- Conditions ------------------------------------------------------------
@@ -227,7 +410,20 @@ class SurveyCubit extends Cubit<SurveyState> {
       for (final a in answers.values) ...a.selectedOptionIds,
     };
 
+    // TODO(survey-menopausa): rimuovere questo filtro età hardcoded quando il
+    // backend aggiunge la condition età alle section menopausa nel CMS (oggi
+    // hanno solo la condition genere==Femmina). La regola richiesta è: mostrare
+    // la domanda menopausa SOLO a profili femminili con età > 35. Il vincolo
+    // "femminile" arriva già dalle condition dell'API; qui aggiungiamo solo il
+    // gate età>35 finché il CMS non lo esprime da sé (vedi survey-feature-status).
+    final age = _ageFromAnswers(survey, answers);
+
     return survey.sections.where((section) {
+      // Gate età>35 additivo per la menopausa (temporaneo, vedi TODO sopra).
+      // Se non conosciamo ancora l'età (DOB non risposta) o è <= 35, nascondi.
+      if (section.isMenopausaQuestion && (age == null || age <= 35)) {
+        return false;
+      }
       if (section.conditions.isEmpty) return true;
       final matched = section.conditions.any(
         (c) => _conditionMatches(c, selectedIds),
@@ -236,6 +432,32 @@ class SurveyCubit extends Cubit<SurveyState> {
       // inverse.
       return section.conditionAction == 'hide' ? !matched : matched;
     }).toList();
+  }
+
+  /// TODO(survey-menopausa): rimuovere insieme al filtro età hardcoded sopra.
+  /// Deriva l'età in anni interi dalla risposta alla section DOB
+  /// ([SurveySection.isDobQuestion]), o null se non ancora risposta / non
+  /// parsabile. Stessa logica di `_computeAge` nel mapper del submit.
+  static int? _ageFromAnswers(
+    Survey survey,
+    Map<String, SurveyAnswer> answers,
+  ) {
+    final dobSection = survey.sections
+        .where((s) => s.isDobQuestion)
+        .cast<SurveySection?>()
+        .firstWhere((s) => s != null, orElse: () => null);
+    if (dobSection == null) return null;
+    final raw = answers[dobSection.id]?.textValue;
+    if (raw == null || raw.isEmpty) return null;
+    final dob = DateTime.tryParse(raw);
+    if (dob == null) return null;
+    final now = DateTime.now();
+    var age = now.year - dob.year;
+    if (now.month < dob.month ||
+        (now.month == dob.month && now.day < dob.day)) {
+      age--;
+    }
+    return age;
   }
 
   static bool _conditionMatches(SurveyCondition c, Set<String> selectedIds) {

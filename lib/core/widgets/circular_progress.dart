@@ -13,7 +13,7 @@ class CircularProgress extends StatelessWidget {
     this.strokeWidth = 6,
     this.trackColor,
     this.foregroundColor,
-    required this.isHome
+    required this.isHome,
   });
   final bool isHome;
   final double value;
@@ -44,7 +44,9 @@ class CircularProgress extends StatelessWidget {
           ),
           Text(
             '${(clamped * 100).round()}%',
-            style: isHome ? AppTypography.numericAccentCircularLarge : AppTypography.numericAccentCircular,
+            style: isHome
+                ? AppTypography.numericAccentCircularLarge
+                : AppTypography.numericAccentCircular,
           ),
         ],
       ),

@@ -84,13 +84,15 @@ class PathDetailCubit extends Cubit<PathDetailState> {
     required String area,
     required AppLocalizations l10n,
   }) async {
+    // Registering the "started" activity is best-effort: a failed POST must not
+    // block the user from reading the step, so we always fall through to load.
     try {
       await _pathRepository.startStep(stepId);
       await _analytics.pathStepOpened(pathId: area, stepId: stepId);
-      await load(area: area, l10n: l10n);
-    } on ApiException catch (e) {
-      emit(state.copyWith(status: PathDetailStatus.error, error: e));
+    } on ApiException {
+      // Swallow: the area still loads below and the read stays usable.
     }
+    await load(area: area, l10n: l10n);
   }
 
   Future<void> completeStep({

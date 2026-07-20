@@ -6,6 +6,7 @@ import '../../../core/network/graphql_client.dart';
 import '../domain/entities/path_material.dart';
 import '../domain/path_materials_repository.dart';
 import 'dto/path_material_dto.dart';
+import 'vimeo_oembed_service.dart';
 
 /// GraphQL-backed implementation of [PathMaterialsRepository].
 ///
@@ -15,10 +16,24 @@ import 'dto/path_material_dto.dart';
 /// by the group id and map the nested materials. Category tabs are derived from
 /// the categories present on the returned materials, de-duplicated by id.
 class PathMaterialsRepositoryImpl implements PathMaterialsRepository {
-  PathMaterialsRepositoryImpl({required GraphqlClient graphqlClient})
-    : _graphqlClient = graphqlClient;
+  PathMaterialsRepositoryImpl({
+    required GraphqlClient graphqlClient,
+    required Dio dio,
+    required VimeoOembedService vimeoOembedService,
+  }) : _graphqlClient = graphqlClient,
+       _dio = dio,
+       _vimeoOembedService = vimeoOembedService;
 
   final GraphqlClient _graphqlClient;
+
+  /// Video materials carry no cover file in the CMS — the poster lives on Vimeo,
+  /// so the card thumbnails are resolved through oEmbed (cached in the service).
+  final VimeoOembedService _vimeoOembedService;
+
+  /// Directus REST is used only for the completion write: `user_activities` has
+  /// no dedicated app endpoint and the many-to-any create is awkward over
+  /// GraphQL, so we POST the plain JSON body the backend documented.
+  final Dio _dio;
 
   static const _query = r'''
 query GetGroupMaterials($groupId: GraphQLStringOrFloat!, $lang: String!) {
@@ -31,6 +46,7 @@ query GetGroupMaterials($groupId: GraphQLStringOrFloat!, $lang: String!) {
       connect_to_article
       asset {
         asset_is_video
+        vimeo_url
         default_asset { id filename_download }
         mobile_asset { id filename_download }
       }
@@ -90,6 +106,15 @@ query GetCompletedMaterials($filter: user_activities_filter) {
     'completed_on': {'_nnull': true},
   };
 
+  /// Detail of one material. Materials with `connect_to_article` carry no body
+  /// of their own: their title/subtitle/body live on the linked `articles` row,
+  /// whose text is split across `plot` (intro) and the `blocks` many-to-any.
+  /// Only `block_text` is requested — on staging the article blocks of every
+  /// linked material are `block_text`, bar a single `block_aside_asset`.
+  ///
+  /// The downloadable PDF of a "Scheda" is not part of `asset` (which is null on
+  /// those materials): it hangs off the `ctas` links, whose `attachment` is
+  /// per-language. `attachemnt_translations` is misspelled in the CMS schema.
   static const _detailQuery = r'''
 query GetMaterial($id: ID!, $lang: String!) {
   percorsi_materials_by_id(id: $id) {
@@ -103,6 +128,52 @@ query GetMaterial($id: ID!, $lang: String!) {
     translations(filter: { languages_code: { code: { _eq: $lang } } }) {
       title
       content
+    }
+    categories {
+      percorsi_material_categories_id {
+        id
+        internal_name
+      }
+    }
+    ctas {
+      links_id {
+        download_on_click
+        translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+          label
+          url
+        }
+        attachemnt_translations(
+          filter: { languages_code: { code: { _eq: $lang } } }
+        ) {
+          attachment { id filename_download }
+        }
+      }
+    }
+    article {
+      id
+      cover {
+        asset_is_video
+        vimeo_url
+        default_asset { id filename_download }
+        mobile_asset { id filename_download }
+      }
+      translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+        title
+        subtitle
+        plot
+      }
+      blocks(sort: ["sort"]) {
+        collection
+        item {
+          ... on block_text {
+            id
+            translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+              title
+              content
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -127,42 +198,62 @@ query GetMaterial($id: ID!, $lang: String!) {
           data?['percorsi_groups_percorsi_materials'] as List<dynamic>? ??
           const [];
 
-      final materials = <PathMaterial>[];
-      // Preserve first-seen order of categories across all materials so the tab
-      // order is stable.
-      final categories = <String, PathMaterialCategory>{};
-
+      final dtos = <PathMaterialDto>[];
       for (final row in rows) {
         final junction = PathMaterialJunctionDto.fromJson(
           row as Map<String, dynamic>,
         );
         final dto = junction.material;
-        if (dto == null) continue;
+        if (dto != null) dtos.add(dto);
+      }
 
+      // Vimeo posters for the video materials, resolved in one concurrent pass
+      // so the cards don't fall back to the category hero.
+      final posters = await _vimeoOembedService.fetchAll(
+        dtos
+            .where((dto) => dto.asset?.assetIsVideo ?? false)
+            .map((dto) => dto.asset?.vimeoUrl)
+            .whereType<String>(),
+      );
+
+      final materials = <PathMaterial>[];
+      // Preserve first-seen order of categories across all materials so the tab
+      // order is stable.
+      final categories = <String, PathMaterialCategory>{};
+
+      for (final dto in dtos) {
         final categoryIds = <String>[];
         // Cover image to fall back to when the material carries no asset of its
         // own: the first category hero we encounter for this material.
         String? categoryHeroUrl;
+        var hidesImage = false;
         for (final cj in dto.categories) {
           final cat = cj.category;
           if (cat == null) continue;
           categoryIds.add(cat.id);
           categoryHeroUrl ??= _assetUrl(cat.heroAsset?.defaultAsset);
-          categories.putIfAbsent(
+          final category = categories.putIfAbsent(
             cat.id,
             () => PathMaterialCategory(
               id: cat.id,
               title: cat.translations.firstOrNull?.title ?? '',
+              internalName: cat.internalName,
             ),
           );
+          hidesImage = hidesImage || category.isAdvice;
         }
 
+        final vimeoUrl = dto.asset?.vimeoUrl;
         materials.add(
           _mapMaterial(
             dto,
             categoryIds,
             isCompleted: completedIds.contains(dto.id),
+            vimeoPosterUrl: vimeoUrl == null
+                ? null
+                : posters[vimeoUrl]?.thumbnailUrl,
             fallbackImageUrl: categoryHeroUrl,
+            hidesImage: hidesImage,
           ),
         );
       }
@@ -192,17 +283,59 @@ query GetMaterial($id: ID!, $lang: String!) {
       if (raw == null) return null;
 
       final dto = PathMaterialDto.fromJson(raw);
-      final asset = dto.asset;
-      final file = asset?.defaultAsset ?? asset?.mobileAsset;
       final translation = dto.translations.firstOrNull;
+      final articleTranslation = dto.article?.translations.firstOrNull;
+
+      // Materials that link an article have no body/asset of their own, so we
+      // fall back to the article for the body, the subtitle and the hero image.
+      final content = _nonEmpty(translation?.content) ?? _articleContent(dto);
+      final asset = dto.asset ?? dto.article?.cover;
+      final file = asset?.defaultAsset ?? asset?.mobileAsset;
 
       return PathMaterialDetail(
         id: dto.id,
-        title: translation?.title ?? '',
+        title:
+            _nonEmpty(translation?.title) ??
+            _nonEmpty(articleTranslation?.title) ??
+            '',
         isVideo: asset?.assetIsVideo ?? false,
-        content: translation?.content,
+        subtitle: _nonEmpty(articleTranslation?.subtitle),
+        content: content,
         imageUrl: _assetUrl(file),
         vimeoUrl: asset?.vimeoUrl,
+        attachments: _attachments(dto),
+        hidesImage: _isAdvice(dto),
+      );
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  @override
+  Future<void> markMaterialCompleted({
+    required String materialId,
+    required String userId,
+  }) async {
+    try {
+      // Idempotent: never duplicate a completion the user already has.
+      final completedIds = await _fetchCompletedMaterialIds();
+      if (completedIds.contains(materialId)) return;
+
+      final now = DateTime.now().toUtc().toIso8601String();
+      await _dio.post<Map<String, dynamic>>(
+        '/items/user_activities',
+        data: <String, dynamic>{
+          'user': userId,
+          // Both timestamps set so the completed-materials query (which filters
+          // on `completed_on`) and the diary Cronologia pick the row up.
+          'started_on': now,
+          'completed_on': now,
+          'activity': [
+            {'collection': 'percorsi_materials', 'item': materialId},
+          ],
+        },
       );
     } on ApiException {
       rethrow;
@@ -274,8 +407,8 @@ query GetMaterial($id: ID!, $lang: String!) {
     for (final row in rows) {
       final links = (row as Map<String, dynamic>)['activity'] as List<dynamic>?;
       for (final link in links ?? const []) {
-        final item = (link as Map<String, dynamic>)['item']
-            as Map<String, dynamic>?;
+        final item =
+            (link as Map<String, dynamic>)['item'] as Map<String, dynamic>?;
         if (item == null || item['__typename'] != 'percorsi_materials') {
           continue;
         }
@@ -290,15 +423,17 @@ query GetMaterial($id: ID!, $lang: String!) {
     PathMaterialDto dto,
     List<String> categoryIds, {
     required bool isCompleted,
+    required bool hidesImage,
+    String? vimeoPosterUrl,
     String? fallbackImageUrl,
   }) {
     final asset = dto.asset;
     final file = asset?.mobileAsset ?? asset?.defaultAsset;
 
-    // Most Benessere materials (consigli and Vimeo videos) carry no image file
-    // of their own; fall back to the category cover so the card is not a bare
-    // placeholder — matching the web app.
-    final imageUrl = _assetUrl(file) ?? fallbackImageUrl;
+    // Video materials carry no image file of their own, so their cover is the
+    // Vimeo poster; the remaining ones (consigli) fall back to the category
+    // cover so the card is not a bare placeholder — matching the web app.
+    final imageUrl = _assetUrl(file) ?? vimeoPosterUrl ?? fallbackImageUrl;
 
     return PathMaterial(
       id: dto.id,
@@ -308,12 +443,83 @@ query GetMaterial($id: ID!, $lang: String!) {
       isCompleted: isCompleted,
       categoryIds: categoryIds,
       imageUrl: imageUrl,
+      hidesImage: hidesImage,
     );
   }
 
+  /// Whether the material belongs to the "Consigli utili" category, which is
+  /// rendered text-only.
+  bool _isAdvice(PathMaterialDto dto) => dto.categories.any(
+    (cj) => cj.category?.internalName == PathMaterialCategories.advice,
+  );
+
   String? _assetUrl(PathMaterialFileDto? file) {
     if (file?.id == null) return null;
-    return '${Env.baseUrl}/assets/${file!.id}/${file.filenameDownload ?? ''}';
+    // Attachment file names contain spaces ("Obiettivo della settimana.pdf"),
+    // which would make the url unparseable for url_launcher.
+    final filename = Uri.encodeComponent(file!.filenameDownload ?? '');
+    return '${Env.baseUrl}/assets/${file.id}/$filename';
+  }
+
+  String? _nonEmpty(String? value) {
+    if (value == null) return null;
+    final trimmed = value.trim();
+    return trimmed.isEmpty ? null : trimmed;
+  }
+
+  /// Downloadable files offered by the material's CTAs. A `links` row can also
+  /// carry an external `url` instead of a file; those are skipped, since the
+  /// detail screen only renders downloads.
+  List<PathMaterialAttachment> _attachments(PathMaterialDto dto) {
+    final attachments = <PathMaterialAttachment>[];
+
+    for (final junction in dto.ctas) {
+      final link = junction.link;
+      if (link == null) continue;
+
+      final label = _nonEmpty(link.translations.firstOrNull?.label);
+
+      for (final translation in link.attachmentTranslations) {
+        final file = translation.attachment;
+        final url = _assetUrl(file);
+        if (url == null) continue;
+
+        attachments.add(
+          PathMaterialAttachment(
+            url: url,
+            label: label ?? file?.filenameDownload ?? '',
+          ),
+        );
+      }
+    }
+
+    return attachments;
+  }
+
+  /// HTML body of a material that links an article: the article's `plot` intro
+  /// followed by its `block_text` blocks, already sorted by the query. Blocks of
+  /// other collections resolve to a null `item` and are skipped.
+  String? _articleContent(PathMaterialDto dto) {
+    final article = dto.article;
+    if (article == null) return null;
+
+    final parts = <String>[];
+
+    final plot = _nonEmpty(article.translations.firstOrNull?.plot);
+    if (plot != null) parts.add(plot);
+
+    for (final block in article.blocks) {
+      final translation = block.item?.translations.firstOrNull;
+      if (translation == null) continue;
+
+      final title = _nonEmpty(translation.title);
+      if (title != null) parts.add('<h3>$title</h3>');
+
+      final content = _nonEmpty(translation.content);
+      if (content != null) parts.add(content);
+    }
+
+    return parts.isEmpty ? null : parts.join('\n');
   }
 
   String _resolveLocale() {

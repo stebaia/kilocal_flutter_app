@@ -29,6 +29,7 @@ import '../features/path/presentation/path_materials_screen.dart';
 import '../features/path/presentation/path_screen.dart';
 import '../features/path/presentation/path_step_screen.dart';
 import '../features/path/presentation/path_timeframe_steps_screen.dart';
+import '../features/profile/presentation/change_password_screen.dart';
 import '../features/profile/presentation/profile_form_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/profile_kit_screen.dart';
@@ -36,6 +37,13 @@ import '../features/profile/presentation/profile_kit_products_screen.dart';
 import '../features/profile/presentation/profile_type_screen.dart';
 import '../features/profile/presentation/profile_type_percorsi_screen.dart';
 import '../features/splash/presentation/splash_screen.dart';
+import '../features/strumenti/domain/entities/strumento.dart';
+import '../features/strumenti/presentation/strumenti_screen.dart';
+import '../features/strumenti/presentation/strumento_detail_screen.dart';
+import '../features/strumenti/gallery/presentation/gallery_screen.dart';
+import '../features/strumenti/glossario/presentation/glossario_screen.dart';
+import '../features/strumenti/promemoria/presentation/promemoria_screen.dart';
+import '../features/strumenti/timer/presentation/timer_screen.dart';
 import '../features/momenti/presentation/momenti_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/statistics/presentation/statistics_screen.dart';
@@ -43,9 +51,54 @@ import '../features/survey/presentation/survey_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Routes that must stay reachable while onboarding is pending: the auth flow
+/// (there is no session to gate yet) and the survey itself (the destination).
+const _onboardingExemptRoutes = {
+  '/splash',
+  '/onboarding',
+  '/login',
+  '/signup',
+  '/forgot-password',
+  '/survey',
+};
+
+/// The route a user must be forced onto for [pendingSurvey], or `null` to let
+/// navigation to [path] proceed.
+///
+/// `user_details.profile_status` is the backend's content gate: while it names
+/// a survey (e.g. `starter_kit` → the post-purchase barcode survey), the user
+/// must complete that survey before reaching the rest of the app. Without this
+/// a user could leave the survey — via back, a deep link or an in-app `go` —
+/// and browse without having entered a proof of purchase.
+///
+/// [sessionLoaded] gates the whole rule: with no session there is nothing to
+/// gate. The auth routes and the survey itself are exempt, otherwise login
+/// would redirect onto itself.
+@visibleForTesting
+String? onboardingRedirectFor({
+  required bool sessionLoaded,
+  required String? pendingSurvey,
+  required String path,
+}) {
+  if (!sessionLoaded) return null;
+  if (pendingSurvey == null) return null;
+  if (_onboardingExemptRoutes.contains(path)) return null;
+  return '/survey?internalName=$pendingSurvey';
+}
+
+String? _onboardingRedirect(BuildContext context, GoRouterState state) {
+  final userState = getIt<UserCubit>().state;
+  return onboardingRedirectFor(
+    sessionLoaded: userState.status == UserStatus.loaded,
+    pendingSurvey: userState.profileStatus.surveyInternalName,
+    path: state.uri.path,
+  );
+}
+
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: '/splash',
+  redirect: _onboardingRedirect,
   routes: [
     GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
     GoRoute(
@@ -79,10 +132,17 @@ final GoRouter appRouter = GoRouter(
       path: '/survey',
       // `internalName` selects the CMS survey (type_survey, starter_kit,
       // qr_pharmacy_1/2, single_product_survey). Defaults to the initial survey.
-      builder: (context, state) => SurveyScreen(
-        internalName:
-            state.uri.queryParameters['internalName'] ?? 'type_survey',
-      ),
+      builder: (context, state) {
+        final internalName =
+            state.uri.queryParameters['internalName'] ?? 'type_survey';
+        return SurveyScreen(
+          // Keyed by survey: chaining one onto another (type_survey →
+          // starter_kit) keeps the same path, so without this the Element is
+          // reused and the finished survey stays on screen.
+          key: ValueKey('survey-$internalName'),
+          internalName: internalName,
+        );
+      },
     ),
     GoRoute(
       path: '/momenti/:id',
@@ -187,6 +247,46 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: '/strumenti',
+              builder: (context, state) => const StrumentiScreen(),
+              routes: [
+                // Every tool now has its own screen; the `:id` placeholder
+                // below only catches ids these routes don't cover.
+                GoRoute(
+                  path: 'promemoria',
+                  builder: (context, state) => const PromemoriaScreen(),
+                ),
+                GoRoute(
+                  path: 'timer',
+                  builder: (context, state) => const TimerScreen(),
+                ),
+                GoRoute(
+                  path: 'gallery',
+                  builder: (context, state) => const GalleryScreen(),
+                ),
+                GoRoute(
+                  path: 'glossario',
+                  builder: (context, state) => const GlossarioScreen(),
+                ),
+                // Launched-tool destination. `:id` is a StrumentoId name;
+                // unknown values fall back to the first tool.
+                GoRoute(
+                  path: ':id',
+                  builder: (context, state) {
+                    final id = StrumentoId.values.firstWhere(
+                      (e) => e.name == state.pathParameters['id'],
+                      orElse: () => StrumentoId.promemoria,
+                    );
+                    return StrumentoDetailScreen(id: id);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
               path: '/profile',
               builder: (context, state) => const ProfileScreen(),
               routes: [
@@ -246,6 +346,10 @@ final GoRouter appRouter = GoRouter(
                     )!.profileFoodPreferences,
                   ),
                 ),
+                GoRoute(
+                  path: 'change-password',
+                  builder: (context, state) => const ChangePasswordScreen(),
+                ),
               ],
             ),
           ],
@@ -264,6 +368,7 @@ class AppScaffold extends StatelessWidget {
     AppIcons.home,
     AppIcons.path,
     AppIcons.diary,
+    AppIcons.strumenti,
     AppIcons.popsicle,
   ];
 

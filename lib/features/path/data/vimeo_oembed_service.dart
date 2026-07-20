@@ -21,11 +21,40 @@ class VimeoOembedService {
 
   final Dio _dio;
 
+  /// Results per video url, kept for the process lifetime. The materials list
+  /// resolves a poster per video on every load, and the same videos also appear
+  /// in the detail screen — without this each visit would re-hit Vimeo.
+  /// Misses are cached too (as null), so a private video is not retried on
+  /// every rebuild.
+  final Map<String, VimeoOembed?> _cache = {};
+
   static const String _endpoint = 'https://vimeo.com/api/oembed.json';
+
+  /// Metadata for every url in [videoUrls], keyed by url, fetched concurrently.
+  /// Urls whose lookup fails are absent from the result.
+  Future<Map<String, VimeoOembed>> fetchAll(Iterable<String> videoUrls) async {
+    final urls = videoUrls.toSet();
+    final results = await Future.wait(urls.map(fetch));
+
+    final byUrl = <String, VimeoOembed>{};
+    for (final (index, url) in urls.indexed) {
+      final data = results[index];
+      if (data != null) byUrl[url] = data;
+    }
+    return byUrl;
+  }
 
   /// Returns metadata for [videoUrl], or `null` when the video is private,
   /// the URL is malformed, or the network call fails. Never throws.
   Future<VimeoOembed?> fetch(String videoUrl) async {
+    if (_cache.containsKey(videoUrl)) return _cache[videoUrl];
+
+    final data = await _fetch(videoUrl);
+    _cache[videoUrl] = data;
+    return data;
+  }
+
+  Future<VimeoOembed?> _fetch(String videoUrl) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         _endpoint,

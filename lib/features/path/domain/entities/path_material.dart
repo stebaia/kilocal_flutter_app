@@ -14,6 +14,7 @@ class PathMaterial extends Equatable {
     required this.isCompleted,
     required this.categoryIds,
     this.imageUrl,
+    this.hidesImage = false,
   });
 
   final String id;
@@ -37,6 +38,10 @@ class PathMaterial extends Equatable {
   /// (e.g. it links to an article instead).
   final String? imageUrl;
 
+  /// Whether the card must be rendered without its cover image: the editorial
+  /// "Consigli utili" are text-only by design.
+  final bool hidesImage;
+
   @override
   List<Object?> get props => [
     id,
@@ -46,6 +51,7 @@ class PathMaterial extends Equatable {
     isCompleted,
     categoryIds,
     imageUrl,
+    hidesImage,
   ];
 }
 
@@ -53,14 +59,21 @@ class PathMaterial extends Equatable {
 ///
 /// A material is either a **video** (Vimeo player, reusing the path-step video
 /// layout) or a **text/image** material (hero image + title + HTML body).
+///
+/// Materials flagged `connect_to_article` carry no body of their own: [content]
+/// is then composed from the linked article's `plot` and its `block_text`
+/// blocks, and [subtitle]/[imageUrl] likewise fall back to the article.
 class PathMaterialDetail extends Equatable {
   const PathMaterialDetail({
     required this.id,
     required this.title,
     required this.isVideo,
+    this.subtitle,
     this.content,
     this.imageUrl,
     this.vimeoUrl,
+    this.attachments = const [],
+    this.hidesImage = false,
   });
 
   final String id;
@@ -68,6 +81,10 @@ class PathMaterialDetail extends Equatable {
 
   /// Whether the material is a video (`asset.asset_is_video`).
   final bool isVideo;
+
+  /// Optional subtitle shown under the title; only linked articles carry one,
+  /// and rarely.
+  final String? subtitle;
 
   /// HTML body shown under the title for text materials.
   final String? content;
@@ -77,6 +94,14 @@ class PathMaterialDetail extends Equatable {
 
   /// Vimeo url for video materials (`asset.vimeo_url`).
   final String? vimeoUrl;
+
+  /// Downloadable files offered by the material's CTAs — the PDFs of the
+  /// "Schede" materials. Empty for materials that offer no download.
+  final List<PathMaterialAttachment> attachments;
+
+  /// Whether the detail must be rendered without its hero image: the editorial
+  /// "Consigli utili" are text-only by design.
+  final bool hidesImage;
 
   /// Embed url for the Vimeo player, preserving query parameters.
   String? get vimeoEmbedUrl {
@@ -98,19 +123,63 @@ class PathMaterialDetail extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, title, isVideo, content, imageUrl, vimeoUrl];
+  List<Object?> get props => [
+    id,
+    title,
+    isVideo,
+    subtitle,
+    content,
+    imageUrl,
+    vimeoUrl,
+    attachments,
+    hidesImage,
+  ];
+}
+
+/// A downloadable file attached to a material through a CTA (`links` row with
+/// a per-language `attachment`), e.g. the PDF of a "Scheda".
+class PathMaterialAttachment extends Equatable {
+  const PathMaterialAttachment({required this.url, required this.label});
+
+  /// Direct `/assets` url of the file; served without authentication.
+  final String url;
+
+  /// CTA text from the CMS ("Scarica il file"), falling back to the file name.
+  final String label;
+
+  @override
+  List<Object?> get props => [url, label];
 }
 
 /// A category tab shown at the top of the materials hub
 /// (`percorsi_material_categories`).
 class PathMaterialCategory extends Equatable {
-  const PathMaterialCategory({required this.id, required this.title});
+  const PathMaterialCategory({
+    required this.id,
+    required this.title,
+    this.internalName,
+  });
 
   final String id;
   final String title;
 
+  /// Stable CMS slug (`internal_name`), e.g. `consigli-utili`. Unlike [title] it
+  /// is not translated, so it is what feature checks key off.
+  final String? internalName;
+
+  /// The editorial "Consigli utili" category, whose items are shown without any
+  /// cover image.
+  bool get isAdvice => internalName == PathMaterialCategories.advice;
+
   @override
-  List<Object?> get props => [id, title];
+  List<Object?> get props => [id, title, internalName];
+}
+
+/// Known `percorsi_material_categories.internal_name` values the app keys off.
+abstract final class PathMaterialCategories {
+  /// "Consigli utili" — its materials are rendered text-only, with no image in
+  /// the list card nor in the detail.
+  static const advice = 'consigli-utili';
 }
 
 /// The full materials hub payload for one area: the available category tabs and

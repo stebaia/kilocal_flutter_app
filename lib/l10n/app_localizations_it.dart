@@ -376,7 +376,43 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileAvatarError => 'Impossibile aggiornare la foto profilo';
 
   @override
+  String get profileChangePassword => 'Cambia password';
+
+  @override
+  String get profileChangePasswordHint =>
+      'Scegli una nuova password per il tuo account.';
+
+  @override
+  String get profileNewPassword => 'Nuova password';
+
+  @override
+  String get profileConfirmPassword => 'Conferma nuova password';
+
+  @override
+  String get profileChangePasswordSubmit => 'Aggiorna password';
+
+  @override
+  String get profilePasswordUpdated => 'Password aggiornata';
+
+  @override
+  String get profilePasswordError => 'Impossibile aggiornare la password';
+
+  @override
+  String profilePasswordTooShort(int count) {
+    return 'La password deve avere almeno $count caratteri';
+  }
+
+  @override
+  String get profilePasswordMismatch => 'Le due password non coincidono';
+
+  @override
   String get profileFoodPreferences => 'Preferenze alimentari';
+
+  @override
+  String get profileFoodPreferencesEdit => 'Aggiungi o modifica';
+
+  @override
+  String get profileFoodPreferencesEmpty => 'Nessuna selezione';
 
   @override
   String get profileNotificationsSection => 'Notifiche';
@@ -448,6 +484,54 @@ class AppLocalizationsIt extends AppLocalizations {
   String get surveyStart => 'Inizia';
 
   @override
+  String get surveyFindPharmacy => 'Trova una Farmacia Kilocal Point';
+
+  @override
+  String get surveyGoToShop => 'Vai allo shop';
+
+  @override
+  String get surveyEnterProofOfPurchase => 'Inserisci prova d\'acquisto';
+
+  @override
+  String get surveyErrorNotANumber => 'Inserisci un numero valido';
+
+  @override
+  String get surveyErrorNotAnInteger => 'Inserisci un numero intero';
+
+  @override
+  String get surveyErrorTooSmall => 'Il valore inserito è troppo basso';
+
+  @override
+  String get surveyErrorTooLarge => 'Il valore inserito è troppo alto';
+
+  @override
+  String get surveyErrorNotADate => 'Inserisci una data valida';
+
+  @override
+  String get surveyErrorDateTooLate => 'Devi avere almeno 18 anni';
+
+  @override
+  String get surveyErrorDateTooEarly => 'Inserisci una data valida';
+
+  @override
+  String get surveyErrorBmiTooLow =>
+      'Il peso inserito non è compatibile con la tua altezza';
+
+  @override
+  String get surveyErrorInvalidZipCode => 'Inserisci un CAP valido (5 cifre)';
+
+  @override
+  String get surveyErrorInvalidPhone =>
+      'Inserisci un numero di telefono valido';
+
+  @override
+  String get surveyErrorInvalidBarcode =>
+      'Codice a barre non riconosciuto. Controlla il codice sulla confezione del tuo Starter Kit.';
+
+  @override
+  String get surveyBarcodeChecking => 'Verifica del codice in corso…';
+
+  @override
   String get notificationsEmpty => 'Nessuna notifica';
 
   @override
@@ -481,6 +565,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get benefitClaimReward => 'Ottieni il premio';
 
   @override
+  String get benefitClaimRewardError => 'Impossibile aprire il link del premio';
+
+  @override
   String get benefitsEmpty => 'Nessun benefit disponibile';
 
   @override
@@ -488,6 +575,12 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get momentiEmpty => 'Nessun momento disponibile';
+
+  @override
+  String get momentiInfoTitle => 'Informazioni';
+
+  @override
+  String get momentiInfoTooltip => 'Informazioni sul momento';
 
   @override
   String get diaryCompleted => 'Completato';
@@ -730,6 +823,28 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diaryGoalSave => 'Salva';
 
   @override
+  String get diaryActivityDetailTitle => 'Dettagli Attività';
+
+  @override
+  String diaryActivityCategory(String category) {
+    return 'Categoria: $category';
+  }
+
+  @override
+  String diaryActivityPlannedOn(String date) {
+    return 'Completamento previsto: $date';
+  }
+
+  @override
+  String diaryActivityToComplete(String date) {
+    return 'Da completare: $date';
+  }
+
+  @override
+  String get diaryActivityCompleteError =>
+      'Impossibile completare l\'attività. Riprova.';
+
+  @override
   String get month1 => 'Mese 1';
 
   @override
@@ -800,6 +915,15 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get pathTimerStop => 'interrompi';
+
+  @override
+  String get pathTimerPause => 'Pausa';
+
+  @override
+  String get pathTimerResume => 'Riprendi';
+
+  @override
   String get pathAreaProgressLabel => 'Il tuo percorso';
 
   @override
@@ -824,6 +948,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pathMaterialsFilterUnavailable => 'Non disponibili';
 
   @override
+  String get pathMaterialDownloadError =>
+      'Impossibile aprire il file. Riprova.';
+
+  @override
   String pathTimeframeStepsCount(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
@@ -842,4 +970,160 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get pathAreaLocked => 'Questo percorso non è ancora disponibile.';
+
+  @override
+  String get strumentiTitle => 'Strumenti';
+
+  @override
+  String get strumentiLaunch => 'Avvia strumento';
+
+  @override
+  String get strumentiPromemoria => 'Promemoria';
+
+  @override
+  String get strumentiTimer => 'Timer';
+
+  @override
+  String get strumentiGlossario => 'Glossario';
+
+  @override
+  String get strumentiGallery => 'Gallery';
+
+  @override
+  String get strumentiComingSoon => 'Questo strumento sarà presto disponibile.';
+
+  @override
+  String get glossarioSearch => 'Cerca';
+
+  @override
+  String get glossarioSearchHint => 'Parola chiave';
+
+  @override
+  String get glossarioResults => 'Risultati corrispondenti';
+
+  @override
+  String get glossarioEmpty => 'Nessun risultato per questa ricerca.';
+
+  @override
+  String get glossarioLoadError => 'Impossibile caricare il glossario.';
+
+  @override
+  String get galleryPhotosTitle => 'Le mie foto';
+
+  @override
+  String get galleryUploadTitle => 'Carica immagine';
+
+  @override
+  String get galleryUploadInfo =>
+      'Usa il bottone per caricare il contenuto del tuo dispositivo';
+
+  @override
+  String get galleryUpload => 'Carica';
+
+  @override
+  String get galleryTakePhoto => 'Scatta foto';
+
+  @override
+  String get galleryRetakePhoto => 'Scatta di nuovo';
+
+  @override
+  String get galleryConfirmUpload => 'Conferma e carica';
+
+  @override
+  String get galleryUploadError => 'Impossibile caricare la foto. Riprova.';
+
+  @override
+  String get galleryDeleteError => 'Impossibile eliminare la foto. Riprova.';
+
+  @override
+  String get galleryLoadError => 'Impossibile caricare le foto.';
+
+  @override
+  String get galleryEmpty => 'Non hai ancora caricato nessuna foto.';
+
+  @override
+  String get galleryToolBlocked =>
+      'Questo strumento non è al momento disponibile.';
+
+  @override
+  String get galleryDelete => 'Elimina';
+
+  @override
+  String get galleryCancel => 'Annulla';
+
+  @override
+  String get gallerySplitTitle => 'Split image';
+
+  @override
+  String get gallerySave => 'Salva';
+
+  @override
+  String get galleryShare => 'Condividi';
+
+  @override
+  String get gallerySaved => 'Immagine salvata';
+
+  @override
+  String get gallerySaveError => 'Impossibile salvare l\'immagine.';
+
+  @override
+  String get promemoriaViewList => 'Lista';
+
+  @override
+  String get promemoriaViewCalendar => 'Calendario';
+
+  @override
+  String get promemoriaEmpty => 'Nessun promemoria per questo mese.';
+
+  @override
+  String get promemoriaLoadError => 'Impossibile caricare i promemoria.';
+
+  @override
+  String get promemoriaAddTitle => 'Aggiungi promemoria';
+
+  @override
+  String get promemoriaMessageLabel => 'Messaggio';
+
+  @override
+  String get promemoriaMessageHint => 'Inserisci qui il testo del promemoria';
+
+  @override
+  String get promemoriaDateLabel => 'Data';
+
+  @override
+  String get promemoriaTimeLabel => 'Ora';
+
+  @override
+  String get promemoriaSelectDate => 'Seleziona data';
+
+  @override
+  String get promemoriaSelectTime => 'Seleziona orario';
+
+  @override
+  String get promemoriaConfirm => 'Conferma';
+
+  @override
+  String get promemoriaSave => 'Salva promemoria';
+
+  @override
+  String get promemoriaEditTitle => 'Modifica Promemoria';
+
+  @override
+  String get promemoriaEdit => 'Modifica';
+
+  @override
+  String get promemoriaSaveShort => 'Salva';
+
+  @override
+  String get promemoriaDelete => 'Elimina';
+
+  @override
+  String get promemoriaDeleteTitle => 'Elimina promemoria';
+
+  @override
+  String get promemoriaCancel => 'Annulla';
+
+  @override
+  String get promemoriaDeleteConfirm =>
+      'Sicuro di voler eliminare il promemoria?';
 }

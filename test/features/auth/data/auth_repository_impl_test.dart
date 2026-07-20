@@ -29,26 +29,28 @@ void main() {
   });
 
   group('AuthRepositoryImpl.logout', () {
-    test('clears tokens, invokes onLogout and calls the API with refresh token',
-        () async {
-      const refreshToken = 'refresh-123';
+    test(
+      'clears tokens, invokes onLogout and calls the API with refresh token',
+      () async {
+        const refreshToken = 'refresh-123';
 
-      when(() => tokenStore.refreshToken).thenAnswer((_) async => refreshToken);
-      when(() => tokenStore.clear()).thenAnswer((_) async {});
-      when(() => api.logout(any(that: isMap)))
-          .thenAnswer((_) async => _httpResponse());
+        when(
+          () => tokenStore.refreshToken,
+        ).thenAnswer((_) async => refreshToken);
+        when(() => tokenStore.clear()).thenAnswer((_) async {});
+        when(
+          () => api.logout(any(that: isMap)),
+        ).thenAnswer((_) async => _httpResponse());
 
-      await repository.logout();
+        await repository.logout();
 
-      verify(() => tokenStore.clear()).called(1);
-      verify(
-        () => api.logout({
-          'refresh_token': refreshToken,
-          'mode': 'json',
-        }),
-      ).called(1);
-      expect(onLogoutCalled, isTrue);
-    });
+        verify(() => tokenStore.clear()).called(1);
+        verify(
+          () => api.logout({'refresh_token': refreshToken, 'mode': 'json'}),
+        ).called(1);
+        expect(onLogoutCalled, isTrue);
+      },
+    );
 
     test('skips API call when there is no refresh token', () async {
       when(() => tokenStore.refreshToken).thenAnswer((_) async => null);

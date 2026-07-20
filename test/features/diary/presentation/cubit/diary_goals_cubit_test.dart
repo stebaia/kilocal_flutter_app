@@ -3,9 +3,12 @@ import 'package:kilocal_flutter_app/features/diary/domain/diary_repository.dart'
 import 'package:kilocal_flutter_app/features/diary/domain/entities/diary_activity.dart';
 import 'package:kilocal_flutter_app/features/diary/domain/entities/diary_goal.dart';
 import 'package:kilocal_flutter_app/features/diary/presentation/cubit/diary_goals_cubit.dart';
+import 'package:kilocal_flutter_app/features/survey/domain/survey_repository.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDiaryRepository extends Mock implements DiaryRepository {}
+
+class MockSurveyRepository extends Mock implements SurveyRepository {}
 
 void main() {
   setUpAll(() {
@@ -14,6 +17,7 @@ void main() {
 
   group('DiaryGoalsCubit', () {
     late MockDiaryRepository repository;
+    late MockSurveyRepository surveyRepository;
     late DiaryGoalsCubit cubit;
 
     const personal = DiaryGoal(
@@ -38,11 +42,18 @@ void main() {
 
     setUp(() {
       repository = MockDiaryRepository();
+      surveyRepository = MockSurveyRepository();
       // load() also fetches categories for the create picker.
       when(
         () => repository.fetchCategories(),
       ).thenAnswer((_) async => const []);
-      cubit = DiaryGoalsCubit(repository: repository);
+      when(
+        () => surveyRepository.fetchMonthEndStatus(),
+      ).thenAnswer((_) async => null);
+      cubit = DiaryGoalsCubit(
+        repository: repository,
+        surveyRepository: surveyRepository,
+      );
     });
 
     test('load emits loaded goals on success', () async {
@@ -54,6 +65,33 @@ void main() {
 
       expect(cubit.state.status, DiaryGoalsStatus.loaded);
       expect(cubit.state.goals, hasLength(3));
+    });
+
+    // The backend materialises the `traguardo_mese_N` goals as a side-effect of
+    // the month-end check, so it has to happen before the list is fetched.
+    test('load triggers the month-end check before fetching goals', () async {
+      when(() => repository.fetchGoals()).thenAnswer((_) async => [kilocal]);
+
+      await cubit.load();
+
+      verifyInOrder([
+        () => surveyRepository.fetchMonthEndStatus(),
+        () => repository.fetchGoals(),
+      ]);
+    });
+
+    test('load still lists goals when the month-end check fails', () async {
+      when(
+        () => surveyRepository.fetchMonthEndStatus(),
+      ).thenThrow(Exception('boom'));
+      when(
+        () => repository.fetchGoals(),
+      ).thenAnswer((_) async => [personal, kilocal]);
+
+      await cubit.load();
+
+      expect(cubit.state.status, DiaryGoalsStatus.loaded);
+      expect(cubit.state.goals, hasLength(2));
     });
 
     test('load emits error on failure', () async {

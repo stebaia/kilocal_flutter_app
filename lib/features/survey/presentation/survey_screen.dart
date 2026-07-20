@@ -4,15 +4,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
+import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../l10n/app_localizations.dart';
+import '../../user/presentation/cubit/user_cubit.dart';
 import '../domain/entities/survey_answer.dart';
+import '../domain/entities/survey_outcome.dart';
 import '../domain/entities/survey_step.dart';
 import 'cubit/survey_cubit.dart';
+import 'survey_validation_l10n.dart';
 import 'widgets/survey_answer_input.dart';
 import 'widgets/survey_html.dart';
 import 'widgets/survey_kit_card.dart';
 import 'widgets/survey_pharmacy_picker.dart';
+import 'widgets/survey_result_actions.dart';
 import 'widgets/survey_scaffold.dart';
 
 /// Entry point for the CMS-driven survey wizard. Pass the CMS `internalName`
@@ -38,12 +44,23 @@ class _SurveyView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<SurveyCubit, SurveyState>(
       listenWhen: (p, c) => p.status != c.status,
-      listener: (context, state) {
-        if (state.status == SurveyStatus.completed) {
-          // TODO(backend): route to the outcome/result destination once the
-          // `outcome` / kit_shop_url contract is confirmed. For now, land home.
-          context.go('/home');
+      listener: (context, state) async {
+        if (state.status != SurveyStatus.completed) return;
+        // The outcome is shown on the in-wizard result section (submitted on
+        // the way in), so completing means the user dismissed it.
+        //
+        // Where to go next is the backend's call, not ours: the submit moves
+        // `profile_status` on (type_survey → starter_kit), which may require a
+        // further survey — the starter kit's proof of purchase. Reload the
+        // session and follow the status, so finishing here cannot skip a gate.
+        final user = getIt<UserCubit>();
+        try {
+          await user.loadSession();
+        } on ApiException {
+          // Keep the user moving; the gate is re-evaluated on the next launch.
         }
+        if (!context.mounted) return;
+        context.go(user.state.route ?? '/home');
       },
       builder: (context, state) {
         switch (state.status) {
@@ -87,9 +104,15 @@ class _StepView extends StatelessWidget {
       currentIndex: state.currentIndex,
       stepLabel: '$stepNumber. ${_stepLabel(section)}',
       ctaLabel: _ctaLabel(section, state),
-      ctaEnabled: _canProceed(section, state),
+      ctaEnabled: state.canLeaveCurrentStep,
       busy: state.status == SurveyStatus.submitting,
-      errorMessage: state.errorMessage,
+      // A live validation failure takes precedence: it tells the user why the
+      // CTA is disabled, whereas errorMessage reports a failed request.
+      errorMessage:
+          state.currentValidationError?.message(
+            AppLocalizations.of(context)!,
+          ) ??
+          state.errorMessage,
       // No back arrow on the first step.
       onBack: state.isFirstStep ? null : cubit.previous,
       onCta: cubit.next,
@@ -110,15 +133,6 @@ class _StepView extends StatelessWidget {
         ? note.trim()
         : 'Scritta solo per step corrente';
   }
-
-  /// Blocks the CTA until a required question is answered / a pharmacy chosen.
-  bool _canProceed(SurveySection section, SurveyState state) {
-    if (section.loadKilocalPoints) return state.selectedPharmacy != null;
-    final question = section.question;
-    if (question == null || !question.required) return true;
-    final answer = state.currentAnswer;
-    return answer != null && !answer.isEmpty;
-  }
 }
 
 /// Renders the body for a section based on its [SurveySectionKind] and, for
@@ -135,11 +149,15 @@ class _SectionBody extends StatelessWidget {
     final answer = state.currentAnswer;
 
     final isResult = section.kind == SurveySectionKind.result;
-    // Result screens fill {{name}}/{{type}}/{{product}}/{{outcome_profile}} from
-    // the submit outcome. TODO(backend): confirm the exact outcome keys once a
-    // real submit response is available (see wiki/survey.md).
+    // Result screens fill {{name}}/{{type}}/{{outcome_profile}} from the submit
+    // outcome plus the logged-in user's first name.
+    // UserCubit is a get_it singleton rather than a tree-provided bloc (there is
+    // no MultiBlocProvider above the router), so read it from the locator.
     final placeholders = isResult
-        ? _outcomePlaceholders(state.submitResult)
+        ? _outcomePlaceholders(
+            state.outcomeProfile,
+            getIt<UserCubit>().state.user?.firstName,
+          )
         : const <String, String>{};
 
     return Column(
@@ -161,6 +179,7 @@ class _SectionBody extends StatelessWidget {
             html: section.subtitle!,
             baseFontSize: 15,
             color: AppColors.textPrimary,
+            lineHeight: 1.45,
             placeholders: placeholders,
           ),
         ],
@@ -169,12 +188,16 @@ class _SectionBody extends StatelessWidget {
           SurveyHtml(
             html: section.content!,
             baseFontSize: 15,
+            lineHeight: 1.45,
             placeholders: placeholders,
+            emphasisKeys: const {'outcome_profile'},
           ),
         ],
         if (isResult) ...[
           const SizedBox(height: AppSpacing.spaceLg),
-          SurveyKitCard(outcome: state.submitResult?.outcome),
+          SurveyKitCard(outcome: state.outcomeProfile),
+          const SizedBox(height: AppSpacing.spaceLg),
+          SurveyResultActions(kitShopUrl: state.submitResult?.kitShopUrl),
         ],
         if (section.loadKilocalPoints) ...[
           const SizedBox(height: AppSpacing.spaceXl),
@@ -197,16 +220,33 @@ class _SectionBody extends StatelessWidget {
     );
   }
 
-  /// Flattens the submit outcome into string placeholders for result-screen
-  /// templating (`{{name}}`, `{{type}}`, …). Values are best-effort until the
-  /// outcome contract is confirmed with backend.
-  Map<String, String> _outcomePlaceholders(SurveySubmitResult? result) {
-    final outcome = result?.outcome;
-    if (outcome == null) return const {};
+  /// Builds the result-screen placeholders the CMS copy expects.
+  ///
+  /// The CMS `type_survey` result section uses `{{name}}`, `{{type}}` and
+  /// `{{outcome_profile}}` — names that match neither the submit response's own
+  /// keys nor each other, so they are mapped explicitly. `{{type}}` →
+  /// "Tipo 2 - Mela" and `{{outcome_profile}}` → the personalized biotype copy,
+  /// both from the hydrated [biotype]; `{{name}}` is the logged-in user's.
+  ///
+  /// Any placeholder left unmapped is stripped by [SurveyHtml], so a partial
+  /// outcome degrades to plain copy instead of leaking `{{…}}`.
+  Map<String, String> _outcomePlaceholders(
+    SurveyOutcome? biotype,
+    String? firstName,
+  ) {
+    final rawOutcome = state.submitResult?.outcome;
     return {
-      for (final entry in outcome.entries)
-        if (entry.value is String || entry.value is num)
-          entry.key: '${entry.value}',
+      // Scalar top-level keys first, so other surveys' result copy keeps
+      // resolving against its own placeholders — the explicit mappings below
+      // take precedence on collision.
+      if (rawOutcome != null)
+        for (final entry in rawOutcome.entries)
+          if (entry.value is String || entry.value is num)
+            entry.key: '${entry.value}',
+      if (firstName != null && firstName.isNotEmpty) 'name': firstName,
+      if (biotype?.typeDisplay != null) 'type': biotype!.typeDisplay!,
+      if (biotype?.description != null)
+        'outcome_profile': biotype!.description!,
     };
   }
 }

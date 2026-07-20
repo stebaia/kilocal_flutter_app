@@ -28,4 +28,13 @@ abstract class UserRepository {
     required List<int> imageBytes,
     required String filename,
   });
+
+  /// Sets a new password via `PATCH /users/me`.
+  ///
+  /// The API authorises this on the Bearer token alone: there is no endpoint
+  /// that verifies the current password, so a live session can change the
+  /// password without re-authenticating. Do not add a "current password" field
+  /// to callers — the contract has nowhere to send it and the check would run
+  /// client-side only. A server-side `/api/auth/password-change` is the fix.
+  Future<void> changePassword(String newPassword);
 }

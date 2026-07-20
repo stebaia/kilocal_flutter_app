@@ -25,6 +25,7 @@ query GetMoment($id: ID!, $lang: String!) {
     translations(filter: { languages_code: { code: { _eq: $lang } } }) {
       title
       description
+      plot
     }
     asset {
       default_asset {
@@ -50,6 +51,7 @@ query GetCurrentMoment($now: String!, $lang: String!) {
     translations(filter: { languages_code: { code: { _eq: $lang } } }) {
       title
       description
+      plot
     }
     asset {
       default_asset {
@@ -99,10 +101,14 @@ query GetCurrentMoment($now: String!, $lang: String!) {
   MomentiData _mapDto(MomentDto dto) {
     final translation = dto.translations.firstOrNull;
     final file = dto.asset?.defaultAsset;
+    final plot = translation?.plot?.trim();
 
     return MomentiData(
       title: translation?.title ?? '',
       description: translation?.description ?? '',
+      // Empty-string plots are common in the CMS; treat them as absent so the
+      // header drops the info action instead of opening an empty sheet.
+      plot: (plot == null || plot.isEmpty) ? null : plot,
       heroImageUrl: _assetUrl(file),
     );
   }

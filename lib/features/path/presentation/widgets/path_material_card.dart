@@ -11,17 +11,27 @@ import '../../domain/entities/path_material.dart';
 /// Card for a single "Materiali extra" item: a hero image with a leading
 /// media-type badge (play for video, document otherwise) and an "available"
 /// pill, with the title underneath.
+///
+/// Materials flagged [PathMaterial.hidesImage] (the "Consigli utili") are
+/// text-only: the badges move next to the title and no cover is shown.
 class PathMaterialCard extends StatelessWidget {
   const PathMaterialCard({super.key, required this.material, this.onTap});
 
   final PathMaterial material;
   final VoidCallback? onTap;
 
-  static const double _imageHeight = 168;
+  /// Covers are 16:9 (the Vimeo poster for videos, the CMS/category hero
+  /// otherwise), so the card image honours that ratio instead of cropping to a
+  /// fixed height.
+  static const double _imageAspectRatio = 16 / 9;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+
+    if (material.hidesImage) {
+      return _TextOnlyCard(material: material, onTap: onTap, l10n: l10n);
+    }
 
     return AppCard(
       onTap: onTap,
@@ -33,9 +43,8 @@ class PathMaterialCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppRadius.md),
             child: Stack(
               children: [
-                SizedBox(
-                  height: _imageHeight,
-                  width: double.infinity,
+                AspectRatio(
+                  aspectRatio: _imageAspectRatio,
                   child: _MaterialImage(url: material.imageUrl),
                 ),
                 Positioned(
@@ -65,6 +74,45 @@ class PathMaterialCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.space2xs),
+        ],
+      ),
+    );
+  }
+}
+
+/// Image-less variant used by the "Consigli utili": the media-type badge leads
+/// the row, the title fills it and the "Disponibile" pill trails.
+class _TextOnlyCard extends StatelessWidget {
+  const _TextOnlyCard({required this.material, required this.l10n, this.onTap});
+
+  final PathMaterial material;
+  final AppLocalizations l10n;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppCard(
+      onTap: onTap,
+      child: Row(
+        children: [
+          _MediaTypeBadge(isVideo: material.isVideo),
+          const SizedBox(width: AppSpacing.spaceSm),
+          Expanded(
+            child: Text(
+              material.title,
+              style: AppTypography.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          if (material.isAvailable) ...[
+            const SizedBox(width: AppSpacing.spaceSm),
+            _AvailablePill(
+              label: l10n.pathMaterialAvailable,
+              // Off the hero image the white pill would vanish into the card.
+              bordered: true,
+            ),
+          ],
         ],
       ),
     );
@@ -129,11 +177,14 @@ class _MediaTypeBadge extends StatelessWidget {
   }
 }
 
-/// White "Disponibile" pill shown in the top-right of the hero image.
+/// White "Disponibile" pill shown in the top-right of the hero image, or inline
+/// next to the title on the image-less variant (where [bordered] keeps it
+/// legible against the card).
 class _AvailablePill extends StatelessWidget {
-  const _AvailablePill({required this.label});
+  const _AvailablePill({required this.label, this.bordered = false});
 
   final String label;
+  final bool bordered;
 
   @override
   Widget build(BuildContext context) {
@@ -145,6 +196,7 @@ class _AvailablePill extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.pill),
+        border: bordered ? Border.all(color: AppColors.borderCard) : null,
       ),
       child: Text(
         label,

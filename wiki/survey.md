@@ -8,6 +8,7 @@ required; send `X-Kilocal-Origin: app`. Source: Swagger *Kilocal App*.
 | Method | Path | Purpose |
 |--------|------|---------|
 | GET | `/survey/me/status` | onboarding state + completed surveys |
+| GET | `/survey/me/month-end-status` | integrazione phase stats + pending month-end survey — **creates the Kilocal goal as a side-effect**, see [[diario]] |
 | POST | `/survey/me/ensure-details` | create the `user_details` row if missing |
 | POST | `/survey/submit/{internalName}` | submit survey answers |
 
@@ -64,6 +65,124 @@ Response (`SurveySubmitResponse`):
 
 `kit_shop_url` → suggested kit checkout (the recommended kit/biotype outcome). `legacy` is
 web-client migration compatibility — ignore in the app.
+
+### `outcome.profile` — result screen data (CONFIRMED, live 2026-07-16)
+
+The `outcome` is **`{id, majority_of_values, profile}`**, and `profile` is only a
+**reference** — it carries no copy:
+
+```json
+"outcome": { "id": 2, "majority_of_values": "2",
+             "profile": { "id": 4, "kit_slug": "kit-tipo-2" } }
+```
+
+So the result screen's texts and images **must be hydrated** from the `profiles` collection
+(`SurveyRepository.fetchOutcomeProfile` → `mapOutcomeProfile`), keyed by `profile.id`:
+
+```graphql
+profiles(filter: { id: { _eq: $id } }, limit: 1) {
+  id
+  icon { id }                            # SVG → CmsSvgIcon, not Image.network
+  kit { asset { default_asset { id } } } # the real file; `asset` is only the wrapper
+  translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+    title      # "Tipo 2"  → the display label
+    name       # "Mela"    → the denomination
+    content content_f      # gender-specific copy
+  }
+}
+```
+
+`{{type}}` = `"$title - $name"` ("Tipo 2 - Mela"); `content_f` is used for female profiles
+(via `genderIsFemale`), with the gender read from the survey's own `is_gender_question`
+answer rather than `user_details` — the submit has only just written it.
+
+> ⚠️ The same submit response *also* carries the fully expanded profile under
+> **`legacy.create_survey_submits_item.outcome.profile`** (translations, icon, kit, colors).
+> **Do not read it**: `legacy` is documented in the OpenAPI spec as "compatibilità client web
+> in migrazione" and will be removed. Hydrate from `profiles` instead.
+
+The result section (CMS id 9, `type_survey`) templates its copy with **`{{name}}`, `{{type}}`
+and `{{outcome_profile}}`** — names that match neither the response's keys nor each other, so
+they are mapped explicitly in `_outcomePlaceholders` (`survey_screen.dart`). `{{name}}` comes
+from the logged-in `AppUser.firstName`, not the outcome.
+
+A failed hydrate is swallowed: the submit already succeeded server-side, so the screen shows
+the survey's own copy rather than failing.
+
+## Onboarding gate — proof of purchase is mandatory
+
+`user_details.profile_status` **is** the gate; the app must not invent its own. Submitting
+`type_survey` moves the status to `starter_kit`, and that survey opens (sort 1, section id
+11) with **"Inserisci il codice a barre"** — a `required: true` input — and only ends with
+"Hai completato il profilo!". So a user cannot reach the app without a proof of purchase,
+provided the app honours the status.
+
+> ⚠️ **The result screen must not offer a proof-of-purchase button.** It looks like it
+> belongs (the web design shows one) but it is wrong twice over: it sits beside "Fine",
+> reading as mandatory while being optional — press "Fine" and the survey simply ends — and
+> it opens the restricted-access unlock sheet, whose `PATCH /profile → active` would skip the
+> `starter_kit` survey entirely. The proof of purchase is collected **by that survey**
+> (section 11, the only one flagged `show_single_product_cta`), which `profile_status` routes
+> the user to next. Removed 2026-07-16 after it let a user press "Fine" and enter the app.
+
+Two things enforce it:
+
+1. **`appRouter.redirect`** (`onboardingRedirectFor`, `lib/app/router.dart`) — while
+   `profileStatus.surveyInternalName != null`, any navigation is redirected onto that survey.
+   Exempt: the auth routes (no session to gate — redirecting would bounce the user off
+   `/login`) and `/survey` itself. Only applies once `UserStatus.loaded`.
+2. **The survey's own exit** — on completion the screen reloads the session and follows
+   `UserState.route` instead of hardcoding `/home`, so finishing `type_survey` chains
+   straight into `starter_kit`.
+
+> The `/survey` route is keyed by `internalName` (`ValueKey('survey-$internalName')`):
+> chaining one survey onto another keeps the same path, so without the key GoRouter reuses
+> the Element and the finished survey stays on screen.
+
+### `other_validations` — enforced (2026-07-16)
+
+`survey_question.other_validations` is a `|`-separated rule list. The CMS only uses six
+(enumerated live across every question):
+
+| Rule | Question | Enforced by |
+|------|----------|-------------|
+| `number\|int\|gte:100\|lte:300` | height (cm) | `SurveyValidationRule` |
+| `number\|lte:300\|gte:30\|bmi:17.5` | weight (kg) | `SurveyValidationRule` |
+| `date\|max:{-18years}\|min:1900-01-01` | date of birth | `SurveyValidationRule` |
+| `zip_code` | CAP (5 digits) | `SurveyValidationRule` |
+| `phone` | phone | `SurveyValidationRule` |
+| `barcode` | starter kit proof of purchase | products catalogue (async) |
+
+Sync rules run as the user types (`SurveyState.currentValidationError`) and disable the CTA
+with the reason shown in the footer. Unknown tokens are ignored on purpose — a rule the app
+cannot interpret must never block the user.
+
+**`bmi:17.5`** needs the height answered earlier in the same survey (located by
+`user_data_field_name == 'height'`, as `buildSubmitBody` does). Without it the BMI bound is
+skipped rather than guessed.
+
+**`barcode` is not a format check.** It means "matches a code in `products` where
+`use_for_barcode_check = true`" — the same rule the restricted-access unlock sheet applies,
+so `SurveyCubit` reuses `ProgramUnlockRepository.fetchBarcodeProducts()` rather than
+duplicating the query. It is checked when the CTA is pressed (it needs the network), and a
+catalogue read failure **does not** let the user through: failing open would defeat the gate.
+
+> `SurveyState.canLeaveCurrentStep` is the single source of truth for both the CTA's enabled
+> state and the cubit's own guard in `next()`, so the button cannot promise something the
+> cubit will refuse.
+
+> ⚠️ `SurveyState.copyWith(errorMessage: null)` **cannot clear the error** — a null argument
+> is indistinguishable from "not passed". Use `clearError: true`.
+
+> ⚠️ The disclaimer ("Attenzione: le informazioni e i consigli…") appears **twice** on the
+> result screen: once hardcoded in the CMS `content` field after `{{outcome_profile}}`, and
+> once inside the profile copy itself. Backend said the duplicate is being removed on their
+> side ("è a post"); the app renders whatever the CMS returns.
+
+**Open question:** "Trova una Farmacia Kilocal Point" (present in the web survey result) has
+no destination in the app contract — no URL in the CMS response, and the `pharmacies`
+collection has no public finder page. The button is hidden until backend supplies one; see
+`SurveyResultActions.pharmacyFinderUrl`.
 
 > **Survey questions** (sections, options, conditions) are **read** via [[graphql]] on the
 > `surveys` / `survey_sections` / `survey_question` collections — there is no dedicated REST

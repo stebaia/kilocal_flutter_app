@@ -50,7 +50,7 @@ class SurveyScaffold extends StatelessWidget {
             onBack: onBack,
             onSkip: onSkip,
           ),
-          SizedBox(height: AppSpacing.spaceMd,),
+          SizedBox(height: AppSpacing.spaceMd),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(

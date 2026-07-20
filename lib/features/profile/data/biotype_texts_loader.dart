@@ -62,8 +62,7 @@ class BiotypeTextsLoader {
     // man reading a woman-only type should still see something rather than
     // nothing — in practice the gender always exists for valid combinations).
     final entry =
-        (byGender[isFemale ? 'f' : 'm'] ??
-                byGender[isFemale ? 'm' : 'f'])
+        (byGender[isFemale ? 'f' : 'm'] ?? byGender[isFemale ? 'm' : 'f'])
             as Map<String, dynamic>?;
     if (entry == null) return null;
 

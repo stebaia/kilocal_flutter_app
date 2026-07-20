@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/di.dart';
 import '../../../core/theme/app_colors.dart';
@@ -128,7 +129,9 @@ class _VideoDetail extends StatelessWidget {
   }
 }
 
-/// Text / image material matching the design: header + hero image + body.
+/// Text / image material matching the design: header + hero image + body. The
+/// "Consigli utili" ([PathMaterialDetail.hidesImage]) drop the hero and open
+/// straight on the title.
 class _TextDetail extends StatelessWidget {
   const _TextDetail({required this.material, this.categoryTitle});
 
@@ -151,7 +154,7 @@ class _TextDetail extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  if (material.imageUrl != null)
+                  if (material.imageUrl != null && !material.hidesImage)
                     AspectRatio(
                       aspectRatio: 1.1,
                       child: Image.network(
@@ -189,6 +192,7 @@ class _TitleAndBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = material.content;
+    final subtitle = material.subtitle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,6 +203,15 @@ class _TitleAndBody extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
+        if (subtitle != null && subtitle.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.spaceXs),
+          Text(
+            subtitle,
+            style: AppTypography.textTheme.bodyLarge?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
         if (content != null && content.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.spaceMd),
           Html(
@@ -216,7 +229,56 @@ class _TitleAndBody extends StatelessWidget {
             },
           ),
         ],
+        for (final attachment in material.attachments) ...[
+          const SizedBox(height: AppSpacing.spaceMd),
+          _AttachmentButton(attachment: attachment),
+        ],
       ],
     );
+  }
+}
+
+/// Download CTA for a material's attached file (the PDF of a "Scheda").
+///
+/// The asset is served unauthenticated, so the file is handed to the system
+/// browser, which downloads it or opens it in the native PDF viewer.
+class _AttachmentButton extends StatelessWidget {
+  const _AttachmentButton({required this.attachment});
+
+  final PathMaterialAttachment attachment;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => _download(context, l10n),
+        icon: const Icon(Icons.download_outlined, size: 20),
+        label: Text(attachment.label),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.accent,
+          foregroundColor: AppColors.surface,
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceMd),
+          textStyle: AppTypography.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _download(BuildContext context, AppLocalizations l10n) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final uri = Uri.tryParse(attachment.url);
+    final opened =
+        uri != null &&
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.pathMaterialDownloadError)),
+      );
+    }
   }
 }

@@ -123,7 +123,9 @@ mutation MarkReadUserNotification($id: ID!, $now: Date!) {
     final ctas = <NotificationCta>[];
     final ctaUrl = dto.jobPayloadCtaUrl;
     if (ctaUrl != null && ctaUrl.isNotEmpty) {
-      ctas.add(NotificationCta(label: dto.jobPayloadCtaLabel ?? '', url: ctaUrl));
+      ctas.add(
+        NotificationCta(label: dto.jobPayloadCtaLabel ?? '', url: ctaUrl),
+      );
     }
 
     final NotificationType type;

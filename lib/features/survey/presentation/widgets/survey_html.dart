@@ -18,6 +18,7 @@ class SurveyHtml extends StatelessWidget {
     this.lineHeight = 1.2,
     this.placeholders = const {},
     this.highlightKeys = const {},
+    this.emphasisKeys = const {},
   });
 
   final String html;
@@ -31,13 +32,23 @@ class SurveyHtml extends StatelessWidget {
   /// [AppColors.typeHighlight] (e.g. `type` → "Tipo 4 - Pera").
   final Set<String> highlightKeys;
 
+  /// Placeholder keys whose substituted value is emphasised as a lead-in
+  /// paragraph (heavier weight, darker ink). Used for `outcome_profile`, whose
+  /// personalized copy would otherwise blend into the legal disclaimer that
+  /// follows it in the same CMS field.
+  final Set<String> emphasisKeys;
+
   @override
   Widget build(BuildContext context) {
     var content = html;
     placeholders.forEach((key, value) {
-      final replacement = highlightKeys.contains(key)
-          ? '<span class="hl">$value</span>'
-          : value;
+      var replacement = value;
+      if (highlightKeys.contains(key)) {
+        replacement = '<span class="hl">$replacement</span>';
+      }
+      if (emphasisKeys.contains(key)) {
+        replacement = '<span class="lead">$replacement</span>';
+      }
       content = content.replaceAll('{{$key}}', replacement);
     });
     // Drop any placeholders left unfilled so raw `{{...}}` never shows.
@@ -59,6 +70,10 @@ class SurveyHtml extends StatelessWidget {
         'strong': Style(fontWeight: FontWeight.w700),
         'p': Style(margin: Margins.only(bottom: 8)),
         '.hl': Style(color: AppColors.typeHighlight),
+        '.lead': Style(
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
       },
     );
   }

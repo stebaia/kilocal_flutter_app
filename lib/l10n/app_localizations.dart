@@ -782,11 +782,77 @@ abstract class AppLocalizations {
   /// **'Couldn\'t update the profile photo'**
   String get profileAvatarError;
 
+  /// No description provided for @profileChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change password'**
+  String get profileChangePassword;
+
+  /// No description provided for @profileChangePasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a new password for your account.'**
+  String get profileChangePasswordHint;
+
+  /// No description provided for @profileNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get profileNewPassword;
+
+  /// No description provided for @profileConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm new password'**
+  String get profileConfirmPassword;
+
+  /// No description provided for @profileChangePasswordSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Update password'**
+  String get profileChangePasswordSubmit;
+
+  /// No description provided for @profilePasswordUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get profilePasswordUpdated;
+
+  /// No description provided for @profilePasswordError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the password'**
+  String get profilePasswordError;
+
+  /// No description provided for @profilePasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least {count} characters'**
+  String profilePasswordTooShort(int count);
+
+  /// No description provided for @profilePasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The two passwords don\'t match'**
+  String get profilePasswordMismatch;
+
   /// No description provided for @profileFoodPreferences.
   ///
   /// In en, this message translates to:
   /// **'Food preferences'**
   String get profileFoodPreferences;
+
+  /// Expander that reveals the full checkbox list of options for a food-preference multi-select (e.g. intolerances).
+  ///
+  /// In en, this message translates to:
+  /// **'Add or edit'**
+  String get profileFoodPreferencesEdit;
+
+  /// Shown in place of the chips when the user has not picked any option for a food-preference multi-select.
+  ///
+  /// In en, this message translates to:
+  /// **'No selection'**
+  String get profileFoodPreferencesEmpty;
 
   /// No description provided for @profileNotificationsSection.
   ///
@@ -920,6 +986,96 @@ abstract class AppLocalizations {
   /// **'Start'**
   String get surveyStart;
 
+  /// No description provided for @surveyFindPharmacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a Kilocal Point pharmacy'**
+  String get surveyFindPharmacy;
+
+  /// No description provided for @surveyGoToShop.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to the shop'**
+  String get surveyGoToShop;
+
+  /// No description provided for @surveyEnterProofOfPurchase.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter proof of purchase'**
+  String get surveyEnterProofOfPurchase;
+
+  /// No description provided for @surveyErrorNotANumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid number'**
+  String get surveyErrorNotANumber;
+
+  /// No description provided for @surveyErrorNotAnInteger.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number'**
+  String get surveyErrorNotAnInteger;
+
+  /// No description provided for @surveyErrorTooSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'That value is too low'**
+  String get surveyErrorTooSmall;
+
+  /// No description provided for @surveyErrorTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'That value is too high'**
+  String get surveyErrorTooLarge;
+
+  /// No description provided for @surveyErrorNotADate.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid date'**
+  String get surveyErrorNotADate;
+
+  /// No description provided for @surveyErrorDateTooLate.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be at least 18'**
+  String get surveyErrorDateTooLate;
+
+  /// No description provided for @surveyErrorDateTooEarly.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid date'**
+  String get surveyErrorDateTooEarly;
+
+  /// No description provided for @surveyErrorBmiTooLow.
+  ///
+  /// In en, this message translates to:
+  /// **'That weight is not compatible with your height'**
+  String get surveyErrorBmiTooLow;
+
+  /// No description provided for @surveyErrorInvalidZipCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid postcode (5 digits)'**
+  String get surveyErrorInvalidZipCode;
+
+  /// No description provided for @surveyErrorInvalidPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number'**
+  String get surveyErrorInvalidPhone;
+
+  /// No description provided for @surveyErrorInvalidBarcode.
+  ///
+  /// In en, this message translates to:
+  /// **'Barcode not recognised. Check the code on your Starter Kit pack.'**
+  String get surveyErrorInvalidBarcode;
+
+  /// No description provided for @surveyBarcodeChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking the code…'**
+  String get surveyBarcodeChecking;
+
   /// No description provided for @notificationsEmpty.
   ///
   /// In en, this message translates to:
@@ -986,6 +1142,12 @@ abstract class AppLocalizations {
   /// **'Claim the reward'**
   String get benefitClaimReward;
 
+  /// No description provided for @benefitClaimRewardError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open the reward link'**
+  String get benefitClaimRewardError;
+
   /// No description provided for @benefitsEmpty.
   ///
   /// In en, this message translates to:
@@ -1003,6 +1165,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No moments available'**
   String get momentiEmpty;
+
+  /// No description provided for @momentiInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Information'**
+  String get momentiInfoTitle;
+
+  /// No description provided for @momentiInfoTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Information about this moment'**
+  String get momentiInfoTooltip;
 
   /// No description provided for @diaryCompleted.
   ///
@@ -1388,6 +1562,36 @@ abstract class AppLocalizations {
   /// **'Save'**
   String get diaryGoalSave;
 
+  /// No description provided for @diaryActivityDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity details'**
+  String get diaryActivityDetailTitle;
+
+  /// No description provided for @diaryActivityCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category: {category}'**
+  String diaryActivityCategory(String category);
+
+  /// No description provided for @diaryActivityPlannedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Planned completion: {date}'**
+  String diaryActivityPlannedOn(String date);
+
+  /// No description provided for @diaryActivityToComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete: {date}'**
+  String diaryActivityToComplete(String date);
+
+  /// No description provided for @diaryActivityCompleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t complete the activity. Try again.'**
+  String get diaryActivityCompleteError;
+
   /// No description provided for @month1.
   ///
   /// In en, this message translates to:
@@ -1508,6 +1712,24 @@ abstract class AppLocalizations {
   /// **'Timer: {time}'**
   String pathTimerPill(String time);
 
+  /// No description provided for @pathTimerStop.
+  ///
+  /// In en, this message translates to:
+  /// **'stop'**
+  String get pathTimerStop;
+
+  /// No description provided for @pathTimerPause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pathTimerPause;
+
+  /// No description provided for @pathTimerResume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get pathTimerResume;
+
   /// No description provided for @pathAreaProgressLabel.
   ///
   /// In en, this message translates to:
@@ -1556,6 +1778,12 @@ abstract class AppLocalizations {
   /// **'Unavailable'**
   String get pathMaterialsFilterUnavailable;
 
+  /// No description provided for @pathMaterialDownloadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the file. Please try again.'**
+  String get pathMaterialDownloadError;
+
   /// No description provided for @pathTimeframeStepsCount.
   ///
   /// In en, this message translates to:
@@ -1579,6 +1807,312 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This path is not available yet.'**
   String get pathAreaLocked;
+
+  /// No description provided for @strumentiTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get strumentiTitle;
+
+  /// No description provided for @strumentiLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'Launch tool'**
+  String get strumentiLaunch;
+
+  /// No description provided for @strumentiPromemoria.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get strumentiPromemoria;
+
+  /// No description provided for @strumentiTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get strumentiTimer;
+
+  /// No description provided for @strumentiGlossario.
+  ///
+  /// In en, this message translates to:
+  /// **'Glossary'**
+  String get strumentiGlossario;
+
+  /// No description provided for @strumentiGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get strumentiGallery;
+
+  /// No description provided for @strumentiComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'This tool will be available soon.'**
+  String get strumentiComingSoon;
+
+  /// No description provided for @glossarioSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get glossarioSearch;
+
+  /// No description provided for @glossarioSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyword'**
+  String get glossarioSearchHint;
+
+  /// No description provided for @glossarioResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching results'**
+  String get glossarioResults;
+
+  /// No description provided for @glossarioEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No results for this search.'**
+  String get glossarioEmpty;
+
+  /// No description provided for @glossarioLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the glossary.'**
+  String get glossarioLoadError;
+
+  /// No description provided for @galleryPhotosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My photos'**
+  String get galleryPhotosTitle;
+
+  /// No description provided for @galleryUploadTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload image'**
+  String get galleryUploadTitle;
+
+  /// No description provided for @galleryUploadInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the button to upload content from your device'**
+  String get galleryUploadInfo;
+
+  /// No description provided for @galleryUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload'**
+  String get galleryUpload;
+
+  /// No description provided for @galleryTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get galleryTakePhoto;
+
+  /// No description provided for @galleryRetakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Retake'**
+  String get galleryRetakePhoto;
+
+  /// No description provided for @galleryConfirmUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm and upload'**
+  String get galleryConfirmUpload;
+
+  /// No description provided for @galleryUploadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not upload the photo. Try again.'**
+  String get galleryUploadError;
+
+  /// No description provided for @galleryDeleteError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete the photo. Try again.'**
+  String get galleryDeleteError;
+
+  /// No description provided for @galleryLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load your photos.'**
+  String get galleryLoadError;
+
+  /// No description provided for @galleryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t uploaded any photos yet.'**
+  String get galleryEmpty;
+
+  /// No description provided for @galleryToolBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'This tool is not available right now.'**
+  String get galleryToolBlocked;
+
+  /// No description provided for @galleryDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get galleryDelete;
+
+  /// No description provided for @galleryCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get galleryCancel;
+
+  /// No description provided for @gallerySplitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Split image'**
+  String get gallerySplitTitle;
+
+  /// No description provided for @gallerySave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get gallerySave;
+
+  /// No description provided for @galleryShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get galleryShare;
+
+  /// No description provided for @gallerySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Image saved'**
+  String get gallerySaved;
+
+  /// No description provided for @gallerySaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the image.'**
+  String get gallerySaveError;
+
+  /// No description provided for @promemoriaViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get promemoriaViewList;
+
+  /// No description provided for @promemoriaViewCalendar.
+  ///
+  /// In en, this message translates to:
+  /// **'Calendar'**
+  String get promemoriaViewCalendar;
+
+  /// No description provided for @promemoriaEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No reminders for this month.'**
+  String get promemoriaEmpty;
+
+  /// No description provided for @promemoriaLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load reminders.'**
+  String get promemoriaLoadError;
+
+  /// No description provided for @promemoriaAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add reminder'**
+  String get promemoriaAddTitle;
+
+  /// No description provided for @promemoriaMessageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get promemoriaMessageLabel;
+
+  /// No description provided for @promemoriaMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the reminder text here'**
+  String get promemoriaMessageHint;
+
+  /// No description provided for @promemoriaDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get promemoriaDateLabel;
+
+  /// No description provided for @promemoriaTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get promemoriaTimeLabel;
+
+  /// No description provided for @promemoriaSelectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date'**
+  String get promemoriaSelectDate;
+
+  /// No description provided for @promemoriaSelectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select time'**
+  String get promemoriaSelectTime;
+
+  /// No description provided for @promemoriaConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get promemoriaConfirm;
+
+  /// No description provided for @promemoriaSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save reminder'**
+  String get promemoriaSave;
+
+  /// No description provided for @promemoriaEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit reminder'**
+  String get promemoriaEditTitle;
+
+  /// No description provided for @promemoriaEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get promemoriaEdit;
+
+  /// No description provided for @promemoriaSaveShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get promemoriaSaveShort;
+
+  /// No description provided for @promemoriaDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get promemoriaDelete;
+
+  /// No description provided for @promemoriaDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete reminder'**
+  String get promemoriaDeleteTitle;
+
+  /// No description provided for @promemoriaCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get promemoriaCancel;
+
+  /// No description provided for @promemoriaDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the reminder?'**
+  String get promemoriaDeleteConfirm;
 }
 
 class _AppLocalizationsDelegate

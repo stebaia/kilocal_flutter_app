@@ -1,5 +1,7 @@
+import '../../user/domain/user_details.dart';
 import '../domain/entities/pharmacy.dart';
 import '../domain/entities/survey_answer.dart';
+import '../domain/entities/survey_outcome.dart';
 import '../domain/entities/survey_step.dart';
 
 /// Maps the raw GraphQL/REST JSON of the survey domain into entities, and builds
@@ -141,6 +143,16 @@ SurveyStatusInfo mapStatus(Map<String, dynamic> json) {
   );
 }
 
+SurveyMonthEndPending mapMonthEndPending(Map<String, dynamic> json) {
+  return SurveyMonthEndPending(
+    month: (json['month'] as num?)?.toInt() ?? 0,
+    internalName: json['internal_name'] as String? ?? '',
+    goalInternalName: json['goal_internal_name'] as String? ?? '',
+    slug: json['slug'] as String?,
+    userReminderId: json['user_reminder_id']?.toString(),
+  );
+}
+
 Pharmacy mapPharmacy(Map<String, dynamic> json) {
   return Pharmacy(
     id: json['id']?.toString() ?? '',
@@ -151,6 +163,34 @@ Pharmacy mapPharmacy(Map<String, dynamic> json) {
     zip: json['zip'] as String?,
     region: json['region'] as String?,
     storeId: json['store_id']?.toString(),
+  );
+}
+
+/// Fills [outcome] with the CMS copy of its `profiles` row.
+///
+/// `translations.title` is the display label ("Tipo 2") and `name` the
+/// denomination ("Mela"); [gender] picks the `content_f` variant for female
+/// profiles, matching `BiotypeDto.toDomain`.
+SurveyOutcome mapOutcomeProfile(
+  SurveyOutcome outcome,
+  Map<String, dynamic> row, {
+  String? gender,
+}) {
+  final tr = _first(row['translations']);
+  final isFemale = genderIsFemale(gender);
+  final kitAsset = (row['kit'] as Map<String, dynamic>?)?['asset'];
+  final defaultAsset =
+      (kitAsset as Map<String, dynamic>?)?['default_asset']
+          as Map<String, dynamic>?;
+
+  return outcome.copyWith(
+    typeLabel: tr?['title'] as String?,
+    denomination: tr?['name'] as String?,
+    description: isFemale
+        ? (tr?['content_f'] as String? ?? tr?['content'] as String?)
+        : tr?['content'] as String?,
+    kitImageId: defaultAsset?['id']?.toString(),
+    iconId: (row['icon'] as Map<String, dynamic>?)?['id']?.toString(),
   );
 }
 

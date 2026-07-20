@@ -11,6 +11,18 @@ abstract class PathMaterialsRepository {
   /// Returns `null` when the material does not exist.
   Future<PathMaterialDetail?> fetchMaterialDetail({required String id});
 
+  /// Registers the user's completion of a material/article in the diary history.
+  ///
+  /// Materials have no REST start/complete endpoint (unlike `/path/steps/*`), so
+  /// this writes a `user_activities` row directly on the `percorsi_materials`
+  /// collection — the same shape the diary Cronologia reads back. Idempotent:
+  /// skips the write when the material is already among the user's completed
+  /// activities. [userId] is the authenticated Directus user id (`UserCubit.myId`).
+  Future<void> markMaterialCompleted({
+    required String materialId,
+    required String userId,
+  });
+
   /// Computes the completed/total figure for each of the given path groups.
   ///
   /// The Benessere sub-sections carry no steps in the REST `/steps` payload —

@@ -3,35 +3,66 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-/// Full-width pill CTA used at the bottom of every survey step.
+/// Full-width pill CTA used at the bottom of every survey step, and for the
+/// result screen's kit actions.
 ///
-/// Enabled: solid [AppColors.accent] with white label and a white circular
-/// forward arrow. Disabled: muted grey fill with grey label (matches the
-/// "Continua con il prossimo step" design). [busy] shows a spinner.
+/// [filled] (default): solid [AppColors.brandPink] with a white label and a
+/// white circular forward arrow; disabled renders a muted grey fill (matching
+/// the "Continua con il prossimo step" design). [busy] shows a spinner.
+/// [SurveyCtaButton.outlined] is the secondary style from the result screen —
+/// a white pill with a pink border, label and arrow.
 class SurveyCtaButton extends StatelessWidget {
   const SurveyCtaButton({
     super.key,
     required this.label,
     required this.onPressed,
     this.busy = false,
-  });
+  }) : filled = true;
+
+  const SurveyCtaButton.outlined({
+    super.key,
+    required this.label,
+    required this.onPressed,
+  }) : busy = false,
+       filled = false;
 
   final String label;
   final VoidCallback? onPressed;
   final bool busy;
+  final bool filled;
 
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null && !busy;
+    final radius = BorderRadius.circular(AppRadius.pill);
+
+    final Color background;
+    final Color foreground;
+    if (!filled) {
+      background = AppColors.neutralWhite;
+      foreground = enabled ? AppColors.brandPink : AppColors.textSecondary;
+    } else {
+      background = enabled ? AppColors.brandPink : AppColors.divider;
+      foreground = enabled ? AppColors.neutralWhite : AppColors.textSecondary;
+    }
 
     return SizedBox(
       width: double.infinity,
       child: Material(
-        color: enabled ? AppColors.brandPink : AppColors.divider,
-        borderRadius: BorderRadius.circular(AppRadius.pill),
+        color: background,
+        // Material asserts shape and borderRadius are mutually exclusive, so the
+        // outlined variant carries its radius inside the shape that draws the
+        // border, and the filled one uses borderRadius alone.
+        borderRadius: filled ? radius : null,
+        shape: filled
+            ? null
+            : RoundedRectangleBorder(
+                borderRadius: radius,
+                side: BorderSide(color: foreground),
+              ),
         child: InkWell(
           onTap: enabled ? onPressed : null,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
+          borderRadius: radius,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.spaceMd,
@@ -56,13 +87,11 @@ class SurveyCtaButton extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: enabled
-                                ? AppColors.neutralWhite
-                                : AppColors.textSecondary,
+                            color: foreground,
                           ),
                         ),
                       ),
-                      _ArrowBadge(enabled: enabled),
+                      _ArrowBadge(filled: filled, enabled: enabled),
                     ],
                   ),
           ),
@@ -73,26 +102,31 @@ class SurveyCtaButton extends StatelessWidget {
 }
 
 class _ArrowBadge extends StatelessWidget {
-  const _ArrowBadge({required this.enabled});
+  const _ArrowBadge({required this.filled, required this.enabled});
 
+  final bool filled;
   final bool enabled;
 
   @override
   Widget build(BuildContext context) {
+    // The outlined style inverts the badge: pink disc, white chevron.
+    final Color disc;
+    final Color chevron;
+    if (!filled) {
+      disc = enabled ? AppColors.brandPink : AppColors.divider;
+      chevron = AppColors.neutralWhite;
+    } else {
+      disc = enabled
+          ? AppColors.neutralWhite
+          : AppColors.neutralWhite.withValues(alpha: 0.6);
+      chevron = enabled ? AppColors.brandPink : AppColors.textSecondary;
+    }
+
     return Container(
       height: 26,
       width: 26,
-      decoration: BoxDecoration(
-        color: enabled
-            ? AppColors.neutralWhite
-            : AppColors.neutralWhite.withValues(alpha: 0.6),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(
-        Icons.chevron_right,
-        size: 20,
-        color: enabled ? AppColors.brandPink : AppColors.textSecondary,
-      ),
+      decoration: BoxDecoration(color: disc, shape: BoxShape.circle),
+      child: Icon(Icons.chevron_right, size: 20, color: chevron),
     );
   }
 }

@@ -29,6 +29,7 @@ MomentTranslationDto _$MomentTranslationDtoFromJson(
 ) => MomentTranslationDto(
   title: json['title'] as String?,
   description: json['description'] as String?,
+  plot: json['plot'] as String?,
 );
 
 Map<String, dynamic> _$MomentTranslationDtoToJson(
@@ -36,6 +37,7 @@ Map<String, dynamic> _$MomentTranslationDtoToJson(
 ) => <String, dynamic>{
   'title': instance.title,
   'description': instance.description,
+  'plot': instance.plot,
 };
 
 MomentAssetDto _$MomentAssetDtoFromJson(Map<String, dynamic> json) =>

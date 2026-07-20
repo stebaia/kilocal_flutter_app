@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../app/di.dart';
 import '../../../core/theme/app_colors.dart';
@@ -18,6 +19,7 @@ import 'cubit/profile_page_cubit.dart';
 import 'cubit/profile_update_cubit.dart';
 import 'widgets/cms_form_view.dart';
 import 'widgets/profile_avatar_editor.dart';
+import 'widgets/profile_list_tile.dart';
 
 /// Single profile form screen (`dashboard-profile`): renders one tab of the CMS
 /// `private_sec_profile` block identified by [tabId] (e.g. personal data, food
@@ -35,6 +37,10 @@ class ProfileFormScreen extends StatelessWidget {
 
   /// CMS tab id of the "My account" tab, which hosts the avatar editor.
   static const _accountTabId = '4';
+
+  /// CMS tab id of the "Food preferences" tab, the only one that collapses its
+  /// multi-selects down to the user's own picks.
+  static const _foodPreferencesTabId = '3';
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +101,11 @@ class ProfileFormScreen extends StatelessWidget {
     if (form == null || form.fields.isEmpty) {
       return _Message(text: l10n.errorGeneric);
     }
-    return _FormBody(form: form, showAvatarEditor: tabId == _accountTabId);
+    return _FormBody(
+      form: form,
+      isAccountTab: tabId == _accountTabId,
+      collapseMultiSelects: tabId == _foodPreferencesTabId,
+    );
   }
 
   ProfileFormTab? _tabFor(ProfilePage? page) {
@@ -107,12 +117,20 @@ class ProfileFormScreen extends StatelessWidget {
 }
 
 class _FormBody extends StatelessWidget {
-  const _FormBody({required this.form, this.showAvatarEditor = false});
+  const _FormBody({
+    required this.form,
+    this.isAccountTab = false,
+    this.collapseMultiSelects = false,
+  });
 
   final CmsForm form;
 
-  /// When true, renders the tappable avatar editor above the form (account tab).
-  final bool showAvatarEditor;
+  /// When true, renders the tappable avatar editor above the form and the
+  /// "Change password" row below it (account tab).
+  final bool isAccountTab;
+
+  /// Forwarded to [CmsFormView.collapseMultiSelects] (food-preferences tab).
+  final bool collapseMultiSelects;
 
   @override
   Widget build(BuildContext context) {
@@ -144,19 +162,28 @@ class _FormBody extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (showAvatarEditor) const ProfileAvatarEditor(),
+                if (isAccountTab) const ProfileAvatarEditor(),
                 BlocBuilder<ProfileUpdateCubit, ProfileUpdateState>(
                   builder: (context, updateState) {
                     return CmsFormView(
                       form: form,
                       initialValues: initialValues,
                       submitting: updateState.isSubmitting,
+                      collapseMultiSelects: collapseMultiSelects,
                       onSubmit: (values) => context
                           .read<ProfileUpdateCubit>()
                           .submit(_toProfileBody(values)),
                     );
                   },
                 ),
+                if (isAccountTab) ...[
+                  const Divider(height: AppSpacing.spaceXl),
+                  ProfileListTile(
+                    icon: Icons.lock_outline,
+                    title: l10n.profileChangePassword,
+                    onTap: () => context.push('/profile/change-password'),
+                  ),
+                ],
               ],
             ),
           );

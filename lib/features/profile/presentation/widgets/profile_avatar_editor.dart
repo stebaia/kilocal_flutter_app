@@ -55,11 +55,7 @@ class ProfileAvatarEditor extends StatelessWidget {
                   child: Stack(
                     children: [
                       _AvatarCircle(uploading: uploadState.isUploading),
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: _CameraBadge(),
-                      ),
+                      Positioned(right: 0, bottom: 0, child: _CameraBadge()),
                     ],
                   ),
                 ),
@@ -93,7 +89,8 @@ class ProfileAvatarEditor extends StatelessWidget {
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
                 title: Text(l10n.profileAvatarFromGallery),
-                onTap: () => Navigator.of(sheetContext).pop(ImageSource.gallery),
+                onTap: () =>
+                    Navigator.of(sheetContext).pop(ImageSource.gallery),
               ),
             ],
           ),

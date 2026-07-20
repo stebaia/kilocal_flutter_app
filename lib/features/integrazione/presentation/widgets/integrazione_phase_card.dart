@@ -177,11 +177,15 @@ class _PhaseImages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final withImages =
-        products.where((p) => p.imageUrl != null).toList(growable: false);
+    final withImages = products
+        .where((p) => p.imageUrl != null)
+        .toList(growable: false);
     if (withImages.isEmpty) {
-      return const Icon(Icons.medication_outlined,
-          color: AppColors.accent, size: 40);
+      return const Icon(
+        Icons.medication_outlined,
+        color: AppColors.accent,
+        size: 40,
+      );
     }
 
     final images = withImages

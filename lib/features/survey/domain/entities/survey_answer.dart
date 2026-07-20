@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import 'survey_outcome.dart';
+
 /// A user's answer to a single survey section, held in memory while the wizard
 /// is in progress. Serialized into a `SurveyStep` for
 /// `POST /survey/submit/{internalName}` at the end.
@@ -75,6 +77,43 @@ class SurveyAnswer extends Equatable {
   ];
 }
 
+/// The month-end survey still to be filled in, as reported by
+/// `GET /survey/me/month-end-status`. When this is non-null the backend has
+/// already created (or reused) the matching Kilocal goal.
+class SurveyMonthEndPending extends Equatable {
+  const SurveyMonthEndPending({
+    required this.month,
+    required this.internalName,
+    required this.goalInternalName,
+    this.slug,
+    this.userReminderId,
+  });
+
+  /// 1–3.
+  final int month;
+
+  /// `month_end_survey_1|2|3`.
+  final String internalName;
+
+  /// `traguardo_mese_1|2|3`.
+  final String goalInternalName;
+
+  /// Survey slug (e.g. `survey-fine-mese-1`) for navigation.
+  final String? slug;
+
+  /// Id of the `user_reminders` row created/reused by the backend.
+  final String? userReminderId;
+
+  @override
+  List<Object?> get props => [
+    month,
+    internalName,
+    goalInternalName,
+    slug,
+    userReminderId,
+  ];
+}
+
 /// Onboarding status returned by `GET /survey/me/status`.
 class SurveyStatusInfo extends Equatable {
   const SurveyStatusInfo({
@@ -107,9 +146,12 @@ class SurveySubmitResult extends Equatable {
   final String surveySubmitId;
   final String profileStatus;
 
-  /// Scoring outcome (biotype/kit). Shape is CMS-defined — kept as a raw map
-  /// until the contract is confirmed with backend.
+  /// Raw scoring outcome (`{id, majority_of_values, profile}`).
   final Map<String, dynamic>? outcome;
+
+  /// The biotype reference from `outcome.profile` — id only, no copy. Hydrate
+  /// it via `SurveyRepository.fetchOutcomeProfile` before displaying.
+  SurveyOutcome? get biotype => SurveyOutcome.fromJson(outcome);
 
   /// Suggested kit checkout URL.
   final String? kitShopUrl;

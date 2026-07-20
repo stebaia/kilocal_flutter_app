@@ -116,16 +116,27 @@ class _BenefitsList extends StatelessWidget {
   /// Opens the benefit detail bottom sheet; if the user taps the reward CTA,
   /// launches the external offer url.
   Future<void> _openDetail(BuildContext context, Benefit benefit) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final claimed = await showBenefitDetailSheet(context, benefit);
     if (claimed == true && benefit.ctaUrl != null) {
-      await _openUrl(benefit.ctaUrl!);
+      await _openUrl(benefit.ctaUrl!, messenger, l10n);
     }
   }
 
-  Future<void> _openUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<void> _openUrl(
+    String url,
+    ScaffoldMessengerState messenger,
+    AppLocalizations l10n,
+  ) async {
+    final uri = Uri.tryParse(url);
+    final opened =
+        uri != null &&
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.benefitClaimRewardError)),
+      );
     }
   }
 }

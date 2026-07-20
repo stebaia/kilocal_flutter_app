@@ -327,12 +327,11 @@ class _SurveyTextFieldState extends State<SurveyTextField> {
   Widget build(BuildContext context) {
     final large = widget.large;
     return TextField(
-      
       controller: _controller,
       onChanged: widget.onChanged,
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,
-      style: TextStyle(fontSize: large ? 22 : 16, color: AppColors.textPrimary, ),
+      style: TextStyle(fontSize: large ? 22 : 16, color: AppColors.textPrimary),
       decoration: InputDecoration(
         hintText: widget.hint,
         // The global theme fills inputs white; keep survey fields transparent.
