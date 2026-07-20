@@ -85,28 +85,40 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
                 ),
               ),
             ),
-            // "Scopri di più" bottom-left.
+            // "Scopri di più" bottom-left, as a white rounded pill so the CTA
+            // stands out against the gradient instead of blending into it.
             Positioned(
               bottom: AppSpacing.spaceLg,
               left: AppSpacing.spaceLg,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    ctaLabel,
-                    style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.neutralWhite,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spaceMd,
+                  vertical: AppSpacing.spaceXs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.neutralWhite,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  boxShadow: AppShadows.card,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      ctaLabel,
+                      style: AppTypography.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.accent,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.space2xs),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppColors.neutralWhite,
-                    size: 20,
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.space2xs),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AppColors.accent,
+                      size: 20,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
