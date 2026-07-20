@@ -915,6 +915,15 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get pathTimerStop => 'interrompi';
+
+  @override
+  String get pathTimerPause => 'Pausa';
+
+  @override
+  String get pathTimerResume => 'Riprendi';
+
+  @override
   String get pathAreaProgressLabel => 'Il tuo percorso';
 
   @override
@@ -982,6 +991,80 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get strumentiComingSoon => 'Questo strumento sarà presto disponibile.';
+
+  @override
+  String get glossarioSearch => 'Cerca';
+
+  @override
+  String get glossarioSearchHint => 'Parola chiave';
+
+  @override
+  String get glossarioResults => 'Risultati corrispondenti';
+
+  @override
+  String get glossarioEmpty => 'Nessun risultato per questa ricerca.';
+
+  @override
+  String get glossarioLoadError => 'Impossibile caricare il glossario.';
+
+  @override
+  String get galleryPhotosTitle => 'Le mie foto';
+
+  @override
+  String get galleryUploadTitle => 'Carica immagine';
+
+  @override
+  String get galleryUploadInfo =>
+      'Usa il bottone per caricare il contenuto del tuo dispositivo';
+
+  @override
+  String get galleryUpload => 'Carica';
+
+  @override
+  String get galleryTakePhoto => 'Scatta foto';
+
+  @override
+  String get galleryRetakePhoto => 'Scatta di nuovo';
+
+  @override
+  String get galleryConfirmUpload => 'Conferma e carica';
+
+  @override
+  String get galleryUploadError => 'Impossibile caricare la foto. Riprova.';
+
+  @override
+  String get galleryDeleteError => 'Impossibile eliminare la foto. Riprova.';
+
+  @override
+  String get galleryLoadError => 'Impossibile caricare le foto.';
+
+  @override
+  String get galleryEmpty => 'Non hai ancora caricato nessuna foto.';
+
+  @override
+  String get galleryToolBlocked =>
+      'Questo strumento non è al momento disponibile.';
+
+  @override
+  String get galleryDelete => 'Elimina';
+
+  @override
+  String get galleryCancel => 'Annulla';
+
+  @override
+  String get gallerySplitTitle => 'Split image';
+
+  @override
+  String get gallerySave => 'Salva';
+
+  @override
+  String get galleryShare => 'Condividi';
+
+  @override
+  String get gallerySaved => 'Immagine salvata';
+
+  @override
+  String get gallerySaveError => 'Impossibile salvare l\'immagine.';
 
   @override
   String get promemoriaViewList => 'Lista';

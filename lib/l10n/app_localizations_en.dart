@@ -911,6 +911,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get pathTimerStop => 'stop';
+
+  @override
+  String get pathTimerPause => 'Pause';
+
+  @override
+  String get pathTimerResume => 'Resume';
+
+  @override
   String get pathAreaProgressLabel => 'Your path';
 
   @override
@@ -978,6 +987,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get strumentiComingSoon => 'This tool will be available soon.';
+
+  @override
+  String get glossarioSearch => 'Search';
+
+  @override
+  String get glossarioSearchHint => 'Keyword';
+
+  @override
+  String get glossarioResults => 'Matching results';
+
+  @override
+  String get glossarioEmpty => 'No results for this search.';
+
+  @override
+  String get glossarioLoadError => 'Could not load the glossary.';
+
+  @override
+  String get galleryPhotosTitle => 'My photos';
+
+  @override
+  String get galleryUploadTitle => 'Upload image';
+
+  @override
+  String get galleryUploadInfo =>
+      'Use the button to upload content from your device';
+
+  @override
+  String get galleryUpload => 'Upload';
+
+  @override
+  String get galleryTakePhoto => 'Take photo';
+
+  @override
+  String get galleryRetakePhoto => 'Retake';
+
+  @override
+  String get galleryConfirmUpload => 'Confirm and upload';
+
+  @override
+  String get galleryUploadError => 'Could not upload the photo. Try again.';
+
+  @override
+  String get galleryDeleteError => 'Could not delete the photo. Try again.';
+
+  @override
+  String get galleryLoadError => 'Could not load your photos.';
+
+  @override
+  String get galleryEmpty => 'You haven\'t uploaded any photos yet.';
+
+  @override
+  String get galleryToolBlocked => 'This tool is not available right now.';
+
+  @override
+  String get galleryDelete => 'Delete';
+
+  @override
+  String get galleryCancel => 'Cancel';
+
+  @override
+  String get gallerySplitTitle => 'Split image';
+
+  @override
+  String get gallerySave => 'Save';
+
+  @override
+  String get galleryShare => 'Share';
+
+  @override
+  String get gallerySaved => 'Image saved';
+
+  @override
+  String get gallerySaveError => 'Could not save the image.';
 
   @override
   String get promemoriaViewList => 'List';
