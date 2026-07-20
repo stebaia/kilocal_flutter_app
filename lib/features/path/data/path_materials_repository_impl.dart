@@ -240,7 +240,7 @@ query GetMaterial($id: ID!, $lang: String!) {
               internalName: cat.internalName,
             ),
           );
-          hidesImage = hidesImage || category.isAdvice;
+          hidesImage = hidesImage || category.hidesImage;
         }
 
         final vimeoUrl = dto.asset?.vimeoUrl;
@@ -448,7 +448,11 @@ query GetMaterial($id: ID!, $lang: String!) {
   }
 
   /// Whether the material belongs to the "Consigli utili" category, which is
-  /// rendered text-only.
+  /// rendered text-only in the detail too.
+  ///
+  /// Deliberately narrower than [PathMaterialCategories.imageless]: "Schede"
+  /// and "Ricette" drop their cover only in the list, and keep the hero image
+  /// once opened.
   bool _isAdvice(PathMaterialDto dto) => dto.categories.any(
     (cj) => cj.category?.internalName == PathMaterialCategories.advice,
   );
