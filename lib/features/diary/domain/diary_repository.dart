@@ -9,6 +9,12 @@ import 'entities/goal_category.dart';
 /// - **Goals** (Traguardi): CRUD over `/journal/goals` (REST).
 abstract class DiaryRepository {
   /// Step history, most recent first — both started-only and completed entries.
+  ///
+  /// Includes synthesised `integrazione` entries built from
+  /// `user_integratori.took_dates`: supplement intake is not a `user_activities`
+  /// row (the M2A union accepts only articles/percorsi_content/
+  /// percorsi_materials — verified via introspection), so it has to be merged in
+  /// client-side. See [[integrazione-schema]].
   Future<List<DiaryActivity>> fetchActivities();
 
   /// Marks a started step completed via `POST /path/steps/{stepId}/complete`.
