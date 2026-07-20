@@ -31,7 +31,12 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
     } catch (_) {}
     try {
       final goals = await _repository.fetchGoals();
-      emit(state.copyWith(status: DiaryGoalsStatus.loaded, goals: goals));
+      emit(
+        state.copyWith(
+          status: DiaryGoalsStatus.loaded,
+          goals: _sortByDueDate(goals),
+        ),
+      );
     } catch (_) {
       emit(state.copyWith(status: DiaryGoalsStatus.error));
     }
@@ -49,7 +54,7 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
   Future<void> createGoal(DiaryGoalInput input) async {
     try {
       final created = await _repository.createGoal(input);
-      emit(state.copyWith(goals: [created, ...state.goals]));
+      emit(state.copyWith(goals: _sortByDueDate([created, ...state.goals])));
     } catch (_) {
       emit(state.copyWith(status: DiaryGoalsStatus.error));
     }
@@ -85,6 +90,19 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
     } catch (_) {
       emit(state.copyWith(goals: previous, status: DiaryGoalsStatus.error));
     }
+  }
+
+  /// Chronological order: nearest due date first, furthest last. Goals without
+  /// a due date have no place on the timeline, so they sink to the bottom.
+  List<DiaryGoal> _sortByDueDate(List<DiaryGoal> goals) {
+    return [...goals]..sort((a, b) {
+      final aDate = a.dueDate;
+      final bDate = b.dueDate;
+      if (aDate == null && bDate == null) return 0;
+      if (aDate == null) return 1;
+      if (bDate == null) return -1;
+      return aDate.compareTo(bDate);
+    });
   }
 
   List<DiaryGoal> _replace(DiaryGoal updated) {
