@@ -50,6 +50,14 @@ query GetGroupMaterials($groupId: GraphQLStringOrFloat!, $lang: String!) {
         default_asset { id filename_download }
         mobile_asset { id filename_download }
       }
+      article {
+        cover {
+          asset_is_video
+          vimeo_url
+          default_asset { id filename_download }
+          mobile_asset { id filename_download }
+        }
+      }
       translations(filter: { languages_code: { code: { _eq: $lang } } }) {
         title
       }
@@ -428,7 +436,15 @@ query GetMaterial($id: ID!, $lang: String!) {
     String? fallbackImageUrl,
   }) {
     final asset = dto.asset;
-    final file = asset?.mobileAsset ?? asset?.defaultAsset;
+
+    // "Schede" and "Ricette" are `connect_to_article` materials with a null
+    // `asset`: their cover lives on the linked article, exactly like in the
+    // detail screen. Without this fallback the whole tab renders placeholders.
+    // Only the image is borrowed — the play/document badge must keep following
+    // the material's own asset, or an article with a video cover would badge a
+    // PDF card as a video.
+    final coverAsset = asset ?? dto.article?.cover;
+    final file = coverAsset?.mobileAsset ?? coverAsset?.defaultAsset;
 
     // Video materials carry no image file of their own, so their cover is the
     // Vimeo poster; the remaining ones (consigli) fall back to the category
@@ -448,11 +464,7 @@ query GetMaterial($id: ID!, $lang: String!) {
   }
 
   /// Whether the material belongs to the "Consigli utili" category, which is
-  /// rendered text-only in the detail too.
-  ///
-  /// Deliberately narrower than [PathMaterialCategories.imageless]: "Schede"
-  /// and "Ricette" drop their cover only in the list, and keep the hero image
-  /// once opened.
+  /// rendered text-only.
   bool _isAdvice(PathMaterialDto dto) => dto.categories.any(
     (cj) => cj.category?.internalName == PathMaterialCategories.advice,
   );
