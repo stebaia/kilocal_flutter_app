@@ -117,8 +117,11 @@ class _VideoDetail extends StatelessWidget {
               posterUrl: material.imageUrl,
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenGutter,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenGutter,
+                AppSpacing.spaceLg,
+                AppSpacing.screenGutter,
+                0,
               ),
               child: _TitleAndBody(material: material),
             ),

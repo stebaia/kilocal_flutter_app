@@ -493,6 +493,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get surveyEnterProofOfPurchase => 'Inserisci prova d\'acquisto';
 
   @override
+  String get surveyNoStarterKit => 'Non ho uno Starter Kit';
+
+  @override
   String get surveyErrorNotANumber => 'Inserisci un numero valido';
 
   @override

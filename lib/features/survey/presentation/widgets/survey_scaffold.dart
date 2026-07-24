@@ -27,7 +27,7 @@ class SurveyScaffold extends StatelessWidget {
 
   final int totalSteps;
   final int currentIndex;
-  final String stepLabel;
+  final String? stepLabel;
   final Widget child;
   final String ctaLabel;
   final VoidCallback? onCta;
@@ -85,7 +85,7 @@ class _Header extends StatelessWidget {
 
   final int totalSteps;
   final int currentIndex;
-  final String stepLabel;
+  final String? stepLabel;
   final VoidCallback? onBack;
   final VoidCallback? onSkip;
 
@@ -139,15 +139,17 @@ class _Header extends StatelessWidget {
                   ),
                 const SizedBox(height: AppSpacing.spaceXs),
                 SurveyStepper(total: totalSteps, currentIndex: currentIndex),
-                const SizedBox(height: AppSpacing.spaceXs),
-                Text(
-                  stepLabel,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.neutralWhite,
+                if (stepLabel != null) ...[
+                  const SizedBox(height: AppSpacing.spaceXs),
+                  Text(
+                    stepLabel!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.neutralWhite,
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: AppSpacing.spaceMd),
               ],
             ),

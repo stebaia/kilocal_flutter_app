@@ -232,6 +232,7 @@
   "surveyFindPharmacy": "Find a Kilocal Point pharmacy",
   "surveyGoToShop": "Go to the shop",
   "surveyEnterProofOfPurchase": "Enter proof of purchase",
+  "surveyNoStarterKit": "I don't have a Starter Kit",
   "surveyErrorNotANumber": "Enter a valid number",
   "surveyErrorNotAnInteger": "Enter a whole number",
   "surveyErrorTooSmall": "That value is too low",
