@@ -38,6 +38,12 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
           )
         : AppColors.brandGradientVertical;
 
+    // The CTA pill picks up the biotype's own `main_color` so it stays on
+    // theme with the card gradient; brand accent when the CMS omits it.
+    final ctaColor = _readableOnWhite(
+      gradientColors?.firstOrNull ?? AppColors.accent,
+    );
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -85,28 +91,36 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
                 ),
               ),
             ),
-            // "Scopri di più" bottom-left.
+            // "Scopri di più" bottom-left, as a white rounded pill so the CTA
+            // stands out against the gradient instead of blending into it.
             Positioned(
               bottom: AppSpacing.spaceLg,
               left: AppSpacing.spaceLg,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    ctaLabel,
-                    style: AppTypography.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.neutralWhite,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.spaceMd,
+                  vertical: AppSpacing.spaceXs,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.neutralWhite,
+                  borderRadius: BorderRadius.circular(AppRadius.pill),
+                  boxShadow: AppShadows.card,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      ctaLabel,
+                      style: AppTypography.textTheme.bodyMedium?.copyWith(
+                        color: ctaColor,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.space2xs),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppColors.neutralWhite,
-                    size: 20,
-                  ),
-                ],
+                    const SizedBox(width: AppSpacing.space2xs),
+                    Icon(Icons.chevron_right, color: ctaColor, size: 20),
+                  ],
+                ),
               ),
             ),
           ],
@@ -115,6 +129,25 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
     );
   }
 }
+
+/// Darkens [color] until it clears the WCAG AA 4.5:1 ratio for 14px text on
+/// the white pill.
+///
+/// Several CMS biotype colors are too light to read on white — the cyan
+/// (#00ACAC), orange (#EF7900) and light blue (#009FE3) types all sit below
+/// 3:1 — so we walk the HSL lightness down instead of hardcoding per-type
+/// overrides, which keeps the hue (and the biotype's identity) intact.
+Color _readableOnWhite(Color color) {
+  const target = 4.5;
+  var hsl = HSLColor.fromColor(color);
+  while (_contrastOnWhite(hsl.toColor()) < target && hsl.lightness > 0.05) {
+    hsl = hsl.withLightness((hsl.lightness - 0.02).clamp(0.0, 1.0));
+  }
+  return hsl.toColor();
+}
+
+double _contrastOnWhite(Color color) =>
+    1.05 / (color.computeLuminance() + 0.05);
 
 /// Renders the biotype silhouette from a local asset with a graceful fallback
 /// (empty space) when the asset is missing or fails to load.

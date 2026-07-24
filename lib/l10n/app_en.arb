@@ -232,6 +232,7 @@
   "surveyFindPharmacy": "Find a Kilocal Point pharmacy",
   "surveyGoToShop": "Go to the shop",
   "surveyEnterProofOfPurchase": "Enter proof of purchase",
+  "surveyNoStarterKit": "I don't have a Starter Kit",
   "surveyErrorNotANumber": "Enter a valid number",
   "surveyErrorNotAnInteger": "Enter a whole number",
   "surveyErrorTooSmall": "That value is too low",
@@ -256,6 +257,15 @@
   "benefitViewDetails": "View details",
   "benefitClaimReward": "Claim the reward",
   "benefitClaimRewardError": "Unable to open the reward link",
+  "benefitVisitSite": "Visit the {partner} website",
+  "@benefitVisitSite": {
+    "placeholders": {
+      "partner": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitCouponCopied": "Discount code copied",
   "benefitsEmpty": "No benefits available",
   "momentiTitle": "Moments",
   "momentiEmpty": "No moments available",

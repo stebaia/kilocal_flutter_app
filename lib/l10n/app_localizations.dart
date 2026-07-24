@@ -1004,6 +1004,12 @@ abstract class AppLocalizations {
   /// **'Enter proof of purchase'**
   String get surveyEnterProofOfPurchase;
 
+  /// No description provided for @surveyNoStarterKit.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t have a Starter Kit'**
+  String get surveyNoStarterKit;
+
   /// No description provided for @surveyErrorNotANumber.
   ///
   /// In en, this message translates to:
@@ -1147,6 +1153,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to open the reward link'**
   String get benefitClaimRewardError;
+
+  /// No description provided for @benefitVisitSite.
+  ///
+  /// In en, this message translates to:
+  /// **'Visit the {partner} website'**
+  String benefitVisitSite(String partner);
+
+  /// No description provided for @benefitCouponCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount code copied'**
+  String get benefitCouponCopied;
 
   /// No description provided for @benefitsEmpty.
   ///

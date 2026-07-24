@@ -60,6 +60,20 @@ query GetDiaryActivities($lang: String!, $page: Int = 1) {
 }
 ''';
 
+  // Supplement intake, merged into the history client-side. `user_integratori`
+  // is already scoped to the caller by the auth token (verified on staging: no
+  // kit filter needed), and `took_dates` is a JSON array of `YYYY-MM-DD`
+  // strings — date-only, so these entries carry no time of day.
+  static const _intakeQuery = r'''
+query GetSupplementIntake {
+  user_integratori {
+    id
+    product { id title }
+    took_dates
+  }
+}
+''';
+
   static const _categoriesQuery = r'''
 query GetGoalCategories($lang: String!) {
   goal_categories(sort: ["id"]) {
@@ -102,11 +116,61 @@ query GetGoalCategories($lang: String!) {
           ),
         );
       }
+
+      activities.addAll(await _fetchSupplementIntake());
+      // Re-sort: the GraphQL `-started_on` ordering only covered the step rows.
+      activities.sort((a, b) {
+        final aDate = a.completedOn ?? a.startedOn;
+        final bDate = b.completedOn ?? b.startedOn;
+        if (aDate == null && bDate == null) return 0;
+        if (aDate == null) return 1;
+        if (bDate == null) return -1;
+        return bDate.compareTo(aDate);
+      });
       return activities;
     } on ApiException {
       rethrow;
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
+    }
+  }
+
+  /// One synthesised [DiaryActivity] per (product, day) in `took_dates`.
+  ///
+  /// These are always complete — an intake is recorded only once taken — and
+  /// carry no `stepId`, so `canComplete` stays false and the diary renders them
+  /// read-only. A failure here must not blank the whole history, so it degrades
+  /// to an empty list.
+  Future<List<DiaryActivity>> _fetchSupplementIntake() async {
+    try {
+      final result = await _graphqlClient.query(_intakeQuery);
+      final data = result['data'] as Map<String, dynamic>?;
+      final rows = data?['user_integratori'] as List<dynamic>? ?? const [];
+
+      final entries = <DiaryActivity>[];
+      for (final row in rows.cast<Map<String, dynamic>>()) {
+        final product = row['product'] as Map<String, dynamic>?;
+        final title = product?['title'] as String?;
+        final dates = row['took_dates'] as List<dynamic>? ?? const [];
+        for (final raw in dates) {
+          final day = _parseDate(raw as String?);
+          if (day == null) continue;
+          entries.add(
+            DiaryActivity(
+              // `took_dates` rows have no id of their own; the tracking row id
+              // plus the day is unique and stable across reloads.
+              id: 'integratore-${row['id']}-${raw as String}',
+              area: DiaryArea.integrazione,
+              title: title,
+              startedOn: day,
+              completedOn: day,
+            ),
+          );
+        }
+      }
+      return entries;
+    } catch (_) {
+      return const [];
     }
   }
 

@@ -491,6 +491,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get surveyEnterProofOfPurchase => 'Enter proof of purchase';
 
   @override
+  String get surveyNoStarterKit => 'I don\'t have a Starter Kit';
+
+  @override
   String get surveyErrorNotANumber => 'Enter a valid number';
 
   @override
@@ -563,6 +566,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get benefitClaimRewardError => 'Unable to open the reward link';
+
+  @override
+  String benefitVisitSite(String partner) {
+    return 'Visit the $partner website';
+  }
+
+  @override
+  String get benefitCouponCopied => 'Discount code copied';
 
   @override
   String get benefitsEmpty => 'No benefits available';

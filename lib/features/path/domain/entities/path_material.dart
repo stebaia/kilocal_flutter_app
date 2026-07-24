@@ -39,7 +39,8 @@ class PathMaterial extends Equatable {
   final String? imageUrl;
 
   /// Whether the card must be rendered without its cover image: the editorial
-  /// "Consigli utili" are text-only by design.
+  /// "Consigli utili" and the "Schede" are text-only by design. "Ricette" keep
+  /// their cover (the linked article's hero).
   final bool hidesImage;
 
   @override
@@ -167,9 +168,13 @@ class PathMaterialCategory extends Equatable {
   /// is not translated, so it is what feature checks key off.
   final String? internalName;
 
-  /// The editorial "Consigli utili" category, whose items are shown without any
-  /// cover image.
-  bool get isAdvice => internalName == PathMaterialCategories.advice;
+  /// Whether this category's cards are listed without a cover image.
+  ///
+  /// "Ricette" deliberately do NOT belong here: they show the linked article's
+  /// hero, both in the list and in the detail.
+  bool get hidesImage =>
+      internalName != null &&
+      PathMaterialCategories.imageless.contains(internalName);
 
   @override
   List<Object?> get props => [id, title, internalName];
@@ -180,6 +185,12 @@ abstract final class PathMaterialCategories {
   /// "Consigli utili" — its materials are rendered text-only, with no image in
   /// the list card nor in the detail.
   static const advice = 'consigli-utili';
+
+  /// "Schede" — downloadable PDFs, listed without a cover image.
+  static const sheets = 'schede';
+
+  /// Categories whose cards carry no cover image in the list.
+  static const imageless = {advice, sheets};
 }
 
 /// The full materials hub payload for one area: the available category tabs and

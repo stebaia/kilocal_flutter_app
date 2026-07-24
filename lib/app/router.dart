@@ -400,7 +400,12 @@ class AppScaffold extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
-                    navigationShell.goBranch(index);
+                    // Always land on the branch's root screen, never wherever
+                    // it was last left — `goBranch` otherwise restores that
+                    // branch's own navigation stack (GoRouter's default), so a
+                    // "consiglio utile" opened inside /path would still be
+                    // showing after leaving to /strumenti and coming back.
+                    navigationShell.goBranch(index, initialLocation: true);
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
