@@ -590,6 +590,36 @@ abstract class AppLocalizations {
   /// **'I bought the Starter kit'**
   String get pathLockedBoughtKit;
 
+  /// Title of the sheet shown when tapping a month that is locked pending completion of the previous one.
+  ///
+  /// In en, this message translates to:
+  /// **'Month locked'**
+  String get pathTimeframeLockedTitle;
+
+  /// Body copy of the timeframe-locked sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'To unlock this month, complete every activity in the previous month first.'**
+  String get pathTimeframeLockedBody;
+
+  /// Title of the sheet shown after completing the last activity of a month.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations!'**
+  String get pathMonthCompletedTitle;
+
+  /// Body copy of the month-completed sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed every activity for this month.'**
+  String get pathMonthCompletedBody;
+
+  /// CTA on the month-completed sheet, opens the statistics screen.
+  ///
+  /// In en, this message translates to:
+  /// **'See statistics'**
+  String get pathMonthCompletedCta;
+
   /// Title of the barcode-entry bottom sheet used to unlock the programme.
   ///
   /// In en, this message translates to:
@@ -1651,30 +1681,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Complete activity'**
   String get pathStepComplete;
-
-  /// No description provided for @pathStepLocked.
-  ///
-  /// In en, this message translates to:
-  /// **'Locked'**
-  String get pathStepLocked;
-
-  /// No description provided for @pathStepCurrent.
-  ///
-  /// In en, this message translates to:
-  /// **'Current'**
-  String get pathStepCurrent;
-
-  /// No description provided for @pathStepCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get pathStepCompleted;
-
-  /// No description provided for @pathStepStarted.
-  ///
-  /// In en, this message translates to:
-  /// **'Started'**
-  String get pathStepStarted;
 
   /// No description provided for @pathStepVideoDuration.
   ///

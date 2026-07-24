@@ -273,6 +273,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathLockedBoughtKit => 'I bought the Starter kit';
 
   @override
+  String get pathTimeframeLockedTitle => 'Month locked';
+
+  @override
+  String get pathTimeframeLockedBody =>
+      'To unlock this month, complete every activity in the previous month first.';
+
+  @override
+  String get pathMonthCompletedTitle => 'Congratulations!';
+
+  @override
+  String get pathMonthCompletedBody =>
+      'You\'ve completed every activity for this month.';
+
+  @override
+  String get pathMonthCompletedCta => 'See statistics';
+
+  @override
   String get pathUnlockTitle => 'Unlock the programme';
 
   @override
@@ -875,18 +892,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pathStepComplete => 'Complete activity';
-
-  @override
-  String get pathStepLocked => 'Locked';
-
-  @override
-  String get pathStepCurrent => 'Current';
-
-  @override
-  String get pathStepCompleted => 'Completed';
-
-  @override
-  String get pathStepStarted => 'Started';
 
   @override
   String pathStepVideoDuration(String duration) {

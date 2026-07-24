@@ -102,6 +102,26 @@
   },
   "pathLockedUnderstood": "Got it",
   "pathLockedBoughtKit": "I bought the Starter kit",
+  "pathTimeframeLockedTitle": "Month locked",
+  "@pathTimeframeLockedTitle": {
+    "description": "Title of the sheet shown when tapping a month that is locked pending completion of the previous one."
+  },
+  "pathTimeframeLockedBody": "To unlock this month, complete every activity in the previous month first.",
+  "@pathTimeframeLockedBody": {
+    "description": "Body copy of the timeframe-locked sheet."
+  },
+  "pathMonthCompletedTitle": "Congratulations!",
+  "@pathMonthCompletedTitle": {
+    "description": "Title of the sheet shown after completing the last activity of a month."
+  },
+  "pathMonthCompletedBody": "You've completed every activity for this month.",
+  "@pathMonthCompletedBody": {
+    "description": "Body copy of the month-completed sheet."
+  },
+  "pathMonthCompletedCta": "See statistics",
+  "@pathMonthCompletedCta": {
+    "description": "CTA on the month-completed sheet, opens the statistics screen."
+  },
   "pathUnlockTitle": "Unlock the programme",
   "@pathUnlockTitle": {
     "description": "Title of the barcode-entry bottom sheet used to unlock the programme."
@@ -398,10 +418,6 @@
   },
   "pathStepContentTitle": "Activity",
   "pathStepComplete": "Complete activity",
-  "pathStepLocked": "Locked",
-  "pathStepCurrent": "Current",
-  "pathStepCompleted": "Completed",
-  "pathStepStarted": "Started",
   "pathStepVideoDuration": "{duration} min",
   "@pathStepVideoDuration": {
     "placeholders": {

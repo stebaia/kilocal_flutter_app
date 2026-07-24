@@ -25,7 +25,9 @@ class PathTimeframeRow extends StatelessWidget {
   final PathTimeframeGroup group;
   final String subtitle;
 
-  /// Tap handler; pass `null` (e.g. for a locked month) to disable the row.
+  /// Tap handler. Still fires when the month is locked — e.g. to show an
+  /// explanatory sheet — so callers decide what a locked tap does; pass
+  /// `null` only when the row should not react to taps at all.
   final VoidCallback? onTap;
   final bool showConnectorTop;
   final bool showConnectorBottom;
@@ -34,10 +36,8 @@ class PathTimeframeRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLocked = group.isLocked;
-
     return InkWell(
-      onTap: isLocked ? null : onTap,
+      onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: IntrinsicHeight(
         child: Row(

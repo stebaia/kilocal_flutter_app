@@ -33,6 +33,65 @@ Future<bool> showPathLockedSheet(
   return false;
 }
 
+/// Shows the "Mese bloccato" sheet when tapping a month/timeframe that is
+/// locked pending completion of the previous one (sequential progression),
+/// as opposed to [showPathLockedSheet] which gates a whole restricted area.
+Future<void> showTimeframeLockedSheet(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
+  return showAppBrandBottomSheet<void>(
+    context,
+    title: l10n.pathTimeframeLockedTitle,
+    child: _TimeframeLockedBody(),
+  );
+}
+
+class _TimeframeLockedBody extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenGutter,
+        AppSpacing.spaceLg,
+        AppSpacing.screenGutter,
+        AppSpacing.spaceMd,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _LockBadge(),
+          const SizedBox(height: AppSpacing.spaceLg),
+          Text(
+            l10n.pathTimeframeLockedBody,
+            textAlign: TextAlign.center,
+            style: AppTypography.textTheme.bodyLarge?.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spaceLg),
+          const Divider(height: 1, color: AppColors.divider),
+          const SizedBox(height: AppSpacing.spaceLg),
+          SizedBox(
+            height: 45,
+            width: double.infinity,
+            child: FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: AppColors.accent),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                l10n.pathLockedUnderstood,
+                style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// The "Sblocca il programma" sheet: enter the starter-kit barcode and unlock.
 ///
 /// Returns `true` when the programme was unlocked.
