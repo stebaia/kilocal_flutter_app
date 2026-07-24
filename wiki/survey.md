@@ -125,6 +125,49 @@ provided the app honours the status.
 > (section 11, the only one flagged `show_single_product_cta`), which `profile_status` routes
 > the user to next. Removed 2026-07-16 after it let a user press "Fine" and enter the app.
 
+> The result screen's own CTA (last step of `type_survey`) now reads **"Continua"**, not
+> "Fine" — `type_survey` always chains into `starter_kit` next (see the redirect below), so
+> "Fine" was misleading. `_ctaLabel`'s fallback (`survey_screen.dart`) applies this to the
+> last step of *every* survey, since any of them can be chained by `profile_status`.
+
+### `show_single_product_cta` — "Non ho uno Starter Kit" (added 2026-07-20)
+
+Section 11's `small_notification_text` tells a user without a Starter Kit to tap **"Non ho
+uno Starter Kit"** to proceed via a single-product purchase instead. The button (rendered
+whenever `section.showSingleProductCta` is true — currently only section 11/`starter_kit` and
+mirrored by section 79/`single_product_survey`, which does not re-show it) navigates to
+`/survey?internalName=single_product_survey`: a parallel flow that asks *which* product was
+bought (a `show_as_dropdown` question) before its own barcode step. Both surveys' barcode
+title templates `{{product}}` in quotes; see below.
+
+### `{{product}}` placeholder (fixed 2026-07-20)
+
+Both `starter_kit` (section 11) and `single_product_survey` (section 79) title their barcode
+step `Inserisci il codice a barre di: "{{product}}"`, but neither survey's copy carried a
+`product` key, so the placeholder rendered empty. `_SectionBody._productName`
+(`survey_screen.dart`) resolves it:
+
+- `single_product_survey` asks a `show_as_dropdown` product question (section 78) immediately
+  before the barcode step — `{{product}}` is that question's selected option's label (e.g.
+  "Kilocal AGE Menopausa").
+- `starter_kit` has no such question — its barcode is about the fixed Starter Kit, not a
+  chosen product — so it falls back to the literal **"Starter Kit Kilocal"**.
+
+### `{{final_asset}}` — the "Hai completato il profilo!" screen (fixed 2026-07-21)
+
+Both `starter_kit` (section 10, sort 17) and `single_product_survey` (section 93, sort 18)
+end with `content: "<p>{{final_asset}}</p>"`. There is **no image field on `survey_sections`**
+(verified via GraphQL introspection — `translations` only carries `title`/`subtitle`/
+`content`, all `String`), so this isn't a CMS file attached to the section itself.
+
+The image is a **local celebration illustration** (`assets/goal.png`, a clapping-hands 3D
+render), the same asset already used for the Traguardi tab's hero card
+(`DiaryHeroCard`/`diary_screen.dart`) — not backend data at all. `_FinalAssetImage`
+(`survey_screen.dart`) renders it on the same red-gradient-card-with-white-circle framing as
+`DiaryHeroCard`. First attempt (since reverted) wrongly assumed this had to come from the
+user's biotype kit image (`user_details.profile.kit`) — it doesn't; the placeholder is filled
+locally, no fetch involved.
+
 Two things enforce it:
 
 1. **`appRouter.redirect`** (`onboardingRedirectFor`, `lib/app/router.dart`) — while
@@ -182,7 +225,9 @@ catalogue read failure **does not** let the user through: failing open would def
 **Open question:** "Trova una Farmacia Kilocal Point" (present in the web survey result) has
 no destination in the app contract — no URL in the CMS response, and the `pharmacies`
 collection has no public finder page. The button is hidden until backend supplies one; see
-`SurveyResultActions.pharmacyFinderUrl`.
+`SurveyResultActions.pharmacyFinderUrl`. Re-checked live via GraphQL introspection
+(2026-07-20): `pharmacies` still has no finder-page field and `surveys` has no URL field —
+still blocked, nothing to wire yet.
 
 > **Survey questions** (sections, options, conditions) are **read** via [[graphql]] on the
 > `surveys` / `survey_sections` / `survey_question` collections — there is no dedicated REST

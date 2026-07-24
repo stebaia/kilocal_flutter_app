@@ -491,6 +491,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get surveyEnterProofOfPurchase => 'Enter proof of purchase';
 
   @override
+  String get surveyNoStarterKit => 'I don\'t have a Starter Kit';
+
+  @override
   String get surveyErrorNotANumber => 'Enter a valid number';
 
   @override

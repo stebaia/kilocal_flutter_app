@@ -15,6 +15,7 @@ import '../domain/entities/survey_step.dart';
 import 'cubit/survey_cubit.dart';
 import 'survey_validation_l10n.dart';
 import 'widgets/survey_answer_input.dart';
+import 'widgets/survey_cta_button.dart';
 import 'widgets/survey_html.dart';
 import 'widgets/survey_kit_card.dart';
 import 'widgets/survey_pharmacy_picker.dart';
@@ -102,7 +103,7 @@ class _StepView extends StatelessWidget {
     return SurveyScaffold(
       totalSteps: state.visibleSections.length,
       currentIndex: state.currentIndex,
-      stepLabel: '$stepNumber. ${_stepLabel(section)}',
+      stepLabel: _stepLabel(section, stepNumber),
       ctaLabel: _ctaLabel(section, state),
       ctaEnabled: state.canLeaveCurrentStep,
       busy: state.status == SurveyStatus.submitting,
@@ -122,16 +123,18 @@ class _StepView extends StatelessWidget {
 
   String _ctaLabel(SurveySection section, SurveyState state) {
     if (section.ctaLabel?.isNotEmpty ?? false) return section.ctaLabel!;
-    return state.isLastStep ? 'Fine' : 'Avanti';
+    // The last step ends this survey, but another (chained) survey may follow
+    // — see `onboardingRedirectFor` — so "Fine" would be misleading; "Continua"
+    // holds regardless of what comes next.
+    return state.isLastStep ? 'Continua' : 'Avanti';
   }
 
-  /// The small header caption. Uses the CMS `small_notification_text` when set,
-  /// otherwise a neutral placeholder (as in the design).
-  String _stepLabel(SurveySection section) {
-    final note = section.smallNotificationText;
-    return (note != null && note.trim().isNotEmpty)
-        ? note.trim()
-        : 'Scritta solo per step corrente';
+  /// The small header caption, shown only when the CMS sets
+  /// `small_notification_text` for this section — no placeholder otherwise.
+  String? _stepLabel(SurveySection section, int stepNumber) {
+    final note = section.smallNotificationText?.trim();
+    if (note == null || note.isEmpty) return null;
+    return '$stepNumber. $note';
   }
 }
 
@@ -153,12 +156,17 @@ class _SectionBody extends StatelessWidget {
     // outcome plus the logged-in user's first name.
     // UserCubit is a get_it singleton rather than a tree-provided bloc (there is
     // no MultiBlocProvider above the router), so read it from the locator.
-    final placeholders = isResult
-        ? _outcomePlaceholders(
-            state.outcomeProfile,
-            getIt<UserCubit>().state.user?.firstName,
-          )
-        : const <String, String>{};
+    final placeholders = <String, String>{
+      if (isResult)
+        ..._outcomePlaceholders(
+          state.outcomeProfile,
+          getIt<UserCubit>().state.user?.firstName,
+        ),
+      // The proof-of-purchase step ("Inserisci il codice a barre di:
+      // "{{product}}"") appears both after a product-dropdown question
+      // (single_product_survey) and on its own (starter_kit, generic kit).
+      'product': ?_productName(state),
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -193,6 +201,14 @@ class _SectionBody extends StatelessWidget {
             emphasisKeys: const {'outcome_profile'},
           ),
         ],
+        // The "Hai completato il profilo!" screen (starter_kit /
+        // single_product_survey) templates `{{final_asset}}` in its content —
+        // not a CMS file on the section itself, but the recommended kit's
+        // product image from the user's own (already assigned) biotype.
+        if (section.content?.contains('{{final_asset}}') ?? false) ...[
+          const SizedBox(height: AppSpacing.spaceLg),
+          _FinalAssetImage(),
+        ],
         if (isResult) ...[
           const SizedBox(height: AppSpacing.spaceLg),
           SurveyKitCard(outcome: state.outcomeProfile),
@@ -216,8 +232,41 @@ class _SectionBody extends StatelessWidget {
             cubit: cubit,
           ),
         ],
+        if (section.showSingleProductCta) ...[
+          const SizedBox(height: AppSpacing.spaceLg),
+          _NoStarterKitButton(),
+        ],
       ],
     );
+  }
+
+  /// The name for `{{product}}`, shown in quotes on the proof-of-purchase step
+  /// ("Inserisci il codice a barre di: "{{product}}"").
+  ///
+  /// `single_product_survey` asks a `show_as_dropdown` product question right
+  /// before the barcode step, so the name is the label of the option the user
+  /// picked. `starter_kit` has no such question — its barcode step is about the
+  /// fixed Starter Kit, so it falls back to that literal name.
+  static const _genericProductName = 'Starter Kit Kilocal';
+
+  String? _productName(SurveyState state) {
+    final survey = state.survey;
+    if (survey == null) return null;
+    SurveySection? dropdown;
+    for (final s in survey.sections) {
+      if (s.showAsDropdown) {
+        dropdown = s;
+        break;
+      }
+    }
+    if (dropdown == null) return _genericProductName;
+
+    final selectedId =
+        state.answers[dropdown.id]?.selectedOptionIds.firstOrNull;
+    for (final option in dropdown.question?.options ?? const <SurveyOption>[]) {
+      if (option.id == selectedId) return option.text ?? _genericProductName;
+    }
+    return _genericProductName;
   }
 
   /// Builds the result-screen placeholders the CMS copy expects.
@@ -248,6 +297,63 @@ class _SectionBody extends StatelessWidget {
       if (biotype?.description != null)
         'outcome_profile': biotype!.description!,
     };
+  }
+}
+
+/// The illustration for the `{{final_asset}}` placeholder on the "Hai
+/// completato il profilo!" screen: the same local celebration asset
+/// (`assets/goal.png`, a clapping-hands 3D render) already used for the
+/// Traguardi tab's hero card (`DiaryHeroCard`/`diary_screen.dart`). The CMS
+/// section carries no image field — this placeholder is filled locally, not
+/// from any backend data.
+class _FinalAssetImage extends StatelessWidget {
+  const _FinalAssetImage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 220,
+      decoration: BoxDecoration(
+        gradient: AppColors.brandGradient,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      alignment: Alignment.center,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 148,
+            height: 148,
+            decoration: const BoxDecoration(
+              color: AppColors.neutralWhite,
+              shape: BoxShape.circle,
+            ),
+          ),
+          Image.asset(
+            'assets/goal.png',
+            width: 200,
+            height: 200,
+            fit: BoxFit.contain,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The `show_single_product_cta` escape hatch on the starter kit's
+/// proof-of-purchase step: a user who bought a single product rather than the
+/// full Starter Kit follows `single_product_survey` instead, which asks which
+/// product and then its own barcode.
+class _NoStarterKitButton extends StatelessWidget {
+  const _NoStarterKitButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SurveyCtaButton.outlined(
+      label: AppLocalizations.of(context)!.surveyNoStarterKit,
+      onPressed: () => context.go('/survey?internalName=single_product_survey'),
+    );
   }
 }
 

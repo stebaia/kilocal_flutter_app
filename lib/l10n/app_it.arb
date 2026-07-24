@@ -185,6 +185,7 @@
   "surveyFindPharmacy": "Trova una Farmacia Kilocal Point",
   "surveyGoToShop": "Vai allo shop",
   "surveyEnterProofOfPurchase": "Inserisci prova d'acquisto",
+  "surveyNoStarterKit": "Non ho uno Starter Kit",
   "surveyErrorNotANumber": "Inserisci un numero valido",
   "surveyErrorNotAnInteger": "Inserisci un numero intero",
   "surveyErrorTooSmall": "Il valore inserito è troppo basso",

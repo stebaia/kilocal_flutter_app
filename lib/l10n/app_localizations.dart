@@ -1004,6 +1004,12 @@ abstract class AppLocalizations {
   /// **'Enter proof of purchase'**
   String get surveyEnterProofOfPurchase;
 
+  /// No description provided for @surveyNoStarterKit.
+  ///
+  /// In en, this message translates to:
+  /// **'I don\'t have a Starter Kit'**
+  String get surveyNoStarterKit;
+
   /// No description provided for @surveyErrorNotANumber.
   ///
   /// In en, this message translates to:
