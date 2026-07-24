@@ -40,18 +40,21 @@ class IntegrazionePhaseCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            child: Container(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          boxShadow: AppShadows.card,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
               height: 200,
               decoration: BoxDecoration(
                 gradient: isLocked
                     ? _lockedGradient
                     : AppColors.brandGradientVertical,
-                boxShadow: AppShadows.card,
               ),
               child: Stack(
                 alignment: Alignment.center,
@@ -79,32 +82,27 @@ class IntegrazionePhaseCard extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.spaceXs),
-          // White footer with title / lock hint.
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.spaceMd,
-              vertical: AppSpacing.spaceMd,
-            ),
-            decoration: BoxDecoration(
+            // White footer with title / lock hint.
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.spaceMd,
+                vertical: AppSpacing.spaceMd,
+              ),
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              boxShadow: AppShadows.card,
-            ),
-            child: Text(
-              footerText,
-              textAlign: TextAlign.center,
-              style: AppTypography.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: isLocked
-                    ? AppColors.textSecondary
-                    : AppColors.textPrimary,
+              child: Text(
+                footerText,
+                textAlign: TextAlign.center,
+                style: AppTypography.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: isLocked
+                      ? AppColors.textSecondary
+                      : AppColors.textPrimary,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

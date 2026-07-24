@@ -1340,6 +1340,12 @@ abstract class AppLocalizations {
   /// **'Mark supplement as taken'**
   String get integrationMarkTaken;
 
+  /// No description provided for @integrationTakenToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken today'**
+  String get integrationTakenToday;
+
   /// No description provided for @integrationMarkTakenError.
   ///
   /// In en, this message translates to:

@@ -331,6 +331,7 @@
     "placeholders": { "days": { "type": "int" } }
   },
   "integrationMarkTaken": "Mark supplement as taken",
+  "integrationTakenToday": "Taken today",
   "integrationMarkTakenError": "Couldn't record the intake. Try again later.",
   "integrationMarkedTaken": "Intake recorded",
   "integrationInstructionsTitle": "Usage instructions",

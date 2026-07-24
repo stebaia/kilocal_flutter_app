@@ -706,6 +706,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get integrationMarkTaken => 'Segna integrato come preso';
 
   @override
+  String get integrationTakenToday => 'Preso oggi';
+
+  @override
   String get integrationMarkTakenError =>
       'Impossibile registrare l\'assunzione. Riprova più tardi.';
 

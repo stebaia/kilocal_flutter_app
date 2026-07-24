@@ -269,6 +269,7 @@
     "placeholders": { "days": { "type": "int" } }
   },
   "integrationMarkTaken": "Segna integrato come preso",
+  "integrationTakenToday": "Preso oggi",
   "integrationMarkTakenError": "Impossibile registrare l'assunzione. Riprova più tardi.",
   "integrationMarkedTaken": "Assunzione registrata",
   "integrationInstructionsTitle": "Istruzioni sull'uso",

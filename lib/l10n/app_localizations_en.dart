@@ -703,6 +703,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationMarkTaken => 'Mark supplement as taken';
 
   @override
+  String get integrationTakenToday => 'Taken today';
+
+  @override
   String get integrationMarkTakenError =>
       'Couldn\'t record the intake. Try again later.';
 

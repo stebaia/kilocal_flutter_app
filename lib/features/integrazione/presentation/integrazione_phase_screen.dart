@@ -137,6 +137,7 @@ class _PhaseProducts extends StatelessWidget {
           product: product,
           onInfoTap: () => _openInstructions(context, product),
           onMarkTaken: () => _markTaken(context, product),
+          onUnmarkTaken: () => _unmarkTaken(context, product),
         );
       },
     );
@@ -174,6 +175,21 @@ class _PhaseProducts extends StatelessWidget {
     } catch (_) {
       // The cubit re-emits an error state that the BlocConsumer listener turns
       // into a toast; keep a messenger fallback for safety.
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.integrationMarkTakenError)),
+      );
+    }
+  }
+
+  Future<void> _unmarkTaken(
+    BuildContext context,
+    IntegrazioneProduct product,
+  ) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await context.read<IntegrazioneCubit>().unmarkTakenToday(product);
+    } catch (_) {
       messenger.showSnackBar(
         SnackBar(content: Text(l10n.integrationMarkTakenError)),
       );
