@@ -31,4 +31,13 @@ abstract class IntegrazioneRepository {
     String? trackingId,
     required DateTime day,
   });
+
+  /// Reverses [markTaken]: removes [day] from `user_integratori.took_dates` for
+  /// the record identified by [trackingId]. The "Preso oggi" CTA must be
+  /// reversible, so this is a no-op-safe undo rather than a permanent action.
+  Future<void> unmarkTaken({
+    required String trackingId,
+    required String kitId,
+    required DateTime day,
+  });
 }

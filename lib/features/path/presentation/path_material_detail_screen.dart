@@ -236,7 +236,7 @@ class _TitleAndBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.spaceMd),
           _AttachmentButton(attachment: attachment),
         ],
-        const SizedBox(height: AppSpacing.spaceLg),
+        const SizedBox(height: AppSpacing.spaceMd),
         _MarkCompletedButton(material: material),
       ],
     );
