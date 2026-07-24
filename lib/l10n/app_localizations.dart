@@ -1778,35 +1778,35 @@ abstract class AppLocalizations {
   /// **'Useful resources for your path'**
   String get pathMaterialsSubtitle;
 
-  /// No description provided for @pathMaterialAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Available'**
-  String get pathMaterialAvailable;
-
   /// No description provided for @pathMaterialsEmpty.
   ///
   /// In en, this message translates to:
   /// **'No materials available'**
   String get pathMaterialsEmpty;
 
-  /// No description provided for @pathMaterialsFilterAvailable.
+  /// No description provided for @pathMaterialsFilterToWatch.
   ///
   /// In en, this message translates to:
-  /// **'Available'**
-  String get pathMaterialsFilterAvailable;
+  /// **'To watch'**
+  String get pathMaterialsFilterToWatch;
 
-  /// No description provided for @pathMaterialsFilterCompleted.
+  /// No description provided for @pathMaterialsFilterWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get pathMaterialsFilterWatched;
+
+  /// No description provided for @pathMaterialMarkCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as completed'**
+  String get pathMaterialMarkCompleted;
+
+  /// No description provided for @pathMaterialCompleted.
   ///
   /// In en, this message translates to:
   /// **'Completed'**
-  String get pathMaterialsFilterCompleted;
-
-  /// No description provided for @pathMaterialsFilterUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Unavailable'**
-  String get pathMaterialsFilterUnavailable;
+  String get pathMaterialCompleted;
 
   /// No description provided for @pathMaterialDownloadError.
   ///
