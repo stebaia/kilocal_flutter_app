@@ -20,7 +20,7 @@ class ActionCard extends StatelessWidget {
       onTap: () => context.push(card.route),
       child: Container(
         height: 165,
-        width: 159,
+        width: double.infinity,
         decoration: BoxDecoration(
           gradient: AppColors.brandGradientVertical,
           borderRadius: BorderRadius.circular(AppRadius.lg),

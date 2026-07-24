@@ -22,11 +22,16 @@ class ContinuePathItem {
     required this.title,
     this.subtitle,
     required this.imageUrl,
+    this.hasStarted = false,
   });
 
   final String title;
   final String? subtitle;
   final String imageUrl;
+
+  /// Whether the user has completed at least one step in any path area.
+  /// Drives the CTA label: "Inizia il percorso" vs "Continua il percorso".
+  final bool hasStarted;
 }
 
 /// Statistics summary for the current month.

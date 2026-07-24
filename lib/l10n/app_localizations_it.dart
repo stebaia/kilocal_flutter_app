@@ -218,6 +218,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get homeContinuePath => 'Continua il percorso';
 
   @override
+  String get homeStartPath => 'Inizia il percorso';
+
+  @override
   String get homeSeeStatistics => 'Vedi statistiche';
 
   @override

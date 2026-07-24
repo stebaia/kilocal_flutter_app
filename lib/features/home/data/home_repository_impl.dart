@@ -3,18 +3,23 @@ import 'package:dio/dio.dart';
 import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../path/data/dto/path_progress_dto.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/home_repository.dart';
 import 'dto/home_continue_step_dto.dart';
 import 'dto/home_month_progress_dto.dart';
 import 'dto/home_moment_dto.dart';
 
-/// Repository implementation that loads the home dashboard from GraphQL.
+/// Repository implementation that loads the home dashboard from GraphQL,
+/// plus the lifetime path progress from `GET /path/me/progress` (REST) used
+/// to decide the "Inizia"/"Continua il percorso" CTA.
 class HomeRepositoryImpl implements HomeRepository {
-  HomeRepositoryImpl({required GraphqlClient graphqlClient})
-    : _graphqlClient = graphqlClient;
+  HomeRepositoryImpl({required GraphqlClient graphqlClient, required Dio dio})
+    : _graphqlClient = graphqlClient,
+      _dio = dio;
 
   final GraphqlClient _graphqlClient;
+  final Dio _dio;
 
   static const _defaultCtaLabel = 'Continua';
   static const _defaultMonthText = 'Le tue attività completate nel mese';
@@ -148,6 +153,7 @@ query HomeMoments($now: String!, $lang: String!) {
     final continueAndText = await _fetchContinueAndText(myId, lang);
     final monthProgress = await _fetchMonthProgress(myId, currentMonth);
     final moment = await _fetchMoment(now, lang);
+    final hasStarted = await _fetchHasStartedPath();
 
     final (continueStepDto, monthText) = continueAndText;
     final continueStep =
@@ -170,6 +176,7 @@ query HomeMoments($now: String!, $lang: String!) {
         title: continueStep.title ?? _continueFallbackTitle,
         subtitle: continueStep.ctaLabel,
         imageUrl: continueImage,
+        hasStarted: hasStarted,
       ),
       monthStats: MonthStats(
         monthLabel: 'Mese $currentMonth',
@@ -357,6 +364,23 @@ query HomeMoments($now: String!, $lang: String!) {
       rethrow;
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
+    }
+  }
+
+  /// Whether the user has completed at least one step in any path area,
+  /// used to pick "Inizia il percorso" vs "Continua il percorso". Defaults to
+  /// `false` (start state) if the progress endpoint is unreachable.
+  Future<bool> _fetchHasStartedPath() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/path/me/progress',
+      );
+      final dto = PathProgressResponseDto.fromJson(response.data ?? const {});
+      return dto.data.overall.completed > 0;
+    } on ApiException {
+      return false;
+    } on DioException {
+      return false;
     }
   }
 

@@ -81,7 +81,9 @@ class ContinuePathCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              l10n.homeContinuePath,
+                              item.hasStarted
+                                  ? l10n.homeContinuePath
+                                  : l10n.homeStartPath,
                               style: AppTypography.textTheme.bodyMedium
                                   ?.copyWith(
                                     color: AppColors.neutralWhite,

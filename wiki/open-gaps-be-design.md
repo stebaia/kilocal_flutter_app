@@ -106,7 +106,29 @@ endpoint**. They are either static CMS content or native OS actions:
 - **Question for the team:** what is the supported flow to set the profile picture — generic
   `/files` + avatar relation, or a new profile field? Confirm before wiring.
 
-## 8. Onboarding — which texts?
+## 9. Home "continue path" card — step cover images missing in the CMS
+
+- **State:** verified live on staging (2026-07-24) with the `mobile.test.active@thefullproject.it`
+  test account. `user_details.percorso_allenamento_curr_step` **does** advance correctly after
+  completing a step (confirmed: after finishing "settimana 1 - allenamento 1", `curr_step` moved
+  to id 12 / sort 7 / "settimana 3 - allenamento 2"), so the home hero card's "next content"
+  pointer is not the problem.
+- **The actual gap:** the preview image never changes because almost no `percorsi_content` row has
+  a cover image. Introspection + a full scan of `percorsi_content` (157 rows) on staging show:
+  **156/157 are video content** (`asset.asset_is_video: true`, with a `vimeo_url`), and only
+  **1/157** has ever had `asset.default_asset` or `asset.mobile_asset` populated — the two fields
+  the home query (`HomeContinueAndText` in `home_repository_impl.dart`) reads for the thumbnail.
+  With those null, the app correctly falls back to the local placeholder
+  (`assets/training.png`), which is why the image looks "stuck" regardless of which step is
+  current.
+- **Missing (content/CMS):** cover images (`default_asset`/`mobile_asset`) uploaded on the
+  `assets` junction row for each video step — or a decision to source the thumbnail elsewhere
+  (e.g. a Vimeo oEmbed thumbnail, which the app already fetches for playback via
+  `vimeo_oembed_service.dart`, as a fallback when `default_asset`/`mobile_asset` are null).
+- **Question for the team:** will the content team backfill cover images for the ~156 video
+  steps, or should the app derive the preview thumbnail from Vimeo's oEmbed response instead?
+
+## 10. Onboarding — which texts?
 
 - **State:** `splash.png` frame is *"SPLASH + APPRODO SALES SPEECH"* with an N-step carousel,
   but the copy is placeholder ("Lorem Ipsum") — no final text and no content endpoint
@@ -130,7 +152,8 @@ endpoint**. They are either static CMS content or native OS actions:
 | 5 | Biotype texts | BE | can mobile role read `profiles_translations`? |
 | 6 | Profile extra screens | design | Figma + target for Tutorial/Support/Privacy/Termini |
 | 7 | Profile image | BE | supported avatar-upload flow (`/files`+avatar vs new field) |
-| 8 | Onboarding texts | design | final slide copy; static vs CMS |
+| 9 | Home continue-path cover images | content/CMS | backfill `default_asset`/`mobile_asset` on video steps, or use Vimeo oEmbed thumbnail |
+| 10 | Onboarding texts | design | final slide copy; static vs CMS |
 
 ## Related
 

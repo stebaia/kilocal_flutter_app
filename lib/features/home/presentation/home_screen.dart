@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import '../../../app/di.dart';
+import '../../../app/router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import 'cubit/home_cubit.dart';
@@ -11,15 +12,48 @@ import 'widgets/continue_path_card.dart';
 import 'widgets/home_header.dart';
 import 'widgets/month_stats_card.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final HomeCubit _homeCubit;
+  ValueNotifier<int>? _reloadSignal;
+
+  @override
+  void initState() {
+    super.initState();
+    _homeCubit = getIt<HomeCubit>()..load();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Re-subscribe if the signal instance ever changes (it won't in
+    // practice, since AppScaffold's State outlives this screen, but this
+    // keeps the listener correctly attached/detached across rebuilds).
+    final signal = HomeReloadSignal.of(context);
+    if (!identical(signal, _reloadSignal)) {
+      _reloadSignal?.removeListener(_onReloadSignal);
+      _reloadSignal = signal?..addListener(_onReloadSignal);
+    }
+  }
+
+  void _onReloadSignal() => _homeCubit.load();
+
+  @override
+  void dispose() {
+    _reloadSignal?.removeListener(_onReloadSignal);
+    _homeCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<HomeCubit>()..load(),
-      child: const _HomeView(),
-    );
+    return BlocProvider.value(value: _homeCubit, child: const _HomeView());
   }
 }
 
