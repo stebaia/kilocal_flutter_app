@@ -482,6 +482,12 @@ abstract class AppLocalizations {
   /// **'Continue the path'**
   String get homeContinuePath;
 
+  /// No description provided for @homeStartPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the path'**
+  String get homeStartPath;
+
   /// No description provided for @homeSeeStatistics.
   ///
   /// In en, this message translates to:

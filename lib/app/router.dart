@@ -359,11 +359,32 @@ final GoRouter appRouter = GoRouter(
   ],
 );
 
-class AppScaffold extends StatelessWidget {
+/// Notifies descendants (namely [HomeScreen]) that the Home tab was just
+/// re-selected from a different tab, so they can reload their data.
+class HomeReloadSignal extends InheritedNotifier<ValueNotifier<int>> {
+  const HomeReloadSignal({
+    super.key,
+    required super.notifier,
+    required super.child,
+  });
+
+  static ValueNotifier<int>? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<HomeReloadSignal>()
+        ?.notifier;
+  }
+}
+
+class AppScaffold extends StatefulWidget {
   const AppScaffold({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  State<AppScaffold> createState() => _AppScaffoldState();
+}
+
+class _AppScaffoldState extends State<AppScaffold> {
   static const _items = [
     AppIcons.home,
     AppIcons.path,
@@ -372,10 +393,26 @@ class AppScaffold extends StatelessWidget {
     AppIcons.popsicle,
   ];
 
+  // Bumped whenever the Home tab is (re)selected from a different tab, so
+  // HomeScreen can reload — its BlocProvider otherwise only runs once, since
+  // the shell's IndexedStack keeps its State alive across tab switches.
+  final _homeReloadSignal = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    _homeReloadSignal.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final navigationShell = widget.navigationShell;
+
     return Scaffold(
-      body: navigationShell,
+      body: HomeReloadSignal(
+        notifier: _homeReloadSignal,
+        child: navigationShell,
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
@@ -400,6 +437,15 @@ class AppScaffold extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
+                    // Home's IndexedStack branch keeps HomeScreen's State (and
+                    // its HomeCubit) alive across tab switches, so returning
+                    // to it after e.g. completing a step elsewhere would show
+                    // stale data. Bump its key to force a remount — and thus
+                    // a fresh HomeCubit.load() — whenever we land on Home
+                    // from a different tab.
+                    if (index == 0 && navigationShell.currentIndex != 0) {
+                      _homeReloadSignal.value++;
+                    }
                     // Always land on the branch's root screen, never wherever
                     // it was last left — `goBranch` otherwise restores that
                     // branch's own navigation stack (GoRouter's default), so a

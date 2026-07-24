@@ -217,6 +217,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeContinuePath => 'Continue the path';
 
   @override
+  String get homeStartPath => 'Start the path';
+
+  @override
   String get homeSeeStatistics => 'See statistics';
 
   @override

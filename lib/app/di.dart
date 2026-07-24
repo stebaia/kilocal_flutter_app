@@ -173,7 +173,10 @@ void configureDependencies() {
 
   // --- Feature: Home ---
   getIt.registerLazySingleton<HomeRepository>(
-    () => HomeRepositoryImpl(graphqlClient: getIt<GraphqlClient>()),
+    () => HomeRepositoryImpl(
+      graphqlClient: getIt<GraphqlClient>(),
+      dio: getIt<Dio>(),
+    ),
   );
   getIt.registerFactory<HomeCubit>(
     () => HomeCubit(
