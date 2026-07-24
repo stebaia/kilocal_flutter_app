@@ -948,19 +948,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathMaterialsSubtitle => 'Useful resources for your path';
 
   @override
-  String get pathMaterialAvailable => 'Available';
-
-  @override
   String get pathMaterialsEmpty => 'No materials available';
 
   @override
-  String get pathMaterialsFilterAvailable => 'Available';
+  String get pathMaterialsFilterToWatch => 'To watch';
 
   @override
-  String get pathMaterialsFilterCompleted => 'Completed';
+  String get pathMaterialsFilterWatched => 'Watched';
 
   @override
-  String get pathMaterialsFilterUnavailable => 'Unavailable';
+  String get pathMaterialMarkCompleted => 'Mark as completed';
+
+  @override
+  String get pathMaterialCompleted => 'Completed';
 
   @override
   String get pathMaterialDownloadError =>

@@ -27,24 +27,27 @@ class PathMaterialDetailCubit extends Cubit<PathMaterialDetailState> {
       emit(
         state.copyWith(status: PathMaterialDetailStatus.loaded, data: detail),
       );
-      // Opening a material counts as completing it in the diary. Best-effort:
-      // a failed write must not surface as a load error over usable content.
-      await _registerCompletion(id);
     } on ApiException catch (e) {
       emit(state.copyWith(status: PathMaterialDetailStatus.error, error: e));
     }
   }
 
-  Future<void> _registerCompletion(String id) async {
+  /// Marks the material completed via the explicit "Segna come completato"
+  /// CTA — completion is no longer implicit on open, so this is the only way
+  /// a material moves from "Da vedere" to "Visti".
+  Future<void> markCompleted() async {
+    final detail = state.data;
     final userId = _userCubit.myId;
-    if (userId == null) return;
+    if (detail == null || userId == null || detail.isCompleted) return;
+
     try {
       await _materialsRepository.markMaterialCompleted(
-        materialId: id,
+        materialId: detail.id,
         userId: userId,
       );
-    } on ApiException {
-      // Swallow: the material stays readable even if the diary write fails.
+      emit(state.copyWith(data: detail.copyWith(isCompleted: true)));
+    } on ApiException catch (e) {
+      emit(state.copyWith(error: e));
     }
   }
 }

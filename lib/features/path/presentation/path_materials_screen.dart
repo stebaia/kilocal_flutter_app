@@ -30,14 +30,15 @@ class PathMaterialsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<PathMaterialsCubit>()..load(groupId: groupId),
-      child: _PathMaterialsView(title: title),
+      child: _PathMaterialsView(groupId: groupId, title: title),
     );
   }
 }
 
 class _PathMaterialsView extends StatelessWidget {
-  const _PathMaterialsView({this.title});
+  const _PathMaterialsView({required this.groupId, this.title});
 
+  final String groupId;
   final String? title;
 
   @override
@@ -84,7 +85,11 @@ class _PathMaterialsView extends StatelessWidget {
                         ),
                       );
                     case PathMaterialsStatus.loaded:
-                      return _MaterialsList(state: state, l10n: l10n);
+                      return _MaterialsList(
+                        state: state,
+                        l10n: l10n,
+                        groupId: groupId,
+                      );
                   }
                 },
               ),
@@ -100,16 +105,12 @@ class _PathMaterialsView extends StatelessWidget {
 
     final options = [
       FilterOption(
-        value: PathMaterialFilter.available,
-        label: l10n.pathMaterialsFilterAvailable,
+        value: PathMaterialFilter.toWatch,
+        label: l10n.pathMaterialsFilterToWatch,
       ),
       FilterOption(
-        value: PathMaterialFilter.completed,
-        label: l10n.pathMaterialsFilterCompleted,
-      ),
-      FilterOption(
-        value: PathMaterialFilter.unavailable,
-        label: l10n.pathMaterialsFilterUnavailable,
+        value: PathMaterialFilter.watched,
+        label: l10n.pathMaterialsFilterWatched,
       ),
     ];
 
@@ -126,10 +127,15 @@ class _PathMaterialsView extends StatelessWidget {
 }
 
 class _MaterialsList extends StatelessWidget {
-  const _MaterialsList({required this.state, required this.l10n});
+  const _MaterialsList({
+    required this.state,
+    required this.l10n,
+    required this.groupId,
+  });
 
   final PathMaterialsState state;
   final AppLocalizations l10n;
+  final String groupId;
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +198,7 @@ class _MaterialsList extends StatelessWidget {
     );
   }
 
-  void _openDetail(BuildContext context, PathMaterial material) {
+  Future<void> _openDetail(BuildContext context, PathMaterial material) async {
     // The category title is shown in the (text) detail header; pass the
     // currently-selected category's title.
     final categories = state.data?.categories ?? const [];
@@ -204,7 +210,12 @@ class _MaterialsList extends StatelessWidget {
       }
     }
 
+    final cubit = context.read<PathMaterialsCubit>();
     final base = GoRouterState.of(context).uri.path;
-    context.push('$base/detail/${material.id}', extra: categoryTitle);
+    await context.push('$base/detail/${material.id}', extra: categoryTitle);
+    // The detail's "Segna come completato" CTA may have just moved this
+    // material from "Da vedere" to "Visti" — reload so the list/filter
+    // reflects it without the user needing to leave and come back.
+    await cubit.load(groupId: groupId);
   }
 }

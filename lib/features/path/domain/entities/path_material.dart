@@ -69,6 +69,7 @@ class PathMaterialDetail extends Equatable {
     required this.id,
     required this.title,
     required this.isVideo,
+    this.isCompleted = false,
     this.subtitle,
     this.content,
     this.imageUrl,
@@ -82,6 +83,10 @@ class PathMaterialDetail extends Equatable {
 
   /// Whether the material is a video (`asset.asset_is_video`).
   final bool isVideo;
+
+  /// Whether the user has already marked this material as completed
+  /// ("Segna come completato"). Drives whether the CTA shows and its state.
+  final bool isCompleted;
 
   /// Optional subtitle shown under the title; only linked articles carry one,
   /// and rarely.
@@ -123,11 +128,27 @@ class PathMaterialDetail extends Equatable {
     ).toString();
   }
 
+  PathMaterialDetail copyWith({bool? isCompleted}) {
+    return PathMaterialDetail(
+      id: id,
+      title: title,
+      isVideo: isVideo,
+      isCompleted: isCompleted ?? this.isCompleted,
+      subtitle: subtitle,
+      content: content,
+      imageUrl: imageUrl,
+      vimeoUrl: vimeoUrl,
+      attachments: attachments,
+      hidesImage: hidesImage,
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,
     title,
     isVideo,
+    isCompleted,
     subtitle,
     content,
     imageUrl,
