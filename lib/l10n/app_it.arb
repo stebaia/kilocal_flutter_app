@@ -82,6 +82,11 @@
   "pathLockedBody": "Questo contenuto non è disponibile per il tuo piano corrente. Acquista il tuo starter kit per sbloccare il programma completo",
   "pathLockedUnderstood": "Ho capito",
   "pathLockedBoughtKit": "Ho acquistato lo Starter kit",
+  "pathTimeframeLockedTitle": "Mese bloccato",
+  "pathTimeframeLockedBody": "Per sbloccare questo mese devi prima completare tutte le attività del mese precedente.",
+  "pathMonthCompletedTitle": "Complimenti!",
+  "pathMonthCompletedBody": "Hai completato tutte le attività di questo mese.",
+  "pathMonthCompletedCta": "Vedi le statistiche",
   "pathUnlockTitle": "Sblocca il programma",
   "pathUnlockInstructions": "Inserisci il codice a barre che trovi sulla confezione del prodotto Kilocal che hai acquistato. Il codice è composto da 1 lettera iniziale + 9 numeri.",
   "pathUnlockCodeHint": "Inserisci codice prova d'acquisto…",
@@ -339,10 +344,6 @@
   "pathCompletedPercent": "completato al {percent}%",
   "pathStepContentTitle": "Attività",
   "pathStepComplete": "Completa attività",
-  "pathStepLocked": "Bloccato",
-  "pathStepCurrent": "Corrente",
-  "pathStepCompleted": "Completato",
-  "pathStepStarted": "Iniziato",
   "pathStepVideoDuration": "{duration} min",
   "@pathStepVideoDuration": {
     "placeholders": {

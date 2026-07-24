@@ -13,6 +13,7 @@ import '../../statistics/presentation/statistics_screen.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'cubit/path_detail_cubit.dart';
 import 'widgets/path_area_hero_card.dart';
+import 'widgets/path_locked_sheets.dart';
 import 'widgets/path_materials_row.dart';
 import 'widgets/path_section_header.dart';
 import 'widgets/path_timeframe_row.dart';
@@ -193,7 +194,7 @@ class _PathAreaDetailContent extends StatelessWidget {
             showConnectorTop: i > 0,
             showConnectorBottom: i < groups.length - 1,
             onTap: groups[i].isLocked
-                ? null
+                ? () => showTimeframeLockedSheet(context)
                 : () => _openTimeframe(context, groups[i]),
           ),
         if (data.hasMaterials) ...[
@@ -219,11 +220,16 @@ class _PathAreaDetailContent extends StatelessWidget {
     return l10n.pathTimeframeStepsCount(group.total);
   }
 
+  /// Jumps straight into the month's first not-yet-completed step (or its
+  /// first step at all, if every step is already done) — there is no more
+  /// intermediate "steps of this month" list screen.
   void _openTimeframe(BuildContext context, PathTimeframeGroup group) {
-    context.push(
-      '/path/${data.area}/timeframe/${group.timeframeId}',
-      extra: group,
+    if (group.steps.isEmpty) return;
+    final step = group.steps.firstWhere(
+      (s) => !s.isCompleted,
+      orElse: () => group.steps.first,
     );
+    context.push('/path/${data.area}/step/${step.id}', extra: step);
   }
 
   void _openMaterials(BuildContext context, String groupId) {

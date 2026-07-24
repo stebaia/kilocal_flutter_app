@@ -28,7 +28,6 @@ import '../features/path/presentation/path_material_detail_screen.dart';
 import '../features/path/presentation/path_materials_screen.dart';
 import '../features/path/presentation/path_screen.dart';
 import '../features/path/presentation/path_step_screen.dart';
-import '../features/path/presentation/path_timeframe_steps_screen.dart';
 import '../features/profile/presentation/change_password_screen.dart';
 import '../features/profile/presentation/profile_form_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
@@ -194,16 +193,6 @@ final GoRouter appRouter = GoRouter(
                       builder: (context, state) => PathAreaGroupDetailScreen(
                         groupId: state.pathParameters['groupId']!,
                         group: state.extra as PathAreaGroup?,
-                      ),
-                    ),
-                    GoRoute(
-                      path: 'timeframe/:timeframeId',
-                      builder: (context, state) => PathTimeframeStepsScreen(
-                        area: state.pathParameters['area']!,
-                        timeframeId: int.parse(
-                          state.pathParameters['timeframeId']!,
-                        ),
-                        group: state.extra as PathTimeframeGroup?,
                       ),
                     ),
                     GoRoute(

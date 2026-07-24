@@ -11,11 +11,14 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../strumenti/promemoria/domain/promemoria_repository.dart';
+import '../../strumenti/promemoria/presentation/widgets/promemoria_create_sheet.dart';
 import '../data/system_timer_service.dart';
 import '../data/vimeo_oembed_service.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'cubit/path_detail_cubit.dart';
 import 'widgets/path_activities_sheet.dart';
+import 'widgets/path_month_completed_sheet.dart';
 import 'widgets/path_timer_pill.dart';
 import 'widgets/path_timer_sheet.dart';
 import 'widgets/vimeo_player_controller.dart';
@@ -67,9 +70,15 @@ class _PathStepViewState extends State<_PathStepView> {
     systemTimer: getIt<SystemTimerService>(),
   );
 
+  // Fraction (0.0-1.0) of the video watched so far, reported by _StepMedia's
+  // Vimeo player. Lives here (rather than in _StepContent) so it survives the
+  // ListView/media widget rebuilding when the cubit reloads.
+  final _watchedFraction = ValueNotifier<double>(0);
+
   @override
   void dispose() {
     _timerController.dispose();
+    _watchedFraction.dispose();
     super.dispose();
   }
 
@@ -110,6 +119,7 @@ class _PathStepViewState extends State<_PathStepView> {
                 area: area,
                 siblings: _siblingsOf(state, step),
                 timerController: _timerController,
+                watchedFraction: _watchedFraction,
               ),
               // Persistent running-timer pill, above the bottom edge.
               Positioned(
@@ -158,79 +168,115 @@ class _StepContent extends StatelessWidget {
     required this.area,
     required this.siblings,
     required this.timerController,
+    required this.watchedFraction,
   });
+
+  /// Fraction of the video that must be watched before "Completa attività"
+  /// unblocks, mirroring the Kilocal Program web platform's own gating.
+  static const double _completionThreshold = 0.9;
 
   final PathStepItem step;
   final String area;
   final List<PathStepItem> siblings;
   final PathTimerController timerController;
+  final ValueNotifier<double> watchedFraction;
+
+  /// Extra bottom padding reserved for the timer pill floating over the
+  /// bottom edge (see PathTimerPill), so it never overlaps the "Completa
+  /// attività" button when the button lands near the end of the scroll.
+  static const double _timerPillClearance = 96;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     final description = step.description;
+    final isVideo = step.asset.isVideo && step.asset.vimeoEmbedUrl != null;
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: AppSpacing.spaceXl),
-      children: [
-        // Keyed by step id so the WebView is not rebuilt when the cubit reloads
-        // after a complete action on the same step.
-        _StepMedia(
-          key: ValueKey(step.id),
-          step: step,
-          area: area,
-          siblings: siblings,
-          timerController: timerController,
+    return AnimatedBuilder(
+      animation: timerController,
+      builder: (context, child) => ListView(
+        padding: EdgeInsets.only(
+          bottom: timerController.isRunning
+              ? _timerPillClearance
+              : AppSpacing.spaceXl,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenGutter,
+        children: [
+          // Keyed by step id so the WebView is not rebuilt when the cubit reloads
+          // after a complete action on the same step.
+          _StepMedia(
+            key: ValueKey(step.id),
+            step: step,
+            area: area,
+            siblings: siblings,
+            timerController: timerController,
+            onProgress: (fraction) {
+              if (fraction > watchedFraction.value) {
+                watchedFraction.value = fraction;
+              }
+            },
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.spaceLg),
-              Text(
-                step.title,
-                style: AppTypography.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              // Long body (HTML markup from the backend `content` field),
-              // shown only when populated.
-              if (description != null && description.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.spaceMd),
-                Html(
-                  data: description,
-                  style: {
-                    'body': Style(
-                      margin: Margins.zero,
-                      padding: HtmlPaddings.zero,
-                      color: AppColors.textSecondary,
-                      fontSize: FontSize(
-                        AppTypography.textTheme.bodyMedium?.fontSize ?? 14,
-                      ),
-                      lineHeight: const LineHeight(1.5),
-                    ),
-                  },
-                ),
-              ],
-              const SizedBox(height: AppSpacing.spaceLg),
-              _StatusLabel(step: step),
-              const SizedBox(height: AppSpacing.spaceXl),
-              if (!step.isCompleted && !step.isLocked)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _completeStep(context),
-                    child: Text(l10n.pathStepComplete),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenGutter,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: AppSpacing.spaceLg),
+                Text(
+                  step.title,
+                  style: AppTypography.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-            ],
+                // Long body (HTML markup from the backend `content` field),
+                // shown only when populated.
+                if (description != null && description.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.spaceMd),
+                  Html(
+                    data: description,
+                    style: {
+                      'body': Style(
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                        color: AppColors.textSecondary,
+                        fontSize: FontSize(
+                          AppTypography.textTheme.bodyMedium?.fontSize ?? 14,
+                        ),
+                        lineHeight: const LineHeight(1.5),
+                      ),
+                    },
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.spaceXl),
+                if (!step.isCompleted && !step.isLocked)
+                  if (isVideo)
+                    ValueListenableBuilder<double>(
+                      valueListenable: watchedFraction,
+                      builder: (context, fraction, _) => SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: fraction >= _completionThreshold
+                              ? () => _completeStep(context)
+                              : null,
+                          child: Text(l10n.pathStepComplete),
+                        ),
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _completeStep(context),
+                        child: Text(l10n.pathStepComplete),
+                      ),
+                    ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -238,9 +284,32 @@ class _StepContent extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<PathDetailCubit>();
     await cubit.completeStep(stepId: step.id, area: area, l10n: l10n);
+    if (!context.mounted) return;
+
+    // If that was the last step of its month, don't just pop back to an
+    // (now non-existent) intermediate list and leave the user stuck on the
+    // first activity again — surface the month completion and offer the
+    // stats recap instead of silently doing nothing further.
+    final monthDone = _isMonthNowComplete(cubit.state);
+    if (monthDone) {
+      await showMonthCompletedSheet(context);
+    }
     if (context.mounted) {
       context.pop(true);
     }
+  }
+
+  /// Whether the timeframe [step] belongs to is now fully completed, per the
+  /// cubit's freshly reloaded state.
+  bool _isMonthNowComplete(PathDetailState state) {
+    final groups = state.data?.timeframeGroups;
+    if (groups == null) return false;
+    for (final group in groups) {
+      if (group.steps.any((s) => s.id == step.id)) {
+        return group.total > 0 && group.completed == group.total;
+      }
+    }
+    return false;
   }
 }
 
@@ -256,12 +325,16 @@ class _StepMedia extends StatefulWidget {
     required this.area,
     required this.siblings,
     required this.timerController,
+    required this.onProgress,
   });
 
   final PathStepItem step;
   final String area;
   final List<PathStepItem> siblings;
   final PathTimerController timerController;
+
+  /// Called with the fraction (0.0-1.0) of the video watched so far.
+  final VimeoProgressCallback onProgress;
 
   @override
   State<_StepMedia> createState() => _StepMediaState();
@@ -311,7 +384,10 @@ class _StepMediaState extends State<_StepMedia> {
     );
 
     setState(() {
-      _controller = buildVimeoController(autoplayUrl);
+      _controller = buildVimeoController(
+        autoplayUrl,
+        onProgress: widget.onProgress,
+      );
     });
   }
 
@@ -464,7 +540,7 @@ class _MediaBottomTools extends StatelessWidget {
               width: 20,
               height: 20,
             ),
-            onTap: () => _openTimer(context),
+            onTap: () => _openReminder(context),
           ),
         ],
       ),
@@ -474,6 +550,11 @@ class _MediaBottomTools extends StatelessWidget {
   Future<void> _openTimer(BuildContext context) async {
     final duration = await showPathTimerSheet(context);
     if (duration != null) timerController.start(duration);
+  }
+
+  Future<void> _openReminder(BuildContext context) async {
+    final input = await showPromemoriaCreateSheet(context);
+    if (input != null) await getIt<PromemoriaRepository>().add(input);
   }
 }
 
@@ -593,51 +674,6 @@ class _DurationBadge extends StatelessWidget {
         l10n.pathStepVideoDuration(_format()),
         style: AppTypography.textTheme.labelSmall?.copyWith(
           color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusLabel extends StatelessWidget {
-  const _StatusLabel({required this.step});
-
-  final PathStepItem step;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final String text;
-    final Color color;
-
-    if (step.isCompleted) {
-      text = l10n.pathStepCompleted;
-      color = AppColors.accent;
-    } else if (step.isLocked) {
-      text = l10n.pathStepLocked;
-      color = AppColors.textSecondary;
-    } else if (step.isCurrent) {
-      text = l10n.pathStepCurrent;
-      color = AppColors.accent;
-    } else {
-      text = l10n.pathStepStarted;
-      color = AppColors.textSecondary;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.spaceMd,
-        vertical: AppSpacing.spaceXs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Text(
-        text,
-        style: AppTypography.textTheme.labelMedium?.copyWith(
-          color: color,
           fontWeight: FontWeight.w600,
         ),
       ),

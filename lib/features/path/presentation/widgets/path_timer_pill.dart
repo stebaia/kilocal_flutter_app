@@ -83,8 +83,9 @@ class PathTimerController extends ChangeNotifier {
   }
 }
 
-/// Persistent red pill showing the running timer; pause / resume on the right,
-/// tap the body to stop. Renders nothing when the timer is not running.
+/// Persistent red pill showing the running timer, with pause/resume and
+/// dismiss (stop) icons on the right. Renders nothing when the timer is not
+/// running.
 class PathTimerPill extends StatelessWidget {
   const PathTimerPill({super.key, required this.controller});
 
@@ -109,35 +110,40 @@ class PathTimerPill extends StatelessWidget {
           child: Material(
             color: AppColors.brandPink,
             borderRadius: BorderRadius.circular(AppRadius.pill),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(AppRadius.pill),
-              onTap: controller.stop,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.spaceLg,
-                  vertical: AppSpacing.spaceMd,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l10n.pathTimerPill(_format(controller.remaining)),
-                        style: AppTypography.textTheme.titleMedium?.copyWith(
-                          color: AppColors.neutralWhite,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: controller.togglePause,
-                      child: Icon(
-                        controller.isPaused ? Icons.play_arrow : Icons.pause,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.spaceLg,
+                vertical: AppSpacing.spaceMd,
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.pathTimerPill(_format(controller.remaining)),
+                      style: AppTypography.textTheme.titleMedium?.copyWith(
                         color: AppColors.neutralWhite,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: controller.togglePause,
+                    child: Icon(
+                      controller.isPaused ? Icons.play_arrow : Icons.pause,
+                      color: AppColors.neutralWhite,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.spaceMd),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: controller.stop,
+                    child: const Icon(
+                      Icons.close,
+                      color: AppColors.neutralWhite,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

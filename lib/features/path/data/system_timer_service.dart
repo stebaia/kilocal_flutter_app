@@ -13,10 +13,18 @@ import 'package:live_activities/live_activities.dart';
 /// The in-app pill is always shown by the caller regardless of what this
 /// service can do, so every method degrades quietly (never throws) and the UI
 /// keeps working even when no native surface is available.
+///
+/// Disabled: [_kNativeSurfaceEnabled] is `false` because launching the system
+/// Clock/a Live Activity when the in-app timer starts was unwanted — users
+/// only expect the in-app pill. The native-surface code below is left intact
+/// (not deleted) so it can be flipped back on with a one-line change if that
+/// changes again.
 class SystemTimerService {
   SystemTimerService({MethodChannel? androidChannel, LiveActivities? live})
     : _android = androidChannel ?? const MethodChannel('kilocal/system_timer'),
       _live = live ?? LiveActivities();
+
+  static const bool _kNativeSurfaceEnabled = false;
 
   /// App Group id shared between the Runner app and the iOS widget extension.
   /// Must match the one configured in Xcode and the extension's entitlements.
@@ -32,6 +40,7 @@ class SystemTimerService {
   /// native surface was started, `false` otherwise (caller still shows the
   /// pill).
   Future<bool> start(Duration duration, {required String label}) async {
+    if (!_kNativeSurfaceEnabled) return false;
     if (Platform.isAndroid) {
       return _startAndroid(duration, label);
     }
@@ -44,6 +53,7 @@ class SystemTimerService {
   /// Ends any running native surface (Live Activity on iOS; the Android system
   /// timer is owned by the Clock app and is not ours to cancel).
   Future<void> stop() async {
+    if (!_kNativeSurfaceEnabled) return;
     final id = _iosActivityId;
     if (Platform.isIOS && id != null) {
       try {

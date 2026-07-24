@@ -9,6 +9,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../statistics/presentation/statistics_screen.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'widgets/path_area_hero_card.dart';
+import 'widgets/path_locked_sheets.dart';
 import 'widgets/path_materials_row.dart';
 import 'widgets/path_section_header.dart';
 import 'widgets/path_timeframe_row.dart';
@@ -94,11 +95,8 @@ class PathAreaGroupDetailScreen extends StatelessWidget {
                       showConnectorTop: i > 0,
                       showConnectorBottom: i < months.length - 1,
                       onTap: months[i].isLocked
-                          ? null
-                          : () => context.push(
-                              '/path/benessere/timeframe/${months[i].timeframeId}',
-                              extra: months[i],
-                            ),
+                          ? () => showTimeframeLockedSheet(context)
+                          : () => _openTimeframe(context, months[i]),
                     ),
                   const SizedBox(height: AppSpacing.spaceSm),
                   const Divider(height: 1, color: AppColors.dividerStrong),
@@ -123,5 +121,17 @@ class PathAreaGroupDetailScreen extends StatelessWidget {
     if (month.isLocked) return l10n.pathTimeframeLocked;
     if (month.isCurrent) return l10n.pathTimeframeCurrent;
     return l10n.pathTimeframeStepsCount(month.total);
+  }
+
+  /// Jumps straight into the month's first not-yet-completed step (or its
+  /// first step at all, if every step is already done) — there is no more
+  /// intermediate "steps of this month" list screen.
+  void _openTimeframe(BuildContext context, PathTimeframeGroup month) {
+    if (month.steps.isEmpty) return;
+    final step = month.steps.firstWhere(
+      (s) => !s.isCompleted,
+      orElse: () => month.steps.first,
+    );
+    context.push('/path/benessere/step/${step.id}', extra: step);
   }
 }
