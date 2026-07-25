@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../app/di.dart';
 import '../../../core/icons/app_icons.dart';
@@ -17,6 +16,7 @@ import '../data/system_timer_service.dart';
 import '../data/vimeo_oembed_service.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'cubit/path_detail_cubit.dart';
+import 'widgets/fullscreen_vimeo_player_screen.dart';
 import 'widgets/path_activities_sheet.dart';
 import 'widgets/path_month_completed_sheet.dart';
 import 'widgets/path_timer_pill.dart';
@@ -313,11 +313,10 @@ class _StepContent extends StatelessWidget {
   }
 }
 
-/// Step media header: a Vimeo player (when the asset is a video) or an image.
-///
-/// Owns its own [WebViewController] for the whole lifetime of the widget and
-/// disposes of it via the platform controller when removed from the tree. Give
-/// it a stable [key] (e.g. the step id) so it survives unrelated rebuilds.
+/// Step media header: a custom poster (when the asset is a video, tapping it
+/// opens the full-screen Vimeo player — see [pushFullscreenVimeoPlayer]) or an
+/// image. Give it a stable [key] (e.g. the step id) so it survives unrelated
+/// rebuilds.
 class _StepMedia extends StatefulWidget {
   const _StepMedia({
     super.key,
@@ -351,9 +350,6 @@ class _StepMediaState extends State<_StepMedia> {
   /// oEmbed poster + duration for the video; null until fetched (or no video).
   VimeoOembed? _oembed;
 
-  /// Once the user taps play we mount the Vimeo WebView and keep it mounted.
-  WebViewController? _controller;
-
   bool get _isVideo =>
       widget.step.asset.isVideo && widget.step.asset.vimeoEmbedUrl != null;
 
@@ -383,12 +379,11 @@ class _StepMediaState extends State<_StepMedia> {
       },
     );
 
-    setState(() {
-      _controller = buildVimeoController(
-        autoplayUrl,
-        onProgress: widget.onProgress,
-      );
-    });
+    pushFullscreenVimeoPlayer(
+      context,
+      embedUrl: autoplayUrl,
+      onProgress: widget.onProgress,
+    );
   }
 
   @override
@@ -399,15 +394,13 @@ class _StepMediaState extends State<_StepMedia> {
         fit: StackFit.expand,
         children: [
           _buildSurface(),
-          // The top bar (back + activities) stays visible over the player.
+          // The top bar (back + activities) stays visible over the poster.
           _MediaTopBar(
             siblings: widget.siblings,
             step: widget.step,
             isActivities: widget.area == 'alimentazione',
           ),
-          // The timer tools are hidden once the native player takes over,
-          // and never shown in the nutrition area.
-          if (_controller == null && widget.area != 'alimentazione')
+          if (widget.area != 'alimentazione')
             _MediaBottomTools(timerController: widget.timerController),
         ],
       ),
@@ -423,15 +416,10 @@ class _StepMediaState extends State<_StepMedia> {
     );
   }
 
-  /// The media itself: native player (once playing), custom poster, image, or
-  /// a placeholder.
+  /// The media itself: custom poster, image, or a placeholder. Playback
+  /// itself always happens in the full-screen route (see [_play]).
   Widget _buildSurface() {
     final media = widget.step.asset;
-    final controller = _controller;
-
-    if (controller != null) {
-      return WebViewWidget(controller: controller);
-    }
 
     if (_isVideo) {
       return _VideoPoster(
