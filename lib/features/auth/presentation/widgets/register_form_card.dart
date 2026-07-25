@@ -18,8 +18,14 @@ class RegisterFormCard extends StatelessWidget {
         return Column(
           children: [
             AppTextField(
-              hint: l10n.registerFullName,
-              onChanged: context.read<RegisterCubit>().fullNameChanged,
+              hint: l10n.registerFirstName,
+              onChanged: context.read<RegisterCubit>().firstNameChanged,
+              textInputAction: TextInputAction.next,
+            ),
+            const SizedBox(height: AppSpacing.spaceLg),
+            AppTextField(
+              hint: l10n.registerLastName,
+              onChanged: context.read<RegisterCubit>().lastNameChanged,
               textInputAction: TextInputAction.next,
             ),
             const SizedBox(height: AppSpacing.spaceLg),
