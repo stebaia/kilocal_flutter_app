@@ -49,7 +49,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+      'Ogni giorno un passo più vicino alla tua ricomposizione.';
 
   @override
   String get loginEmail => 'Email';
@@ -77,10 +77,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get registerSubtitle =>
-      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+      'Per scoprire il tuo tipo e il percorso su misura per te compila il form e inizia il test.';
 
   @override
-  String get registerFullName => 'Nome e Cognome';
+  String get registerFirstName => 'Nome';
+
+  @override
+  String get registerLastName => 'Cognome';
 
   @override
   String get registerEmail => 'Indirizzo e-mail';

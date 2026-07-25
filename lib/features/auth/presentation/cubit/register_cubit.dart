@@ -13,8 +13,11 @@ class RegisterCubit extends Cubit<RegisterState> {
 
   final AuthRepository _authRepository;
 
-  void fullNameChanged(String value) =>
-      emit(state.copyWith(fullName: value, clearError: true));
+  void firstNameChanged(String value) =>
+      emit(state.copyWith(firstName: value, clearError: true));
+
+  void lastNameChanged(String value) =>
+      emit(state.copyWith(lastName: value, clearError: true));
 
   void emailChanged(String value) =>
       emit(state.copyWith(email: value, clearError: true));

@@ -173,7 +173,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.'**
+  /// **'Every day one step closer to your body recomposition.'**
   String get loginSubtitle;
 
   /// No description provided for @loginEmail.
@@ -227,14 +227,20 @@ abstract class AppLocalizations {
   /// No description provided for @registerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.'**
+  /// **'To discover your type and the path tailored for you, fill in the form and start the test.'**
   String get registerSubtitle;
 
-  /// No description provided for @registerFullName.
+  /// No description provided for @registerFirstName.
   ///
   /// In en, this message translates to:
-  /// **'Full name'**
-  String get registerFullName;
+  /// **'First name'**
+  String get registerFirstName;
+
+  /// No description provided for @registerLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get registerLastName;
 
   /// No description provided for @registerEmail.
   ///
