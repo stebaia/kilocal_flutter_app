@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/app_localizations.dart';
+import 'profile_type_integration_sheet.dart';
 import 'profile_type_percorsi_sheet.dart';
 
 /// The four path-category shortcuts of the "percorsi" section on dashboard-type
@@ -31,13 +31,10 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
     _PercorsoCategory('allenamento', AppIcons.training),
     _PercorsoCategory('alimentazione', AppIcons.food),
     _PercorsoCategory('benessere', AppIcons.wellness),
-    // Integrazione is a phase-based area with its own screen: the tile jumps
-    // straight to it instead of opening the biotype description sheet.
-    _PercorsoCategory(
-      'integrazione',
-      AppIcons.supplement,
-      route: '/path/integrazione',
-    ),
+    // Integrazione is a phase-based area with its own screen: the tile opens
+    // an intermediate pitch sheet (see [showProfileTypeIntegrationSheet])
+    // instead of the biotype description sheet used by the other categories.
+    _PercorsoCategory('integrazione', AppIcons.supplement),
   ];
 
   @override
@@ -64,9 +61,11 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
                   category: _categories[i],
                   accentColor: accentColor,
                   onTap: () {
-                    final route = _categories[i].route;
-                    if (route != null) {
-                      context.push(route);
+                    if (_categories[i].area == 'integrazione') {
+                      showProfileTypeIntegrationSheet(
+                        context,
+                        accentColor: accentColor,
+                      );
                       return;
                     }
                     showProfileTypePercorsiSheet(
@@ -98,14 +97,10 @@ class ProfileTypePercorsiGrid extends StatelessWidget {
 }
 
 class _PercorsoCategory {
-  const _PercorsoCategory(this.area, this.iconName, {this.route});
+  const _PercorsoCategory(this.area, this.iconName);
 
   final String area;
   final String iconName;
-
-  /// When set, tapping the tile navigates to this route instead of opening the
-  /// biotype description sheet.
-  final String? route;
 }
 
 /// A pill-shaped, bordered category button with a centered biotype-colored icon.
