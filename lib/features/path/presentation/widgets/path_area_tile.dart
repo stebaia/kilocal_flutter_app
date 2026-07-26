@@ -40,8 +40,7 @@ class PathAreaTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           gradient: AppColors.brandGradientVertical,
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -51,44 +50,56 @@ class PathAreaTile extends StatelessWidget {
           children: [
             Text(
               title,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: AppTypography.textTheme.titleMedium?.copyWith(
                 color: AppColors.neutralWhite,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                height: 1.15,
               ),
             ),
-            SizedBox(height: 13),
-            SizedBox(
-              width: 100,
-              height: 100,
-              child: Opacity(
-                // Dim the illustration to signal the locked state.
-                opacity: isRestricted ? 0.45 : 1,
-                child: Stack(
-                  alignment: Alignment.center,
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      height: 100,
-                      width: 100,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: AppColors.kilokalPink,
-                      ),
+            const SizedBox(height: 13),
+            // Expanded + FittedBox instead of a hardcoded 100x100: the circle
+            // fills whatever vertical space is left after the title/counter,
+            // so it shrinks gracefully on narrower devices or with a larger
+            // system font instead of overflowing the fixed-aspect-ratio grid
+            // cell (see the "4 blocchi non responsive" report).
+            Expanded(
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Opacity(
+                    // Dim the illustration to signal the locked state.
+                    opacity: isRestricted ? 0.45 : 1,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(100),
+                            color: AppColors.kilokalPink,
+                          ),
+                        ),
+                        OverflowBox(
+                          maxWidth: 130,
+                          maxHeight: 90,
+                          child: PathActionCardImage(
+                            imageUrl: '',
+                            assetName: assetName,
+                          ),
+                        ),
+                      ],
                     ),
-                    OverflowBox(
-                      maxWidth: 200,
-                      maxHeight: 120,
-                      child: PathActionCardImage(
-                        imageUrl: '',
-                        assetName: assetName,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
-            SizedBox(height: 18),
+            const SizedBox(height: 18),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

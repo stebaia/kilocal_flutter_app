@@ -95,9 +95,11 @@ class PathActionCardImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // The dumbbell illustration is wider than the others, so keep it smaller
-    // to avoid it overflowing too far past the pink circle.
+    // to avoid it overflowing too far past the pink circle. Sized close to
+    // the 100x100 circle behind them (rather than 1.3-2x it) so the FittedBox
+    // scaling in PathAreaTile doesn't make them look oversized on any device.
     final isLogo = assetName == 'assets/name_logo.png';
-    final size = isLogo ? const Size(130, 90) : const Size(200, 110);
+    final size = isLogo ? const Size(104, 72) : const Size(130, 90);
 
     return Image.asset(
       assetName!,
