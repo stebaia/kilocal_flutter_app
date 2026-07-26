@@ -351,6 +351,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTypePointBodyFallback => 'Content coming soon.';
 
   @override
+  String get profileTypeIntegrationSheetTitle => 'Integration';
+
+  @override
+  String get profileTypeIntegrationSheetHeadline =>
+      'Your Kilocal path isn\'t just nutrition and movement!';
+
+  @override
+  String get profileTypeIntegrationSheetBody =>
+      'The supplement kit is designed to support you step by step, reactivating your body\'s energy and boosting your path\'s results.';
+
+  @override
+  String get profileTypeIntegrationSheetCta => 'See dedicated section';
+
+  @override
   String get profileTypeProductsSection => 'Product information';
 
   @override

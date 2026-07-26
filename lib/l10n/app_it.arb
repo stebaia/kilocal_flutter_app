@@ -121,6 +121,22 @@
   "@profileTypePointBodyFallback": {
     "description": "Fallback body in the body-map point/area sheet when there is no text."
   },
+  "profileTypeIntegrationSheetTitle": "Integrazione",
+  "@profileTypeIntegrationSheetTitle": {
+    "description": "Title of the intermediate sheet shown before entering the Integrazione area."
+  },
+  "profileTypeIntegrationSheetHeadline": "Il tuo percorso Kilocal non è solo alimentazione e movimento!",
+  "@profileTypeIntegrationSheetHeadline": {
+    "description": "Bold headline in the Integrazione intermediate sheet."
+  },
+  "profileTypeIntegrationSheetBody": "Il kit di integratori è pensato per accompagnarti passo dopo passo, riattivando l'energia del corpo e potenziando i risultati del tuo percorso.",
+  "@profileTypeIntegrationSheetBody": {
+    "description": "Body copy in the Integrazione intermediate sheet."
+  },
+  "profileTypeIntegrationSheetCta": "Vedi sezione dedicata",
+  "@profileTypeIntegrationSheetCta": {
+    "description": "CTA button in the Integrazione intermediate sheet; navigates to the Integrazione area."
+  },
   "profileTypeProductsSection": "Informazioni sui prodotti",
   "profileTypeMyKit": "Il mio Kit",
   "profileTypeSupplements": "Integrazioni e prodotti",

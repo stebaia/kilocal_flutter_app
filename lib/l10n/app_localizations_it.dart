@@ -352,6 +352,20 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileTypePointBodyFallback => 'Contenuto in arrivo.';
 
   @override
+  String get profileTypeIntegrationSheetTitle => 'Integrazione';
+
+  @override
+  String get profileTypeIntegrationSheetHeadline =>
+      'Il tuo percorso Kilocal non è solo alimentazione e movimento!';
+
+  @override
+  String get profileTypeIntegrationSheetBody =>
+      'Il kit di integratori è pensato per accompagnarti passo dopo passo, riattivando l\'energia del corpo e potenziando i risultati del tuo percorso.';
+
+  @override
+  String get profileTypeIntegrationSheetCta => 'Vedi sezione dedicata';
+
+  @override
   String get profileTypeProductsSection => 'Informazioni sui prodotti';
 
   @override

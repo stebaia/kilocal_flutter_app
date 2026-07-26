@@ -734,6 +734,30 @@ abstract class AppLocalizations {
   /// **'Content coming soon.'**
   String get profileTypePointBodyFallback;
 
+  /// Title of the intermediate sheet shown before entering the Integrazione area.
+  ///
+  /// In en, this message translates to:
+  /// **'Integration'**
+  String get profileTypeIntegrationSheetTitle;
+
+  /// Bold headline in the Integrazione intermediate sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Kilocal path isn\'t just nutrition and movement!'**
+  String get profileTypeIntegrationSheetHeadline;
+
+  /// Body copy in the Integrazione intermediate sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'The supplement kit is designed to support you step by step, reactivating your body\'s energy and boosting your path\'s results.'**
+  String get profileTypeIntegrationSheetBody;
+
+  /// CTA button in the Integrazione intermediate sheet; navigates to the Integrazione area.
+  ///
+  /// In en, this message translates to:
+  /// **'See dedicated section'**
+  String get profileTypeIntegrationSheetCta;
+
   /// No description provided for @profileTypeProductsSection.
   ///
   /// In en, this message translates to:

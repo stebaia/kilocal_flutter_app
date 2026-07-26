@@ -162,6 +162,22 @@
   "@profileTypePointBodyFallback": {
     "description": "Fallback body in the body-map point/area sheet when there is no text."
   },
+  "profileTypeIntegrationSheetTitle": "Integration",
+  "@profileTypeIntegrationSheetTitle": {
+    "description": "Title of the intermediate sheet shown before entering the Integrazione area."
+  },
+  "profileTypeIntegrationSheetHeadline": "Your Kilocal path isn't just nutrition and movement!",
+  "@profileTypeIntegrationSheetHeadline": {
+    "description": "Bold headline in the Integrazione intermediate sheet."
+  },
+  "profileTypeIntegrationSheetBody": "The supplement kit is designed to support you step by step, reactivating your body's energy and boosting your path's results.",
+  "@profileTypeIntegrationSheetBody": {
+    "description": "Body copy in the Integrazione intermediate sheet."
+  },
+  "profileTypeIntegrationSheetCta": "See dedicated section",
+  "@profileTypeIntegrationSheetCta": {
+    "description": "CTA button in the Integrazione intermediate sheet; navigates to the Integrazione area."
+  },
   "profileTypeProductsSection": "Product information",
   "profileTypeMyKit": "My Kit",
   "profileTypeSupplements": "Supplements and products",
