@@ -13,6 +13,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/hex_color.dart';
 import '../../user/presentation/cubit/user_cubit.dart';
+import 'cubit/avatar_upload_cubit.dart';
+import 'widgets/avatar_picker.dart';
 import 'widgets/profile_group_card.dart';
 import 'widgets/profile_list_tile.dart';
 import 'widgets/profile_section_label.dart';
@@ -241,29 +243,54 @@ class _ProfileAppVersionTile extends StatelessWidget {
 
 /// Circular avatar shown in the profile header (top-right). Shows the user's
 /// profile photo (`directus_users.avatar`) when available, otherwise a person
-/// icon placeholder.
+/// icon placeholder. Tapping opens the same camera/gallery picker as the "My
+/// account" screen, so the header photo can be changed from here directly.
 class _ProfileAvatar extends StatelessWidget {
   const _ProfileAvatar();
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserCubit, UserState>(
-      bloc: getIt<UserCubit>(),
-      builder: (context, state) {
-        final avatarUrl = state.user?.avatarUrl;
-        return Container(
-          width: 44,
-          height: 44,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.accentSoft,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: avatarUrl == null
-              ? const _AvatarPlaceholder()
-              : _AvatarImage(url: avatarUrl),
-        );
-      },
+    return BlocProvider(
+      create: (_) => getIt<AvatarUploadCubit>(),
+      child: BlocListener<AvatarUploadCubit, AvatarUploadState>(
+        listenWhen: (prev, curr) => prev.status != curr.status,
+        listener: handleAvatarUploadFeedback,
+        child: BlocBuilder<AvatarUploadCubit, AvatarUploadState>(
+          builder: (context, uploadState) {
+            return GestureDetector(
+              onTap: uploadState.isUploading
+                  ? null
+                  : () => showAvatarPicker(context),
+              child: BlocBuilder<UserCubit, UserState>(
+                bloc: getIt<UserCubit>(),
+                builder: (context, state) {
+                  final avatarUrl = state.user?.avatarUrl;
+                  return Container(
+                    width: 44,
+                    height: 44,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.accentSoft,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: uploadState.isUploading
+                        ? const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          )
+                        : avatarUrl == null
+                        ? const _AvatarPlaceholder()
+                        : _AvatarImage(url: avatarUrl),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

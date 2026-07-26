@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../../app/di.dart';
 import '../../../../core/network/token_store.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../user/presentation/cubit/user_cubit.dart';
 import '../cubit/avatar_upload_cubit.dart';
+import 'avatar_picker.dart';
 
 /// Large, tappable profile avatar shown at the top of the "My account" screen.
 ///
@@ -22,24 +21,9 @@ class ProfileAvatarEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
     return BlocListener<AvatarUploadCubit, AvatarUploadState>(
       listenWhen: (prev, curr) => prev.status != curr.status,
-      listener: (context, state) {
-        final messenger = ScaffoldMessenger.of(context);
-        if (state.status == AvatarUploadStatus.success) {
-          messenger.showSnackBar(
-            SnackBar(content: Text(l10n.profileAvatarUpdated)),
-          );
-          context.read<AvatarUploadCubit>().reset();
-        } else if (state.status == AvatarUploadStatus.error) {
-          messenger.showSnackBar(
-            SnackBar(content: Text(l10n.profileAvatarError)),
-          );
-          context.read<AvatarUploadCubit>().reset();
-        }
-      },
+      listener: handleAvatarUploadFeedback,
       child: BlocBuilder<AvatarUploadCubit, AvatarUploadState>(
         builder: (context, uploadState) {
           return Center(
@@ -48,7 +32,7 @@ class ProfileAvatarEditor extends StatelessWidget {
               child: GestureDetector(
                 onTap: uploadState.isUploading
                     ? null
-                    : () => _showPicker(context),
+                    : () => showAvatarPicker(context),
                 child: SizedBox(
                   width: _size,
                   height: _size,
@@ -65,41 +49,6 @@ class ProfileAvatarEditor extends StatelessWidget {
         },
       ),
     );
-  }
-
-  Future<void> _showPicker(BuildContext context) async {
-    final l10n = AppLocalizations.of(context)!;
-    final cubit = context.read<AvatarUploadCubit>();
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: AppColors.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt_outlined),
-                title: Text(l10n.profileAvatarFromCamera),
-                onTap: () => Navigator.of(sheetContext).pop(ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library_outlined),
-                title: Text(l10n.profileAvatarFromGallery),
-                onTap: () =>
-                    Navigator.of(sheetContext).pop(ImageSource.gallery),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-    if (source != null) {
-      await cubit.pickAndUpload(source);
-    }
   }
 }
 
