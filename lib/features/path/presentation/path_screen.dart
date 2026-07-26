@@ -183,7 +183,11 @@ class _PathContent extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: AppSpacing.spaceMd,
                 crossAxisSpacing: AppSpacing.spaceMd,
-                childAspectRatio: 0.76,
+                // Slightly taller than square so a 2-line area title (longer
+                // words like "Alimentazione", or larger system font sizes) has
+                // enough room without pushing the illustration/counter off the
+                // card on narrower devices.
+                childAspectRatio: 0.68,
                 children: data.areas
                     .map(
                       (area) => PathAreaTile(
