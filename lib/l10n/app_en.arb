@@ -229,9 +229,29 @@
   "profileSupportSection": "Support",
   "profileTutorial": "Tutorial on how to use the app",
   "profileContactSupport": "Contact support",
+  "profileContactSupportNoMailApp": "No mail app is set up on this device. You can reach us at info@kilocalprogram.it",
+  "@profileContactSupportNoMailApp": {
+    "description": "Shown when the device has no mail app that can handle the mailto: link."
+  },
   "profileLogout": "Log out",
   "@profileLogout": {
     "description": "Logout action label in the profile screen"
+  },
+  "profileLogoutConfirmTitle": "Log out of your account",
+  "@profileLogoutConfirmTitle": {
+    "description": "Title of the confirmation dialog shown before logging out."
+  },
+  "profileLogoutConfirmBody": "Are you sure you want to log out of your account?",
+  "@profileLogoutConfirmBody": {
+    "description": "Body of the confirmation dialog shown before logging out."
+  },
+  "profileLogoutConfirmCancel": "Cancel",
+  "@profileLogoutConfirmCancel": {
+    "description": "Cancel button in the logout confirmation dialog."
+  },
+  "profileLogoutConfirmAction": "Log out",
+  "@profileLogoutConfirmAction": {
+    "description": "Confirm button in the logout confirmation dialog."
   },
   "profileAppVersionSection": "App",
   "profileAppVersion": "App version",

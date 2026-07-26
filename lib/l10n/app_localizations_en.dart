@@ -469,7 +469,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileContactSupport => 'Contact support';
 
   @override
+  String get profileContactSupportNoMailApp =>
+      'No mail app is set up on this device. You can reach us at info@kilocalprogram.it';
+
+  @override
   String get profileLogout => 'Log out';
+
+  @override
+  String get profileLogoutConfirmTitle => 'Log out of your account';
+
+  @override
+  String get profileLogoutConfirmBody =>
+      'Are you sure you want to log out of your account?';
+
+  @override
+  String get profileLogoutConfirmCancel => 'Cancel';
+
+  @override
+  String get profileLogoutConfirmAction => 'Log out';
 
   @override
   String get profileAppVersionSection => 'App';
