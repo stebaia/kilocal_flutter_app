@@ -956,11 +956,41 @@ abstract class AppLocalizations {
   /// **'Contact support'**
   String get profileContactSupport;
 
+  /// Shown when the device has no mail app that can handle the mailto: link.
+  ///
+  /// In en, this message translates to:
+  /// **'No mail app is set up on this device. You can reach us at info@kilocalprogram.it'**
+  String get profileContactSupportNoMailApp;
+
   /// Logout action label in the profile screen
   ///
   /// In en, this message translates to:
   /// **'Log out'**
   String get profileLogout;
+
+  /// Title of the confirmation dialog shown before logging out.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out of your account'**
+  String get profileLogoutConfirmTitle;
+
+  /// Body of the confirmation dialog shown before logging out.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out of your account?'**
+  String get profileLogoutConfirmBody;
+
+  /// Cancel button in the logout confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileLogoutConfirmCancel;
+
+  /// Confirm button in the logout confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get profileLogoutConfirmAction;
 
   /// No description provided for @profileAppVersionSection.
   ///

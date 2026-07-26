@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:kilocal_flutter_app/app/di.dart';
 import 'package:kilocal_flutter_app/features/auth/domain/auth_repository.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
@@ -22,6 +23,54 @@ import 'widgets/profile_type_card.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
+
+  /// Support inbox for "Contatta l'assistenza"; opens the device's mail app
+  /// via a `mailto:` link rather than an in-app form.
+  static const _supportEmail = 'info@kilocalprogram.it';
+
+  Future<void> _contactSupport(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final uri = Uri(scheme: 'mailto', path: _supportEmail);
+    // Simulators/emulators commonly have no mail app configured, which is not
+    // the generic error case — tell the user how to reach support instead of
+    // a bare "something went wrong, try again" that implies retrying helps.
+    final launched = await canLaunchUrl(uri) && await launchUrl(uri);
+    if (!launched && context.mounted) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.profileContactSupportNoMailApp)),
+      );
+    }
+  }
+
+  /// Confirms the intent to log out before actually doing so, so a stray tap
+  /// on "Esci" doesn't sign the user out immediately.
+  Future<void> _confirmLogout(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.profileLogoutConfirmTitle),
+        content: Text(l10n.profileLogoutConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.profileLogoutConfirmCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              l10n.profileLogoutConfirmAction,
+              style: const TextStyle(color: AppColors.accent),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await _performLogout(context);
+    }
+  }
 
   Future<void> _performLogout(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
@@ -135,21 +184,25 @@ class ProfileScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.spaceLg),
 
                       // --- Notifiche ---
-                      ProfileSectionLabel(
-                        text: l10n.profileNotificationsSection,
-                      ),
-                      const SizedBox(height: AppSpacing.spaceSm),
-                      ProfileGroupCard(
-                        tiles: [
-                          ProfileListTile(
-                            icon: Icons.description_outlined,
-                            title: l10n.profilePushNotifications,
-                            subtitle: l10n.profilePushNotificationsStatus,
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.spaceLg),
+                      // Commented out rather than removed: "Notifiche push"
+                      // doesn't lead anywhere yet (no settings screen behind
+                      // it), so the whole section is hidden until there's
+                      // something for it to open.
+                      // ProfileSectionLabel(
+                      //   text: l10n.profileNotificationsSection,
+                      // ),
+                      // const SizedBox(height: AppSpacing.spaceSm),
+                      // ProfileGroupCard(
+                      //   tiles: [
+                      //     ProfileListTile(
+                      //       icon: Icons.description_outlined,
+                      //       title: l10n.profilePushNotifications,
+                      //       subtitle: l10n.profilePushNotificationsStatus,
+                      //       onTap: () {},
+                      //     ),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: AppSpacing.spaceLg),
 
                       // --- Assistenza ---
                       ProfileSectionLabel(text: l10n.profileSupportSection),
@@ -159,12 +212,12 @@ class ProfileScreen extends StatelessWidget {
                           ProfileListTile(
                             icon: Icons.description_outlined,
                             title: l10n.profileContactSupport,
-                            onTap: () {},
+                            onTap: () => _contactSupport(context),
                           ),
                           ProfileListTile(
                             icon: Icons.logout,
                             title: l10n.profileLogout,
-                            onTap: () => _performLogout(context),
+                            onTap: () => _confirmLogout(context),
                           ),
                         ],
                       ),
