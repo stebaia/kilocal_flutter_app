@@ -176,6 +176,7 @@ void configureDependencies() {
     () => HomeRepositoryImpl(
       graphqlClient: getIt<GraphqlClient>(),
       dio: getIt<Dio>(),
+      vimeoOembedService: getIt<VimeoOembedService>(),
     ),
   );
   getIt.registerFactory<HomeCubit>(

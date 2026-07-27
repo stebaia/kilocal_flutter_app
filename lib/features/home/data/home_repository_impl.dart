@@ -4,6 +4,7 @@ import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
 import '../../path/data/dto/path_progress_dto.dart';
+import '../../path/data/vimeo_oembed_service.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/home_repository.dart';
 import 'dto/home_continue_step_dto.dart';
@@ -14,12 +15,17 @@ import 'dto/home_moment_dto.dart';
 /// plus the lifetime path progress from `GET /path/me/progress` (REST) used
 /// to decide the "Inizia"/"Continua il percorso" CTA.
 class HomeRepositoryImpl implements HomeRepository {
-  HomeRepositoryImpl({required GraphqlClient graphqlClient, required Dio dio})
-    : _graphqlClient = graphqlClient,
-      _dio = dio;
+  HomeRepositoryImpl({
+    required GraphqlClient graphqlClient,
+    required Dio dio,
+    required VimeoOembedService vimeoOembedService,
+  }) : _graphqlClient = graphqlClient,
+       _dio = dio,
+       _vimeoOembedService = vimeoOembedService;
 
   final GraphqlClient _graphqlClient;
   final Dio _dio;
+  final VimeoOembedService _vimeoOembedService;
 
   static const _defaultCtaLabel = 'Continua';
   static const _defaultMonthText = 'Le tue attività completate nel mese';
@@ -38,6 +44,8 @@ query HomeContinueAndText($myId: ID!, $lang: String!) {
         title
       }
       asset {
+        asset_is_video
+        vimeo_url
         default_asset {
           id
           filename_download
@@ -51,6 +59,8 @@ query HomeContinueAndText($myId: ID!, $lang: String!) {
         title
       }
       asset {
+        asset_is_video
+        vimeo_url
         default_asset {
           id
           filename_download
@@ -64,6 +74,8 @@ query HomeContinueAndText($myId: ID!, $lang: String!) {
         title
       }
       asset {
+        asset_is_video
+        vimeo_url
         default_asset {
           id
           filename_download
@@ -163,9 +175,7 @@ query HomeMoments($now: String!, $lang: String!) {
           ctaLabel: _defaultCtaLabel,
         );
 
-    final continueImage = continueStep.imageFileId != null
-        ? '${Env.baseUrl}/assets/${continueStep.imageFileId}/${continueStep.imageFileName}'
-        : _continueFallbackImage;
+    final continueImage = await _resolveContinueImage(continueStep);
 
     final momentImage = _momentFallbackImage;
 
@@ -249,6 +259,7 @@ query HomeMoments($now: String!, $lang: String!) {
         imageFileId: step?['image_file_id'] as String?,
         imageFileName: step?['image_file_name'] as String?,
         ctaLabel: ctaLabel,
+        vimeoUrl: step?['vimeo_url'] as String?,
       );
 
       return (dto, monthText);
@@ -275,10 +286,12 @@ query HomeMoments($now: String!, $lang: String!) {
       final title = _translation(step, lang)?['title'] as String?;
       final asset = step['asset'] as Map<String, dynamic>?;
       final file = asset?['default_asset'] as Map<String, dynamic>?;
+      final isVideo = asset?['asset_is_video'] as bool? ?? false;
       return <String, dynamic>{
         'title': title,
         'image_file_id': file?['id'],
         'image_file_name': file?['filename_download'],
+        'vimeo_url': isVideo ? (asset?['vimeo_url'] as String?) : null,
       };
     }
     return null;
@@ -365,6 +378,24 @@ query HomeMoments($now: String!, $lang: String!) {
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
+  }
+
+  /// Resolves the "continua il percorso" hero image: the CMS
+  /// `default_asset`/`mobile_asset` when present, otherwise the Vimeo oEmbed
+  /// poster for the step's video (156/157 `percorsi_content` rows have no CMS
+  /// cover image — confirmed by backend, 2026-07). Falls back to the static
+  /// asset only when neither is available. See
+  /// [[home-continue-path-image-gap]].
+  Future<String> _resolveContinueImage(HomeContinueStepDto step) async {
+    if (step.imageFileId != null) {
+      return '${Env.baseUrl}/assets/${step.imageFileId}/${step.imageFileName}';
+    }
+    final vimeoUrl = step.vimeoUrl;
+    if (vimeoUrl != null) {
+      final oembed = await _vimeoOembedService.fetch(vimeoUrl);
+      if (oembed?.thumbnailUrl != null) return oembed!.thumbnailUrl!;
+    }
+    return _continueFallbackImage;
   }
 
   /// Whether the user has completed at least one step in any path area,

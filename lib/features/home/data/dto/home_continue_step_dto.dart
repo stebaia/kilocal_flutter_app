@@ -10,6 +10,7 @@ class HomeContinueStepDto {
     this.imageFileId,
     this.imageFileName,
     this.ctaLabel,
+    this.vimeoUrl,
   });
 
   final String? title;
@@ -22,6 +23,12 @@ class HomeContinueStepDto {
 
   @JsonKey(name: 'cta_label')
   final String? ctaLabel;
+
+  /// Fallback when the step's CMS asset has no `default_asset`/`mobile_asset`
+  /// (true for 156/157 `percorsi_content` rows, confirmed by backend) — the
+  /// Vimeo oEmbed poster is used instead. See [[home-continue-path-image-gap]].
+  @JsonKey(name: 'vimeo_url')
+  final String? vimeoUrl;
 
   factory HomeContinueStepDto.fromJson(Map<String, dynamic> json) =>
       _$HomeContinueStepDtoFromJson(json);
