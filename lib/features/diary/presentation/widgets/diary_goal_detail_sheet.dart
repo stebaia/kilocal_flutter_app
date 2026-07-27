@@ -24,6 +24,11 @@ Future<DiaryGoalDetailAction?> showDiaryGoalDetailSheet(
   return showModalBottomSheet<DiaryGoalDetailAction>(
     context: context,
     backgroundColor: AppColors.surface,
+    showDragHandle: true,
+    isScrollControlled: true,
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+    ),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
     ),
@@ -73,6 +78,7 @@ class _DiaryGoalDetailSheet extends StatelessWidget {
                   child: Text(
                     l10n.diaryGoalEditTitle,
                     style: AppTypography.textTheme.labelLarge?.copyWith(
+                      color: AppColors.textPrimary,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -97,6 +103,7 @@ class _DiaryGoalDetailSheet extends StatelessWidget {
                 child: Text(
                   l10n.diaryGoalDelete,
                   style: AppTypography.textTheme.labelLarge?.copyWith(
+                    color: AppColors.textPrimary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -118,22 +125,14 @@ class _DiaryGoalDetailSheet extends StatelessWidget {
                 onPressed: () => Navigator.of(
                   context,
                 ).pop(DiaryGoalDetailAction.toggleCompleted),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      goal.isCompleted
-                          ? l10n.diaryGoalMarkIncomplete
-                          : l10n.diaryGoalComplete,
-                      style: AppTypography.textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    if (!goal.isCompleted) ...[
-                      const SizedBox(width: AppSpacing.spaceXs),
-                      const Icon(Icons.check, size: 18),
-                    ],
-                  ],
+                child: Text(
+                  goal.isCompleted
+                      ? l10n.diaryGoalMarkIncomplete
+                      : l10n.diaryGoalComplete,
+                  style: AppTypography.textTheme.labelLarge?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
