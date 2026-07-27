@@ -442,30 +442,13 @@ class _AppScaffoldState extends State<AppScaffold> {
                     // showing after leaving to /strumenti and coming back.
                     navigationShell.goBranch(index, initialLocation: true);
                   },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    width: 48,
-                    height: 48,
-                    alignment: Alignment.center,
-                    decoration: isSelected
-                        ? BoxDecoration(
-                            color: AppColors.accentSoft,
-                            shape: BoxShape.circle,
-                          )
-                        : null,
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: _NavIcon(
-                        item: item,
-                        color: color,
-                        isSelected: isSelected,
-                        // The profile tab (last) shows the user's biotype icon
-                        // from the CMS when available.
-                        useBiotypeIcon: index == _items.length - 1,
-                      ),
-                    ),
+                  child: _NavTile(
+                    item: item,
+                    color: color,
+                    isSelected: isSelected,
+                    // The profile tab (last) shows the user's biotype icon and
+                    // color from the CMS when available.
+                    useBiotypeIcon: index == _items.length - 1,
                   ),
                 );
               }),
@@ -477,11 +460,16 @@ class _AppScaffoldState extends State<AppScaffold> {
   }
 }
 
-/// A bottom-bar icon. For the profile tab ([useBiotypeIcon]) it shows the user's
-/// biotype icon from the CMS (tinted with the current [color]), falling back to
-/// the static [item] SVG when the biotype or its icon is unavailable.
-class _NavIcon extends StatelessWidget {
-  const _NavIcon({
+/// A bottom-bar tab: the selected-state circle badge plus its icon.
+///
+/// The brand tabs (Home/Percorso/Diario/Tool) always use the brand red for
+/// both the icon and the selected badge. The profile tab ([useBiotypeIcon])
+/// instead follows the user's biotype `main_color` from the CMS for *both* —
+/// see the recap screenshot (2026-07-27): each biotype has its own icon tint
+/// **and** its own soft badge tint, not just a recolored icon on a fixed pink
+/// badge.
+class _NavTile extends StatelessWidget {
+  const _NavTile({
     required this.item,
     required this.color,
     required this.isSelected,
@@ -496,29 +484,71 @@ class _NavIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!useBiotypeIcon) {
-      return AppIcon(item, size: 20, color: color);
+      return _Badge(
+        isSelected: isSelected,
+        badgeColor: AppColors.accentSoft,
+        child: AppIcon(item, size: 20, color: color),
+      );
     }
 
     return BlocBuilder<UserCubit, UserState>(
       bloc: getIt<UserCubit>(),
       builder: (context, state) {
         final biotype = state.details?.biotype;
+        final biotypeColor = colorFromHex(biotype?.mainColor);
         // Selected: tint with the biotype colour (main_color), falling back to
         // the accent. Unselected: keep the muted grey for a clear active state.
         final iconColor = isSelected
-            ? (colorFromHex(biotype?.mainColor) ?? AppColors.accent)
+            ? (biotypeColor ?? AppColors.accent)
             : color;
         final fallback = AppIcon(item, size: 20, color: iconColor);
 
         final iconUrl = biotype?.iconUrl;
-        if (iconUrl == null) return fallback;
-        return CmsSvgIcon(
-          url: iconUrl,
-          size: 20,
-          color: iconColor,
-          fallback: fallback,
+        final icon = iconUrl == null
+            ? fallback
+            : CmsSvgIcon(
+                url: iconUrl,
+                size: 20,
+                color: iconColor,
+                fallback: fallback,
+              );
+
+        return _Badge(
+          isSelected: isSelected,
+          badgeColor: (biotypeColor ?? AppColors.accent).withValues(
+            alpha: 0.15,
+          ),
+          child: icon,
         );
       },
+    );
+  }
+}
+
+/// The 48x48 circle badge shown behind a selected tab's icon.
+class _Badge extends StatelessWidget {
+  const _Badge({
+    required this.isSelected,
+    required this.badgeColor,
+    required this.child,
+  });
+
+  final bool isSelected;
+  final Color badgeColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      width: 48,
+      height: 48,
+      alignment: Alignment.center,
+      decoration: isSelected
+          ? BoxDecoration(color: badgeColor, shape: BoxShape.circle)
+          : null,
+      child: SizedBox(width: 24, height: 24, child: child),
     );
   }
 }
