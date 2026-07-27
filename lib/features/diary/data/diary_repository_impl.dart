@@ -278,6 +278,39 @@ query GetGoalCategories($lang: String!) {
   }
 
   @override
+  Future<DiaryGoal> updateGoal(String id, DiaryGoalInput input) async {
+    try {
+      await _dio.patch<Map<String, dynamic>>(
+        '$_goalsPath/$id',
+        data: <String, dynamic>{
+          'content': input.content,
+          'due_date': input.dueDate != null
+              ? _formatDate(input.dueDate!)
+              : null,
+          if (input.category != null) 'category': input.category,
+          if (input.relatedGoal != null) 'related_goal': input.relatedGoal,
+        },
+      );
+      // PATCH returns no body (see [[diario]]); re-fetch to get the
+      // authoritative row rather than assuming the write round-tripped as-is.
+      final goals = await fetchGoals();
+      final updated = goals.where((g) => g.id == id).firstOrNull;
+      if (updated == null) {
+        throw const ApiException(
+          type: ApiErrorType.notFound,
+          statusCode: 404,
+          message: 'Goal not found after update',
+        );
+      }
+      return updated;
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  @override
   Future<void> updateGoalCompletion({
     required String id,
     required bool completed,

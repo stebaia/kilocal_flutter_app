@@ -8,12 +8,14 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_header.dart';
 import '../domain/entities/diary_activity.dart';
+import '../domain/entities/diary_goal.dart';
 import 'cubit/diary_goals_cubit.dart';
 import 'cubit/diary_history_cubit.dart';
 import 'widgets/create_goal_sheet.dart';
 import 'widgets/diary_activity_sheet.dart';
 import 'widgets/diary_filter_sheet.dart';
 import 'widgets/diary_goal_card.dart';
+import 'widgets/diary_goal_detail_sheet.dart';
 import 'widgets/diary_hero_card.dart';
 import 'widgets/diary_history_card.dart';
 import 'widgets/diary_tab_switch.dart';
@@ -153,11 +155,12 @@ class _HistoryTab extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
                     child: DiaryHistoryCard(
                       activity: activity,
-                      // Only actionable (started, not-yet-completed) steps open
-                      // the detail sheet; done entries stay display-only.
-                      onTap: activity.canComplete
-                          ? () => _onActivityTap(context, activity)
-                          : null,
+                      // Every entry opens "Dettagli Attività": actionable
+                      // (started, not-yet-completed) steps show the "Completa
+                      // attività" button in it; completed ones are read-only
+                      // (showDiaryActivitySheet already omits the button when
+                      // !activity.canComplete).
+                      onTap: () => _onActivityTap(context, activity),
                     ),
                   ),
                 );
@@ -231,8 +234,7 @@ class _GoalsTab extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
                     child: DiaryGoalCard(
                       goal: goal,
-                      onToggle: () => cubit.toggleCompleted(goal),
-                      onDelete: () => cubit.deleteGoal(goal),
+                      onTap: () => _onGoalTap(context, cubit, goal),
                     ),
                   ),
                 );
@@ -250,6 +252,55 @@ class _GoalsTab extends StatelessWidget {
           children: children,
         );
       },
+    );
+  }
+
+  Future<void> _onGoalTap(
+    BuildContext context,
+    DiaryGoalsCubit cubit,
+    DiaryGoal goal,
+  ) async {
+    final action = await showDiaryGoalDetailSheet(context, goal: goal);
+    switch (action) {
+      case DiaryGoalDetailAction.edit:
+        if (!context.mounted) return;
+        final input = await showEditGoalSheet(
+          context,
+          goal: goal,
+          categories: cubit.state.categories,
+        );
+        if (input != null) await cubit.updateGoal(goal, input);
+      case DiaryGoalDetailAction.toggleCompleted:
+        await cubit.toggleCompleted(goal);
+      case DiaryGoalDetailAction.delete:
+        if (!context.mounted) return;
+        final confirmed = await _confirmGoalDeletion(context);
+        if (confirmed == true) await cubit.deleteGoal(goal);
+      case null:
+        break;
+    }
+  }
+
+  Future<bool?> _confirmGoalDeletion(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.diaryGoalDeleteConfirmTitle),
+        content: Text(l10n.diaryGoalDeleteConfirmBody),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.diaryGoalDeleteConfirmCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(
+              l10n.diaryGoalDeleteConfirmAction,
+              style: const TextStyle(color: AppColors.accent),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

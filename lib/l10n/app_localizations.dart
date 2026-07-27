@@ -1658,6 +1658,12 @@ abstract class AppLocalizations {
   /// **'New goal'**
   String get diaryGoalCreateTitle;
 
+  /// Title of the goal edit sheet (create_goal_sheet reused in edit mode).
+  ///
+  /// In en, this message translates to:
+  /// **'Edit goal'**
+  String get diaryGoalEditTitle;
+
   /// No description provided for @diaryGoalContentHint.
   ///
   /// In en, this message translates to:
@@ -1681,6 +1687,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get diaryGoalSave;
+
+  /// Button in the goal detail sheet to mark an incomplete goal as achieved.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goal'**
+  String get diaryGoalComplete;
+
+  /// Button in the goal detail sheet to revert a completed goal back to not-achieved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as not achieved'**
+  String get diaryGoalMarkIncomplete;
+
+  /// Button in the goal detail sheet to delete the goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete goal'**
+  String get diaryGoalDelete;
+
+  /// Title of the confirmation dialog before deleting a goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this goal?'**
+  String get diaryGoalDeleteConfirmTitle;
+
+  /// Body of the confirmation dialog before deleting a goal.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get diaryGoalDeleteConfirmBody;
+
+  /// Cancel button in the goal deletion confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get diaryGoalDeleteConfirmCancel;
+
+  /// Confirm button in the goal deletion confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get diaryGoalDeleteConfirmAction;
 
   /// No description provided for @diaryActivityDetailTitle.
   ///

@@ -26,24 +26,59 @@ Future<DiaryGoalInput?> showCreateGoalSheet(
   );
 }
 
+/// Sheet to **edit** an existing personal goal: same layout as create, but
+/// pre-filled from [goal] and titled "Modifica traguardo". Returns the edited
+/// [DiaryGoalInput], or `null` if cancelled.
+Future<DiaryGoalInput?> showEditGoalSheet(
+  BuildContext context, {
+  required DiaryGoal goal,
+  required List<GoalCategory> categories,
+}) {
+  return showModalBottomSheet<DiaryGoalInput>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: AppColors.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+    ),
+    builder: (context) =>
+        _CreateGoalSheet(categories: categories, initial: goal),
+  );
+}
+
 class _CreateGoalSheet extends StatefulWidget {
-  const _CreateGoalSheet({required this.categories});
+  const _CreateGoalSheet({required this.categories, this.initial});
 
   final List<GoalCategory> categories;
+
+  /// When set, the sheet is in edit mode: fields are pre-filled from this
+  /// goal and the title/behavior switches to "Modifica traguardo".
+  final DiaryGoal? initial;
 
   @override
   State<_CreateGoalSheet> createState() => _CreateGoalSheetState();
 }
 
 class _CreateGoalSheetState extends State<_CreateGoalSheet> {
-  final _controller = TextEditingController();
+  late final _controller = TextEditingController(
+    text: widget.initial?.content ?? '',
+  );
   DateTime? _dueDate;
   GoalCategory? _category;
+
+  bool get _isEdit => widget.initial != null;
 
   @override
   void initState() {
     super.initState();
-    if (widget.categories.isNotEmpty) _category = widget.categories.first;
+    final initial = widget.initial;
+    _dueDate = initial?.dueDate;
+    if (initial?.category != null) {
+      _category = widget.categories
+          .where((c) => c.id == initial!.category)
+          .firstOrNull;
+    }
+    _category ??= widget.categories.isNotEmpty ? widget.categories.first : null;
   }
 
   @override
@@ -69,7 +104,7 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.diaryGoalCreateTitle,
+                _isEdit ? l10n.diaryGoalEditTitle : l10n.diaryGoalCreateTitle,
                 style: AppTypography.textTheme.titleMedium,
               ),
               const SizedBox(height: AppSpacing.spaceMd),
@@ -170,6 +205,7 @@ class _CreateGoalSheetState extends State<_CreateGoalSheet> {
         content: _controller.text.trim(),
         dueDate: _dueDate,
         category: _category?.id,
+        relatedGoal: widget.initial?.relatedGoal,
       ),
     );
   }
