@@ -12,6 +12,7 @@ HomeContinueStepDto _$HomeContinueStepDtoFromJson(Map<String, dynamic> json) =>
       imageFileId: json['image_file_id'] as String?,
       imageFileName: json['image_file_name'] as String?,
       ctaLabel: json['cta_label'] as String?,
+      vimeoUrl: json['vimeo_url'] as String?,
     );
 
 Map<String, dynamic> _$HomeContinueStepDtoToJson(
@@ -21,4 +22,5 @@ Map<String, dynamic> _$HomeContinueStepDtoToJson(
   'image_file_id': instance.imageFileId,
   'image_file_name': instance.imageFileName,
   'cta_label': instance.ctaLabel,
+  'vimeo_url': instance.vimeoUrl,
 };
