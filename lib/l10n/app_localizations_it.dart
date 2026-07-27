@@ -879,6 +879,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diaryGoalCreateTitle => 'Nuovo traguardo';
 
   @override
+  String get diaryGoalEditTitle => 'Modifica traguardo';
+
+  @override
   String get diaryGoalContentHint => 'Descrivi il tuo traguardo';
 
   @override
@@ -889,6 +892,28 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get diaryGoalSave => 'Salva';
+
+  @override
+  String get diaryGoalComplete => 'Completa traguardo';
+
+  @override
+  String get diaryGoalMarkIncomplete => 'Segna come non raggiunto';
+
+  @override
+  String get diaryGoalDelete => 'Elimina traguardo';
+
+  @override
+  String get diaryGoalDeleteConfirmTitle => 'Eliminare il traguardo?';
+
+  @override
+  String get diaryGoalDeleteConfirmBody =>
+      'Questa azione non può essere annullata.';
+
+  @override
+  String get diaryGoalDeleteConfirmCancel => 'Annulla';
+
+  @override
+  String get diaryGoalDeleteConfirmAction => 'Elimina';
 
   @override
   String get diaryActivityDetailTitle => 'Dettagli Attività';

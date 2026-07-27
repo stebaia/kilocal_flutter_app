@@ -8,18 +8,13 @@ import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/diary_goal.dart';
 
 /// A single Traguardo card: date, Personale/Kilocal badge, text, and a
-/// "Raggiunto" chip once completed. Tap toggles completion.
+/// "Raggiunto" chip once completed. Tap opens the "Dettagli Traguardo" sheet
+/// (Elimina/Completa) rather than toggling completion directly.
 class DiaryGoalCard extends StatelessWidget {
-  const DiaryGoalCard({
-    super.key,
-    required this.goal,
-    this.onToggle,
-    this.onDelete,
-  });
+  const DiaryGoalCard({super.key, required this.goal, this.onTap});
 
   final DiaryGoal goal;
-  final VoidCallback? onToggle;
-  final VoidCallback? onDelete;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +22,7 @@ class DiaryGoalCard extends StatelessWidget {
     final isKilocal = goal.kind == DiaryGoalKind.kilocal;
 
     return AppCard(
-      onTap: onToggle,
+      onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -55,19 +50,6 @@ class DiaryGoalCard extends StatelessWidget {
                       : l10n.diaryGoalPersonal,
                   color: isKilocal ? AppColors.accent : AppColors.textSecondary,
                   filled: isKilocal,
-                ),
-              if (onDelete != null)
-                GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onDelete,
-                  child: const Padding(
-                    padding: EdgeInsets.only(left: AppSpacing.spaceXs),
-                    child: Icon(
-                      Icons.close,
-                      size: 18,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
                 ),
             ],
           ),

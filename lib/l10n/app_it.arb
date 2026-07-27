@@ -358,10 +358,42 @@
   "diaryFilterKilocal": "Traguardi Kilocal",
   "diaryFilterCompleted": "Completati",
   "diaryGoalCreateTitle": "Nuovo traguardo",
+  "diaryGoalEditTitle": "Modifica traguardo",
+  "@diaryGoalEditTitle": {
+    "description": "Title of the goal edit sheet (create_goal_sheet reused in edit mode)."
+  },
   "diaryGoalContentHint": "Descrivi il tuo traguardo",
   "diaryGoalCategory": "Categoria",
   "diaryGoalPickDate": "Aggiungi una data",
   "diaryGoalSave": "Salva",
+  "diaryGoalComplete": "Completa traguardo",
+  "@diaryGoalComplete": {
+    "description": "Button in the goal detail sheet to mark an incomplete goal as achieved."
+  },
+  "diaryGoalMarkIncomplete": "Segna come non raggiunto",
+  "@diaryGoalMarkIncomplete": {
+    "description": "Button in the goal detail sheet to revert a completed goal back to not-achieved."
+  },
+  "diaryGoalDelete": "Elimina traguardo",
+  "@diaryGoalDelete": {
+    "description": "Button in the goal detail sheet to delete the goal."
+  },
+  "diaryGoalDeleteConfirmTitle": "Eliminare il traguardo?",
+  "@diaryGoalDeleteConfirmTitle": {
+    "description": "Title of the confirmation dialog before deleting a goal."
+  },
+  "diaryGoalDeleteConfirmBody": "Questa azione non può essere annullata.",
+  "@diaryGoalDeleteConfirmBody": {
+    "description": "Body of the confirmation dialog before deleting a goal."
+  },
+  "diaryGoalDeleteConfirmCancel": "Annulla",
+  "@diaryGoalDeleteConfirmCancel": {
+    "description": "Cancel button in the goal deletion confirmation dialog."
+  },
+  "diaryGoalDeleteConfirmAction": "Elimina",
+  "@diaryGoalDeleteConfirmAction": {
+    "description": "Confirm button in the goal deletion confirmation dialog."
+  },
   "diaryActivityDetailTitle": "Dettagli Attività",
   "diaryActivityCategory": "Categoria: {category}",
   "@diaryActivityCategory": {

@@ -875,6 +875,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryGoalCreateTitle => 'New goal';
 
   @override
+  String get diaryGoalEditTitle => 'Edit goal';
+
+  @override
   String get diaryGoalContentHint => 'Describe your goal';
 
   @override
@@ -885,6 +888,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryGoalSave => 'Save';
+
+  @override
+  String get diaryGoalComplete => 'Complete goal';
+
+  @override
+  String get diaryGoalMarkIncomplete => 'Mark as not achieved';
+
+  @override
+  String get diaryGoalDelete => 'Delete goal';
+
+  @override
+  String get diaryGoalDeleteConfirmTitle => 'Delete this goal?';
+
+  @override
+  String get diaryGoalDeleteConfirmBody => 'This action cannot be undone.';
+
+  @override
+  String get diaryGoalDeleteConfirmCancel => 'Cancel';
+
+  @override
+  String get diaryGoalDeleteConfirmAction => 'Delete';
 
   @override
   String get diaryActivityDetailTitle => 'Activity details';
