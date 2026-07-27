@@ -103,7 +103,11 @@ PathGroupDto _$PathGroupDtoFromJson(Map<String, dynamic> json) => PathGroupDto(
       ? null
       : DirectusFileDto.fromJson(json['icon'] as Map<String, dynamic>),
   tools: (json['tools'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  categories: json['categories'] as List<dynamic>?,
+  categories: (json['categories'] as List<dynamic>?)
+      ?.map(
+        (e) => PathGroupCategoryJunctionDto.fromJson(e as Map<String, dynamic>),
+      )
+      .toList(),
   translations: (json['translations'] as List<dynamic>)
       .map((e) => PathTranslationDto.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -231,6 +235,36 @@ Map<String, dynamic> _$PathTranslationDtoToJson(PathTranslationDto instance) =>
       'title': instance.title,
       'content': instance.description,
     };
+
+PathGroupCategoryJunctionDto _$PathGroupCategoryJunctionDtoFromJson(
+  Map<String, dynamic> json,
+) => PathGroupCategoryJunctionDto(
+  category: json['percorsi_material_categories_id'] == null
+      ? null
+      : PathGroupCategoryDto.fromJson(
+          json['percorsi_material_categories_id'] as Map<String, dynamic>,
+        ),
+);
+
+Map<String, dynamic> _$PathGroupCategoryJunctionDtoToJson(
+  PathGroupCategoryJunctionDto instance,
+) => <String, dynamic>{'percorsi_material_categories_id': instance.category};
+
+PathGroupCategoryDto _$PathGroupCategoryDtoFromJson(
+  Map<String, dynamic> json,
+) => PathGroupCategoryDto(
+  id: _idFromJson(json['id']),
+  translations: (json['translations'] as List<dynamic>)
+      .map((e) => PathTranslationDto.fromJson(e as Map<String, dynamic>))
+      .toList(),
+);
+
+Map<String, dynamic> _$PathGroupCategoryDtoToJson(
+  PathGroupCategoryDto instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'translations': instance.translations,
+};
 
 DirectusFileDto _$DirectusFileDtoFromJson(Map<String, dynamic> json) =>
     DirectusFileDto(

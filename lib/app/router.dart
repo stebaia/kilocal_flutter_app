@@ -205,10 +205,14 @@ final GoRouter appRouter = GoRouter(
                     ),
                     GoRoute(
                       path: 'materials/:groupId',
-                      builder: (context, state) => PathMaterialsScreen(
-                        groupId: state.pathParameters['groupId']!,
-                        title: state.extra as String?,
-                      ),
+                      builder: (context, state) {
+                        final args = state.extra as PathMaterialsRouteArgs?;
+                        return PathMaterialsScreen(
+                          groupId: state.pathParameters['groupId']!,
+                          title: args?.title,
+                          categories: args?.categories,
+                        );
+                      },
                       routes: [
                         GoRoute(
                           path: 'detail/:materialId',

@@ -1,3 +1,5 @@
+import 'path_material.dart';
+
 /// Domain entity that represents the detail of a single path area.
 class PathAreaDetail {
   const PathAreaDetail({
@@ -73,6 +75,7 @@ class PathAreaGroup {
     required this.completed,
     required this.total,
     this.months = const [],
+    this.categories = const [],
   });
 
   final String id;
@@ -84,6 +87,13 @@ class PathAreaGroup {
   /// months so the group detail can show every month even when the group has
   /// no steps yet — such months come through locked with a 0/0 count.
   final List<PathTimeframeGroup> months;
+
+  /// The group's official material categories (from `groups[].categories` on
+  /// `GET /path/me/areas/{area}/steps`), e.g. Benessere's "Scopri" /
+  /// "Consigli utili". Authoritative source for the materials hub's category
+  /// tabs — deriving them from the materials list instead let a mistagged
+  /// material surface a duplicate-titled tab. See [[statistics-feature-status]].
+  final List<PathMaterialCategory> categories;
 
   double get progress => total == 0 ? 0 : completed / total;
 
@@ -97,6 +107,7 @@ class PathAreaGroup {
       completed: completed ?? this.completed,
       total: total ?? this.total,
       months: months,
+      categories: categories,
     );
   }
 }

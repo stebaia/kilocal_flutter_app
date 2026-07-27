@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../statistics/presentation/statistics_screen.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'cubit/path_detail_cubit.dart';
+import 'path_materials_screen.dart';
 import 'widgets/path_area_hero_card.dart';
 import 'widgets/path_locked_sheets.dart';
 import 'widgets/path_materials_row.dart';
@@ -308,7 +309,10 @@ class _WellbeingGroupsList extends StatelessWidget {
           total: group.total,
           onTap: () => context.push(
             '/path/benessere/materials/${group.id}',
-            extra: group.title,
+            extra: PathMaterialsRouteArgs(
+              title: group.title,
+              categories: group.categories,
+            ),
           ),
         );
       },

@@ -5,6 +5,7 @@ import '../../../l10n/app_localizations.dart';
 import '../../../core/network/api_exception.dart';
 import '../domain/entities/path_area_detail.dart';
 import '../domain/entities/path_data.dart';
+import '../domain/entities/path_material.dart';
 import '../domain/path_repository.dart';
 import 'dto/path_area_steps_dto.dart';
 import 'dto/path_progress_dto.dart';
@@ -182,6 +183,7 @@ class PathRepositoryImpl implements PathRepository {
             completed: g.steps.where((s) => s.completed).length,
             total: g.steps.length,
             months: _monthsForGroup(g, orderedTimeframes, l10n),
+            categories: _mapGroupCategories(g, l10n),
           ),
     ];
 
@@ -234,6 +236,25 @@ class PathRepositoryImpl implements PathRepository {
         steps: [for (final s in steps) _mapStepDto(s, title, l10n)],
       );
     }).toList();
+  }
+
+  /// Maps a group's official material categories (`group.categories`), the
+  /// authoritative source for the materials hub's tabs. Skips entries with no
+  /// localized title (matches how groups/steps are already filtered above).
+  List<PathMaterialCategory> _mapGroupCategories(
+    PathGroupDto group,
+    AppLocalizations l10n,
+  ) {
+    final categories = <PathMaterialCategory>[];
+    for (final junction
+        in group.categories ?? const <PathGroupCategoryJunctionDto>[]) {
+      final category = junction.category;
+      if (category == null) continue;
+      final title = category.translations.titleFor(l10n.localeName);
+      if (title == null || title.isEmpty) continue;
+      categories.add(PathMaterialCategory(id: category.id, title: title));
+    }
+    return categories;
   }
 
   PathStepItem _mapStepDto(
