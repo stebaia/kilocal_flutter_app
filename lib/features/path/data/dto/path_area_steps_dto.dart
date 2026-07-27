@@ -161,7 +161,13 @@ class PathGroupDto {
 
   final DirectusFileDto? icon;
   final List<String>? tools;
-  final List<dynamic>? categories;
+
+  /// The group's official material categories (e.g. Benessere sub-sections'
+  /// "Scopri" / "Consigli utili"), authoritative per backend confirmation —
+  /// unlike deriving tabs from the materials list, this can't surface a
+  /// duplicate-titled category from a mistagged material. See
+  /// [[statistics-feature-status]].
+  final List<PathGroupCategoryJunctionDto>? categories;
   final List<PathTranslationDto> translations;
   final List<PathStepDto> steps;
 
@@ -334,6 +340,36 @@ class PathTranslationDto {
   final String? description;
 
   Map<String, dynamic> toJson() => _$PathTranslationDtoToJson(this);
+}
+
+/// One row of a group's `categories` M2M junction
+/// (`percorsi_groups_percorsi_material_categories`).
+@JsonSerializable()
+class PathGroupCategoryJunctionDto {
+  const PathGroupCategoryJunctionDto({this.category});
+
+  factory PathGroupCategoryJunctionDto.fromJson(Map<String, dynamic> json) =>
+      _$PathGroupCategoryJunctionDtoFromJson(json);
+
+  @JsonKey(name: 'percorsi_material_categories_id')
+  final PathGroupCategoryDto? category;
+
+  Map<String, dynamic> toJson() => _$PathGroupCategoryJunctionDtoToJson(this);
+}
+
+@JsonSerializable()
+class PathGroupCategoryDto {
+  const PathGroupCategoryDto({required this.id, required this.translations});
+
+  factory PathGroupCategoryDto.fromJson(Map<String, dynamic> json) =>
+      _$PathGroupCategoryDtoFromJson(json);
+
+  @JsonKey(fromJson: _idFromJson)
+  final String id;
+
+  final List<PathTranslationDto> translations;
+
+  Map<String, dynamic> toJson() => _$PathGroupCategoryDtoToJson(this);
 }
 
 @JsonSerializable()

@@ -15,10 +15,30 @@ import 'cubit/path_materials_cubit.dart';
 import 'widgets/path_material_card.dart';
 import 'widgets/path_material_category_tabs.dart';
 
+/// Navigation args for [PathMaterialsScreen], passed via `GoRouterState.extra`.
+///
+/// [categories], when provided, are the tapped group's *official* categories
+/// (`group.categories` from `GET /path/me/areas/{area}/steps`) and take
+/// priority over the categories the materials repository derives from the
+/// materials list — backend-confirmed authoritative source, since deriving
+/// tabs from materials let a mistagged one surface a duplicate-titled
+/// category tab (e.g. two "Scopri" chips). See [[statistics-feature-status]].
+class PathMaterialsRouteArgs {
+  const PathMaterialsRouteArgs({this.title, this.categories});
+
+  final String? title;
+  final List<PathMaterialCategory>? categories;
+}
+
 /// "Materiali Extra" hub for an area. Opened from the area detail's materials
 /// row; receives the area's "Materiali" group id used to load the materials.
 class PathMaterialsScreen extends StatelessWidget {
-  const PathMaterialsScreen({super.key, required this.groupId, this.title});
+  const PathMaterialsScreen({
+    super.key,
+    required this.groupId,
+    this.title,
+    this.categories,
+  });
 
   /// Id of the area's `is_percorso_main_tab: false` ("Materiali") group.
   final String groupId;
@@ -26,20 +46,35 @@ class PathMaterialsScreen extends StatelessWidget {
   /// Optional screen title; defaults to the localized "Materiali extra".
   final String? title;
 
+  /// The group's official categories, when known — see [PathMaterialsRouteArgs].
+  final List<PathMaterialCategory>? categories;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<PathMaterialsCubit>()..load(groupId: groupId),
-      child: _PathMaterialsView(groupId: groupId, title: title),
+      child: _PathMaterialsView(
+        groupId: groupId,
+        title: title,
+        officialCategories: categories,
+      ),
     );
   }
 }
 
 class _PathMaterialsView extends StatelessWidget {
-  const _PathMaterialsView({required this.groupId, this.title});
+  const _PathMaterialsView({
+    required this.groupId,
+    this.title,
+    this.officialCategories,
+  });
 
   final String groupId;
   final String? title;
+
+  /// The tapped group's official categories, when known — takes priority over
+  /// [PathMaterialsState.data]'s materials-derived ones.
+  final List<PathMaterialCategory>? officialCategories;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +124,7 @@ class _PathMaterialsView extends StatelessWidget {
                         state: state,
                         l10n: l10n,
                         groupId: groupId,
+                        officialCategories: officialCategories,
                       );
                   }
                 },
@@ -131,17 +167,23 @@ class _MaterialsList extends StatelessWidget {
     required this.state,
     required this.l10n,
     required this.groupId,
+    this.officialCategories,
   });
 
   final PathMaterialsState state;
   final AppLocalizations l10n;
   final String groupId;
 
+  /// The tapped group's official categories, when known — see
+  /// [PathMaterialsRouteArgs]. Falls back to the materials-derived ones (the
+  /// old behavior) only when absent, e.g. a cold deep-link into this screen.
+  final List<PathMaterialCategory>? officialCategories;
+
   @override
   Widget build(BuildContext context) {
     final data = state.data;
     final materials = state.visibleMaterials;
-    final categories = data?.categories ?? const [];
+    final categories = officialCategories ?? data?.categories ?? const [];
 
     return CustomScrollView(
       slivers: [
@@ -201,7 +243,7 @@ class _MaterialsList extends StatelessWidget {
   Future<void> _openDetail(BuildContext context, PathMaterial material) async {
     // The category title is shown in the (text) detail header; pass the
     // currently-selected category's title.
-    final categories = state.data?.categories ?? const [];
+    final categories = officialCategories ?? state.data?.categories ?? const [];
     String? categoryTitle;
     for (final c in categories) {
       if (c.id == state.selectedCategoryId) {
