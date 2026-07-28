@@ -213,7 +213,10 @@ class _PathAreaDetailContent extends StatelessWidget {
             showConnectorTop: i > 0,
             showConnectorBottom: i < groups.length - 1,
             onTap: groups[i].isLocked
-                ? () => showTimeframeLockedSheet(context)
+                ? () => showTimeframeLockedSheet(
+                    context,
+                    currentMonth: _referenceMonthFor(groups),
+                  )
                 : () => _openTimeframe(context, groups[i], l10n),
           ),
         if (data.hasMaterials) ...[
@@ -237,6 +240,20 @@ class _PathAreaDetailContent extends StatelessWidget {
     if (group.isLocked) return l10n.pathTimeframeLocked;
     if (group.isCurrent) return l10n.pathTimeframeCurrent;
     return l10n.pathTimeframeStepsCount(group.total);
+  }
+
+  /// The month the "mese bloccato" sheet should name as "still to finish" —
+  /// the active month (`isCurrent`), or as a fallback the last unlocked,
+  /// not-yet-completed month, since a locked future month is always blocked
+  /// on finishing whichever month is currently in progress.
+  PathTimeframeGroup? _referenceMonthFor(List<PathTimeframeGroup> groups) {
+    for (final group in groups) {
+      if (group.isCurrent) return group;
+    }
+    for (final group in groups.reversed) {
+      if (!group.isLocked && group.completed < group.total) return group;
+    }
+    return null;
   }
 
   /// Jumps straight into the month's first not-yet-completed step (or its

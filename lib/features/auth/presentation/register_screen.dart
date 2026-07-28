@@ -62,16 +62,7 @@ class _RegisterView extends StatelessWidget {
             prev.status != curr.status || prev.error != curr.error,
         listener: (context, state) {
           if (state.status == RegisterStatus.success) {
-            toastification.show(
-              context: context,
-              type: ToastificationType.success,
-              style: ToastificationStyle.flat,
-              autoCloseDuration: const Duration(seconds: 4),
-              title: Text(l10n.registerSuccessTitle),
-              description: Text(l10n.registerSuccessDescription),
-              alignment: Alignment.topCenter,
-            );
-            context.go('/login');
+            context.go(state.route ?? '/home');
           } else if (state.error != null) {
             toastification.show(
               context: context,

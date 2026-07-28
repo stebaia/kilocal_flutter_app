@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../domain/entities/path_area_detail.dart';
 import '../cubit/program_unlock_cubit.dart';
 
 /// Shows the "Contenuto bloccato" sheet for a restricted user tapping a locked
@@ -36,19 +37,37 @@ Future<bool> showPathLockedSheet(
 /// Shows the "Mese bloccato" sheet when tapping a month/timeframe that is
 /// locked pending completion of the previous one (sequential progression),
 /// as opposed to [showPathLockedSheet] which gates a whole restricted area.
-Future<void> showTimeframeLockedSheet(BuildContext context) {
+///
+/// When [currentMonth] is given (the month the user still needs to finish),
+/// the body names it and states how many activities are left instead of
+/// showing a generic message.
+Future<void> showTimeframeLockedSheet(
+  BuildContext context, {
+  PathTimeframeGroup? currentMonth,
+}) {
   final l10n = AppLocalizations.of(context)!;
   return showAppBrandBottomSheet<void>(
     context,
     title: l10n.pathTimeframeLockedTitle,
-    child: _TimeframeLockedBody(),
+    child: _TimeframeLockedBody(currentMonth: currentMonth),
   );
 }
 
 class _TimeframeLockedBody extends StatelessWidget {
+  const _TimeframeLockedBody({this.currentMonth});
+
+  final PathTimeframeGroup? currentMonth;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final remaining = currentMonth == null
+        ? null
+        : currentMonth!.total - currentMonth!.completed;
+    final body =
+        (remaining == null || remaining <= 0 || currentMonth!.title.isEmpty)
+        ? l10n.pathTimeframeLockedBody
+        : l10n.pathTimeframeLockedBodyDetailed(remaining, currentMonth!.title);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.screenGutter,
@@ -62,7 +81,7 @@ class _TimeframeLockedBody extends StatelessWidget {
           const _LockBadge(),
           const SizedBox(height: AppSpacing.spaceLg),
           Text(
-            l10n.pathTimeframeLockedBody,
+            body,
             textAlign: TextAlign.center,
             style: AppTypography.textTheme.bodyLarge?.copyWith(
               color: AppColors.textPrimary,

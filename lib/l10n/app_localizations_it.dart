@@ -291,6 +291,17 @@ class AppLocalizationsIt extends AppLocalizations {
       'Per sbloccare questo mese devi prima completare tutte le attività del mese precedente.';
 
   @override
+  String pathTimeframeLockedBodyDetailed(int count, String monthTitle) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'completa $count attività rimaste',
+      one: 'completa $count attività rimasta',
+    );
+    return 'Per sbloccare la sezione completa: $_temp0 del $monthTitle.';
+  }
+
+  @override
   String get pathMonthCompletedTitle => 'Complimenti!';
 
   @override

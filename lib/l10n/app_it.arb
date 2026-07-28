@@ -87,6 +87,17 @@
   "pathLockedBoughtKit": "Ho acquistato lo Starter kit",
   "pathTimeframeLockedTitle": "Mese bloccato",
   "pathTimeframeLockedBody": "Per sbloccare questo mese devi prima completare tutte le attività del mese precedente.",
+  "pathTimeframeLockedBodyDetailed": "Per sbloccare la sezione completa: {count, plural, one{completa {count} attività rimasta} other{completa {count} attività rimaste}} del {monthTitle}.",
+  "@pathTimeframeLockedBodyDetailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "monthTitle": {
+        "type": "String"
+      }
+    }
+  },
   "pathMonthCompletedTitle": "Complimenti!",
   "pathMonthCompletedBody": "Hai completato tutte le attività di questo mese.",
   "pathMonthCompletedCta": "Vedi le statistiche",

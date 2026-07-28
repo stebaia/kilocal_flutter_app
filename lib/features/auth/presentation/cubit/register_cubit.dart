@@ -1,17 +1,26 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../user/presentation/cubit/user_cubit.dart';
 import '../../domain/auth_repository.dart';
 
 part 'register_state.dart';
 
 class RegisterCubit extends Cubit<RegisterState> {
-  RegisterCubit({required AuthRepository authRepository})
-    : _authRepository = authRepository,
-      super(const RegisterState());
+  RegisterCubit({
+    required AuthRepository authRepository,
+    required UserCubit userCubit,
+    required AnalyticsEvents analytics,
+  }) : _authRepository = authRepository,
+       _userCubit = userCubit,
+       _analytics = analytics,
+       super(const RegisterState());
 
   final AuthRepository _authRepository;
+  final UserCubit _userCubit;
+  final AnalyticsEvents _analytics;
 
   void firstNameChanged(String value) =>
       emit(state.copyWith(firstName: value, clearError: true));
@@ -66,7 +75,22 @@ class RegisterCubit extends Cubit<RegisterState> {
         password: state.password,
         passwordConfirm: state.passwordConfirm,
       );
-      emit(state.copyWith(status: RegisterStatus.success));
+
+      await _authRepository.login(
+        email: state.email.trim(),
+        password: state.password,
+      );
+
+      await _userCubit.loadSession();
+
+      await _analytics.signUp();
+
+      emit(
+        state.copyWith(
+          status: RegisterStatus.success,
+          route: _userCubit.state.route ?? '/home',
+        ),
+      );
     } on ApiException catch (e) {
       emit(
         state.copyWith(

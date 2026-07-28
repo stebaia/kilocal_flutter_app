@@ -113,6 +113,18 @@
   "@pathTimeframeLockedBody": {
     "description": "Body copy of the timeframe-locked sheet."
   },
+  "pathTimeframeLockedBodyDetailed": "To unlock the full section: {count, plural, one{finish {count} more activity} other{finish {count} more activities}} in {monthTitle}.",
+  "@pathTimeframeLockedBodyDetailed": {
+    "description": "Body copy of the timeframe-locked sheet when we know how many activities are left in the current month.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "monthTitle": {
+        "type": "String"
+      }
+    }
+  },
   "pathMonthCompletedTitle": "Congratulations!",
   "@pathMonthCompletedTitle": {
     "description": "Title of the sheet shown after completing the last activity of a month."

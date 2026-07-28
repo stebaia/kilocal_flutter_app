@@ -620,6 +620,12 @@ abstract class AppLocalizations {
   /// **'To unlock this month, complete every activity in the previous month first.'**
   String get pathTimeframeLockedBody;
 
+  /// Body copy of the timeframe-locked sheet when we know how many activities are left in the current month.
+  ///
+  /// In en, this message translates to:
+  /// **'To unlock the full section: {count, plural, one{finish {count} more activity} other{finish {count} more activities}} in {monthTitle}.'**
+  String pathTimeframeLockedBodyDetailed(int count, String monthTitle);
+
   /// Title of the sheet shown after completing the last activity of a month.
   ///
   /// In en, this message translates to:

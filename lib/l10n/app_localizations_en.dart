@@ -291,6 +291,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'To unlock this month, complete every activity in the previous month first.';
 
   @override
+  String pathTimeframeLockedBodyDetailed(int count, String monthTitle) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'finish $count more activities',
+      one: 'finish $count more activity',
+    );
+    return 'To unlock the full section: $_temp0 in $monthTitle.';
+  }
+
+  @override
   String get pathMonthCompletedTitle => 'Congratulations!';
 
   @override

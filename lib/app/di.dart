@@ -179,7 +179,11 @@ void configureDependencies() {
     ),
   );
   getIt.registerFactory<RegisterCubit>(
-    () => RegisterCubit(authRepository: getIt<AuthRepository>()),
+    () => RegisterCubit(
+      authRepository: getIt<AuthRepository>(),
+      userCubit: getIt<UserCubit>(),
+      analytics: getIt<AnalyticsEvents>(),
+    ),
   );
   getIt.registerFactory<ForgotPasswordCubit>(
     () => ForgotPasswordCubit(authRepository: getIt<AuthRepository>()),

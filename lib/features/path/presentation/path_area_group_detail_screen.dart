@@ -107,7 +107,10 @@ class _PathAreaGroupDetailScreenState extends State<PathAreaGroupDetailScreen> {
                       showConnectorTop: i > 0,
                       showConnectorBottom: i < months.length - 1,
                       onTap: months[i].isLocked
-                          ? () => showTimeframeLockedSheet(context)
+                          ? () => showTimeframeLockedSheet(
+                              context,
+                              currentMonth: _referenceMonthFor(months),
+                            )
                           : () => _openTimeframe(context, months[i]),
                     ),
                   const SizedBox(height: AppSpacing.spaceSm),
@@ -134,6 +137,20 @@ class _PathAreaGroupDetailScreenState extends State<PathAreaGroupDetailScreen> {
     if (month.isLocked) return l10n.pathTimeframeLocked;
     if (month.isCurrent) return l10n.pathTimeframeCurrent;
     return l10n.pathTimeframeStepsCount(month.total);
+  }
+
+  /// The month the "mese bloccato" sheet should name as "still to finish" —
+  /// the active month (`isCurrent`), or as a fallback the last unlocked,
+  /// not-yet-completed month, since a locked future month is always blocked
+  /// on finishing whichever month is currently in progress.
+  PathTimeframeGroup? _referenceMonthFor(List<PathTimeframeGroup> months) {
+    for (final month in months) {
+      if (month.isCurrent) return month;
+    }
+    for (final month in months.reversed) {
+      if (!month.isLocked && month.completed < month.total) return month;
+    }
+    return null;
   }
 
   /// Jumps straight into the month's first not-yet-completed step (or its

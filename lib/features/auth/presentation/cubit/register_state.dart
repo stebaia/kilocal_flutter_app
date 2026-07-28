@@ -23,6 +23,7 @@ class RegisterState extends Equatable {
     this.obscurePasswordConfirm = true,
     this.status = RegisterStatus.initial,
     this.error,
+    this.route,
   });
 
   final String firstName;
@@ -34,6 +35,10 @@ class RegisterState extends Equatable {
   final bool obscurePasswordConfirm;
   final RegisterStatus status;
   final RegisterError? error;
+
+  /// The post-registration route derived from `profile_status`. Only set
+  /// when [status] is [RegisterStatus.success].
+  final String? route;
 
   bool get isValid =>
       firstName.trim().isNotEmpty &&
@@ -53,6 +58,7 @@ class RegisterState extends Equatable {
     RegisterStatus? status,
     RegisterError? error,
     bool clearError = false,
+    String? route,
   }) {
     return RegisterState(
       firstName: firstName ?? this.firstName,
@@ -65,6 +71,7 @@ class RegisterState extends Equatable {
           obscurePasswordConfirm ?? this.obscurePasswordConfirm,
       status: status ?? this.status,
       error: clearError ? null : error ?? this.error,
+      route: route ?? this.route,
     );
   }
 
@@ -79,5 +86,6 @@ class RegisterState extends Equatable {
     obscurePasswordConfirm,
     status,
     error,
+    route,
   ];
 }
