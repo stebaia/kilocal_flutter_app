@@ -46,6 +46,25 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "env"
+    productFlavors {
+        // Points at the staging CMS (see lib/core/config/env.dart) and gets a
+        // distinct applicationId + label so it installs side-by-side with the
+        // production app on the same device. No Firebase app is registered for
+        // this package yet, so Firebase init is disabled (FIREBASE_ENABLED=false
+        // is wired in app/build.gradle.kts's resValue below via manifest placeholder).
+        create("staging") {
+            dimension = "env"
+            applicationIdSuffix = ".stg"
+            versionNameSuffix = "-stg"
+            resValue("string", "app_name", "Kilocal Staging")
+        }
+        create("production") {
+            dimension = "env"
+            resValue("string", "app_name", "Kilocal")
+        }
+    }
+
     signingConfigs {
         create("release") {
             if (keystorePropertiesFile.exists()) {

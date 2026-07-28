@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
+import '../core/config/env.dart';
 import '../core/monitoring/analytics_events.dart';
 import '../core/monitoring/analytics_service.dart';
 import '../core/monitoring/firebase_analytics_service.dart';
@@ -98,17 +99,27 @@ void configureDependencies() {
   // Registered first so the Dio client can attach the performance interceptor
   // and other layers can report errors/events. Swap the Firebase impls for the
   // Noop variants in tests via a test-only DI setup.
-  getIt.registerLazySingleton<MonitoringService>(
-    () => FirebaseMonitoringService(),
-  );
-  getIt.registerLazySingleton<AnalyticsService>(
-    () => FirebaseAnalyticsService(),
-  );
+  // The `staging` Android flavor has no app registered in the Firebase
+  // project yet, so it falls back to Noop implementations instead of
+  // touching the Firebase SDKs at all.
+  if (Env.isFirebaseEnabled) {
+    getIt.registerLazySingleton<MonitoringService>(
+      () => FirebaseMonitoringService(),
+    );
+    getIt.registerLazySingleton<AnalyticsService>(
+      () => FirebaseAnalyticsService(),
+    );
+    getIt.registerLazySingleton<PushNotificationService>(
+      () => PushNotificationService(),
+    );
+  } else {
+    getIt.registerLazySingleton<MonitoringService>(NoopMonitoringService.new);
+    getIt.registerLazySingleton<AnalyticsService>(
+      () => const NoopAnalyticsService(),
+    );
+  }
   getIt.registerLazySingleton<AnalyticsEvents>(
     () => AnalyticsEvents(getIt<AnalyticsService>()),
-  );
-  getIt.registerLazySingleton<PushNotificationService>(
-    () => PushNotificationService(),
   );
 
   // --- Core: token persistence ---
@@ -119,7 +130,10 @@ void configureDependencies() {
     () => DioClient(
       tokenStore: getIt<TokenStore>(),
       onAuthExpired: _onAuthExpired,
-      extraInterceptors: [PerformanceInterceptor()],
+      // PerformanceInterceptor touches FirebasePerformance.instance, which
+      // needs Firebase.initializeApp to have run — skip it entirely when
+      // Firebase is disabled (staging flavor).
+      extraInterceptors: Env.isFirebaseEnabled ? [PerformanceInterceptor()] : [],
     ),
   );
 

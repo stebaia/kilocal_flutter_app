@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../core/config/env.dart';
 import '../core/monitoring/analytics_service.dart';
 import '../core/monitoring/firebase_analytics_service.dart';
 import '../core/monitoring/monitoring_service.dart';
@@ -29,22 +30,29 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
     () async {
       WidgetsFlutterBinding.ensureInitialized();
 
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      // The `staging` Android flavor has no app registered in the Firebase
+      // project yet, so it skips init entirely rather than crashing on it.
+      if (Env.isFirebaseEnabled) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
 
-      // Must be registered before runApp so terminated-state pushes are handled.
-      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+        // Must be registered before runApp so terminated-state pushes are handled.
+        FirebaseMessaging.onBackgroundMessage(
+          firebaseMessagingBackgroundHandler,
+        );
+      }
 
       configureDependencies();
 
       final monitoring = getIt<MonitoringService>();
       final analytics = getIt<AnalyticsService>();
-      final push = getIt<PushNotificationService>();
 
-      await monitoring.init();
-      if (analytics is FirebaseAnalyticsService) {
-        await analytics.init();
+      if (Env.isFirebaseEnabled) {
+        await monitoring.init();
+        if (analytics is FirebaseAnalyticsService) {
+          await analytics.init();
+        }
       }
 
       // Framework (synchronous build/layout/paint) errors → Crashlytics.
@@ -66,8 +74,11 @@ Future<void> bootstrap(FutureOr<Widget> Function() builder) async {
         return true;
       };
 
-      // Best-effort push setup; failures must not block app start.
-      unawaited(push.init());
+      // Best-effort push setup; failures must not block app start. Skipped
+      // entirely when Firebase is disabled (no FCM without Firebase.initializeApp).
+      if (Env.isFirebaseEnabled) {
+        unawaited(getIt<PushNotificationService>().init());
+      }
 
       runApp(await builder());
     },
