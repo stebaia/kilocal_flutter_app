@@ -11,6 +11,8 @@ class HomeContinueStepDto {
     this.imageFileName,
     this.ctaLabel,
     this.vimeoUrl,
+    this.stepId,
+    this.area,
   });
 
   final String? title;
@@ -29,6 +31,15 @@ class HomeContinueStepDto {
   /// Vimeo oEmbed poster is used instead. See [[home-continue-path-image-gap]].
   @JsonKey(name: 'vimeo_url')
   final String? vimeoUrl;
+
+  /// Id of the current step, used to deep-link the home card to
+  /// `/path/{area}/step/{stepId}` instead of the generic `/path` list.
+  @JsonKey(name: 'step_id')
+  final String? stepId;
+
+  /// Path area the current step belongs to (`allenamento`, `alimentazione`
+  /// or `benessere`). Needed alongside [stepId] to build the deep link.
+  final String? area;
 
   factory HomeContinueStepDto.fromJson(Map<String, dynamic> json) =>
       _$HomeContinueStepDtoFromJson(json);

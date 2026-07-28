@@ -97,7 +97,9 @@ class _PathStepViewState extends State<_PathStepView> {
         builder: (context, state) {
           final step = _resolveStep(state);
 
-          if (step == null && state.status == PathDetailStatus.loading) {
+          if (step == null &&
+              state.status != PathDetailStatus.error &&
+              state.status != PathDetailStatus.loaded) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.accent),
             );

@@ -23,6 +23,8 @@ class ContinuePathItem {
     this.subtitle,
     required this.imageUrl,
     this.hasStarted = false,
+    this.stepId,
+    this.area,
   });
 
   final String title;
@@ -32,6 +34,14 @@ class ContinuePathItem {
   /// Whether the user has completed at least one step in any path area.
   /// Drives the CTA label: "Inizia il percorso" vs "Continua il percorso".
   final bool hasStarted;
+
+  /// Id of the current/last step, when known. Used to deep-link the card
+  /// tap to `/path/{area}/step/{stepId}` instead of the generic path list.
+  final String? stepId;
+
+  /// Path area the current step belongs to (`allenamento`, `alimentazione`
+  /// or `benessere`). Required alongside [stepId] to build the deep link.
+  final String? area;
 }
 
 /// Statistics summary for the current month.

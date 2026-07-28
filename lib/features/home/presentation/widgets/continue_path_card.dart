@@ -24,7 +24,15 @@ class ContinuePathCard extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => context.go('/path'),
+      onTap: () {
+        final area = item.area;
+        final stepId = item.stepId;
+        if (area != null && stepId != null) {
+          context.go('/path/$area/step/$stepId');
+        } else {
+          context.go('/path');
+        }
+      },
       child: SizedBox(
         height: 220,
         child: Stack(
