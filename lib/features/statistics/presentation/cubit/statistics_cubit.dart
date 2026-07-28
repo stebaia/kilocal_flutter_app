@@ -24,10 +24,36 @@ class StatisticsCubit extends Cubit<StatisticsState> {
   Future<void> load(AppLocalizations l10n) async {
     emit(state.copyWith(status: StatisticsStatus.loading));
     try {
-      final stats = await _statisticsRepository.fetchStatistics(l10n);
-      emit(StatisticsState(status: StatisticsStatus.loaded, stats: stats));
+      final stats = await _statisticsRepository.fetchStatistics(
+        l10n,
+        timeframeId: state.selectedTimeframe?.id,
+      );
+      emit(state.copyWith(status: StatisticsStatus.loaded, stats: stats));
     } catch (_) {
       emit(state.copyWith(status: StatisticsStatus.error));
     }
+  }
+
+  /// Fetches the reference area's selectable timeframes for the filter sheet.
+  Future<List<AreaTimeframe>> fetchTimeframes(
+    AppLocalizations l10n, {
+    required String referenceArea,
+  }) {
+    return _statisticsRepository.fetchAreaTimeframes(
+      area: referenceArea,
+      l10n: l10n,
+    );
+  }
+
+  /// Applies (or clears, when [timeframe] is null) the timeframe filter and
+  /// reloads every area's stats.
+  Future<void> selectTimeframe(AppLocalizations l10n, AreaTimeframe? timeframe) {
+    emit(
+      state.copyWith(
+        selectedTimeframe: timeframe,
+        clearSelectedTimeframe: timeframe == null,
+      ),
+    );
+    return load(l10n);
   }
 }

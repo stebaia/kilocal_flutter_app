@@ -394,6 +394,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileTypeProductsSection => 'Informazioni sui prodotti';
 
   @override
+  String get profileTypeStarterKit => 'Il tuo Starter Kit';
+
+  @override
   String get profileTypeMyKit => 'Il mio Kit';
 
   @override
@@ -543,6 +546,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get statisticsMonth => 'Mese corrente';
+
+  @override
+  String get statisticsTimeframeSheetTitle => 'Seleziona un periodo';
 
   @override
   String get notificationsTitle => 'Notifiche';

@@ -153,6 +153,7 @@
     "description": "CTA button in the Integrazione intermediate sheet; navigates to the Integrazione area."
   },
   "profileTypeProductsSection": "Informazioni sui prodotti",
+  "profileTypeStarterKit": "Il tuo Starter Kit",
   "profileTypeMyKit": "Il mio Kit",
   "profileTypeSupplements": "Integrazioni e prodotti",
   "profileKitTitle": "Kit {type}",
@@ -234,6 +235,7 @@
   "logoutCancel": "Annulla",
   "statisticsTitle": "Statistiche",
   "statisticsMonth": "Mese corrente",
+  "statisticsTimeframeSheetTitle": "Seleziona un periodo",
   "notificationsTitle": "Notifiche",
   "errorGeneric": "Qualcosa è andato storto. Riprova.",
   "retry": "Riprova",

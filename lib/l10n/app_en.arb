@@ -195,6 +195,7 @@
     "description": "CTA button in the Integrazione intermediate sheet; navigates to the Integrazione area."
   },
   "profileTypeProductsSection": "Product information",
+  "profileTypeStarterKit": "Your Starter Kit",
   "profileTypeMyKit": "My Kit",
   "profileTypeSupplements": "Supplements and products",
   "profileKitTitle": "Kit {type}",
@@ -297,6 +298,7 @@
   },
   "statisticsTitle": "Statistics",
   "statisticsMonth": "Current month",
+  "statisticsTimeframeSheetTitle": "Select a period",
   "notificationsTitle": "Notifications",
   "errorGeneric": "Something went wrong. Please try again.",
   "retry": "Retry",

@@ -27,6 +27,7 @@ abstract final class AppIcons {
   static const String activities = 'activities';
   static const String supplement = 'stat_supplement';
   static const String strumenti = 'strumenti';
+  static const String calendarFilter = 'calendar_filter';
 }
 
 /// Widget generico per le icone SVG dell'app.

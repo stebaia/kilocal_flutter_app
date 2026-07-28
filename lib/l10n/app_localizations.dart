@@ -794,6 +794,12 @@ abstract class AppLocalizations {
   /// **'Product information'**
   String get profileTypeProductsSection;
 
+  /// No description provided for @profileTypeStarterKit.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Starter Kit'**
+  String get profileTypeStarterKit;
+
   /// No description provided for @profileTypeMyKit.
   ///
   /// In en, this message translates to:
@@ -1075,6 +1081,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Current month'**
   String get statisticsMonth;
+
+  /// No description provided for @statisticsTimeframeSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a period'**
+  String get statisticsTimeframeSheetTitle;
 
   /// No description provided for @notificationsTitle.
   ///

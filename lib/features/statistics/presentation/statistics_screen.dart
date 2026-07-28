@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations.dart';
 
 import '../../../app/di.dart';
+import '../../../core/icons/app_icons.dart';
 import '../../../core/theme/app_spacing.dart';
 import 'cubit/statistics_cubit.dart';
 import 'widgets/statistics_card.dart';
+import 'widgets/statistics_timeframe_sheet.dart';
 
 class StatisticsScreen extends StatelessWidget {
   const StatisticsScreen({super.key});
@@ -25,12 +27,44 @@ class StatisticsScreen extends StatelessWidget {
 class _StatisticsView extends StatelessWidget {
   const _StatisticsView();
 
+  /// Reference area whose timeframes drive the filter sheet (see
+  /// [[statistics-feature-status]] — every area's timeframes are independent,
+  /// so a single one is used as the common list for the global filter).
+  static const _referenceArea = 'allenamento';
+
+  Future<void> _openTimeframeFilter(BuildContext context) async {
+    final cubit = context.read<StatisticsCubit>();
+    final l10n = AppLocalizations.of(context)!;
+    final timeframes = await cubit.fetchTimeframes(
+      l10n,
+      referenceArea: _referenceArea,
+    );
+    if (!context.mounted) return;
+    final selected = await showStatisticsTimeframeSheet(
+      context,
+      timeframes: timeframes,
+      selectedTimeframeId: cubit.state.selectedTimeframe?.id,
+    );
+    if (selected == null) return;
+    if (!context.mounted) return;
+    await cubit.selectTimeframe(l10n, selected);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.statisticsTitle)),
+      appBar: AppBar(
+        title: Text(l10n.statisticsTitle),
+        actions: [
+          IconButton(
+            icon: const AppIcon(AppIcons.calendarFilter, size: 24),
+            tooltip: l10n.statisticsTimeframeSheetTitle,
+            onPressed: () => _openTimeframeFilter(context),
+          ),
+        ],
+      ),
       // top: false — the AppBar insets the status bar; SafeArea guards only the
       // bottom against the Android system navigation bar.
       body: SafeArea(
@@ -67,6 +101,7 @@ class _StatisticsView extends StatelessWidget {
                       stat.completed,
                       stat.total,
                     ),
+                    monthLabelOverride: state.selectedTimeframe?.title,
                   ),
                 );
               },
