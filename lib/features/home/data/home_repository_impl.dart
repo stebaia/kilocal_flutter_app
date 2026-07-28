@@ -187,6 +187,8 @@ query HomeMoments($now: String!, $lang: String!) {
         subtitle: continueStep.ctaLabel,
         imageUrl: continueImage,
         hasStarted: hasStarted,
+        stepId: continueStep.stepId,
+        area: continueStep.area,
       ),
       monthStats: MonthStats(
         monthLabel: 'Mese $currentMonth',
@@ -261,6 +263,8 @@ query HomeMoments($now: String!, $lang: String!) {
         imageFileName: step?['image_file_name'] as String?,
         ctaLabel: ctaLabel,
         vimeoUrl: step?['vimeo_url'] as String?,
+        stepId: step?['step_id'] as String?,
+        area: step?['area'] as String?,
       );
 
       return (dto, monthText);
@@ -276,13 +280,13 @@ query HomeMoments($now: String!, $lang: String!) {
     String lang,
   ) {
     if (details == null) return null;
-    const stepKeys = [
-      'percorso_allenamento_curr_step',
-      'percorso_alimentazione_curr_step',
-      'percorso_benessere_curr_step',
-    ];
-    for (final key in stepKeys) {
-      final step = details[key] as Map<String, dynamic>?;
+    const stepKeys = {
+      'percorso_allenamento_curr_step': 'allenamento',
+      'percorso_alimentazione_curr_step': 'alimentazione',
+      'percorso_benessere_curr_step': 'benessere',
+    };
+    for (final entry in stepKeys.entries) {
+      final step = details[entry.key] as Map<String, dynamic>?;
       if (step == null) continue;
       final title = _translation(step, lang)?['title'] as String?;
       final asset = step['asset'] as Map<String, dynamic>?;
@@ -293,6 +297,8 @@ query HomeMoments($now: String!, $lang: String!) {
         'image_file_id': file?['id'],
         'image_file_name': file?['filename_download'],
         'vimeo_url': isVideo ? (asset?['vimeo_url'] as String?) : null,
+        'step_id': step['id']?.toString(),
+        'area': entry.value,
       };
     }
     return null;
