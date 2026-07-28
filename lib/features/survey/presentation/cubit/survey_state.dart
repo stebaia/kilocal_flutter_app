@@ -1,5 +1,18 @@
 part of 'survey_cubit.dart';
 
+/// A product picked at random from the user's own kit, for the barcode step's
+/// `{{product}}` placeholder and its code validation (see
+/// [SurveyRepository.fetchKitBarcodeProducts]).
+class KitBarcodeProduct extends Equatable {
+  const KitBarcodeProduct({required this.title, required this.codes});
+
+  final String title;
+  final Set<String> codes;
+
+  @override
+  List<Object?> get props => [title, codes];
+}
+
 enum SurveyStatus {
   initial,
   loading,
@@ -20,6 +33,7 @@ class SurveyState extends Equatable {
     this.submitResult,
     this.outcomeProfile,
     this.errorMessage,
+    this.kitBarcodeProduct,
   });
 
   final SurveyStatus status;
@@ -46,6 +60,11 @@ class SurveyState extends Equatable {
   final SurveyOutcome? outcomeProfile;
 
   final String? errorMessage;
+
+  /// The product picked for the kit proof-of-purchase step (`starter_kit`'s
+  /// barcode section, `single_product_barcode_check == false`), or `null`
+  /// when not yet resolved / not applicable. See [KitBarcodeProduct].
+  final KitBarcodeProduct? kitBarcodeProduct;
 
   SurveySection? get currentSection =>
       currentIndex >= 0 && currentIndex < visibleSections.length
@@ -122,6 +141,7 @@ class SurveyState extends Equatable {
     SurveySubmitResult? submitResult,
     SurveyOutcome? outcomeProfile,
     String? errorMessage,
+    KitBarcodeProduct? kitBarcodeProduct,
 
     /// Clears [errorMessage]. `copyWith(errorMessage: null)` cannot: a null
     /// argument is indistinguishable from "not passed", so it keeps the old
@@ -138,6 +158,7 @@ class SurveyState extends Equatable {
       submitResult: submitResult ?? this.submitResult,
       outcomeProfile: outcomeProfile ?? this.outcomeProfile,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      kitBarcodeProduct: kitBarcodeProduct ?? this.kitBarcodeProduct,
     );
   }
 
@@ -152,5 +173,6 @@ class SurveyState extends Equatable {
     submitResult,
     outcomeProfile,
     errorMessage,
+    kitBarcodeProduct,
   ];
 }

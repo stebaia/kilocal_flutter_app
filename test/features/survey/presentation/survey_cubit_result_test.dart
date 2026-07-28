@@ -8,6 +8,7 @@ import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_outco
 import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_step.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/survey_repository.dart';
 import 'package:kilocal_flutter_app/features/survey/presentation/cubit/survey_cubit.dart';
+import 'package:kilocal_flutter_app/features/user/presentation/cubit/user_cubit.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSurveyRepository extends Mock implements SurveyRepository {}
@@ -16,6 +17,8 @@ class MockAnalyticsEvents extends Mock implements AnalyticsEvents {}
 
 class MockProgramUnlockRepository extends Mock
     implements ProgramUnlockRepository {}
+
+class MockUserCubit extends Mock implements UserCubit {}
 
 /// Guards when `type_survey` is submitted relative to its result section.
 ///
@@ -27,6 +30,7 @@ void main() {
   late MockSurveyRepository repository;
   late MockAnalyticsEvents analytics;
   late MockProgramUnlockRepository unlockRepository;
+  late MockUserCubit userCubit;
 
   // Verbatim from a live submit: the profile is a reference, not the copy.
   const submitResult = SurveySubmitResult(
@@ -94,9 +98,11 @@ void main() {
     repository = MockSurveyRepository();
     analytics = MockAnalyticsEvents();
     unlockRepository = MockProgramUnlockRepository();
+    userCubit = MockUserCubit();
     when(
       () => unlockRepository.fetchBarcodeProducts(),
     ).thenAnswer((_) async => const <BarcodeProduct>[]);
+    when(() => userCubit.state).thenReturn(const UserState());
 
     when(() => repository.ensureDetails()).thenAnswer((_) async {});
     when(() => repository.fetchSurvey(any())).thenAnswer((_) async => survey);
@@ -120,6 +126,7 @@ void main() {
     repository: repository,
     analytics: analytics,
     unlockRepository: unlockRepository,
+    userCubit: userCubit,
   );
 
   test(

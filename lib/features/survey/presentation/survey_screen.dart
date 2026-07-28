@@ -152,16 +152,16 @@ class _SectionBody extends StatelessWidget {
     final answer = state.currentAnswer;
 
     final isResult = section.kind == SurveySectionKind.result;
-    // Result screens fill {{name}}/{{type}}/{{outcome_profile}} from the submit
-    // outcome plus the logged-in user's first name.
     // UserCubit is a get_it singleton rather than a tree-provided bloc (there is
     // no MultiBlocProvider above the router), so read it from the locator.
+    final firstName = getIt<UserCubit>().state.user?.firstName;
     final placeholders = <String, String>{
-      if (isResult)
-        ..._outcomePlaceholders(
-          state.outcomeProfile,
-          getIt<UserCubit>().state.user?.firstName,
-        ),
+      // {{name}} appears outside result screens too (e.g. starter_kit's "{{name}}
+      // sei all'inizio del tuo percorso!" info step), so it's always available.
+      if (firstName != null && firstName.isNotEmpty) 'name': firstName,
+      // Result screens additionally fill {{type}}/{{outcome_profile}} from the
+      // submit outcome.
+      if (isResult) ..._outcomePlaceholders(state.outcomeProfile),
       // The proof-of-purchase step ("Inserisci il codice a barre di:
       // "{{product}}"") appears both after a product-dropdown question
       // (single_product_survey) and on its own (starter_kit, generic kit).
@@ -245,8 +245,10 @@ class _SectionBody extends StatelessWidget {
   ///
   /// `single_product_survey` asks a `show_as_dropdown` product question right
   /// before the barcode step, so the name is the label of the option the user
-  /// picked. `starter_kit` has no such question — its barcode step is about the
-  /// fixed Starter Kit, so it falls back to that literal name.
+  /// picked. `starter_kit` has no such question — its barcode step is about a
+  /// product from the user's own kit, randomly picked by the cubit
+  /// ([SurveyState.kitBarcodeProduct]); this literal is only the fallback
+  /// while that read is in flight or fails.
   static const _genericProductName = 'Starter Kit Kilocal';
 
   String? _productName(SurveyState state) {
@@ -259,7 +261,9 @@ class _SectionBody extends StatelessWidget {
         break;
       }
     }
-    if (dropdown == null) return _genericProductName;
+    if (dropdown == null) {
+      return state.kitBarcodeProduct?.title ?? _genericProductName;
+    }
 
     final selectedId =
         state.answers[dropdown.id]?.selectedOptionIds.firstOrNull;
@@ -275,14 +279,12 @@ class _SectionBody extends StatelessWidget {
   /// `{{outcome_profile}}` — names that match neither the submit response's own
   /// keys nor each other, so they are mapped explicitly. `{{type}}` →
   /// "Tipo 2 - Mela" and `{{outcome_profile}}` → the personalized biotype copy,
-  /// both from the hydrated [biotype]; `{{name}}` is the logged-in user's.
+  /// both from the hydrated [biotype]. `{{name}}` is handled by the caller for
+  /// every section, not just result screens.
   ///
   /// Any placeholder left unmapped is stripped by [SurveyHtml], so a partial
   /// outcome degrades to plain copy instead of leaking `{{…}}`.
-  Map<String, String> _outcomePlaceholders(
-    SurveyOutcome? biotype,
-    String? firstName,
-  ) {
+  Map<String, String> _outcomePlaceholders(SurveyOutcome? biotype) {
     final rawOutcome = state.submitResult?.outcome;
     return {
       // Scalar top-level keys first, so other surveys' result copy keeps
@@ -292,7 +294,6 @@ class _SectionBody extends StatelessWidget {
         for (final entry in rawOutcome.entries)
           if (entry.value is String || entry.value is num)
             entry.key: '${entry.value}',
-      if (firstName != null && firstName.isNotEmpty) 'name': firstName,
       if (biotype?.typeDisplay != null) 'type': biotype!.typeDisplay!,
       if (biotype?.description != null)
         'outcome_profile': biotype!.description!,

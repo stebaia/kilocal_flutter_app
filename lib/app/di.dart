@@ -353,6 +353,7 @@ void configureDependencies() {
       analytics: getIt<AnalyticsEvents>(),
       // Shared with the unlock sheet so both accept the same barcodes.
       unlockRepository: getIt<ProgramUnlockRepository>(),
+      userCubit: getIt<UserCubit>(),
     ),
   );
 

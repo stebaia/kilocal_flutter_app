@@ -1,3 +1,4 @@
+import '../../path/domain/entities/barcode_product.dart';
 import 'entities/pharmacy.dart';
 import 'entities/survey_answer.dart';
 import 'entities/survey_outcome.dart';
@@ -47,4 +48,15 @@ abstract interface class SurveyRepository {
     SurveyOutcome outcome, {
     String? gender,
   });
+
+  /// Every product belonging to kit [kitId] (flattened across its phases),
+  /// with its accepted barcodes (product + variants).
+  ///
+  /// Used for the proof-of-purchase step when the survey is about a Starter
+  /// Kit rather than a single product (`single_product_barcode_check == false`
+  /// on the section): the title shown in `Inserisci il codice a barre di:
+  /// "{{product}}"` is picked at random from the user's own kit, and its
+  /// barcodes replace the generic `use_for_barcode_check` catalogue for
+  /// validating the code entered on this step.
+  Future<List<BarcodeProduct>> fetchKitBarcodeProducts(String kitId);
 }
