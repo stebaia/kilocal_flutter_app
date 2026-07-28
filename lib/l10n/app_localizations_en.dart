@@ -15,24 +15,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashLoading => 'Loading...';
 
   @override
-  String get onboardingTitle1 => 'Welcome to Kilocal';
+  String get onboardingTitle1 => 'Your path.\nFour areas to follow.';
 
   @override
   String get onboardingBody1 =>
-      'Start your personalized wellness journey with us.';
+      'Nutrition, training, supplements and 360° wellbeing, personalized for you';
 
   @override
-  String get onboardingTitle2 => 'Follow your path';
+  String get onboardingTitle2 => 'The Starter Kit.\nYour best ally.';
 
   @override
   String get onboardingBody2 =>
-      'Training, nutrition, wellbeing and integration in one place.';
+      'The right supplements for you in a single Kit that helps you reach your goals.';
 
   @override
-  String get onboardingTitle3 => 'Track your progress';
+  String get onboardingTitle3 => 'Get guidance\nfrom our experts';
 
   @override
-  String get onboardingBody3 => 'Monitor your results and achieve your goals.';
+  String get onboardingBody3 =>
+      'Nutritionists, personal trainers and many other experts guiding you along the way with recipes, videos, challenges and more.';
+
+  @override
+  String get onboardingTitle4 => 'Great. Now you can start.';
+
+  @override
+  String get onboardingBody4 =>
+      'Continue to start your body recomposition journey now.';
 
   @override
   String get onboardingNext => 'Next';
