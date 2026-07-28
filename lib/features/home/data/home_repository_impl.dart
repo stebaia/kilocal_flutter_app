@@ -205,6 +205,7 @@ query HomeMoments($now: String!, $lang: String!) {
           imageUrl: momentImage,
           route: '/momenti/home',
           assetName: _momentFallbackImage,
+          isLocked: true,
         ),
         HomeActionCard(
           title: 'Benefit',

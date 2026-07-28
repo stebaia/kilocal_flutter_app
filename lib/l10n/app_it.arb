@@ -73,6 +73,8 @@
   "homeBenefits": "Benefit",
   "homePathCardTitle": "Titolo contenuto da continuare lorem ipsuim",
   "homeMonthStatsDescription": "Lorem ipsum dolor sit amet consectetur. Facilisi varius.",
+  "homeComingSoonTitle": "Coming soon",
+  "homeComingSoonBody": "Questa sezione sarà presto disponibile.",
   "tabHome": "Home",
   "tabPath": "Percorso",
   "tabDiary": "Diario",

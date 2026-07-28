@@ -247,6 +247,12 @@ class AppLocalizationsIt extends AppLocalizations {
       'Lorem ipsum dolor sit amet consectetur. Facilisi varius.';
 
   @override
+  String get homeComingSoonTitle => 'Coming soon';
+
+  @override
+  String get homeComingSoonBody => 'Questa sezione sarà presto disponibile.';
+
+  @override
   String get tabHome => 'Home';
 
   @override

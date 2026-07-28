@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/home_data.dart';
 import 'action_card_illustration.dart';
 
@@ -14,10 +15,31 @@ class ActionCard extends StatelessWidget {
 
   final HomeActionCard card;
 
+  void _handleTap(BuildContext context) {
+    if (card.isLocked) {
+      final l10n = AppLocalizations.of(context)!;
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.homeComingSoonTitle),
+          content: Text(l10n.homeComingSoonBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+    context.push(card.route);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push(card.route),
+      onTap: () => _handleTap(context),
       child: Container(
         height: 165,
         width: double.infinity,
@@ -30,6 +52,11 @@ class ActionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppRadius.lg),
           child: Stack(
             children: [
+              // Darkening overlay for the locked ("coming soon") state.
+              if (card.isLocked)
+                Positioned.fill(
+                  child: Container(color: Colors.black.withValues(alpha: 0.35)),
+                ),
               // Top-center illustration.
               Positioned(
                 top: AppSpacing.spaceMd,
@@ -39,6 +66,7 @@ class ActionCard extends StatelessWidget {
                   child: ActionCardIllustration(
                     imageUrl: card.imageUrl,
                     assetName: card.assetName,
+                    isLocked: card.isLocked,
                   ),
                 ),
               ),
@@ -55,11 +83,17 @@ class ActionCard extends StatelessWidget {
                   ),
                 ),
               ),
-              // Bottom-right play icon.
+              // Bottom-right play/lock icon.
               Positioned(
                 bottom: AppSpacing.spaceMd,
                 right: AppSpacing.spaceMd,
-                child: AppIcon(AppIcons.play, size: AppSpacing.spaceMd),
+                child: card.isLocked
+                    ? AppIcon(
+                        AppIcons.lock,
+                        size: AppSpacing.spaceMd,
+                        color: AppColors.neutralWhite,
+                      )
+                    : AppIcon(AppIcons.play, size: AppSpacing.spaceMd),
               ),
             ],
           ),

@@ -54,6 +54,7 @@ class HomeActionCard {
     required this.imageUrl,
     required this.route,
     this.assetName,
+    this.isLocked = false,
   });
 
   final String title;
@@ -63,4 +64,8 @@ class HomeActionCard {
   /// Optional local asset used as the card illustration.
   /// When provided, it takes precedence over [imageUrl].
   final String? assetName;
+
+  /// When true, tapping the card shows a "coming soon" alert instead of
+  /// navigating to [route].
+  final bool isLocked;
 }

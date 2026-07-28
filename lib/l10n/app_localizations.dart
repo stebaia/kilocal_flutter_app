@@ -536,6 +536,18 @@ abstract class AppLocalizations {
   /// **'Lorem ipsum dolor sit amet consectetur. Facilisi varius.'**
   String get homeMonthStatsDescription;
 
+  /// No description provided for @homeComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get homeComingSoonTitle;
+
+  /// No description provided for @homeComingSoonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This section will be available soon.'**
+  String get homeComingSoonBody;
+
   /// No description provided for @tabHome.
   ///
   /// In en, this message translates to:
