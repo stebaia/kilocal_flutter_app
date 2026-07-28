@@ -57,11 +57,11 @@ android {
             dimension = "env"
             applicationIdSuffix = ".stg"
             versionNameSuffix = "-stg"
-            resValue("string", "app_name", "Kilocal Staging")
+            resValue("string", "app_name", "Kilocal Programm")
         }
         create("production") {
             dimension = "env"
-            resValue("string", "app_name", "Kilocal")
+            resValue("string", "app_name", "Kilocal Programm")
         }
     }
 
