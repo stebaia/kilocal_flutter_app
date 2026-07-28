@@ -1,7 +1,7 @@
 name: kilocal_flutter_app
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.3+3
+version: 0.1.4+4
 
 environment:
   sdk: ^3.11.3
@@ -88,6 +88,9 @@ flutter:
     - assets/self_care.png
     - assets/lifestyle.png
     - assets/zen.png
+    - assets/baf.png
+    - assets/doctor.png
+    - assets/drums.png
     - assets/path_header_ellipse.svg
     - assets/biotype_texts.json
     - assets/strumenti/

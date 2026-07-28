@@ -113,38 +113,50 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingTitle1.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Kilocal'**
+  /// **'Your path.\nFour areas to follow.'**
   String get onboardingTitle1;
 
   /// No description provided for @onboardingBody1.
   ///
   /// In en, this message translates to:
-  /// **'Start your personalized wellness journey with us.'**
+  /// **'Nutrition, training, supplements and 360° wellbeing, personalized for you'**
   String get onboardingBody1;
 
   /// No description provided for @onboardingTitle2.
   ///
   /// In en, this message translates to:
-  /// **'Follow your path'**
+  /// **'The Starter Kit.\nYour best ally.'**
   String get onboardingTitle2;
 
   /// No description provided for @onboardingBody2.
   ///
   /// In en, this message translates to:
-  /// **'Training, nutrition, wellbeing and integration in one place.'**
+  /// **'The right supplements for you in a single Kit that helps you reach your goals.'**
   String get onboardingBody2;
 
   /// No description provided for @onboardingTitle3.
   ///
   /// In en, this message translates to:
-  /// **'Track your progress'**
+  /// **'Get guidance\nfrom our experts'**
   String get onboardingTitle3;
 
   /// No description provided for @onboardingBody3.
   ///
   /// In en, this message translates to:
-  /// **'Monitor your results and achieve your goals.'**
+  /// **'Nutritionists, personal trainers and many other experts guiding you along the way with recipes, videos, challenges and more.'**
   String get onboardingBody3;
+
+  /// No description provided for @onboardingTitle4.
+  ///
+  /// In en, this message translates to:
+  /// **'Great. Now you can start.'**
+  String get onboardingTitle4;
+
+  /// No description provided for @onboardingBody4.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to start your body recomposition journey now.'**
+  String get onboardingBody4;
 
   /// No description provided for @onboardingNext.
   ///

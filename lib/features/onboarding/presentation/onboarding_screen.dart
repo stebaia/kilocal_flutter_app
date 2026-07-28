@@ -66,14 +66,22 @@ class _OnboardingViewState extends State<_OnboardingView> {
       OnboardingSlideData(
         title: l10n.onboardingTitle1,
         body: l10n.onboardingBody1,
+        image: 'assets/zen.png',
       ),
       OnboardingSlideData(
         title: l10n.onboardingTitle2,
         body: l10n.onboardingBody2,
+        image: 'assets/baf.png',
       ),
       OnboardingSlideData(
         title: l10n.onboardingTitle3,
         body: l10n.onboardingBody3,
+        image: 'assets/doctor.png',
+      ),
+      OnboardingSlideData(
+        title: l10n.onboardingTitle4,
+        body: l10n.onboardingBody4,
+        image: 'assets/drums.png',
       ),
     ];
 
@@ -190,8 +198,8 @@ class _SlideContent extends StatelessWidget {
           flex: 3,
           child: Center(
             child: Image.asset(
-              'assets/zen.png',
-              height: 200,
+              data.image,
+              height: 300,
               fit: BoxFit.contain,
             ),
           ),

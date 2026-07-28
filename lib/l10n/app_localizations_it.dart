@@ -15,25 +15,32 @@ class AppLocalizationsIt extends AppLocalizations {
   String get splashLoading => 'Caricamento in corso...';
 
   @override
-  String get onboardingTitle1 => 'Benvenuto in Kilocal';
+  String get onboardingTitle1 => 'Il tuo percorso.\nQuattro aree da seguire.';
 
   @override
   String get onboardingBody1 =>
-      'Inizia il tuo percorso personalizzato di benessere con noi.';
+      'Alimentazione, allenamento, integrazione e benessere a 360°, personalizzati su di te';
 
   @override
-  String get onboardingTitle2 => 'Segui il tuo percorso';
+  String get onboardingTitle2 => 'Lo Starter Kit.\nIl tuo migliore alleato.';
 
   @override
   String get onboardingBody2 =>
-      'Allenamento, alimentazione, benessere e integrazione in un unico posto.';
+      'Gli integratori giusti per te in un Kit unico che ti aiuta a raggiungere i tuoi obiettivi.';
 
   @override
-  String get onboardingTitle3 => 'Traccia i tuoi progressi';
+  String get onboardingTitle3 => 'Fatti consigliare\ndai nostri esperti';
 
   @override
   String get onboardingBody3 =>
-      'Monitora i tuoi risultati e raggiungi i tuoi obiettivi.';
+      'Nutrizionisti, personal trainer e tanti altri esperti che ti guidano nel percorso con ricette, video, challenge e molto altro.';
+
+  @override
+  String get onboardingTitle4 => 'Bene. Ora puoi iniziare.';
+
+  @override
+  String get onboardingBody4 =>
+      'Prosegui per iniziare ora il tuo percorso di ricomposizione corporea.';
 
   @override
   String get onboardingNext => 'Avanti';
