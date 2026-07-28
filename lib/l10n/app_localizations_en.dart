@@ -250,7 +250,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeComingSoonTitle => 'Coming soon';
 
   @override
-  String get homeComingSoonBody => 'This section will be available soon.';
+  String get homeComingSoonBody =>
+      'The content of this section will be available soon.';
 
   @override
   String get tabHome => 'Home';

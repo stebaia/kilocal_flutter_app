@@ -545,7 +545,7 @@ abstract class AppLocalizations {
   /// No description provided for @homeComingSoonBody.
   ///
   /// In en, this message translates to:
-  /// **'This section will be available soon.'**
+  /// **'The content of this section will be available soon.'**
   String get homeComingSoonBody;
 
   /// No description provided for @tabHome.
