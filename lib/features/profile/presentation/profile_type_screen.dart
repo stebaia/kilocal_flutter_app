@@ -117,7 +117,7 @@ class _Content extends StatelessWidget {
           const SizedBox(height: AppSpacing.spaceSm),
           ProfileProductTile(
             icon: Icons.menu_book_outlined,
-            title: biotype.kit?.title ?? l10n.profileTypeMyKit,
+            title: l10n.profileTypeStarterKit,
             badgeColor: colorFromHex(biotype.mainColor),
             // "Il mio Kit" opens the kit plan card ("Kit tipo N").
             onTap: kitId == null
