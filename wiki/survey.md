@@ -140,7 +140,7 @@ mirrored by section 79/`single_product_survey`, which does not re-show it) navig
 bought (a `show_as_dropdown` question) before its own barcode step. Both surveys' barcode
 title templates `{{product}}` in quotes; see below.
 
-### `{{product}}` placeholder (fixed 2026-07-20)
+### `{{product}}` placeholder (fixed 2026-07-20, kit source fixed 2026-07-28)
 
 Both `starter_kit` (section 11) and `single_product_survey` (section 79) title their barcode
 step `Inserisci il codice a barre di: "{{product}}"`, but neither survey's copy carried a
@@ -150,8 +150,42 @@ step `Inserisci il codice a barre di: "{{product}}"`, but neither survey's copy 
 - `single_product_survey` asks a `show_as_dropdown` product question (section 78) immediately
   before the barcode step — `{{product}}` is that question's selected option's label (e.g.
   "Kilocal AGE Menopausa").
-- `starter_kit` has no such question — its barcode is about the fixed Starter Kit, not a
-  chosen product — so it falls back to the literal **"Starter Kit Kilocal"**.
+- `starter_kit` has no such question. **Correct rule (confirmed by backend, 2026-07-28):** when
+  the barcode section has `single_product_barcode_check == false`, the product is picked at
+  **random from the user's own kit** (`user_details.profile.kit.id`), not a hardcoded name — a
+  first pass literally used `"Starter Kit Kilocal"` for every user, which was wrong.
+  `single_product_barcode_check == true` (other flows, e.g. the restricted-access unlock)
+  keeps checking the generic `use_for_barcode_check` catalogue instead.
+
+**Query** (`SurveyRepositoryImpl.fetchKitBarcodeProducts`, same shape as
+`ProfileKitRepositoryImpl`): `product_kits_by_id(id: $kitId) { phases { products_with_duration {
+kit_products_duration_id { product { id title barcodes variants { barcodes } } } } } }`,
+flattened across phases (dedup by product id, no `show_in_shop` filter — this is for barcode
+matching, not the shop listing). `SurveyCubit._loadKitBarcodeProduct` runs this once, unawaited,
+right after `start()` loads the survey (only when a visible section needs it), shuffles the
+eligible products (non-empty `codes`), and caches the pick in `SurveyState.kitBarcodeProduct`
+(`{title, codes}`) for the rest of the wizard — both the `{{product}}` placeholder and this
+step's barcode validation (`_isKnownBarcode`) read from that cache; a read failure leaves it
+`null`, which fails the step closed (no code can match) and falls back to the literal
+"Starter Kit Kilocal" for the placeholder text only.
+
+⚠️ **`exclude_from_kit_barcode_check` does not exist in the CMS.** The initial spec described
+filtering the kit's products by this field before picking one at random. Checked via GraphQL
+introspection live on staging across every relevant collection (`products`, `kit_products`,
+`kit_products_duration`, `product_variants`, `product_kits`) — no such field anywhere, only
+`single_product_barcode_check` (on `survey_sections`) and `use_for_barcode_check` (on
+`products`, a different flow). Backend confirmed (2026-07-28): the field exists on the web
+front-end only, not in Directus — **skip that filter and consider every product in the kit
+eligible.**
+
+### `{{name}}` outside result screens (fixed 2026-07-28)
+
+`starter_kit` section 6 (sort 2, an `info` section — no `possible_answer`, `use_custom_cta:
+false`) titles itself `"{{name}} sei all'inizio del tuo percorso!"`. `{{name}}` was previously
+only added to the placeholder map for `SurveySectionKind.result` sections (the `type_survey`
+outcome screen), so it rendered empty here. `_SectionBody.build` now resolves `{{name}}` from
+the logged-in user's `firstName` for **every** section, not just results; `_outcomePlaceholders`
+only adds `{{type}}`/`{{outcome_profile}}` on top for result screens.
 
 ### `{{final_asset}}` — the "Hai completato il profilo!" screen (fixed 2026-07-21)
 
