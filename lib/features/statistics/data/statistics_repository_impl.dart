@@ -36,7 +36,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
   /// in a materials group is not double-counted.
   static const _monthCompletedQuery = r'''
 query StatisticsMonthCompleted {
-  user_activities(filter: { completed_on: { _nnull: true } }) {
+  user_activities(filter: { completed_on: { _nnull: true } }, limit: -1) {
     activity {
       item {
         ... on percorsi_content {
@@ -55,9 +55,16 @@ query StatisticsMonthCompleted {
 }
 ''';
 
-  static const _monthTotalsQuery = r'''
-query StatisticsMonthTotals($month: Int!) {
-  percorsi_content(filter: { timeframe: { sort: { _eq: $month } } }) {
+  /// The month is inlined instead of passed as a variable: Directus types
+  /// `_eq` on `timeframe.sort` as `GraphQLStringOrFloat`, which rejects an
+  /// `Int!` variable (HTTP 400 GRAPHQL_VALIDATION) — same reason
+  /// `HomeRepositoryImpl` interpolates the month into its query template.
+  static const _monthTotalsQueryTemplate = r'''
+query StatisticsMonthTotals {
+  percorsi_content(
+    filter: { timeframe: { sort: { _eq: {{month}} } } }
+    limit: -1
+  ) {
     id
     used_in {
       percorsi_groups_id {
@@ -163,7 +170,9 @@ query StatisticsMonthTotals($month: Int!) {
   ) async {
     final results = await Future.wait([
       _graphqlClient.query(_monthCompletedQuery),
-      _graphqlClient.query(_monthTotalsQuery, variables: {'month': monthSort}),
+      _graphqlClient.query(
+        _monthTotalsQueryTemplate.replaceAll('{{month}}', monthSort.toString()),
+      ),
     ]);
 
     final completed = <String, int>{};

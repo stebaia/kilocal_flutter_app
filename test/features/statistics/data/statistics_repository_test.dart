@@ -133,10 +133,7 @@ void main() {
         },
       );
       when(
-        () => graphql.query(
-          any(that: contains('StatisticsMonthTotals')),
-          variables: any(named: 'variables'),
-        ),
+        () => graphql.query(any(that: contains('StatisticsMonthTotals'))),
       ).thenAnswer(
         (_) async => {
           'data': {'percorsi_content': contents},
@@ -234,7 +231,7 @@ void main() {
       },
     );
 
-    test('passes the timeframe sort as the GraphQL month variable', () async {
+    test('inlines the timeframe sort into the totals query filter', () async {
       stubProgress(
         _progressResponse(
           areas: {
@@ -248,13 +245,13 @@ void main() {
 
       await repository.fetchStatistics(l10n, timeframe: timeframe);
 
+      // Directus rejects an Int! variable here (`_eq` on `timeframe.sort` is
+      // typed GraphQLStringOrFloat), so the month is interpolated directly.
       final captured = verify(
-        () => graphql.query(
-          any(that: contains('StatisticsMonthTotals')),
-          variables: captureAny(named: 'variables'),
-        ),
+        () =>
+            graphql.query(captureAny(that: contains('StatisticsMonthTotals'))),
       ).captured;
-      expect(captured.single, {'month': 2});
+      expect(captured.single as String, contains('_eq: 2'));
     });
   });
 }
