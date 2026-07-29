@@ -5,15 +5,18 @@ import 'entities/area_stat.dart';
 abstract class StatisticsRepository {
   /// Fetches per-area completion stats.
   ///
-  /// When [timeframeId] is null, returns lifetime-aggregated progress
-  /// (`GET /path/me/progress`). When provided, returns progress filtered to
-  /// that timeframe (`GET /path/me/progress?timeframe_id=`) for every area.
+  /// When [timeframe] is null, returns lifetime-aggregated progress
+  /// (`GET /path/me/progress`). When provided, recomputes the step-based
+  /// areas' progress for that month from GraphQL (completed `user_activities`
+  /// + `percorsi_content` on `timeframe.sort`) — the progress endpoint is
+  /// lifetime-only and accepts no timeframe parameter. `integrazione` is
+  /// phase-based and keeps its lifetime value in both cases.
   ///
   /// `benessere` is intentionally excluded from the returned list (product
   /// decision); the backend still returns it, it is just not surfaced here.
   Future<List<AreaStat>> fetchStatistics(
     AppLocalizations l10n, {
-    int? timeframeId,
+    AreaTimeframe? timeframe,
   });
 
   /// Fetches the selectable timeframes (months/phases) for a single

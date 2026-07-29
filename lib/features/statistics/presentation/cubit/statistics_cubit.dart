@@ -26,7 +26,7 @@ class StatisticsCubit extends Cubit<StatisticsState> {
     try {
       final stats = await _statisticsRepository.fetchStatistics(
         l10n,
-        timeframeId: state.selectedTimeframe?.id,
+        timeframe: state.selectedTimeframe,
       );
       emit(state.copyWith(status: StatisticsStatus.loaded, stats: stats));
     } catch (_) {
@@ -47,7 +47,10 @@ class StatisticsCubit extends Cubit<StatisticsState> {
 
   /// Applies (or clears, when [timeframe] is null) the timeframe filter and
   /// reloads every area's stats.
-  Future<void> selectTimeframe(AppLocalizations l10n, AreaTimeframe? timeframe) {
+  Future<void> selectTimeframe(
+    AppLocalizations l10n,
+    AreaTimeframe? timeframe,
+  ) {
     emit(
       state.copyWith(
         selectedTimeframe: timeframe,

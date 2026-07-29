@@ -1,40 +1,103 @@
 import 'package:dio/dio.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/network/graphql_client.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../path/data/dto/path_area_steps_dto.dart';
 import '../../path/data/dto/path_progress_dto.dart';
 import '../domain/entities/area_stat.dart';
 import '../domain/statistics_repository.dart';
 
-/// Dio-backed implementation of [StatisticsRepository].
+/// Dio/GraphQL-backed implementation of [StatisticsRepository].
 ///
-/// Reuses the already-computed progress from `GET /path/me/progress` — the same
-/// endpoint (and DTO) that powers the path screen — and reshapes it into the
-/// per-area cards shown on the statistics screen. `benessere` is filtered out
-/// on purpose (product decision); it is still returned by the backend but not
-/// surfaced here.
+/// Lifetime stats reuse the already-computed progress from
+/// `GET /path/me/progress` — the same endpoint (and DTO) that powers the path
+/// screen. The month filter cannot use that endpoint (it is lifetime-only and
+/// accepts no timeframe parameter — backend-confirmed), so per-month stats are
+/// recomputed from GraphQL exactly like the web app does: completed
+/// `user_activities` plus `percorsi_content` filtered on `timeframe.sort`
+/// (same pattern as `HomeRepositoryImpl._fetchMonthProgress`).
+///
+/// `benessere` is filtered out on purpose (product decision); it is still
+/// returned by the backend but not surfaced here. `integrazione` is
+/// phase-based, has no per-month semantics, and keeps its lifetime value.
 class StatisticsRepositoryImpl implements StatisticsRepository {
-  const StatisticsRepositoryImpl({required Dio dio}) : _dio = dio;
+  const StatisticsRepositoryImpl({
+    required Dio dio,
+    required GraphqlClient graphqlClient,
+  }) : _dio = dio,
+       _graphqlClient = graphqlClient;
 
   final Dio _dio;
+  final GraphqlClient _graphqlClient;
+
+  /// Area resolved through each content's main-tab group, matching what
+  /// `/path/me/progress` counts (`is_percorso_main_tab`), so a content reused
+  /// in a materials group is not double-counted.
+  static const _monthCompletedQuery = r'''
+query StatisticsMonthCompleted {
+  user_activities(filter: { completed_on: { _nnull: true } }) {
+    activity {
+      item {
+        ... on percorsi_content {
+          id
+          timeframe { sort }
+          used_in {
+            percorsi_groups_id {
+              is_percorso_main_tab
+              percorso { root { internal_name } }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+''';
+
+  static const _monthTotalsQuery = r'''
+query StatisticsMonthTotals($month: Int!) {
+  percorsi_content(filter: { timeframe: { sort: { _eq: $month } } }) {
+    id
+    used_in {
+      percorsi_groups_id {
+        is_percorso_main_tab
+        percorso { root { internal_name } }
+      }
+    }
+  }
+}
+''';
 
   @override
   Future<List<AreaStat>> fetchStatistics(
     AppLocalizations l10n, {
-    int? timeframeId,
+    AreaTimeframe? timeframe,
   }) async {
     try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        '/path/me/progress',
-        queryParameters: timeframeId == null
-            ? null
-            : {'timeframe_id': timeframeId},
-      );
-      final dto = PathProgressResponseDto.fromJson(response.data ?? const {});
-      return _areaMeta(l10n)
-          .map((meta) => _mapArea(meta, dto.data.areas[meta.internalName]))
-          .toList();
+      final lifetime = await _fetchLifetimeProgress();
+      if (timeframe == null) {
+        return _areaMeta(l10n)
+            .map((meta) => _mapArea(meta, lifetime.areas[meta.internalName]))
+            .toList();
+      }
+
+      final monthCounts = await _fetchMonthCounts(timeframe.sort);
+      return _areaMeta(l10n).map((meta) {
+        // `integrazione` is phase-based: no per-month breakdown, keep lifetime.
+        final monthCount = monthCounts[meta.internalName];
+        if (monthCount == null) {
+          return _mapArea(meta, lifetime.areas[meta.internalName]);
+        }
+        return AreaStat(
+          id: meta.internalName,
+          area: meta.title,
+          assetName: meta.assetName,
+          month: meta.timeframeLabel,
+          completed: monthCount.completed,
+          total: monthCount.total,
+        );
+      }).toList();
     } on ApiException {
       rethrow;
     } on DioException catch (e) {
@@ -52,9 +115,9 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
         '/path/me/areas/$area/steps',
       );
       final dto = PathAreaStepsResponseDto.fromJson(response.data ?? const {});
-      final timeframes = (dto.data.timeframes ?? const <PathTimeframeDto>[])
-          .toList()
-        ..sort((a, b) => a.sort.compareTo(b.sort));
+      final timeframes =
+          (dto.data.timeframes ?? const <PathTimeframeDto>[]).toList()
+            ..sort((a, b) => a.sort.compareTo(b.sort));
       // `timeframes[].is_current` is not always reliable, so the current
       // timeframe is derived from `active_timeframe.sort` (backend-confirmed
       // source of truth) when present, falling back to the flag otherwise.
@@ -67,6 +130,7 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
             (tf) => AreaTimeframe(
               id: tf.id,
               title: tf.translations.titleFor(l10n.localeName) ?? '',
+              sort: tf.sort,
               isCurrent: activeSort != null
                   ? tf.sort == activeSort
                   : tf.isCurrent ?? false,
@@ -78,6 +142,79 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
+  }
+
+  /// Lifetime progress from `GET /path/me/progress`.
+  Future<PathProgressDto> _fetchLifetimeProgress() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '/path/me/progress',
+      // The server caches this endpoint keyed by exact URL; a monotonic
+      // throwaway param forces a fresh read after step completions.
+      queryParameters: {'_': DateTime.now().millisecondsSinceEpoch},
+    );
+    return PathProgressResponseDto.fromJson(response.data ?? const {}).data;
+  }
+
+  /// Completed/total counts per area (`root.internal_name`) for the month with
+  /// [monthSort], recomputed client-side from GraphQL. Only step-based areas
+  /// are present in the result — `integrazione` is not monthly.
+  Future<Map<String, ({int completed, int total})>> _fetchMonthCounts(
+    int monthSort,
+  ) async {
+    final results = await Future.wait([
+      _graphqlClient.query(_monthCompletedQuery),
+      _graphqlClient.query(_monthTotalsQuery, variables: {'month': monthSort}),
+    ]);
+
+    final completed = <String, int>{};
+    final completedBody = results[0]['data'] as Map<String, dynamic>?;
+    final activities = completedBody?['user_activities'] as List<dynamic>?;
+    for (final activity in activities ?? <dynamic>[]) {
+      final items =
+          (activity as Map<String, dynamic>)['activity'] as List<dynamic>?;
+      for (final wrapper in items ?? <dynamic>[]) {
+        final item = (wrapper as Map<String, dynamic>)['item'];
+        if (item is! Map<String, dynamic>) continue;
+        final timeframe = item['timeframe'] as Map<String, dynamic>?;
+        if (timeframe?['sort'] != monthSort) continue;
+        final area = _mainTabArea(item);
+        if (area == null) continue;
+        completed[area] = (completed[area] ?? 0) + 1;
+        break;
+      }
+    }
+
+    final totals = <String, int>{};
+    final totalsBody = results[1]['data'] as Map<String, dynamic>?;
+    final contents = totalsBody?['percorsi_content'] as List<dynamic>?;
+    for (final content in contents ?? <dynamic>[]) {
+      final area = _mainTabArea(content as Map<String, dynamic>);
+      if (area == null) continue;
+      totals[area] = (totals[area] ?? 0) + 1;
+    }
+
+    return {
+      for (final area in {...completed.keys, ...totals.keys})
+        area: (completed: completed[area] ?? 0, total: totals[area] ?? 0),
+    };
+  }
+
+  /// The `root.internal_name` of the content's main-tab group, or null when
+  /// the content is not linked to any main-tab group (e.g. materials-only).
+  String? _mainTabArea(Map<String, dynamic> content) {
+    final usedIn = content['used_in'] as List<dynamic>?;
+    for (final usage in usedIn ?? <dynamic>[]) {
+      final group =
+          (usage as Map<String, dynamic>)['percorsi_groups_id']
+              as Map<String, dynamic>?;
+      if (group == null) continue;
+      if (group['is_percorso_main_tab'] != true) continue;
+      final percorso = group['percorso'] as Map<String, dynamic>?;
+      final root = percorso?['root'] as Map<String, dynamic>?;
+      final name = root?['internal_name'] as String?;
+      if (name != null) return name;
+    }
+    return null;
   }
 
   AreaStat _mapArea(_AreaMeta meta, AreaProgressDto? progress) {
@@ -95,9 +232,9 @@ class StatisticsRepositoryImpl implements StatisticsRepository {
   /// display order. `benessere` is intentionally omitted. The `internalName`
   /// must match `root.internal_name` returned by the backend.
   ///
-  /// `/path/me/progress` returns lifetime-aggregated progress with no timeframe,
-  /// so the label ("Mese 1" / "Fase 1") is a fixed placeholder until the API
-  /// exposes a per-timeframe breakdown.
+  /// The `timeframeLabel` ("Mese 1" / "Fase 1") is a placeholder shown in the
+  /// lifetime view; under the month filter the screen overrides it with the
+  /// selected timeframe title (except `integrazione`, which stays phase-based).
   static List<_AreaMeta> _areaMeta(AppLocalizations l10n) => [
     _AreaMeta(
       internalName: 'allenamento',

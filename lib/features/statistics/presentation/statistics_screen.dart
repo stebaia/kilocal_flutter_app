@@ -101,7 +101,12 @@ class _StatisticsView extends StatelessWidget {
                       stat.completed,
                       stat.total,
                     ),
-                    monthLabelOverride: state.selectedTimeframe?.title,
+                    // `integrazione` is phase-based and keeps its lifetime
+                    // figures under the month filter, so it also keeps its
+                    // own "Fase 1" label instead of the month title.
+                    monthLabelOverride: stat.id == 'integrazione'
+                        ? null
+                        : state.selectedTimeframe?.title,
                   ),
                 );
               },
