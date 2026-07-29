@@ -506,6 +506,7 @@
   },
   "pathStepContentTitle": "Activity",
   "pathStepComplete": "Complete activity",
+  "pathStepWatchFullVideo": "Watch the whole video before marking the activity as completed",
   "pathStepVideoDuration": "{duration} min",
   "@pathStepVideoDuration": {
     "placeholders": {

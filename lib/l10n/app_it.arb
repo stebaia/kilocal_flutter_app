@@ -431,6 +431,7 @@
   "pathCompletedPercent": "completato al {percent}%",
   "pathStepContentTitle": "Attività",
   "pathStepComplete": "Completa attività",
+  "pathStepWatchFullVideo": "Guarda tutto il video prima di segnare l'attività come completata",
   "pathStepVideoDuration": "{duration} min",
   "@pathStepVideoDuration": {
     "placeholders": {
