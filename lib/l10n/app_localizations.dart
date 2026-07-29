@@ -1946,6 +1946,12 @@ abstract class AppLocalizations {
   /// **'No materials available'**
   String get pathMaterialsEmpty;
 
+  /// No description provided for @pathMaterialsFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get pathMaterialsFilterAll;
+
   /// No description provided for @pathMaterialsFilterToWatch.
   ///
   /// In en, this message translates to:
@@ -1957,6 +1963,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watched'**
   String get pathMaterialsFilterWatched;
+
+  /// No description provided for @pathMaterialsSectionToWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'To complete/read'**
+  String get pathMaterialsSectionToWatch;
+
+  /// No description provided for @pathMaterialsSectionWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed/read'**
+  String get pathMaterialsSectionWatched;
 
   /// No description provided for @pathMaterialMarkCompleted.
   ///

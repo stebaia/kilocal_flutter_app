@@ -1048,10 +1048,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathMaterialsEmpty => 'No materials available';
 
   @override
+  String get pathMaterialsFilterAll => 'All';
+
+  @override
   String get pathMaterialsFilterToWatch => 'To watch';
 
   @override
   String get pathMaterialsFilterWatched => 'Watched';
+
+  @override
+  String get pathMaterialsSectionToWatch => 'To complete/read';
+
+  @override
+  String get pathMaterialsSectionWatched => 'Completed/read';
 
   @override
   String get pathMaterialMarkCompleted => 'Mark as completed';

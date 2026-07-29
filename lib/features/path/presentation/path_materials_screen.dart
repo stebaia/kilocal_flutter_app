@@ -141,6 +141,10 @@ class _PathMaterialsView extends StatelessWidget {
 
     final options = [
       FilterOption(
+        value: PathMaterialFilter.all,
+        label: l10n.pathMaterialsFilterAll,
+      ),
+      FilterOption(
         value: PathMaterialFilter.toWatch,
         label: l10n.pathMaterialsFilterToWatch,
       ),
@@ -223,20 +227,64 @@ class _MaterialsList extends StatelessWidget {
               AppSpacing.screenGutter,
               AppSpacing.spaceXl,
             ),
-            sliver: SliverList.separated(
-              itemCount: materials.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: AppSpacing.spaceMd),
-              itemBuilder: (context, index) {
-                final material = materials[index];
-                return PathMaterialCard(
-                  material: material,
-                  onTap: () => _openDetail(context, material),
-                );
-              },
-            ),
+            sliver: SliverList(delegate: _buildDelegate(context, materials)),
           ),
       ],
+    );
+  }
+
+  /// Under [PathMaterialFilter.all], [materials] is already sorted
+  /// not-yet-completed first (see [PathMaterialsState.visibleMaterials]), so
+  /// the split point between the two status groups is just the index of the
+  /// first completed item — this builds the "Da completare/leggere" /
+  /// "Completata/letta" section headers around that split. Other filters show
+  /// a single, header-less list since every card already shares that status.
+  SliverChildDelegate _buildDelegate(
+    BuildContext context,
+    List<PathMaterial> materials,
+  ) {
+    if (state.filter != PathMaterialFilter.all) {
+      return SliverChildBuilderDelegate(
+        (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.spaceMd),
+          child: _card(context, materials[index]),
+        ),
+        childCount: materials.length,
+      );
+    }
+
+    final firstCompleted = materials.indexWhere((m) => m.isCompleted);
+    final splitIndex = firstCompleted == -1 ? materials.length : firstCompleted;
+    final hasToWatch = splitIndex > 0;
+    final hasWatched = splitIndex < materials.length;
+
+    final items = <Widget>[
+      if (hasToWatch) _SectionHeader(title: l10n.pathMaterialsSectionToWatch),
+      for (var i = 0; i < splitIndex; i++)
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.spaceMd),
+          child: _card(context, materials[i]),
+        ),
+      if (hasToWatch && hasWatched) const SizedBox(height: AppSpacing.spaceLg),
+      if (hasWatched) _SectionHeader(title: l10n.pathMaterialsSectionWatched),
+      for (var i = splitIndex; i < materials.length; i++)
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.spaceMd),
+          child: _card(context, materials[i]),
+        ),
+    ];
+
+    return SliverChildBuilderDelegate(
+      (context, index) => items[index],
+      childCount: items.length,
+    );
+  }
+
+  Widget _card(BuildContext context, PathMaterial material) {
+    return PathMaterialCard(
+      material: material,
+      highlightCompleted: state.filter == PathMaterialFilter.all,
+      onTap: () => _openDetail(context, material),
     );
   }
 
@@ -259,5 +307,28 @@ class _MaterialsList extends StatelessWidget {
     // material from "Da vedere" to "Visti" — reload so the list/filter
     // reflects it without the user needing to leave and come back.
     await cubit.load(groupId: groupId);
+  }
+}
+
+/// Bold uppercase caption above each status group under
+/// [PathMaterialFilter.all] ("Da completare/leggere" / "Completata/letta").
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.spaceSm),
+      child: Text(
+        title.toUpperCase(),
+        style: AppTypography.textTheme.labelLarge?.copyWith(
+          color: AppColors.textPrimary,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.4,
+        ),
+      ),
+    );
   }
 }

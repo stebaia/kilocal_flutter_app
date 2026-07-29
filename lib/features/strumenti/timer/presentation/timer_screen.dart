@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/di.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_header.dart';
@@ -13,7 +14,9 @@ import 'widgets/timer_countdown_ring.dart';
 /// Same countdown engine as the in-path bottom sheet ([PathTimerController],
 /// which also drives the native timer surface); the difference is presentation
 /// — duration wheels and a running ring live on a white card over the brand red
-/// ellipse instead of inside a sheet.
+/// ellipse instead of inside a sheet. The controller is the single shared
+/// app-wide instance (see di.dart), so a timer started here also shows the
+/// overlay pill (app.dart) on every other screen, and vice versa.
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key});
 
@@ -32,13 +35,13 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = PathTimerController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+    _controller = getIt<PathTimerController>();
+    // The controller may already be running (started from the path screen
+    // before navigating here). It only tracks the remaining time, not the
+    // original total, so the ring's progress arc restarts from "now" rather
+    // than showing the true elapsed fraction — an acceptable approximation
+    // since the countdown text itself is always correct.
+    if (_controller.isRunning) _total = _controller.remaining;
   }
 
   void _start() {

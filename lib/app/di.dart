@@ -53,6 +53,7 @@ import '../features/path/data/path_materials_repository_impl.dart';
 import '../features/path/data/path_repository_impl.dart';
 import '../features/path/data/program_unlock_repository_impl.dart';
 import '../features/path/data/system_timer_service.dart';
+import '../features/path/presentation/widgets/path_timer_pill.dart';
 import '../features/path/data/vimeo_oembed_service.dart';
 import '../features/path/domain/path_materials_repository.dart';
 import '../features/path/domain/path_repository.dart';
@@ -272,6 +273,12 @@ void configureDependencies() {
   );
   getIt.registerLazySingleton<VimeoOembedService>(() => VimeoOembedService());
   getIt.registerLazySingleton<SystemTimerService>(() => SystemTimerService());
+  // Single shared instance so starting the timer from the path steps screen
+  // or from strumenti drives the same countdown and the same overlay pill,
+  // regardless of which screen started it or is currently visible.
+  getIt.registerLazySingleton<PathTimerController>(
+    () => PathTimerController(systemTimer: getIt<SystemTimerService>()),
+  );
 
   // --- Feature: Benefits ---
   getIt.registerLazySingleton<BenefitsRepository>(

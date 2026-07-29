@@ -1052,10 +1052,19 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pathMaterialsEmpty => 'Nessun materiale disponibile';
 
   @override
+  String get pathMaterialsFilterAll => 'Tutti';
+
+  @override
   String get pathMaterialsFilterToWatch => 'Da vedere';
 
   @override
   String get pathMaterialsFilterWatched => 'Visti';
+
+  @override
+  String get pathMaterialsSectionToWatch => 'Da completare/leggere';
+
+  @override
+  String get pathMaterialsSectionWatched => 'Completata/letta';
 
   @override
   String get pathMaterialMarkCompleted => 'Segna come completato';

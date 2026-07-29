@@ -38,6 +38,7 @@ dependencies:
   firebase_analytics: ^12.4.1
   firebase_performance: ^0.11.4+1
   firebase_messaging: ^16.2.2
+  audioplayers: ^6.5.1
   flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
   package_info_plus: ^10.2.0
@@ -94,6 +95,7 @@ flutter:
     - assets/path_header_ellipse.svg
     - assets/biotype_texts.json
     - assets/strumenti/
+    - assets/audio/
 
 # App launcher icon — kilocal logo (white) on brand red (#C7153B), matching the
 # splash screen. Regenerate native icons with:

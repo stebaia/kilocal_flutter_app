@@ -19,7 +19,7 @@ class ContinuePathCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     const cardRadius = 16.0;
     const imageOverflow = 20.0;
-    const imageSize = 157.0;
+
     const minGap = AppSpacing.spaceSm;
 
     return GestureDetector(
@@ -34,6 +34,8 @@ class ContinuePathCard extends StatelessWidget {
         }
       },
       child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+
         height: 220,
         child: Stack(
           children: [
@@ -52,44 +54,15 @@ class ContinuePathCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(cardRadius),
                   child: Stack(
                     children: [
-                      // Decorative ribbon at the bottom-left.
-                      Positioned(
-                        bottom: -1,
-                        left: -10,
-                        child: Transform.rotate(
-                          angle: -0.1,
-                          child: SvgPicture.asset(
-                            'assets/icons/line.svg',
-                            width: 150,
-                            height: 80,
-                          ),
-                        ),
-                      ),
-                      // White text box on the left. Right-constrained (rather
-                      // than a fixed width) so it never crowds the image on
-                      // narrow screens.
-                      Positioned(
-                        top: AppSpacing.spaceLg,
-                        left: AppSpacing.spaceLg,
-                        right: AppSpacing.spaceLg + imageSize + minGap,
-                        child: Container(
-                          padding: const EdgeInsets.all(AppSpacing.spaceMd),
-                          decoration: BoxDecoration(
-                            color: AppColors.neutralWhite,
-                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                          ),
-                          child: Text(
-                            item.title,
-                            style: AppTypography.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ),
                       // Bottom-right CTA.
                       Positioned(
                         bottom: AppSpacing.spaceMid,
-                        right: AppSpacing.spaceLg,
+                        left: 25,
+                        right: 25,
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisSize: MainAxisSize.max,
                           children: [
                             Text(
                               item.hasStarted
@@ -102,7 +75,7 @@ class ContinuePathCard extends StatelessWidget {
                                   ),
                             ),
                             const SizedBox(width: AppSpacing.spaceSm),
-                            AppIcon(AppIcons.play, size: 24),
+                            AppIcon(AppIcons.play, size: 16),
                           ],
                         ),
                       ),
@@ -111,13 +84,14 @@ class ContinuePathCard extends StatelessWidget {
                 ),
               ),
             ),
+
             // Hero image overflowing the top of the red card, on the right.
             Positioned(
               top: 0,
               right: AppSpacing.spaceLg,
               child: Container(
-                width: imageSize,
-                height: imageSize,
+                width: 293,
+                height: 161,
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   color: AppColors.neutralWhite,
@@ -126,6 +100,25 @@ class ContinuePathCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   child: _buildImage(item.imageUrl),
+                ),
+              ),
+            ),
+
+            Positioned(
+              top: 14,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.neutralWhite,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                  ),
+                  child: Text(
+                    item.title,
+                    style: AppTypography.textTheme.bodySmall?.copyWith(fontSize: 12),
+                  ),
                 ),
               ),
             ),

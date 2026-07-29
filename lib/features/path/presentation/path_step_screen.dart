@@ -13,7 +13,6 @@ import '../../../core/widgets/app_bottom_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../strumenti/promemoria/domain/promemoria_repository.dart';
 import '../../strumenti/promemoria/presentation/widgets/promemoria_create_sheet.dart';
-import '../data/system_timer_service.dart';
 import '../data/vimeo_oembed_service.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'cubit/path_detail_cubit.dart';
@@ -66,10 +65,10 @@ class _PathStepView extends StatefulWidget {
 }
 
 class _PathStepViewState extends State<_PathStepView> {
-  // Lives for the whole screen so the running timer survives sheet dismissals.
-  final _timerController = PathTimerController(
-    systemTimer: getIt<SystemTimerService>(),
-  );
+  // Shared app-wide instance (see app.dart's overlay + di.dart) so the timer
+  // and its pill survive navigating away from this screen entirely, not just
+  // sheet dismissals within it.
+  final _timerController = getIt<PathTimerController>();
 
   // Fraction (0.0-1.0) of the video watched so far, reported by _StepMedia's
   // Vimeo player. Lives here (rather than in _StepContent) so it survives the
@@ -78,7 +77,6 @@ class _PathStepViewState extends State<_PathStepView> {
 
   @override
   void dispose() {
-    _timerController.dispose();
     _watchedFraction.dispose();
     super.dispose();
   }
@@ -115,25 +113,12 @@ class _PathStepViewState extends State<_PathStepView> {
             );
           }
 
-          return Stack(
-            children: [
-              _StepContent(
-                step: step,
-                area: area,
-                siblings: _siblingsOf(state, step),
-                timerController: _timerController,
-                watchedFraction: _watchedFraction,
-              ),
-              // Persistent running-timer pill, above the bottom edge.
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: SafeArea(
-                  child: PathTimerPill(controller: _timerController),
-                ),
-              ),
-            ],
+          return _StepContent(
+            step: step,
+            area: area,
+            siblings: _siblingsOf(state, step),
+            timerController: _timerController,
+            watchedFraction: _watchedFraction,
           );
         },
       ),

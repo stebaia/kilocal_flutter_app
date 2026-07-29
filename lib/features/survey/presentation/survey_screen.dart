@@ -114,8 +114,14 @@ class _StepView extends StatelessWidget {
             AppLocalizations.of(context)!,
           ) ??
           state.errorMessage,
-      // No back arrow on the first step.
-      onBack: state.isFirstStep ? null : cubit.previous,
+      // On the first step of *this* survey instance, fall back to popping
+      // the route rather than hiding the arrow outright: a chained survey
+      // (e.g. "Non ho uno Starter Kit" → single_product_survey) is pushed on
+      // top of a previous one, so there is a real screen to return to even
+      // though this cubit's own step index is 0.
+      onBack: !state.isFirstStep
+          ? cubit.previous
+          : (Navigator.canPop(context) ? () => context.pop() : null),
       onCta: cubit.next,
       child: _SectionBody(section: section, state: state),
     );
@@ -353,7 +359,11 @@ class _NoStarterKitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SurveyCtaButton.outlined(
       label: AppLocalizations.of(context)!.surveyNoStarterKit,
-      onPressed: () => context.go('/survey?internalName=single_product_survey'),
+      // push (not go): keeps the starter-kit survey on the stack underneath,
+      // so the back arrow below has something to return to instead of
+      // leaving this step with no way back.
+      onPressed: () =>
+          context.push('/survey?internalName=single_product_survey'),
     );
   }
 }

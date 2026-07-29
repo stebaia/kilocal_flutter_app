@@ -34,13 +34,11 @@ abstract final class Env {
   /// Ignores the CMS `is_tool_blocked` kill-switch, so a tool the backend has
   /// switched off can still be opened and tested.
   ///
-  /// Debug builds ignore the flag by default (staging ships tools blocked,
-  /// which would leave them untestable). Release builds always honour the CMS —
-  /// `kReleaseMode` gates this so a tool the backend disabled can never be
-  /// shipped open. Override either way with
+  /// Always ignored, including in release builds — the CMS kill-switch is
+  /// not honoured client-side. Override with
   /// `--dart-define=IGNORE_TOOL_BLOCKED=true|false`.
   static const bool ignoreToolBlocked = bool.fromEnvironment(
     'IGNORE_TOOL_BLOCKED',
-    defaultValue: !kReleaseMode,
+    defaultValue: true,
   );
 }
