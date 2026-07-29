@@ -16,6 +16,16 @@ class StatisticsCubit extends Cubit<StatisticsState> {
 
   final StatisticsRepository _statisticsRepository;
 
+  /// Area whose timeframes drive both the default selection and the filter
+  /// sheet (see [[statistics-feature-status]] — every area's timeframes are
+  /// independent, so a single one is used as the common list).
+  static const referenceArea = 'allenamento';
+
+  /// Whether the initial default (current month) has been resolved already.
+  /// Resolved once per cubit lifetime, so a later explicit selection/clear is
+  /// never overridden by a reload.
+  var _defaultTimeframeResolved = false;
+
   /// Seeds the cubit with ready-made data (used by tests).
   void loadWithData(List<AreaStat> data) {
     emit(StatisticsState(status: StatisticsStatus.loaded, stats: data));
@@ -24,6 +34,10 @@ class StatisticsCubit extends Cubit<StatisticsState> {
   Future<void> load(AppLocalizations l10n) async {
     emit(state.copyWith(status: StatisticsStatus.loading));
     try {
+      if (!_defaultTimeframeResolved) {
+        _defaultTimeframeResolved = true;
+        await _resolveDefaultTimeframe(l10n);
+      }
       final stats = await _statisticsRepository.fetchStatistics(
         l10n,
         timeframe: state.selectedTimeframe,
@@ -31,6 +45,26 @@ class StatisticsCubit extends Cubit<StatisticsState> {
       emit(state.copyWith(status: StatisticsStatus.loaded, stats: stats));
     } catch (_) {
       emit(state.copyWith(status: StatisticsStatus.error));
+    }
+  }
+
+  /// Defaults the filter to the current month (design: "Statistiche mese
+  /// corrente"). Best-effort: if the timeframes cannot be loaded, the screen
+  /// falls back to lifetime progress.
+  Future<void> _resolveDefaultTimeframe(AppLocalizations l10n) async {
+    try {
+      final timeframes = await _statisticsRepository.fetchAreaTimeframes(
+        area: referenceArea,
+        l10n: l10n,
+      );
+      if (timeframes.isEmpty) return;
+      final current = timeframes.firstWhere(
+        (tf) => tf.isCurrent,
+        orElse: () => timeframes.first,
+      );
+      emit(state.copyWith(selectedTimeframe: current));
+    } catch (_) {
+      // Keep lifetime as the fallback view.
     }
   }
 
@@ -51,6 +85,9 @@ class StatisticsCubit extends Cubit<StatisticsState> {
     AppLocalizations l10n,
     AreaTimeframe? timeframe,
   ) {
+    // An explicit choice (including clearing) suppresses the initial
+    // current-month default, so the next [load] cannot override it.
+    _defaultTimeframeResolved = true;
     emit(
       state.copyWith(
         selectedTimeframe: timeframe,
