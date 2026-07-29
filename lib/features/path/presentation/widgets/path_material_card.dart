@@ -151,8 +151,8 @@ class _MediaTypeBadge extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: AppIcon(
-        isVideo ? AppIcons.playSmall : AppIcons.archive,
-        size: 18,
+        isVideo ? AppIcons.materialVideo : AppIcons.materialText,
+        size: 16,
         color: AppColors.neutralWhite,
       ),
     );

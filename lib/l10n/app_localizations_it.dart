@@ -15,25 +15,32 @@ class AppLocalizationsIt extends AppLocalizations {
   String get splashLoading => 'Caricamento in corso...';
 
   @override
-  String get onboardingTitle1 => 'Benvenuto in Kilocal';
+  String get onboardingTitle1 => 'Il tuo percorso.\nQuattro aree da seguire.';
 
   @override
   String get onboardingBody1 =>
-      'Inizia il tuo percorso personalizzato di benessere con noi.';
+      'Alimentazione, allenamento, integrazione e benessere a 360°, personalizzati su di te';
 
   @override
-  String get onboardingTitle2 => 'Segui il tuo percorso';
+  String get onboardingTitle2 => 'Lo Starter Kit.\nIl tuo migliore alleato.';
 
   @override
   String get onboardingBody2 =>
-      'Allenamento, alimentazione, benessere e integrazione in un unico posto.';
+      'Gli integratori giusti per te in un Kit unico che ti aiuta a raggiungere i tuoi obiettivi.';
 
   @override
-  String get onboardingTitle3 => 'Traccia i tuoi progressi';
+  String get onboardingTitle3 => 'Fatti consigliare\ndai nostri esperti';
 
   @override
   String get onboardingBody3 =>
-      'Monitora i tuoi risultati e raggiungi i tuoi obiettivi.';
+      'Nutrizionisti, personal trainer e tanti altri esperti che ti guidano nel percorso con ricette, video, challenge e molto altro.';
+
+  @override
+  String get onboardingTitle4 => 'Bene. Ora puoi iniziare.';
+
+  @override
+  String get onboardingBody4 =>
+      'Prosegui per iniziare ora il tuo percorso di ricomposizione corporea.';
 
   @override
   String get onboardingNext => 'Avanti';
@@ -49,7 +56,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+      'Ogni giorno un passo più vicino alla tua ricomposizione.';
 
   @override
   String get loginEmail => 'Email';
@@ -77,10 +84,13 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get registerSubtitle =>
-      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+      'Per scoprire il tuo tipo e il percorso su misura per te compila il form e inizia il test.';
 
   @override
-  String get registerFullName => 'Nome e Cognome';
+  String get registerFirstName => 'Nome';
+
+  @override
+  String get registerLastName => 'Cognome';
 
   @override
   String get registerEmail => 'Indirizzo e-mail';
@@ -218,6 +228,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get homeContinuePath => 'Continua il percorso';
 
   @override
+  String get homeStartPath => 'Inizia il percorso';
+
+  @override
   String get homeSeeStatistics => 'Vedi statistiche';
 
   @override
@@ -232,6 +245,13 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get homeMonthStatsDescription =>
       'Lorem ipsum dolor sit amet consectetur. Facilisi varius.';
+
+  @override
+  String get homeComingSoonTitle => 'Presto in arrivo';
+
+  @override
+  String get homeComingSoonBody =>
+      'I contenuti di questa sezione saranno disponibili prossimamente.';
 
   @override
   String get tabHome => 'Home';
@@ -269,6 +289,34 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get pathLockedBoughtKit => 'Ho acquistato lo Starter kit';
+
+  @override
+  String get pathTimeframeLockedTitle => 'Mese bloccato';
+
+  @override
+  String get pathTimeframeLockedBody =>
+      'Per sbloccare questo mese devi prima completare tutte le attività del mese precedente.';
+
+  @override
+  String pathTimeframeLockedBodyDetailed(int count, String monthTitle) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'completa $count attività rimaste',
+      one: 'completa $count attività rimasta',
+    );
+    return 'Per sbloccare la sezione completa: $_temp0 del $monthTitle.';
+  }
+
+  @override
+  String get pathMonthCompletedTitle => 'Complimenti!';
+
+  @override
+  String get pathMonthCompletedBody =>
+      'Hai completato tutte le attività di questo mese.';
+
+  @override
+  String get pathMonthCompletedCta => 'Vedi le statistiche';
 
   @override
   String get pathUnlockTitle => 'Sblocca il programma';
@@ -329,7 +377,24 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileTypePointBodyFallback => 'Contenuto in arrivo.';
 
   @override
+  String get profileTypeIntegrationSheetTitle => 'Integrazione';
+
+  @override
+  String get profileTypeIntegrationSheetHeadline =>
+      'Il tuo percorso Kilocal non è solo alimentazione e movimento!';
+
+  @override
+  String get profileTypeIntegrationSheetBody =>
+      'Il kit di integratori è pensato per accompagnarti passo dopo passo, riattivando l\'energia del corpo e potenziando i risultati del tuo percorso.';
+
+  @override
+  String get profileTypeIntegrationSheetCta => 'Vedi sezione dedicata';
+
+  @override
   String get profileTypeProductsSection => 'Informazioni sui prodotti';
+
+  @override
+  String get profileTypeStarterKit => 'Il tuo Starter Kit';
 
   @override
   String get profileTypeMyKit => 'Il mio Kit';
@@ -433,7 +498,24 @@ class AppLocalizationsIt extends AppLocalizations {
   String get profileContactSupport => 'Contatta l\'assistenza';
 
   @override
+  String get profileContactSupportNoMailApp =>
+      'Nessuna app email configurata su questo dispositivo. Scrivi a info@kilocalprogram.it';
+
+  @override
   String get profileLogout => 'Esci';
+
+  @override
+  String get profileLogoutConfirmTitle => 'Esci dall\'account';
+
+  @override
+  String get profileLogoutConfirmBody =>
+      'Sei sicuro di voler uscire dal tuo account?';
+
+  @override
+  String get profileLogoutConfirmCancel => 'Annulla';
+
+  @override
+  String get profileLogoutConfirmAction => 'Esci';
 
   @override
   String get profileAppVersionSection => 'App';
@@ -464,6 +546,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get statisticsMonth => 'Mese corrente';
+
+  @override
+  String get statisticsTimeframeSheetTitle => 'Seleziona un periodo';
 
   @override
   String get notificationsTitle => 'Notifiche';
@@ -686,6 +771,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get integrationMarkTaken => 'Segna integrato come preso';
 
   @override
+  String get integrationTakenToday => 'Preso oggi';
+
+  @override
   String get integrationMarkTakenError =>
       'Impossibile registrare l\'assunzione. Riprova più tardi.';
 
@@ -822,6 +910,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get diaryGoalCreateTitle => 'Nuovo traguardo';
 
   @override
+  String get diaryGoalEditTitle => 'Modifica traguardo';
+
+  @override
   String get diaryGoalContentHint => 'Descrivi il tuo traguardo';
 
   @override
@@ -832,6 +923,28 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get diaryGoalSave => 'Salva';
+
+  @override
+  String get diaryGoalComplete => 'Completa traguardo';
+
+  @override
+  String get diaryGoalMarkIncomplete => 'Segna come non raggiunto';
+
+  @override
+  String get diaryGoalDelete => 'Elimina traguardo';
+
+  @override
+  String get diaryGoalDeleteConfirmTitle => 'Eliminare il traguardo?';
+
+  @override
+  String get diaryGoalDeleteConfirmBody =>
+      'Questa azione non può essere annullata.';
+
+  @override
+  String get diaryGoalDeleteConfirmCancel => 'Annulla';
+
+  @override
+  String get diaryGoalDeleteConfirmAction => 'Elimina';
 
   @override
   String get diaryActivityDetailTitle => 'Dettagli Attività';
@@ -878,16 +991,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pathStepComplete => 'Completa attività';
 
   @override
-  String get pathStepLocked => 'Bloccato';
-
-  @override
-  String get pathStepCurrent => 'Corrente';
-
-  @override
-  String get pathStepCompleted => 'Completato';
-
-  @override
-  String get pathStepStarted => 'Iniziato';
+  String get pathStepWatchFullVideo =>
+      'Guarda tutto il video prima di segnare l\'attività come completata';
 
   @override
   String pathStepVideoDuration(String duration) {
@@ -944,19 +1049,19 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pathMaterialsSubtitle => 'Risorse utili per il tuo percorso';
 
   @override
-  String get pathMaterialAvailable => 'Disponibile';
-
-  @override
   String get pathMaterialsEmpty => 'Nessun materiale disponibile';
 
   @override
-  String get pathMaterialsFilterAvailable => 'Disponibili';
+  String get pathMaterialsFilterToWatch => 'Da vedere';
 
   @override
-  String get pathMaterialsFilterCompleted => 'Completati';
+  String get pathMaterialsFilterWatched => 'Visti';
 
   @override
-  String get pathMaterialsFilterUnavailable => 'Non disponibili';
+  String get pathMaterialMarkCompleted => 'Segna come completato';
+
+  @override
+  String get pathMaterialCompleted => 'Completato';
 
   @override
   String get pathMaterialDownloadError =>

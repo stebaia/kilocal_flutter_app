@@ -3,19 +3,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../app/di.dart';
 import '../../../core/icons/app_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_bottom_sheet.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../strumenti/promemoria/domain/promemoria_repository.dart';
+import '../../strumenti/promemoria/presentation/widgets/promemoria_create_sheet.dart';
 import '../data/system_timer_service.dart';
 import '../data/vimeo_oembed_service.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'cubit/path_detail_cubit.dart';
+import 'widgets/fullscreen_vimeo_player_screen.dart';
 import 'widgets/path_activities_sheet.dart';
+import 'widgets/path_month_completed_sheet.dart';
 import 'widgets/path_timer_pill.dart';
 import 'widgets/path_timer_sheet.dart';
 import 'widgets/vimeo_player_controller.dart';
@@ -67,9 +71,15 @@ class _PathStepViewState extends State<_PathStepView> {
     systemTimer: getIt<SystemTimerService>(),
   );
 
+  // Fraction (0.0-1.0) of the video watched so far, reported by _StepMedia's
+  // Vimeo player. Lives here (rather than in _StepContent) so it survives the
+  // ListView/media widget rebuilding when the cubit reloads.
+  final _watchedFraction = ValueNotifier<double>(0);
+
   @override
   void dispose() {
     _timerController.dispose();
+    _watchedFraction.dispose();
     super.dispose();
   }
 
@@ -88,7 +98,9 @@ class _PathStepViewState extends State<_PathStepView> {
         builder: (context, state) {
           final step = _resolveStep(state);
 
-          if (step == null && state.status == PathDetailStatus.loading) {
+          if (step == null &&
+              state.status != PathDetailStatus.error &&
+              state.status != PathDetailStatus.loaded) {
             return const Center(
               child: CircularProgressIndicator(color: AppColors.accent),
             );
@@ -110,6 +122,7 @@ class _PathStepViewState extends State<_PathStepView> {
                 area: area,
                 siblings: _siblingsOf(state, step),
                 timerController: _timerController,
+                watchedFraction: _watchedFraction,
               ),
               // Persistent running-timer pill, above the bottom edge.
               Positioned(
@@ -158,79 +171,142 @@ class _StepContent extends StatelessWidget {
     required this.area,
     required this.siblings,
     required this.timerController,
+    required this.watchedFraction,
   });
+
+  /// Fraction of the video that must be watched before "Completa attività"
+  /// unblocks, mirroring the Kilocal Program web platform's own gating.
+  static const double _completionThreshold = 0.9;
 
   final PathStepItem step;
   final String area;
   final List<PathStepItem> siblings;
   final PathTimerController timerController;
+  final ValueNotifier<double> watchedFraction;
+
+  /// Extra bottom padding reserved for the timer pill floating over the
+  /// bottom edge (see PathTimerPill), so it never overlaps the "Completa
+  /// attività" button when the button lands near the end of the scroll.
+  static const double _timerPillClearance = 96;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     final description = step.description;
+    final isVideo = step.asset.isVideo && step.asset.vimeoEmbedUrl != null;
 
-    return ListView(
-      padding: const EdgeInsets.only(bottom: AppSpacing.spaceXl),
-      children: [
-        // Keyed by step id so the WebView is not rebuilt when the cubit reloads
-        // after a complete action on the same step.
-        _StepMedia(
-          key: ValueKey(step.id),
-          step: step,
-          area: area,
-          siblings: siblings,
-          timerController: timerController,
+    return AnimatedBuilder(
+      animation: timerController,
+      builder: (context, child) => ListView(
+        padding: EdgeInsets.only(
+          bottom: timerController.isRunning
+              ? _timerPillClearance
+              : AppSpacing.spaceXl,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenGutter,
+        children: [
+          // Keyed by step id so the WebView is not rebuilt when the cubit reloads
+          // after a complete action on the same step.
+          _StepMedia(
+            key: ValueKey(step.id),
+            step: step,
+            area: area,
+            siblings: siblings,
+            timerController: timerController,
+            onProgress: (fraction) {
+              if (fraction > watchedFraction.value) {
+                watchedFraction.value = fraction;
+              }
+            },
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: AppSpacing.spaceLg),
-              Text(
-                step.title,
-                style: AppTypography.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              // Long body (HTML markup from the backend `content` field),
-              // shown only when populated.
-              if (description != null && description.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.spaceMd),
-                Html(
-                  data: description,
-                  style: {
-                    'body': Style(
-                      margin: Margins.zero,
-                      padding: HtmlPaddings.zero,
-                      color: AppColors.textSecondary,
-                      fontSize: FontSize(
-                        AppTypography.textTheme.bodyMedium?.fontSize ?? 14,
-                      ),
-                      lineHeight: const LineHeight(1.5),
-                    ),
-                  },
-                ),
-              ],
-              const SizedBox(height: AppSpacing.spaceLg),
-              _StatusLabel(step: step),
-              const SizedBox(height: AppSpacing.spaceXl),
-              if (!step.isCompleted && !step.isLocked)
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => _completeStep(context),
-                    child: Text(l10n.pathStepComplete),
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenGutter,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: AppSpacing.spaceLg),
+                Text(
+                  step.title,
+                  style: AppTypography.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-            ],
+                // Long body (HTML markup from the backend `content` field),
+                // shown only when populated.
+                if (description != null && description.isNotEmpty) ...[
+                  const SizedBox(height: AppSpacing.spaceMd),
+                  Html(
+                    data: description,
+                    style: {
+                      'body': Style(
+                        margin: Margins.zero,
+                        padding: HtmlPaddings.zero,
+                        color: AppColors.textSecondary,
+                        fontSize: FontSize(
+                          AppTypography.textTheme.bodyMedium?.fontSize ?? 14,
+                        ),
+                        lineHeight: const LineHeight(1.5),
+                      ),
+                    },
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.spaceXl),
+                if (!step.isCompleted && !step.isLocked)
+                  if (isVideo)
+                    ValueListenableBuilder<double>(
+                      valueListenable: watchedFraction,
+                      builder: (context, fraction, _) {
+                        final unlocked = fraction >= _completionThreshold;
+                        return SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            // Kept visually "disabled" (grey) until the video
+                            // is watched, but always tappable underneath so a
+                            // tap can explain why via a bottom sheet — a truly
+                            // disabled button swallows the tap instead.
+                            style: unlocked
+                                ? null
+                                : ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.divider,
+                                    foregroundColor: AppColors.textSecondary,
+                                  ),
+                            onPressed: unlocked
+                                ? () => _completeStep(context)
+                                : () => _showWatchFullVideoSheet(context),
+                            child: Text(l10n.pathStepComplete),
+                          ),
+                        );
+                      },
+                    )
+                  else
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _completeStep(context),
+                        child: Text(l10n.pathStepComplete),
+                      ),
+                    ),
+              ],
+            ),
           ),
+        ],
+      ),
+    );
+  }
+
+  void _showWatchFullVideoSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showAppBottomSheet<void>(
+      context: context,
+      title: l10n.pathStepComplete,
+      child: Text(
+        l10n.pathStepWatchFullVideo,
+        style: AppTypography.textTheme.bodyMedium?.copyWith(
+          color: AppColors.textSecondary,
         ),
-      ],
+      ),
     );
   }
 
@@ -238,17 +314,39 @@ class _StepContent extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final cubit = context.read<PathDetailCubit>();
     await cubit.completeStep(stepId: step.id, area: area, l10n: l10n);
+    if (!context.mounted) return;
+
+    // If that was the last step of its month, don't just pop back to an
+    // (now non-existent) intermediate list and leave the user stuck on the
+    // first activity again — surface the month completion and offer the
+    // stats recap instead of silently doing nothing further.
+    final monthDone = _isMonthNowComplete(cubit.state);
+    if (monthDone) {
+      await showMonthCompletedSheet(context);
+    }
     if (context.mounted) {
       context.pop(true);
     }
   }
+
+  /// Whether the timeframe [step] belongs to is now fully completed, per the
+  /// cubit's freshly reloaded state.
+  bool _isMonthNowComplete(PathDetailState state) {
+    final groups = state.data?.timeframeGroups;
+    if (groups == null) return false;
+    for (final group in groups) {
+      if (group.steps.any((s) => s.id == step.id)) {
+        return group.total > 0 && group.completed == group.total;
+      }
+    }
+    return false;
+  }
 }
 
-/// Step media header: a Vimeo player (when the asset is a video) or an image.
-///
-/// Owns its own [WebViewController] for the whole lifetime of the widget and
-/// disposes of it via the platform controller when removed from the tree. Give
-/// it a stable [key] (e.g. the step id) so it survives unrelated rebuilds.
+/// Step media header: a custom poster (when the asset is a video, tapping it
+/// opens the full-screen Vimeo player — see [pushFullscreenVimeoPlayer]) or an
+/// image. Give it a stable [key] (e.g. the step id) so it survives unrelated
+/// rebuilds.
 class _StepMedia extends StatefulWidget {
   const _StepMedia({
     super.key,
@@ -256,12 +354,16 @@ class _StepMedia extends StatefulWidget {
     required this.area,
     required this.siblings,
     required this.timerController,
+    required this.onProgress,
   });
 
   final PathStepItem step;
   final String area;
   final List<PathStepItem> siblings;
   final PathTimerController timerController;
+
+  /// Called with the fraction (0.0-1.0) of the video watched so far.
+  final VimeoProgressCallback onProgress;
 
   @override
   State<_StepMedia> createState() => _StepMediaState();
@@ -277,9 +379,6 @@ class _StepMediaState extends State<_StepMedia> {
 
   /// oEmbed poster + duration for the video; null until fetched (or no video).
   VimeoOembed? _oembed;
-
-  /// Once the user taps play we mount the Vimeo WebView and keep it mounted.
-  WebViewController? _controller;
 
   bool get _isVideo =>
       widget.step.asset.isVideo && widget.step.asset.vimeoEmbedUrl != null;
@@ -303,16 +402,25 @@ class _StepMediaState extends State<_StepMedia> {
     final embedUrl = widget.step.asset.vimeoEmbedUrl;
     if (embedUrl == null) return;
     // Autoplay so the tap on the custom poster starts the video immediately.
+    // fullscreen=0 hides Vimeo's own fullscreen button: the player already
+    // plays inside a Flutter-managed full-screen route (see
+    // [FullscreenVimeoPlayerScreen]), so Vimeo's own requestFullscreen()
+    // would have nothing left to do.
     final autoplayUrl = Uri.parse(embedUrl).replace(
       queryParameters: {
         ...Uri.parse(embedUrl).queryParameters,
         'autoplay': '1',
+        'fullscreen': '0',
       },
     );
 
-    setState(() {
-      _controller = buildVimeoController(autoplayUrl);
-    });
+    pushFullscreenVimeoPlayer(
+      context,
+      embedUrl: autoplayUrl,
+      isLandscape: _oembed?.isLandscape ?? true,
+      onProgress: widget.onProgress,
+      onEnded: () => widget.onProgress(1),
+    );
   }
 
   @override
@@ -323,15 +431,13 @@ class _StepMediaState extends State<_StepMedia> {
         fit: StackFit.expand,
         children: [
           _buildSurface(),
-          // The top bar (back + activities) stays visible over the player.
+          // The top bar (back + activities) stays visible over the poster.
           _MediaTopBar(
             siblings: widget.siblings,
             step: widget.step,
             isActivities: widget.area == 'alimentazione',
           ),
-          // The timer tools are hidden once the native player takes over,
-          // and never shown in the nutrition area.
-          if (_controller == null && widget.area != 'alimentazione')
+          if (widget.area != 'alimentazione')
             _MediaBottomTools(timerController: widget.timerController),
         ],
       ),
@@ -347,15 +453,10 @@ class _StepMediaState extends State<_StepMedia> {
     );
   }
 
-  /// The media itself: native player (once playing), custom poster, image, or
-  /// a placeholder.
+  /// The media itself: custom poster, image, or a placeholder. Playback
+  /// itself always happens in the full-screen route (see [_play]).
   Widget _buildSurface() {
     final media = widget.step.asset;
-    final controller = _controller;
-
-    if (controller != null) {
-      return WebViewWidget(controller: controller);
-    }
 
     if (_isVideo) {
       return _VideoPoster(
@@ -464,7 +565,7 @@ class _MediaBottomTools extends StatelessWidget {
               width: 20,
               height: 20,
             ),
-            onTap: () => _openTimer(context),
+            onTap: () => _openReminder(context),
           ),
         ],
       ),
@@ -474,6 +575,11 @@ class _MediaBottomTools extends StatelessWidget {
   Future<void> _openTimer(BuildContext context) async {
     final duration = await showPathTimerSheet(context);
     if (duration != null) timerController.start(duration);
+  }
+
+  Future<void> _openReminder(BuildContext context) async {
+    final input = await showPromemoriaCreateSheet(context);
+    if (input != null) await getIt<PromemoriaRepository>().add(input);
   }
 }
 
@@ -593,51 +699,6 @@ class _DurationBadge extends StatelessWidget {
         l10n.pathStepVideoDuration(_format()),
         style: AppTypography.textTheme.labelSmall?.copyWith(
           color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusLabel extends StatelessWidget {
-  const _StatusLabel({required this.step});
-
-  final PathStepItem step;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final String text;
-    final Color color;
-
-    if (step.isCompleted) {
-      text = l10n.pathStepCompleted;
-      color = AppColors.accent;
-    } else if (step.isLocked) {
-      text = l10n.pathStepLocked;
-      color = AppColors.textSecondary;
-    } else if (step.isCurrent) {
-      text = l10n.pathStepCurrent;
-      color = AppColors.accent;
-    } else {
-      text = l10n.pathStepStarted;
-      color = AppColors.textSecondary;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.spaceMd,
-        vertical: AppSpacing.spaceXs,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppRadius.pill),
-      ),
-      child: Text(
-        text,
-        style: AppTypography.textTheme.labelMedium?.copyWith(
-          color: color,
           fontWeight: FontWeight.w600,
         ),
       ),

@@ -13,10 +13,16 @@ class StatisticsCard extends StatelessWidget {
     super.key,
     required this.stat,
     required this.activitiesCount,
+    this.monthLabelOverride,
   });
 
   final AreaStat stat;
   final String activitiesCount;
+
+  /// Overrides [AreaStat.month] with the selected filter's timeframe title,
+  /// shown instead of the lifetime-progress placeholder when a filter from
+  /// the calendar icon is active.
+  final String? monthLabelOverride;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +46,10 @@ class StatisticsCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.spaceSm),
-                Text(stat.month, style: AppTypography.textTheme.labelMedium),
+                Text(
+                  monthLabelOverride ?? stat.month,
+                  style: AppTypography.textTheme.labelMedium,
+                ),
                 const SizedBox(height: AppSpacing.space2xs),
                 Text(
                   activitiesCount,

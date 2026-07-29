@@ -11,7 +11,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Kilocal</string>
+	<string>$(KILOCAL_DISPLAY_NAME)</string>
 	<key>NSSupportsLiveActivities</key>
    	<true/>
 	<key>CFBundleExecutable</key>

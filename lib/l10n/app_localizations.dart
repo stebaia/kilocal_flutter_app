@@ -113,38 +113,50 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingTitle1.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Kilocal'**
+  /// **'Your path.\nFour areas to follow.'**
   String get onboardingTitle1;
 
   /// No description provided for @onboardingBody1.
   ///
   /// In en, this message translates to:
-  /// **'Start your personalized wellness journey with us.'**
+  /// **'Nutrition, training, supplements and 360° wellbeing, personalized for you'**
   String get onboardingBody1;
 
   /// No description provided for @onboardingTitle2.
   ///
   /// In en, this message translates to:
-  /// **'Follow your path'**
+  /// **'The Starter Kit.\nYour best ally.'**
   String get onboardingTitle2;
 
   /// No description provided for @onboardingBody2.
   ///
   /// In en, this message translates to:
-  /// **'Training, nutrition, wellbeing and integration in one place.'**
+  /// **'The right supplements for you in a single Kit that helps you reach your goals.'**
   String get onboardingBody2;
 
   /// No description provided for @onboardingTitle3.
   ///
   /// In en, this message translates to:
-  /// **'Track your progress'**
+  /// **'Get guidance\nfrom our experts'**
   String get onboardingTitle3;
 
   /// No description provided for @onboardingBody3.
   ///
   /// In en, this message translates to:
-  /// **'Monitor your results and achieve your goals.'**
+  /// **'Nutritionists, personal trainers and many other experts guiding you along the way with recipes, videos, challenges and more.'**
   String get onboardingBody3;
+
+  /// No description provided for @onboardingTitle4.
+  ///
+  /// In en, this message translates to:
+  /// **'Great. Now you can start.'**
+  String get onboardingTitle4;
+
+  /// No description provided for @onboardingBody4.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue to start your body recomposition journey now.'**
+  String get onboardingBody4;
 
   /// No description provided for @onboardingNext.
   ///
@@ -173,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @loginSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.'**
+  /// **'Every day one step closer to your body recomposition.'**
   String get loginSubtitle;
 
   /// No description provided for @loginEmail.
@@ -227,14 +239,20 @@ abstract class AppLocalizations {
   /// No description provided for @registerSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.'**
+  /// **'To discover your type and the path tailored for you, fill in the form and start the test.'**
   String get registerSubtitle;
 
-  /// No description provided for @registerFullName.
+  /// No description provided for @registerFirstName.
   ///
   /// In en, this message translates to:
-  /// **'Full name'**
-  String get registerFullName;
+  /// **'First name'**
+  String get registerFirstName;
+
+  /// No description provided for @registerLastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get registerLastName;
 
   /// No description provided for @registerEmail.
   ///
@@ -482,6 +500,12 @@ abstract class AppLocalizations {
   /// **'Continue the path'**
   String get homeContinuePath;
 
+  /// No description provided for @homeStartPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the path'**
+  String get homeStartPath;
+
   /// No description provided for @homeSeeStatistics.
   ///
   /// In en, this message translates to:
@@ -511,6 +535,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Lorem ipsum dolor sit amet consectetur. Facilisi varius.'**
   String get homeMonthStatsDescription;
+
+  /// No description provided for @homeComingSoonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get homeComingSoonTitle;
+
+  /// No description provided for @homeComingSoonBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The content of this section will be available soon.'**
+  String get homeComingSoonBody;
 
   /// No description provided for @tabHome.
   ///
@@ -583,6 +619,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I bought the Starter kit'**
   String get pathLockedBoughtKit;
+
+  /// Title of the sheet shown when tapping a month that is locked pending completion of the previous one.
+  ///
+  /// In en, this message translates to:
+  /// **'Month locked'**
+  String get pathTimeframeLockedTitle;
+
+  /// Body copy of the timeframe-locked sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'To unlock this month, complete every activity in the previous month first.'**
+  String get pathTimeframeLockedBody;
+
+  /// Body copy of the timeframe-locked sheet when we know how many activities are left in the current month.
+  ///
+  /// In en, this message translates to:
+  /// **'To unlock the full section: {count, plural, one{finish {count} more activity} other{finish {count} more activities}} in {monthTitle}.'**
+  String pathTimeframeLockedBodyDetailed(int count, String monthTitle);
+
+  /// Title of the sheet shown after completing the last activity of a month.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations!'**
+  String get pathMonthCompletedTitle;
+
+  /// Body copy of the month-completed sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve completed every activity for this month.'**
+  String get pathMonthCompletedBody;
+
+  /// CTA on the month-completed sheet, opens the statistics screen.
+  ///
+  /// In en, this message translates to:
+  /// **'See statistics'**
+  String get pathMonthCompletedCta;
 
   /// Title of the barcode-entry bottom sheet used to unlock the programme.
   ///
@@ -692,11 +764,41 @@ abstract class AppLocalizations {
   /// **'Content coming soon.'**
   String get profileTypePointBodyFallback;
 
+  /// Title of the intermediate sheet shown before entering the Integrazione area.
+  ///
+  /// In en, this message translates to:
+  /// **'Integration'**
+  String get profileTypeIntegrationSheetTitle;
+
+  /// Bold headline in the Integrazione intermediate sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Kilocal path isn\'t just nutrition and movement!'**
+  String get profileTypeIntegrationSheetHeadline;
+
+  /// Body copy in the Integrazione intermediate sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'The supplement kit is designed to support you step by step, reactivating your body\'s energy and boosting your path\'s results.'**
+  String get profileTypeIntegrationSheetBody;
+
+  /// CTA button in the Integrazione intermediate sheet; navigates to the Integrazione area.
+  ///
+  /// In en, this message translates to:
+  /// **'See dedicated section'**
+  String get profileTypeIntegrationSheetCta;
+
   /// No description provided for @profileTypeProductsSection.
   ///
   /// In en, this message translates to:
   /// **'Product information'**
   String get profileTypeProductsSection;
+
+  /// No description provided for @profileTypeStarterKit.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Starter Kit'**
+  String get profileTypeStarterKit;
 
   /// No description provided for @profileTypeMyKit.
   ///
@@ -890,11 +992,41 @@ abstract class AppLocalizations {
   /// **'Contact support'**
   String get profileContactSupport;
 
+  /// Shown when the device has no mail app that can handle the mailto: link.
+  ///
+  /// In en, this message translates to:
+  /// **'No mail app is set up on this device. You can reach us at info@kilocalprogram.it'**
+  String get profileContactSupportNoMailApp;
+
   /// Logout action label in the profile screen
   ///
   /// In en, this message translates to:
   /// **'Log out'**
   String get profileLogout;
+
+  /// Title of the confirmation dialog shown before logging out.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out of your account'**
+  String get profileLogoutConfirmTitle;
+
+  /// Body of the confirmation dialog shown before logging out.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out of your account?'**
+  String get profileLogoutConfirmBody;
+
+  /// Cancel button in the logout confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileLogoutConfirmCancel;
+
+  /// Confirm button in the logout confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get profileLogoutConfirmAction;
 
   /// No description provided for @profileAppVersionSection.
   ///
@@ -949,6 +1081,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Current month'**
   String get statisticsMonth;
+
+  /// No description provided for @statisticsTimeframeSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a period'**
+  String get statisticsTimeframeSheetTitle;
 
   /// No description provided for @notificationsTitle.
   ///
@@ -1304,6 +1442,12 @@ abstract class AppLocalizations {
   /// **'Mark supplement as taken'**
   String get integrationMarkTaken;
 
+  /// No description provided for @integrationTakenToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken today'**
+  String get integrationTakenToday;
+
   /// No description provided for @integrationMarkTakenError.
   ///
   /// In en, this message translates to:
@@ -1556,6 +1700,12 @@ abstract class AppLocalizations {
   /// **'New goal'**
   String get diaryGoalCreateTitle;
 
+  /// Title of the goal edit sheet (create_goal_sheet reused in edit mode).
+  ///
+  /// In en, this message translates to:
+  /// **'Edit goal'**
+  String get diaryGoalEditTitle;
+
   /// No description provided for @diaryGoalContentHint.
   ///
   /// In en, this message translates to:
@@ -1579,6 +1729,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Save'**
   String get diaryGoalSave;
+
+  /// Button in the goal detail sheet to mark an incomplete goal as achieved.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete goal'**
+  String get diaryGoalComplete;
+
+  /// Button in the goal detail sheet to revert a completed goal back to not-achieved.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as not achieved'**
+  String get diaryGoalMarkIncomplete;
+
+  /// Button in the goal detail sheet to delete the goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete goal'**
+  String get diaryGoalDelete;
+
+  /// Title of the confirmation dialog before deleting a goal.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this goal?'**
+  String get diaryGoalDeleteConfirmTitle;
+
+  /// Body of the confirmation dialog before deleting a goal.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone.'**
+  String get diaryGoalDeleteConfirmBody;
+
+  /// Cancel button in the goal deletion confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get diaryGoalDeleteConfirmCancel;
+
+  /// Confirm button in the goal deletion confirmation dialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get diaryGoalDeleteConfirmAction;
 
   /// No description provided for @diaryActivityDetailTitle.
   ///
@@ -1646,29 +1838,11 @@ abstract class AppLocalizations {
   /// **'Complete activity'**
   String get pathStepComplete;
 
-  /// No description provided for @pathStepLocked.
+  /// No description provided for @pathStepWatchFullVideo.
   ///
   /// In en, this message translates to:
-  /// **'Locked'**
-  String get pathStepLocked;
-
-  /// No description provided for @pathStepCurrent.
-  ///
-  /// In en, this message translates to:
-  /// **'Current'**
-  String get pathStepCurrent;
-
-  /// No description provided for @pathStepCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get pathStepCompleted;
-
-  /// No description provided for @pathStepStarted.
-  ///
-  /// In en, this message translates to:
-  /// **'Started'**
-  String get pathStepStarted;
+  /// **'Watch the whole video before marking the activity as completed'**
+  String get pathStepWatchFullVideo;
 
   /// No description provided for @pathStepVideoDuration.
   ///
@@ -1766,35 +1940,35 @@ abstract class AppLocalizations {
   /// **'Useful resources for your path'**
   String get pathMaterialsSubtitle;
 
-  /// No description provided for @pathMaterialAvailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Available'**
-  String get pathMaterialAvailable;
-
   /// No description provided for @pathMaterialsEmpty.
   ///
   /// In en, this message translates to:
   /// **'No materials available'**
   String get pathMaterialsEmpty;
 
-  /// No description provided for @pathMaterialsFilterAvailable.
+  /// No description provided for @pathMaterialsFilterToWatch.
   ///
   /// In en, this message translates to:
-  /// **'Available'**
-  String get pathMaterialsFilterAvailable;
+  /// **'To watch'**
+  String get pathMaterialsFilterToWatch;
 
-  /// No description provided for @pathMaterialsFilterCompleted.
+  /// No description provided for @pathMaterialsFilterWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched'**
+  String get pathMaterialsFilterWatched;
+
+  /// No description provided for @pathMaterialMarkCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as completed'**
+  String get pathMaterialMarkCompleted;
+
+  /// No description provided for @pathMaterialCompleted.
   ///
   /// In en, this message translates to:
   /// **'Completed'**
-  String get pathMaterialsFilterCompleted;
-
-  /// No description provided for @pathMaterialsFilterUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Unavailable'**
-  String get pathMaterialsFilterUnavailable;
+  String get pathMaterialCompleted;
 
   /// No description provided for @pathMaterialDownloadError.
   ///

@@ -7,6 +7,8 @@ import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_answe
 import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_step.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/survey_repository.dart';
 import 'package:kilocal_flutter_app/features/survey/presentation/cubit/survey_cubit.dart';
+import 'package:kilocal_flutter_app/features/user/domain/user_details.dart';
+import 'package:kilocal_flutter_app/features/user/presentation/cubit/user_cubit.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockSurveyRepository extends Mock implements SurveyRepository {}
@@ -15,6 +17,8 @@ class MockAnalyticsEvents extends Mock implements AnalyticsEvents {}
 
 class MockProgramUnlockRepository extends Mock
     implements ProgramUnlockRepository {}
+
+class MockUserCubit extends Mock implements UserCubit {}
 
 /// Guards the *whole* survey at submit time, not just the step being left.
 ///
@@ -26,9 +30,15 @@ void main() {
   late MockSurveyRepository repository;
   late MockAnalyticsEvents analytics;
   late MockProgramUnlockRepository unlockRepository;
+  late MockUserCubit userCubit;
 
   const validCode = 'A947328593';
-  final catalogue = [
+  const kitBiotype = Biotype(
+    id: 4,
+    displayName: 'Tipo 2',
+    kit: BiotypeKit(id: 'kit-3'),
+  );
+  final kitProducts = [
     const BarcodeProduct(id: '1', title: 'Kilocal', codes: {validCode}),
   ];
 
@@ -119,6 +129,7 @@ void main() {
     repository = MockSurveyRepository();
     analytics = MockAnalyticsEvents();
     unlockRepository = MockProgramUnlockRepository();
+    userCubit = MockUserCubit();
 
     when(() => repository.ensureDetails()).thenAnswer((_) async {});
     when(() => repository.fetchSurvey(any())).thenAnswer((_) async => survey);
@@ -126,8 +137,11 @@ void main() {
     when(() => analytics.onboardingCompleted()).thenAnswer((_) async {});
     when(() => analytics.surveySubmitted(any())).thenAnswer((_) async {});
     when(
-      () => unlockRepository.fetchBarcodeProducts(),
-    ).thenAnswer((_) async => catalogue);
+      () => userCubit.state,
+    ).thenReturn(const UserState(details: UserDetails(biotype: kitBiotype)));
+    when(
+      () => repository.fetchKitBarcodeProducts(any()),
+    ).thenAnswer((_) async => kitProducts);
     when(
       () => repository.submit(
         internalName: any(named: 'internalName'),
@@ -142,6 +156,7 @@ void main() {
     repository: repository,
     analytics: analytics,
     unlockRepository: unlockRepository,
+    userCubit: userCubit,
   );
 
   void verifyNoSubmit() {
@@ -159,6 +174,8 @@ void main() {
   Future<SurveyCubit> walkToEndAndFinish() async {
     final cubit = build();
     await cubit.start('starter_kit');
+    // fetchKitBarcodeProduct runs unawaited off start(); let it settle.
+    await Future<void>.delayed(Duration.zero);
     cubit.setText(validCode);
     await cubit.next();
     cubit.setText('20121');
@@ -178,6 +195,7 @@ void main() {
     () async {
       final cubit = build();
       await cubit.start('starter_kit');
+      await Future<void>.delayed(Duration.zero);
 
       // Pass the barcode step legitimately…
       cubit.setText(validCode);
@@ -203,6 +221,7 @@ void main() {
   test('sends the user back to the offending step with a reason', () async {
     final cubit = build();
     await cubit.start('starter_kit');
+    await Future<void>.delayed(Duration.zero);
 
     cubit.setText(validCode);
     await cubit.next();
@@ -220,23 +239,22 @@ void main() {
   });
 
   test(
-    'does not submit when the catalogue cannot be read at submit time',
+    'does not advance past the barcode step when the kit products cannot be '
+    'read',
     () async {
+      // The kit-product read fails from the very start (loaded once, off
+      // start()) — there is no cached product to validate against, so the
+      // step must fail closed rather than let any code through.
+      when(
+        () => repository.fetchKitBarcodeProducts(any()),
+      ).thenThrow(const ApiException(type: ApiErrorType.network, statusCode: 0));
+
       final cubit = build();
       await cubit.start('starter_kit');
       cubit.setText(validCode);
       await cubit.next();
-      cubit.setText('20121');
-      await cubit.next();
 
-      // The code was accepted on the way through, but the catalogue is now
-      // unreachable: failing open here would let the gate through.
-      when(() => unlockRepository.fetchBarcodeProducts()).thenThrow(
-        const ApiException(type: ApiErrorType.network, statusCode: 0),
-      );
-      await cubit.next();
-
-      expect(cubit.state.status, isNot(SurveyStatus.completed));
+      expect(cubit.state.currentIndex, 0);
       verifyNoSubmit();
     },
   );

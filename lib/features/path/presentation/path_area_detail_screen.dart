@@ -12,7 +12,9 @@ import '../../../l10n/app_localizations.dart';
 import '../../statistics/presentation/statistics_screen.dart';
 import '../domain/entities/path_area_detail.dart';
 import 'cubit/path_detail_cubit.dart';
+import 'path_materials_screen.dart';
 import 'widgets/path_area_hero_card.dart';
+import 'widgets/path_locked_sheets.dart';
 import 'widgets/path_materials_row.dart';
 import 'widgets/path_section_header.dart';
 import 'widgets/path_timeframe_row.dart';
@@ -76,15 +78,25 @@ class PathAreaDetailScreen extends StatelessWidget {
   }
 }
 
-class _PathAreaDetailView extends StatelessWidget {
+class _PathAreaDetailView extends StatefulWidget {
   const _PathAreaDetailView({required this.area});
 
   final String area;
 
   @override
+  State<_PathAreaDetailView> createState() => _PathAreaDetailViewState();
+}
+
+class _PathAreaDetailViewState extends State<_PathAreaDetailView> {
+  // Set once a step is completed while this screen is open, so backing out
+  // tells PathScreen to refresh its overall progress card instead of leaving
+  // it on the stale (cached) figures — see [[statistics-feature-status]].
+  bool _hasProgressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final presentation = _AreaPresentation.of(area, l10n);
+    final presentation = _AreaPresentation.of(widget.area, l10n);
 
     return Scaffold(
       backgroundColor: AppColors.surface,
@@ -98,6 +110,7 @@ class _PathAreaDetailView extends StatelessWidget {
             AppHeader(
               title: presentation.title,
               showBack: true,
+              onBack: () => Navigator.of(context).pop(_hasProgressed),
               trailing: GestureDetector(
                 onTap: () => context.push(StatisticsScreen.route),
                 child: const AppIcon(
@@ -130,6 +143,8 @@ class _PathAreaDetailView extends StatelessWidget {
                       return _PathAreaDetailContent(
                         data: data,
                         presentation: presentation,
+                        onStepProgressed: () =>
+                            setState(() => _hasProgressed = true),
                       );
                   }
                 },
@@ -146,10 +161,15 @@ class _PathAreaDetailContent extends StatelessWidget {
   const _PathAreaDetailContent({
     required this.data,
     required this.presentation,
+    required this.onStepProgressed,
   });
 
   final PathAreaDetail data;
   final _AreaPresentation presentation;
+
+  /// Called when a step push comes back having completed something, so the
+  /// parent can flag the change for when the user backs out of this screen.
+  final VoidCallback onStepProgressed;
 
   @override
   Widget build(BuildContext context) {
@@ -193,8 +213,11 @@ class _PathAreaDetailContent extends StatelessWidget {
             showConnectorTop: i > 0,
             showConnectorBottom: i < groups.length - 1,
             onTap: groups[i].isLocked
-                ? null
-                : () => _openTimeframe(context, groups[i]),
+                ? () => showTimeframeLockedSheet(
+                    context,
+                    currentMonth: _referenceMonthFor(groups),
+                  )
+                : () => _openTimeframe(context, groups[i], l10n),
           ),
         if (data.hasMaterials) ...[
           const SizedBox(height: AppSpacing.spaceSm),
@@ -219,11 +242,52 @@ class _PathAreaDetailContent extends StatelessWidget {
     return l10n.pathTimeframeStepsCount(group.total);
   }
 
-  void _openTimeframe(BuildContext context, PathTimeframeGroup group) {
-    context.push(
-      '/path/${data.area}/timeframe/${group.timeframeId}',
-      extra: group,
+  /// The month the "mese bloccato" sheet should name as "still to finish" —
+  /// the active month (`isCurrent`), or as a fallback the last unlocked,
+  /// not-yet-completed month, since a locked future month is always blocked
+  /// on finishing whichever month is currently in progress.
+  PathTimeframeGroup? _referenceMonthFor(List<PathTimeframeGroup> groups) {
+    for (final group in groups) {
+      if (group.isCurrent) return group;
+    }
+    for (final group in groups.reversed) {
+      if (!group.isLocked && group.completed < group.total) return group;
+    }
+    return null;
+  }
+
+  /// Jumps straight into the month's first not-yet-completed step (or its
+  /// first step at all, if every step is already done) — there is no more
+  /// intermediate "steps of this month" list screen.
+  ///
+  /// Awaits the push: [PathStepScreen] creates its own [PathDetailCubit]
+  /// instance (a DI factory, not shared with this screen's), so completing a
+  /// step there reloads *that* cubit, not this one — this screen's month/
+  /// percent figures would otherwise stay stale until the user fully leaves
+  /// and re-enters the area. [PathStepScreen] pops `true` when a step was just
+  /// completed, so on that signal we both reload this screen's own cubit and
+  /// forward the flag via [onStepProgressed] so backing further out can tell
+  /// [PathScreen] to refresh its overall figures too. See
+  /// [[statistics-feature-status]].
+  Future<void> _openTimeframe(
+    BuildContext context,
+    PathTimeframeGroup group,
+    AppLocalizations l10n,
+  ) async {
+    if (group.steps.isEmpty) return;
+    final step = group.steps.firstWhere(
+      (s) => !s.isCompleted,
+      orElse: () => group.steps.first,
     );
+    final progressed = await context.push<bool>(
+      '/path/${data.area}/step/${step.id}',
+      extra: step,
+    );
+    if (progressed != true) return;
+    if (context.mounted) {
+      await context.read<PathDetailCubit>().load(area: data.area, l10n: l10n);
+    }
+    onStepProgressed();
   }
 
   void _openMaterials(BuildContext context, String groupId) {
@@ -262,7 +326,10 @@ class _WellbeingGroupsList extends StatelessWidget {
           total: group.total,
           onTap: () => context.push(
             '/path/benessere/materials/${group.id}',
-            extra: group.title,
+            extra: PathMaterialsRouteArgs(
+              title: group.title,
+              categories: group.categories,
+            ),
           ),
         );
       },

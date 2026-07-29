@@ -22,11 +22,26 @@ class ContinuePathItem {
     required this.title,
     this.subtitle,
     required this.imageUrl,
+    this.hasStarted = false,
+    this.stepId,
+    this.area,
   });
 
   final String title;
   final String? subtitle;
   final String imageUrl;
+
+  /// Whether the user has completed at least one step in any path area.
+  /// Drives the CTA label: "Inizia il percorso" vs "Continua il percorso".
+  final bool hasStarted;
+
+  /// Id of the current/last step, when known. Used to deep-link the card
+  /// tap to `/path/{area}/step/{stepId}` instead of the generic path list.
+  final String? stepId;
+
+  /// Path area the current step belongs to (`allenamento`, `alimentazione`
+  /// or `benessere`). Required alongside [stepId] to build the deep link.
+  final String? area;
 }
 
 /// Statistics summary for the current month.
@@ -49,6 +64,7 @@ class HomeActionCard {
     required this.imageUrl,
     required this.route,
     this.assetName,
+    this.isLocked = false,
   });
 
   final String title;
@@ -58,4 +74,8 @@ class HomeActionCard {
   /// Optional local asset used as the card illustration.
   /// When provided, it takes precedence over [imageUrl].
   final String? assetName;
+
+  /// When true, tapping the card shows a "coming soon" alert instead of
+  /// navigating to [route].
+  final bool isLocked;
 }

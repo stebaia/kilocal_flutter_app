@@ -326,20 +326,10 @@ mutation SetCurrentPhase($id: ID!, $phaseId: Int!) {
       }
 
       // Existing record: re-read, append today (idempotently), and write back.
-      final current = await _graphqlClient.query(
-        _trackingQuery,
-        variables: {'kitId': kitId},
+      final existing = await _currentTookDates(
+        trackingId: trackingId,
+        kitId: kitId,
       );
-      final rows =
-          (current['data'] as Map<String, dynamic>?)?['user_integratori']
-              as List<dynamic>?;
-      final row = rows
-          ?.map((j) => UserIntegratoreDto.fromJson(j as Map<String, dynamic>))
-          .firstWhere(
-            (d) => d.id == trackingId,
-            orElse: () => const UserIntegratoreDto(id: ''),
-          );
-      final existing = row?.tookDates.map(_dateOnly).toList() ?? <String>[];
       if (!existing.contains(dayIso)) existing.add(dayIso);
 
       await _graphqlClient.query(
@@ -351,6 +341,54 @@ mutation SetCurrentPhase($id: ID!, $phaseId: Int!) {
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
     }
+  }
+
+  @override
+  Future<void> unmarkTaken({
+    required String trackingId,
+    required String kitId,
+    required DateTime day,
+  }) async {
+    try {
+      final dayIso = _dateOnly(day);
+      final existing = await _currentTookDates(
+        trackingId: trackingId,
+        kitId: kitId,
+      );
+      existing.remove(dayIso);
+
+      await _graphqlClient.query(
+        _updateTrackingMutation,
+        variables: {'id': trackingId, 'tookDates': existing},
+      );
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  /// Re-reads [trackingId]'s current `took_dates` (as `YYYY-MM-DD` strings) so
+  /// a write can append/remove a single day without racing a stale in-memory
+  /// copy.
+  Future<List<String>> _currentTookDates({
+    required String trackingId,
+    required String kitId,
+  }) async {
+    final current = await _graphqlClient.query(
+      _trackingQuery,
+      variables: {'kitId': kitId},
+    );
+    final rows =
+        (current['data'] as Map<String, dynamic>?)?['user_integratori']
+            as List<dynamic>?;
+    final row = rows
+        ?.map((j) => UserIntegratoreDto.fromJson(j as Map<String, dynamic>))
+        .firstWhere(
+          (d) => d.id == trackingId,
+          orElse: () => const UserIntegratoreDto(id: ''),
+        );
+    return row?.tookDates.map(_dateOnly).toList() ?? <String>[];
   }
 
   /// Formats a date as `YYYY-MM-DD` (the CMS `Date` shape, no time component).

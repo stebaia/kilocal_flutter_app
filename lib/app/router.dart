@@ -28,7 +28,6 @@ import '../features/path/presentation/path_material_detail_screen.dart';
 import '../features/path/presentation/path_materials_screen.dart';
 import '../features/path/presentation/path_screen.dart';
 import '../features/path/presentation/path_step_screen.dart';
-import '../features/path/presentation/path_timeframe_steps_screen.dart';
 import '../features/profile/presentation/change_password_screen.dart';
 import '../features/profile/presentation/profile_form_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
@@ -197,16 +196,6 @@ final GoRouter appRouter = GoRouter(
                       ),
                     ),
                     GoRoute(
-                      path: 'timeframe/:timeframeId',
-                      builder: (context, state) => PathTimeframeStepsScreen(
-                        area: state.pathParameters['area']!,
-                        timeframeId: int.parse(
-                          state.pathParameters['timeframeId']!,
-                        ),
-                        group: state.extra as PathTimeframeGroup?,
-                      ),
-                    ),
-                    GoRoute(
                       path: 'step/:stepId',
                       builder: (context, state) => PathStepScreen(
                         area: state.pathParameters['area']!,
@@ -216,10 +205,14 @@ final GoRouter appRouter = GoRouter(
                     ),
                     GoRoute(
                       path: 'materials/:groupId',
-                      builder: (context, state) => PathMaterialsScreen(
-                        groupId: state.pathParameters['groupId']!,
-                        title: state.extra as String?,
-                      ),
+                      builder: (context, state) {
+                        final args = state.extra as PathMaterialsRouteArgs?;
+                        return PathMaterialsScreen(
+                          groupId: state.pathParameters['groupId']!,
+                          title: args?.title,
+                          categories: args?.categories,
+                        );
+                      },
                       routes: [
                         GoRoute(
                           path: 'detail/:materialId',
@@ -359,11 +352,32 @@ final GoRouter appRouter = GoRouter(
   ],
 );
 
-class AppScaffold extends StatelessWidget {
+/// Notifies descendants (namely [HomeScreen]) that the Home tab was just
+/// re-selected from a different tab, so they can reload their data.
+class HomeReloadSignal extends InheritedNotifier<ValueNotifier<int>> {
+  const HomeReloadSignal({
+    super.key,
+    required super.notifier,
+    required super.child,
+  });
+
+  static ValueNotifier<int>? of(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<HomeReloadSignal>()
+        ?.notifier;
+  }
+}
+
+class AppScaffold extends StatefulWidget {
   const AppScaffold({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  @override
+  State<AppScaffold> createState() => _AppScaffoldState();
+}
+
+class _AppScaffoldState extends State<AppScaffold> {
   static const _items = [
     AppIcons.home,
     AppIcons.path,
@@ -372,10 +386,26 @@ class AppScaffold extends StatelessWidget {
     AppIcons.popsicle,
   ];
 
+  // Bumped whenever the Home tab is (re)selected from a different tab, so
+  // HomeScreen can reload — its BlocProvider otherwise only runs once, since
+  // the shell's IndexedStack keeps its State alive across tab switches.
+  final _homeReloadSignal = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    _homeReloadSignal.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final navigationShell = widget.navigationShell;
+
     return Scaffold(
-      body: navigationShell,
+      body: HomeReloadSignal(
+        notifier: _homeReloadSignal,
+        child: navigationShell,
+      ),
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
@@ -400,6 +430,15 @@ class AppScaffold extends StatelessWidget {
                 return GestureDetector(
                   onTap: () {
                     HapticFeedback.selectionClick();
+                    // Home's IndexedStack branch keeps HomeScreen's State (and
+                    // its HomeCubit) alive across tab switches, so returning
+                    // to it after e.g. completing a step elsewhere would show
+                    // stale data. Bump its key to force a remount — and thus
+                    // a fresh HomeCubit.load() — whenever we land on Home
+                    // from a different tab.
+                    if (index == 0 && navigationShell.currentIndex != 0) {
+                      _homeReloadSignal.value++;
+                    }
                     // Always land on the branch's root screen, never wherever
                     // it was last left — `goBranch` otherwise restores that
                     // branch's own navigation stack (GoRouter's default), so a
@@ -407,30 +446,13 @@ class AppScaffold extends StatelessWidget {
                     // showing after leaving to /strumenti and coming back.
                     navigationShell.goBranch(index, initialLocation: true);
                   },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOut,
-                    width: 48,
-                    height: 48,
-                    alignment: Alignment.center,
-                    decoration: isSelected
-                        ? BoxDecoration(
-                            color: AppColors.accentSoft,
-                            shape: BoxShape.circle,
-                          )
-                        : null,
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: _NavIcon(
-                        item: item,
-                        color: color,
-                        isSelected: isSelected,
-                        // The profile tab (last) shows the user's biotype icon
-                        // from the CMS when available.
-                        useBiotypeIcon: index == _items.length - 1,
-                      ),
-                    ),
+                  child: _NavTile(
+                    item: item,
+                    color: color,
+                    isSelected: isSelected,
+                    // The profile tab (last) shows the user's biotype icon and
+                    // color from the CMS when available.
+                    useBiotypeIcon: index == _items.length - 1,
                   ),
                 );
               }),
@@ -442,11 +464,16 @@ class AppScaffold extends StatelessWidget {
   }
 }
 
-/// A bottom-bar icon. For the profile tab ([useBiotypeIcon]) it shows the user's
-/// biotype icon from the CMS (tinted with the current [color]), falling back to
-/// the static [item] SVG when the biotype or its icon is unavailable.
-class _NavIcon extends StatelessWidget {
-  const _NavIcon({
+/// A bottom-bar tab: the selected-state circle badge plus its icon.
+///
+/// The brand tabs (Home/Percorso/Diario/Tool) always use the brand red for
+/// both the icon and the selected badge. The profile tab ([useBiotypeIcon])
+/// instead follows the user's biotype `main_color` from the CMS for *both* —
+/// see the recap screenshot (2026-07-27): each biotype has its own icon tint
+/// **and** its own soft badge tint, not just a recolored icon on a fixed pink
+/// badge.
+class _NavTile extends StatelessWidget {
+  const _NavTile({
     required this.item,
     required this.color,
     required this.isSelected,
@@ -461,29 +488,71 @@ class _NavIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!useBiotypeIcon) {
-      return AppIcon(item, size: 20, color: color);
+      return _Badge(
+        isSelected: isSelected,
+        badgeColor: AppColors.accentSoft,
+        child: AppIcon(item, size: 20, color: color),
+      );
     }
 
     return BlocBuilder<UserCubit, UserState>(
       bloc: getIt<UserCubit>(),
       builder: (context, state) {
         final biotype = state.details?.biotype;
+        final biotypeColor = colorFromHex(biotype?.mainColor);
         // Selected: tint with the biotype colour (main_color), falling back to
         // the accent. Unselected: keep the muted grey for a clear active state.
         final iconColor = isSelected
-            ? (colorFromHex(biotype?.mainColor) ?? AppColors.accent)
+            ? (biotypeColor ?? AppColors.accent)
             : color;
         final fallback = AppIcon(item, size: 20, color: iconColor);
 
         final iconUrl = biotype?.iconUrl;
-        if (iconUrl == null) return fallback;
-        return CmsSvgIcon(
-          url: iconUrl,
-          size: 20,
-          color: iconColor,
-          fallback: fallback,
+        final icon = iconUrl == null
+            ? fallback
+            : CmsSvgIcon(
+                url: iconUrl,
+                size: 20,
+                color: iconColor,
+                fallback: fallback,
+              );
+
+        return _Badge(
+          isSelected: isSelected,
+          badgeColor: (biotypeColor ?? AppColors.accent).withValues(
+            alpha: 0.15,
+          ),
+          child: icon,
         );
       },
+    );
+  }
+}
+
+/// The 48x48 circle badge shown behind a selected tab's icon.
+class _Badge extends StatelessWidget {
+  const _Badge({
+    required this.isSelected,
+    required this.badgeColor,
+    required this.child,
+  });
+
+  final bool isSelected;
+  final Color badgeColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      width: 48,
+      height: 48,
+      alignment: Alignment.center,
+      decoration: isSelected
+          ? BoxDecoration(color: badgeColor, shape: BoxShape.circle)
+          : null,
+      child: SizedBox(width: 24, height: 24, child: child),
     );
   }
 }

@@ -9,6 +9,12 @@ import 'promemoria_notification_service.dart';
 
 /// Backend-backed [PromemoriaRepository]: reads/writes calendar reminders via
 /// [PromemoriaApi] and mirrors each future reminder as a local OS notification.
+///
+/// KNOWN BACKEND BUG (see wiki/strumenti.md): a single [add] can come back on a
+/// later [getAll] as multiple rows — same content/time, one per future month on
+/// the same day. Verified this repository sends exactly one `POST` per create
+/// and [PromemoriaState.remindersInMonth] filters by year+month, not just day —
+/// so the duplication happens server-side, not here.
 class PromemoriaRepositoryImpl implements PromemoriaRepository {
   PromemoriaRepositoryImpl({
     required PromemoriaApi api,

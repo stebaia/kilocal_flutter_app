@@ -8,11 +8,14 @@ class _MockDio extends Mock implements Dio {}
 
 /// Builds an area-steps response with the given main-tab [groups]. Each group
 /// entry is `(title, completedFlags)` where `completedFlags` is one bool per
-/// step.
+/// step. [categoriesPerGroup], when provided, is one list of `(id, title)`
+/// category pairs per group (same order as [groups]) — mirrors
+/// `groups[].categories` from the real backend.
 Map<String, dynamic> _areaResponse(
   List<(String, List<bool>)> groups, {
   String area = 'benessere',
   List<Map<String, dynamic>> timeframes = const [],
+  List<List<(String, String)>>? categoriesPerGroup,
 }) {
   var stepId = 0;
   Map<String, dynamic> step(bool completed) => {
@@ -51,7 +54,7 @@ Map<String, dynamic> _areaResponse(
       // The wellbeing sub-sections come back as separate groups, all flagged
       // `is_percorso_main_tab: false` — mirror that here.
       'groups': [
-        for (final (title, flags) in groups)
+        for (final (index, (title, flags)) in groups.indexed)
           {
             'id': title,
             'sort': null,
@@ -61,6 +64,18 @@ Map<String, dynamic> _areaResponse(
               {'languages_code': 'it-IT', 'title': title},
             ],
             'steps': [for (final c in flags) step(c)],
+            if (categoriesPerGroup != null)
+              'categories': [
+                for (final (catId, catTitle) in categoriesPerGroup[index])
+                  {
+                    'percorsi_material_categories_id': {
+                      'id': catId,
+                      'translations': [
+                        {'languages_code': 'it-IT', 'title': catTitle},
+                      ],
+                    },
+                  },
+              ],
           },
       ],
     },
@@ -220,4 +235,41 @@ void main() {
       expect(m.isLocked, isTrue);
     }
   });
+
+  test(
+    'maps group.categories to PathAreaGroup.categories without throwing',
+    () async {
+      // Regression test: `group.categories ?? const []` without an explicit
+      // element type made Dart infer the for-in loop variable as `dynamic`
+      // when `categories` was non-null, so the `titleFor` extension method
+      // (statically resolved) wasn't found on `category.translations` at
+      // runtime — "PathCubit.load" swallowed it into a generic error and the
+      // whole "Il tuo percorso" screen showed "Qualcosa è andato storto"
+      // (user-reported 2026-07-27, only reproducible with real backend data
+      // carrying populated categories — no existing test covered this shape).
+      stubResponse(
+        _areaResponse(
+          [('Mindfullness', <bool>[]), ('Self Care', <bool>[])],
+          categoriesPerGroup: [
+            [('7', 'Scopri'), ('8', 'Consigli utili')],
+            [('9', 'Scopri'), ('10', 'Consigli utili')],
+          ],
+        ),
+      );
+
+      final detail = await repository.fetchAreaSteps(
+        area: 'benessere',
+        l10n: l10n,
+      );
+
+      expect(detail.groups[0].categories.map((c) => (c.id, c.title)), [
+        ('7', 'Scopri'),
+        ('8', 'Consigli utili'),
+      ]);
+      expect(detail.groups[1].categories.map((c) => (c.id, c.title)), [
+        ('9', 'Scopri'),
+        ('10', 'Consigli utili'),
+      ]);
+    },
+  );
 }

@@ -109,6 +109,21 @@ class _PathContent extends StatelessWidget {
     if (unlocked) await cubit.load(l10n);
   }
 
+  /// Opens the area detail. `/path/:area` (via [PathAreaDetailScreen]) pops
+  /// `true` when the user completed a step while there, so the overall
+  /// progress card — otherwise stale, since `/path/me/progress` is only
+  /// fetched once per [PathCubit] lifetime — gets refreshed on return. See
+  /// [[statistics-feature-status]].
+  Future<void> _onAreaTap(
+    BuildContext context,
+    PathArea area,
+    AppLocalizations l10n,
+  ) async {
+    final cubit = context.read<PathCubit>();
+    final progressed = await context.push<bool>('/path/${area.id}');
+    if (progressed == true) await cubit.load(l10n);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -183,7 +198,11 @@ class _PathContent extends StatelessWidget {
                 physics: const NeverScrollableScrollPhysics(),
                 mainAxisSpacing: AppSpacing.spaceMd,
                 crossAxisSpacing: AppSpacing.spaceMd,
-                childAspectRatio: 0.76,
+                // Slightly taller than square so a 2-line area title (longer
+                // words like "Alimentazione", or larger system font sizes) has
+                // enough room without pushing the illustration/counter off the
+                // card on narrower devices.
+                childAspectRatio: 0.68,
                 children: data.areas
                     .map(
                       (area) => PathAreaTile(
@@ -194,7 +213,7 @@ class _PathContent extends StatelessWidget {
                         isRestricted: area.isRestricted,
                         onTap: () => area.isRestricted
                             ? _onRestrictedTap(context, area, l10n)
-                            : context.push('/path/${area.id}'),
+                            : _onAreaTap(context, area, l10n),
                       ),
                     )
                     .toList(),

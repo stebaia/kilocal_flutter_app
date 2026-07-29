@@ -27,3 +27,18 @@ class AreaStat {
 
   double get percent => total == 0 ? 0 : completed / total;
 }
+
+/// A selectable timeframe (month/phase), shown in the statistics filter
+/// bottom sheet. Selecting one refetches every area's stats filtered via
+/// `GET /path/me/progress?timeframe_id=`.
+class AreaTimeframe {
+  const AreaTimeframe({
+    required this.id,
+    required this.title,
+    this.isCurrent = false,
+  });
+
+  final int id;
+  final String title;
+  final bool isCurrent;
+}

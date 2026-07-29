@@ -1,21 +1,36 @@
 import 'package:dio/dio.dart';
 
-/// Lightweight metadata for a Vimeo video fetched via the public oEmbed API.
+/// Lightweight metadata for a Vimeo video fetched via the public v2 video API.
 class VimeoOembed {
-  const VimeoOembed({this.thumbnailUrl, this.duration});
+  const VimeoOembed({
+    this.thumbnailUrl,
+    this.duration,
+    this.width,
+    this.height,
+  });
 
-  /// Poster image for the video, upscaled to a screen-friendly width.
+  /// Poster image for the video (`thumbnail_large`, a fixed 640px-wide still).
   final String? thumbnailUrl;
 
   /// Video length, used to render the duration overlay.
   final Duration? duration;
+
+  /// Source width/height in pixels, used to tell landscape from portrait
+  /// footage so the full-screen player can pick the matching orientation.
+  final int? width;
+  final int? height;
+
+  /// Whether the video is wider than it is tall. Defaults to `true` (the
+  /// common case) when dimensions are missing.
+  bool get isLandscape => (width ?? 1) >= (height ?? 1);
 }
 
-/// Fetches public Vimeo metadata (thumbnail + duration) via oEmbed.
-///
-/// oEmbed is a public, unauthenticated endpoint on `vimeo.com`, so it uses its
-/// own bare [Dio] instance — it must not go through the app's auth interceptor
-/// or base URL.
+/// Fetches public Vimeo metadata (thumbnail + duration) via the legacy `v2`
+/// video endpoint, matching what the Kilocal web frontend already does for the
+/// same problem (CMS video steps have no cover image — see
+/// [[home-continue-path-image-gap]] / [[statistics-feature-status]]): extract
+/// the numeric id from the video's `vimeo_url` and fetch
+/// `https://vimeo.com/api/v2/video/{id}.json`, reading `thumbnail_large`.
 class VimeoOembedService {
   VimeoOembedService({Dio? dio}) : _dio = dio ?? Dio();
 
@@ -28,7 +43,12 @@ class VimeoOembedService {
   /// every rebuild.
   final Map<String, VimeoOembed?> _cache = {};
 
-  static const String _endpoint = 'https://vimeo.com/api/oembed.json';
+  static const String _endpointTemplate = 'https://vimeo.com/api/v2/video';
+
+  /// Matches the numeric video id in a Vimeo url, e.g. `vimeo.com/1120185037`
+  /// or `vimeo.com/1120185037?ts=0&share=copy` — both seen live in the CMS's
+  /// `vimeo_url` field.
+  static final RegExp _idPattern = RegExp(r'vimeo\.com/(\d+)');
 
   /// Metadata for every url in [videoUrls], keyed by url, fetched concurrently.
   /// Urls whose lookup fails are absent from the result.
@@ -44,8 +64,8 @@ class VimeoOembedService {
     return byUrl;
   }
 
-  /// Returns metadata for [videoUrl], or `null` when the video is private,
-  /// the URL is malformed, or the network call fails. Never throws.
+  /// Returns metadata for [videoUrl], or `null` when the id can't be parsed,
+  /// the video is private, or the network call fails. Never throws.
   Future<VimeoOembed?> fetch(String videoUrl) async {
     if (_cache.containsKey(videoUrl)) return _cache[videoUrl];
 
@@ -55,28 +75,25 @@ class VimeoOembedService {
   }
 
   Future<VimeoOembed?> _fetch(String videoUrl) async {
-    try {
-      final response = await _dio.get<Map<String, dynamic>>(
-        _endpoint,
-        queryParameters: {'url': videoUrl},
-      );
-      final data = response.data;
-      if (data == null) return null;
+    final id = _idPattern.firstMatch(videoUrl)?.group(1);
+    if (id == null) return null;
 
-      final seconds = data['duration'];
+    try {
+      final response = await _dio.get<List<dynamic>>(
+        '$_endpointTemplate/$id.json',
+      );
+      final entry = response.data?.firstOrNull as Map<String, dynamic>?;
+      if (entry == null) return null;
+
+      final seconds = entry['duration'];
       return VimeoOembed(
-        thumbnailUrl: _upscale(data['thumbnail_url'] as String?),
+        thumbnailUrl: entry['thumbnail_large'] as String?,
         duration: seconds is int ? Duration(seconds: seconds) : null,
+        width: entry['width'] as int?,
+        height: entry['height'] as int?,
       );
     } on DioException {
       return null;
     }
-  }
-
-  /// Vimeo returns a small poster (`..._295x166`). Bump the dimensions so the
-  /// thumbnail is crisp on the full-width media header.
-  String? _upscale(String? url) {
-    if (url == null) return null;
-    return url.replaceAll(RegExp(r'_\d+x\d+'), '_960x540');
   }
 }

@@ -21,6 +21,9 @@ Future<void> showProfileTypePercorsiSheet(
     backgroundColor: AppColors.surface,
     showDragHandle: true,
     isScrollControlled: true,
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.sizeOf(context).height * 0.9,
+    ),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
     ),

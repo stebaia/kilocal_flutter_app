@@ -39,9 +39,10 @@ class CmsFormView extends StatefulWidget {
 }
 
 class _CmsFormViewState extends State<CmsFormView> {
-  /// Identity fields the user must not be able to edit (name, surname, gender):
-  /// they are rendered read-only and excluded from the submitted values.
-  static const _readOnlyKeys = {'first_name', 'last_name', 'gender'};
+  /// Identity fields the user must not be able to edit (name, surname, gender,
+  /// email): they are rendered read-only and excluded from the submitted
+  /// values. Email is the account's login identifier, so it's locked here too.
+  static const _readOnlyKeys = {'first_name', 'last_name', 'gender', 'email'};
 
   final _formKey = GlobalKey<FormState>();
   final Map<String, TextEditingController> _controllers = {};
@@ -98,6 +99,13 @@ class _CmsFormViewState extends State<CmsFormView> {
     widget.onSubmit(values);
   }
 
+  /// Whether at least one field is actually editable. When every field is
+  /// read-only (e.g. the account tab, which today only shows the locked
+  /// email), there's nothing for "Salva" to submit, so the button is hidden
+  /// rather than shown disabled/dead.
+  bool get _hasEditableField =>
+      widget.form.fields.any((field) => !_isReadOnly(field));
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -109,17 +117,19 @@ class _CmsFormViewState extends State<CmsFormView> {
             _buildField(field),
             const SizedBox(height: AppSpacing.spaceMd),
           ],
-          const SizedBox(height: AppSpacing.spaceXs),
-          ElevatedButton(
-            onPressed: widget.submitting ? null : _submit,
-            child: widget.submitting
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(widget.form.submitLabel ?? 'Salva'),
-          ),
+          if (_hasEditableField) ...[
+            const SizedBox(height: AppSpacing.spaceXs),
+            ElevatedButton(
+              onPressed: widget.submitting ? null : _submit,
+              child: widget.submitting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text(widget.form.submitLabel ?? 'Salva'),
+            ),
+          ],
         ],
       ),
     );

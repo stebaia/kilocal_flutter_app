@@ -5,10 +5,15 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 
 class OnboardingSlideData {
-  const OnboardingSlideData({required this.title, required this.body});
+  const OnboardingSlideData({
+    required this.title,
+    required this.body,
+    required this.image,
+  });
 
   final String title;
   final String body;
+  final String image;
 }
 
 /// The text block (title + body) of an onboarding slide.

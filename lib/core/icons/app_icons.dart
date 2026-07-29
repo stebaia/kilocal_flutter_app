@@ -19,12 +19,15 @@ abstract final class AppIcons {
   static const String lock = 'lock';
   static const String briefcase = 'briefcase';
   static const String archive = 'archive';
+  static const String materialText = 'material_text';
+  static const String materialVideo = 'material_video';
   static const String mindfulness = 'mindfulness';
   static const String selfCare = 'self_care';
   static const String lifestyle = 'lifestyle';
   static const String activities = 'activities';
   static const String supplement = 'stat_supplement';
   static const String strumenti = 'strumenti';
+  static const String calendarFilter = 'calendar_filter';
 }
 
 /// Widget generico per le icone SVG dell'app.

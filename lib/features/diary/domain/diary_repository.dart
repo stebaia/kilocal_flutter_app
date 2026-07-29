@@ -32,6 +32,9 @@ abstract class DiaryRepository {
 
   Future<DiaryGoal> createGoal(DiaryGoalInput input);
 
+  /// Updates a goal's content/due date via `PATCH /journal/goals/{id}`.
+  Future<DiaryGoal> updateGoal(String id, DiaryGoalInput input);
+
   /// Marks a goal completed/uncompleted by setting/clearing `completed_at`.
   Future<void> updateGoalCompletion({
     required String id,

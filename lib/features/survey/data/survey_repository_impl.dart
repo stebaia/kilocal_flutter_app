@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../path/domain/entities/barcode_product.dart';
 import '../domain/entities/pharmacy.dart';
 import '../domain/entities/survey_answer.dart';
 import '../domain/entities/survey_outcome.dart';
@@ -275,6 +276,98 @@ query GetOutcomeProfile($id: GraphQLStringOrFloat!, $lang: String!) {
       rethrow;
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
+    }
+  }
+
+  /// Flattens every product across a kit's phases (`kit_products`), same shape
+  /// as `ProfileKitRepositoryImpl` — no `show_in_shop` filter here since this
+  /// is for barcode matching, not the shop listing. There is no
+  /// `exclude_from_kit_barcode_check` field in the CMS (confirmed by backend,
+  /// 2026-07-28 — it exists on the web front-end only), so every product in
+  /// the kit is eligible; `use_for_barcode_check` is a different flow's field
+  /// (restricted-access unlock) and is not applied here.
+  static const _kitBarcodeProductsQuery = r'''
+query KitBarcodeProducts($kitId: ID!) {
+  product_kits_by_id(id: $kitId) {
+    phases {
+      products_with_duration {
+        kit_products_duration_id {
+          product {
+            id
+            title
+            barcodes
+            variants {
+              barcodes
+            }
+          }
+        }
+      }
+    }
+  }
+}
+''';
+
+  @override
+  Future<List<BarcodeProduct>> fetchKitBarcodeProducts(String kitId) async {
+    try {
+      final result = await _graphqlClient.query(
+        _kitBarcodeProductsQuery,
+        variables: <String, dynamic>{'kitId': kitId},
+      );
+      final kit =
+          (result['data'] as Map<String, dynamic>?)?['product_kits_by_id']
+              as Map<String, dynamic>?;
+      final phases = kit?['phases'] as List<dynamic>? ?? const [];
+
+      final products = <BarcodeProduct>[];
+      final seen = <String>{};
+      for (final phase in phases.whereType<Map<String, dynamic>>()) {
+        final junctions =
+            phase['products_with_duration'] as List<dynamic>? ?? const [];
+        for (final junction in junctions.whereType<Map<String, dynamic>>()) {
+          final product =
+              junction['kit_products_duration_id']
+                  as Map<String, dynamic>?;
+          final raw = product?['product'] as Map<String, dynamic>?;
+          if (raw == null) continue;
+          final id = '${raw['id']}';
+          if (!seen.add(id)) continue;
+          products.add(_mapKitBarcodeProduct(id, raw));
+        }
+      }
+      return products;
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  BarcodeProduct _mapKitBarcodeProduct(String id, Map<String, dynamic> json) {
+    final codes = <String>{
+      ..._barcodeCodesFrom(json['barcodes']),
+      for (final variant
+          in (json['variants'] as List<dynamic>? ?? const [])
+              .whereType<Map<String, dynamic>>())
+        ..._barcodeCodesFrom(variant['barcodes']),
+    };
+    return BarcodeProduct(
+      id: id,
+      title: (json['title'] as String?)?.trim() ?? '',
+      codes: codes,
+    );
+  }
+
+  /// Reads the `codice` values from a `barcodes` JSON field
+  /// (`[{ "codice": "A947328593" }]`), normalised to upper case. Same shape as
+  /// `ProgramUnlockRepositoryImpl._codesFrom`.
+  Iterable<String> _barcodeCodesFrom(dynamic barcodes) sync* {
+    if (barcodes is! List) return;
+    for (final entry in barcodes) {
+      if (entry is Map && entry['codice'] is String) {
+        final code = (entry['codice'] as String).trim().toUpperCase();
+        if (code.isNotEmpty) yield code;
+      }
     }
   }
 

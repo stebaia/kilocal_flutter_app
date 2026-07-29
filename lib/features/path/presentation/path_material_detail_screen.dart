@@ -236,7 +236,61 @@ class _TitleAndBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.spaceMd),
           _AttachmentButton(attachment: attachment),
         ],
+        const SizedBox(height: AppSpacing.spaceMd),
+        _MarkCompletedButton(material: material),
       ],
+    );
+  }
+}
+
+/// "Segna come completato" CTA: the only way a material moves from "Da
+/// vedere" to "Visti" — opening the detail no longer completes it on its own.
+/// Once completed, shows a plain confirmation label instead of a button.
+class _MarkCompletedButton extends StatelessWidget {
+  const _MarkCompletedButton({required this.material});
+
+  final PathMaterialDetail material;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (material.isCompleted) {
+      return Row(
+        children: [
+          const Icon(Icons.check_circle, color: AppColors.accent, size: 20),
+          const SizedBox(width: AppSpacing.spaceXs),
+          Text(
+            l10n.pathMaterialCompleted,
+            style: AppTypography.textTheme.bodyMedium?.copyWith(
+              color: AppColors.accent,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton(
+        onPressed: () =>
+            context.read<PathMaterialDetailCubit>().markCompleted(),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.accent,
+          side: const BorderSide(color: AppColors.accent),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceMd),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+        ),
+        child: Text(
+          l10n.pathMaterialMarkCompleted,
+          style: AppTypography.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
     );
   }
 }

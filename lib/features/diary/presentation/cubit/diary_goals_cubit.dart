@@ -60,6 +60,15 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
     }
   }
 
+  Future<void> updateGoal(DiaryGoal goal, DiaryGoalInput input) async {
+    try {
+      final updated = await _repository.updateGoal(goal.id, input);
+      emit(state.copyWith(goals: _sortByDueDate(_replace(updated))));
+    } catch (_) {
+      emit(state.copyWith(status: DiaryGoalsStatus.error));
+    }
+  }
+
   Future<void> toggleCompleted(DiaryGoal goal) async {
     final target = !goal.isCompleted;
     // Optimistic update; revert on failure by reloading.

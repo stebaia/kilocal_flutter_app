@@ -16,11 +16,15 @@ class IntegrazioneProductCard extends StatelessWidget {
     required this.product,
     required this.onInfoTap,
     required this.onMarkTaken,
+    required this.onUnmarkTaken,
   });
 
   final IntegrazioneProduct product;
   final VoidCallback onInfoTap;
   final VoidCallback onMarkTaken;
+
+  /// Undoes today's intake — the "Preso oggi" CTA must be reversible.
+  final VoidCallback onUnmarkTaken;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +39,6 @@ class IntegrazioneProductCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: AppShadows.card,
       ),
-      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -78,9 +81,11 @@ class IntegrazioneProductCard extends StatelessWidget {
                 _ProgressDots(taken: taken, total: total),
                 const SizedBox(height: AppSpacing.spaceMd),
                 _MarkTakenButton(
-                  label: l10n.integrationMarkTaken,
-                  enabledToday: !takenToday,
-                  onTap: onMarkTaken,
+                  takenToday: takenToday,
+                  label: takenToday
+                      ? l10n.integrationTakenToday
+                      : l10n.integrationMarkTaken,
+                  onTap: takenToday ? onUnmarkTaken : onMarkTaken,
                 ),
               ],
             ),
@@ -110,8 +115,9 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 140,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: AppColors.brandGradientVertical,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       padding: const EdgeInsets.all(AppSpacing.spaceMd),
       child: Row(
@@ -220,52 +226,77 @@ class _ProgressDots extends StatelessWidget {
   }
 }
 
+/// "Segna integrato come preso" / "Preso oggi" CTA, matching the Figma states:
+/// an outlined red button before today's intake is logged, a solid red one
+/// once it is. Both states stay tappable — the solid one undoes the intake,
+/// so the action is always reversible rather than a one-way completion.
 class _MarkTakenButton extends StatelessWidget {
   const _MarkTakenButton({
     required this.label,
-    required this.enabledToday,
+    required this.takenToday,
     required this.onTap,
   });
 
   final String label;
-  final bool enabledToday;
+  final bool takenToday;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton(
-        onPressed: enabledToday ? onTap : null,
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.accent,
-          side: const BorderSide(color: AppColors.accent),
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceMd),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.pill),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              label,
-              style: AppTypography.textTheme.titleSmall?.copyWith(
-                color: enabledToday
-                    ? AppColors.accent
-                    : AppColors.textSecondary,
-                fontWeight: FontWeight.w700,
+    final textStyle = AppTypography.textTheme.titleSmall?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+
+    final button = takenToday
+        ? ElevatedButton(
+            onPressed: onTap,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.accent,
+              foregroundColor: AppColors.neutralWhite,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceMd),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
               ),
             ),
-            const SizedBox(width: AppSpacing.spaceXs),
-            Icon(
-              Icons.check,
-              size: 18,
-              color: enabledToday ? AppColors.accent : AppColors.textSecondary,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: textStyle?.copyWith(color: AppColors.neutralWhite),
+                ),
+                const SizedBox(width: AppSpacing.spaceXs),
+                const Icon(
+                  Icons.check,
+                  size: 18,
+                  color: AppColors.neutralWhite,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          )
+        : OutlinedButton(
+            onPressed: onTap,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.accent,
+              side: const BorderSide(color: AppColors.accent),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceMd),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: textStyle?.copyWith(color: AppColors.accent),
+                ),
+                const SizedBox(width: AppSpacing.spaceXs),
+                const Icon(Icons.check, size: 18, color: AppColors.accent),
+              ],
+            ),
+          );
+
+    return SizedBox(width: double.infinity, child: button);
   }
 }

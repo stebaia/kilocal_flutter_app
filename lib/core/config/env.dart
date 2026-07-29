@@ -22,6 +22,15 @@ abstract final class Env {
   /// Network timeout for connect/receive/send.
   static const Duration timeout = Duration(seconds: 30);
 
+  /// Whether Firebase (Crashlytics/Analytics/Performance/FCM) should be
+  /// initialised. The `staging` Android flavor has no app registered in the
+  /// Firebase project yet, so it disables this to avoid init failures.
+  /// Override with `--dart-define=FIREBASE_ENABLED=true|false`.
+  static const bool isFirebaseEnabled = bool.fromEnvironment(
+    'FIREBASE_ENABLED',
+    defaultValue: true,
+  );
+
   /// Ignores the CMS `is_tool_blocked` kill-switch, so a tool the backend has
   /// switched off can still be opened and tested.
   ///

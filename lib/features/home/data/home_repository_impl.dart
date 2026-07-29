@@ -3,18 +3,29 @@ import 'package:dio/dio.dart';
 import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../path/data/dto/path_progress_dto.dart';
+import '../../path/data/vimeo_oembed_service.dart';
 import '../domain/entities/home_data.dart';
 import '../domain/home_repository.dart';
 import 'dto/home_continue_step_dto.dart';
 import 'dto/home_month_progress_dto.dart';
 import 'dto/home_moment_dto.dart';
 
-/// Repository implementation that loads the home dashboard from GraphQL.
+/// Repository implementation that loads the home dashboard from GraphQL,
+/// plus the lifetime path progress from `GET /path/me/progress` (REST) used
+/// to decide the "Inizia"/"Continua il percorso" CTA.
 class HomeRepositoryImpl implements HomeRepository {
-  HomeRepositoryImpl({required GraphqlClient graphqlClient})
-    : _graphqlClient = graphqlClient;
+  HomeRepositoryImpl({
+    required GraphqlClient graphqlClient,
+    required Dio dio,
+    required VimeoOembedService vimeoOembedService,
+  }) : _graphqlClient = graphqlClient,
+       _dio = dio,
+       _vimeoOembedService = vimeoOembedService;
 
   final GraphqlClient _graphqlClient;
+  final Dio _dio;
+  final VimeoOembedService _vimeoOembedService;
 
   static const _defaultCtaLabel = 'Continua';
   static const _defaultMonthText = 'Le tue attività completate nel mese';
@@ -33,6 +44,8 @@ query HomeContinueAndText($myId: ID!, $lang: String!) {
         title
       }
       asset {
+        asset_is_video
+        vimeo_url
         default_asset {
           id
           filename_download
@@ -46,6 +59,8 @@ query HomeContinueAndText($myId: ID!, $lang: String!) {
         title
       }
       asset {
+        asset_is_video
+        vimeo_url
         default_asset {
           id
           filename_download
@@ -59,6 +74,8 @@ query HomeContinueAndText($myId: ID!, $lang: String!) {
         title
       }
       asset {
+        asset_is_video
+        vimeo_url
         default_asset {
           id
           filename_download
@@ -148,6 +165,7 @@ query HomeMoments($now: String!, $lang: String!) {
     final continueAndText = await _fetchContinueAndText(myId, lang);
     final monthProgress = await _fetchMonthProgress(myId, currentMonth);
     final moment = await _fetchMoment(now, lang);
+    final hasStarted = await _fetchHasStartedPath();
 
     final (continueStepDto, monthText) = continueAndText;
     final continueStep =
@@ -157,9 +175,7 @@ query HomeMoments($now: String!, $lang: String!) {
           ctaLabel: _defaultCtaLabel,
         );
 
-    final continueImage = continueStep.imageFileId != null
-        ? '${Env.baseUrl}/assets/${continueStep.imageFileId}/${continueStep.imageFileName}'
-        : _continueFallbackImage;
+    final continueImage = await _resolveContinueImage(continueStep);
 
     final momentImage = _momentFallbackImage;
 
@@ -170,6 +186,9 @@ query HomeMoments($now: String!, $lang: String!) {
         title: continueStep.title ?? _continueFallbackTitle,
         subtitle: continueStep.ctaLabel,
         imageUrl: continueImage,
+        hasStarted: hasStarted,
+        stepId: continueStep.stepId,
+        area: continueStep.area,
       ),
       monthStats: MonthStats(
         monthLabel: 'Mese $currentMonth',
@@ -188,6 +207,7 @@ query HomeMoments($now: String!, $lang: String!) {
           imageUrl: momentImage,
           route: '/momenti/home',
           assetName: _momentFallbackImage,
+          isLocked: true,
         ),
         HomeActionCard(
           title: 'Benefit',
@@ -242,6 +262,9 @@ query HomeMoments($now: String!, $lang: String!) {
         imageFileId: step?['image_file_id'] as String?,
         imageFileName: step?['image_file_name'] as String?,
         ctaLabel: ctaLabel,
+        vimeoUrl: step?['vimeo_url'] as String?,
+        stepId: step?['step_id'] as String?,
+        area: step?['area'] as String?,
       );
 
       return (dto, monthText);
@@ -257,21 +280,25 @@ query HomeMoments($now: String!, $lang: String!) {
     String lang,
   ) {
     if (details == null) return null;
-    const stepKeys = [
-      'percorso_allenamento_curr_step',
-      'percorso_alimentazione_curr_step',
-      'percorso_benessere_curr_step',
-    ];
-    for (final key in stepKeys) {
-      final step = details[key] as Map<String, dynamic>?;
+    const stepKeys = {
+      'percorso_allenamento_curr_step': 'allenamento',
+      'percorso_alimentazione_curr_step': 'alimentazione',
+      'percorso_benessere_curr_step': 'benessere',
+    };
+    for (final entry in stepKeys.entries) {
+      final step = details[entry.key] as Map<String, dynamic>?;
       if (step == null) continue;
       final title = _translation(step, lang)?['title'] as String?;
       final asset = step['asset'] as Map<String, dynamic>?;
       final file = asset?['default_asset'] as Map<String, dynamic>?;
+      final isVideo = asset?['asset_is_video'] as bool? ?? false;
       return <String, dynamic>{
         'title': title,
         'image_file_id': file?['id'],
         'image_file_name': file?['filename_download'],
+        'vimeo_url': isVideo ? (asset?['vimeo_url'] as String?) : null,
+        'step_id': step['id']?.toString(),
+        'area': entry.value,
       };
     }
     return null;
@@ -357,6 +384,41 @@ query HomeMoments($now: String!, $lang: String!) {
       rethrow;
     } on DioException catch (e) {
       throw ApiException.fromDio(e);
+    }
+  }
+
+  /// Resolves the "continua il percorso" hero image: the CMS
+  /// `default_asset`/`mobile_asset` when present, otherwise the Vimeo oEmbed
+  /// poster for the step's video (156/157 `percorsi_content` rows have no CMS
+  /// cover image — confirmed by backend, 2026-07). Falls back to the static
+  /// asset only when neither is available. See
+  /// [[home-continue-path-image-gap]].
+  Future<String> _resolveContinueImage(HomeContinueStepDto step) async {
+    if (step.imageFileId != null) {
+      return '${Env.baseUrl}/assets/${step.imageFileId}/${step.imageFileName}';
+    }
+    final vimeoUrl = step.vimeoUrl;
+    if (vimeoUrl != null) {
+      final oembed = await _vimeoOembedService.fetch(vimeoUrl);
+      if (oembed?.thumbnailUrl != null) return oembed!.thumbnailUrl!;
+    }
+    return _continueFallbackImage;
+  }
+
+  /// Whether the user has completed at least one step in any path area,
+  /// used to pick "Inizia il percorso" vs "Continua il percorso". Defaults to
+  /// `false` (start state) if the progress endpoint is unreachable.
+  Future<bool> _fetchHasStartedPath() async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/path/me/progress',
+      );
+      final dto = PathProgressResponseDto.fromJson(response.data ?? const {});
+      return dto.data.overall.completed > 0;
+    } on ApiException {
+      return false;
+    } on DioException {
+      return false;
     }
   }
 

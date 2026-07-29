@@ -1,7 +1,7 @@
 part of 'onboarding_cubit.dart';
 
 class OnboardingState extends Equatable {
-  const OnboardingState({this.currentPage = 0, this.totalPages = 3});
+  const OnboardingState({this.currentPage = 0, this.totalPages = 4});
 
   final int currentPage;
   final int totalPages;

@@ -117,7 +117,7 @@ class _Content extends StatelessWidget {
           const SizedBox(height: AppSpacing.spaceSm),
           ProfileProductTile(
             icon: Icons.menu_book_outlined,
-            title: biotype.kit?.title ?? l10n.profileTypeMyKit,
+            title: l10n.profileTypeStarterKit,
             badgeColor: colorFromHex(biotype.mainColor),
             // "Il mio Kit" opens the kit plan card ("Kit tipo N").
             onTap: kitId == null
@@ -162,11 +162,35 @@ class _BiotypeDescriptionHtml extends StatelessWidget {
 
   final String html;
 
+  /// Strips trailing/empty block markup (`<p>&nbsp;</p>`, stray `<br>` runs,
+  /// blank paragraphs) that some CMS entries leave at the end of `content_f`.
+  /// `Html` is `shrinkWrap`-sized, so leftover empty blocks render as real,
+  /// oversized blank space under the visible copy instead of being collapsed.
+  static String _sanitize(String raw) {
+    var html = raw
+        // Empty paragraphs (optionally holding only whitespace/&nbsp;/<br>).
+        .replaceAll(
+          RegExp(r'<p[^>]*>(\s|&nbsp;|<br\s*/?>)*</p>', caseSensitive: false),
+          '',
+        )
+        // Runs of 2+ consecutive <br> tags collapse to a single break.
+        .replaceAll(
+          RegExp(r'(<br\s*/?>\s*){2,}', caseSensitive: false),
+          '<br/>',
+        );
+    // Trailing empty/whitespace-only blocks or breaks left at the very end.
+    html = html.replaceAll(
+      RegExp(r'(\s|&nbsp;|<br\s*/?>|<p[^>]*>\s*</p>)+$', caseSensitive: false),
+      '',
+    );
+    return html.trim();
+  }
+
   @override
   Widget build(BuildContext context) {
     final baseSize = AppTypography.textTheme.bodyMedium?.fontSize ?? 14;
     return Html(
-      data: html,
+      data: _sanitize(html),
       shrinkWrap: true,
       style: {
         'body': Style(

@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../data/vimeo_oembed_service.dart';
 import '../../../../app/di.dart';
-import 'vimeo_player_controller.dart';
+import 'fullscreen_vimeo_player_screen.dart';
 
 /// Full-bleed video header for a material detail, mirroring the path-step video
 /// layout: a custom poster (Vimeo oEmbed thumbnail + play button + duration)
-/// that swaps to an autoplaying Vimeo WebView on tap, with a floating back
-/// button over the media.
+/// with a floating back button over the media. Tapping play opens the video
+/// full-screen (see [pushFullscreenVimeoPlayer]) rather than swapping in an
+/// inline WebView — the JS `requestFullscreen` call some embeds rely on isn't
+/// reliable across WebView engines, so full-screen playback is driven natively
+/// instead.
 ///
-/// Give it a stable [key] (the material id) so the WebView survives unrelated
-/// rebuilds.
+/// Give it a stable [key] (the material id) so unrelated rebuilds don't reset
+/// the poster fetch.
 class PathMaterialVideo extends StatefulWidget {
   const PathMaterialVideo({
     super.key,
@@ -40,7 +42,6 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
   static const double _mediaHeight = 417;
 
   VimeoOembed? _oembed;
-  WebViewController? _controller;
 
   bool get _isVideo => widget.embedUrl != null;
 
@@ -60,16 +61,23 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
   void _play() {
     final embedUrl = widget.embedUrl;
     if (embedUrl == null) return;
+    // fullscreen=0 hides Vimeo's own fullscreen button: the player already
+    // plays inside a Flutter-managed full-screen route (see
+    // [FullscreenVimeoPlayerScreen]), so Vimeo's own requestFullscreen()
+    // would have nothing left to do.
     final autoplayUrl = Uri.parse(embedUrl).replace(
       queryParameters: {
         ...Uri.parse(embedUrl).queryParameters,
         'autoplay': '1',
+        'fullscreen': '0',
       },
     );
 
-    setState(() {
-      _controller = buildVimeoController(autoplayUrl);
-    });
+    pushFullscreenVimeoPlayer(
+      context,
+      embedUrl: autoplayUrl,
+      isLandscape: _oembed?.isLandscape ?? true,
+    );
   }
 
   @override
@@ -78,10 +86,7 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
       borderRadius: BorderRadius.circular(AppRadius.lg),
       child: Stack(
         fit: StackFit.expand,
-        children: [
-          _buildSurface(),
-          if (_controller == null) const _BackButtonOverlay(),
-        ],
+        children: [_buildSurface(), const _BackButtonOverlay()],
       ),
     );
 
@@ -96,9 +101,6 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
   }
 
   Widget _buildSurface() {
-    final controller = _controller;
-    if (controller != null) return WebViewWidget(controller: controller);
-
     if (_isVideo) {
       return _VideoPoster(
         thumbnailUrl: _oembed?.thumbnailUrl ?? widget.posterUrl,

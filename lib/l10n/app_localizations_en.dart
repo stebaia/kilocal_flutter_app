@@ -15,24 +15,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get splashLoading => 'Loading...';
 
   @override
-  String get onboardingTitle1 => 'Welcome to Kilocal';
+  String get onboardingTitle1 => 'Your path.\nFour areas to follow.';
 
   @override
   String get onboardingBody1 =>
-      'Start your personalized wellness journey with us.';
+      'Nutrition, training, supplements and 360° wellbeing, personalized for you';
 
   @override
-  String get onboardingTitle2 => 'Follow your path';
+  String get onboardingTitle2 => 'The Starter Kit.\nYour best ally.';
 
   @override
   String get onboardingBody2 =>
-      'Training, nutrition, wellbeing and integration in one place.';
+      'The right supplements for you in a single Kit that helps you reach your goals.';
 
   @override
-  String get onboardingTitle3 => 'Track your progress';
+  String get onboardingTitle3 => 'Get guidance\nfrom our experts';
 
   @override
-  String get onboardingBody3 => 'Monitor your results and achieve your goals.';
+  String get onboardingBody3 =>
+      'Nutritionists, personal trainers and many other experts guiding you along the way with recipes, videos, challenges and more.';
+
+  @override
+  String get onboardingTitle4 => 'Great. Now you can start.';
+
+  @override
+  String get onboardingBody4 =>
+      'Continue to start your body recomposition journey now.';
 
   @override
   String get onboardingNext => 'Next';
@@ -48,7 +56,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginSubtitle =>
-      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+      'Every day one step closer to your body recomposition.';
 
   @override
   String get loginEmail => 'Email';
@@ -76,10 +84,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get registerSubtitle =>
-      'Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.';
+      'To discover your type and the path tailored for you, fill in the form and start the test.';
 
   @override
-  String get registerFullName => 'Full name';
+  String get registerFirstName => 'First name';
+
+  @override
+  String get registerLastName => 'Last name';
 
   @override
   String get registerEmail => 'Email address';
@@ -217,6 +228,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeContinuePath => 'Continue the path';
 
   @override
+  String get homeStartPath => 'Start the path';
+
+  @override
   String get homeSeeStatistics => 'See statistics';
 
   @override
@@ -231,6 +245,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get homeMonthStatsDescription =>
       'Lorem ipsum dolor sit amet consectetur. Facilisi varius.';
+
+  @override
+  String get homeComingSoonTitle => 'Coming soon';
+
+  @override
+  String get homeComingSoonBody =>
+      'The content of this section will be available soon.';
 
   @override
   String get tabHome => 'Home';
@@ -268,6 +289,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pathLockedBoughtKit => 'I bought the Starter kit';
+
+  @override
+  String get pathTimeframeLockedTitle => 'Month locked';
+
+  @override
+  String get pathTimeframeLockedBody =>
+      'To unlock this month, complete every activity in the previous month first.';
+
+  @override
+  String pathTimeframeLockedBodyDetailed(int count, String monthTitle) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'finish $count more activities',
+      one: 'finish $count more activity',
+    );
+    return 'To unlock the full section: $_temp0 in $monthTitle.';
+  }
+
+  @override
+  String get pathMonthCompletedTitle => 'Congratulations!';
+
+  @override
+  String get pathMonthCompletedBody =>
+      'You\'ve completed every activity for this month.';
+
+  @override
+  String get pathMonthCompletedCta => 'See statistics';
 
   @override
   String get pathUnlockTitle => 'Unlock the programme';
@@ -328,7 +377,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTypePointBodyFallback => 'Content coming soon.';
 
   @override
+  String get profileTypeIntegrationSheetTitle => 'Integration';
+
+  @override
+  String get profileTypeIntegrationSheetHeadline =>
+      'Your Kilocal path isn\'t just nutrition and movement!';
+
+  @override
+  String get profileTypeIntegrationSheetBody =>
+      'The supplement kit is designed to support you step by step, reactivating your body\'s energy and boosting your path\'s results.';
+
+  @override
+  String get profileTypeIntegrationSheetCta => 'See dedicated section';
+
+  @override
   String get profileTypeProductsSection => 'Product information';
+
+  @override
+  String get profileTypeStarterKit => 'Your Starter Kit';
 
   @override
   String get profileTypeMyKit => 'My Kit';
@@ -432,7 +498,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileContactSupport => 'Contact support';
 
   @override
+  String get profileContactSupportNoMailApp =>
+      'No mail app is set up on this device. You can reach us at info@kilocalprogram.it';
+
+  @override
   String get profileLogout => 'Log out';
+
+  @override
+  String get profileLogoutConfirmTitle => 'Log out of your account';
+
+  @override
+  String get profileLogoutConfirmBody =>
+      'Are you sure you want to log out of your account?';
+
+  @override
+  String get profileLogoutConfirmCancel => 'Cancel';
+
+  @override
+  String get profileLogoutConfirmAction => 'Log out';
 
   @override
   String get profileAppVersionSection => 'App';
@@ -462,6 +545,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statisticsMonth => 'Current month';
+
+  @override
+  String get statisticsTimeframeSheetTitle => 'Select a period';
 
   @override
   String get notificationsTitle => 'Notifications';
@@ -683,6 +769,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get integrationMarkTaken => 'Mark supplement as taken';
 
   @override
+  String get integrationTakenToday => 'Taken today';
+
+  @override
   String get integrationMarkTakenError =>
       'Couldn\'t record the intake. Try again later.';
 
@@ -818,6 +907,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diaryGoalCreateTitle => 'New goal';
 
   @override
+  String get diaryGoalEditTitle => 'Edit goal';
+
+  @override
   String get diaryGoalContentHint => 'Describe your goal';
 
   @override
@@ -828,6 +920,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get diaryGoalSave => 'Save';
+
+  @override
+  String get diaryGoalComplete => 'Complete goal';
+
+  @override
+  String get diaryGoalMarkIncomplete => 'Mark as not achieved';
+
+  @override
+  String get diaryGoalDelete => 'Delete goal';
+
+  @override
+  String get diaryGoalDeleteConfirmTitle => 'Delete this goal?';
+
+  @override
+  String get diaryGoalDeleteConfirmBody => 'This action cannot be undone.';
+
+  @override
+  String get diaryGoalDeleteConfirmCancel => 'Cancel';
+
+  @override
+  String get diaryGoalDeleteConfirmAction => 'Delete';
 
   @override
   String get diaryActivityDetailTitle => 'Activity details';
@@ -874,16 +987,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathStepComplete => 'Complete activity';
 
   @override
-  String get pathStepLocked => 'Locked';
-
-  @override
-  String get pathStepCurrent => 'Current';
-
-  @override
-  String get pathStepCompleted => 'Completed';
-
-  @override
-  String get pathStepStarted => 'Started';
+  String get pathStepWatchFullVideo =>
+      'Watch the whole video before marking the activity as completed';
 
   @override
   String pathStepVideoDuration(String duration) {
@@ -940,19 +1045,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pathMaterialsSubtitle => 'Useful resources for your path';
 
   @override
-  String get pathMaterialAvailable => 'Available';
-
-  @override
   String get pathMaterialsEmpty => 'No materials available';
 
   @override
-  String get pathMaterialsFilterAvailable => 'Available';
+  String get pathMaterialsFilterToWatch => 'To watch';
 
   @override
-  String get pathMaterialsFilterCompleted => 'Completed';
+  String get pathMaterialsFilterWatched => 'Watched';
 
   @override
-  String get pathMaterialsFilterUnavailable => 'Unavailable';
+  String get pathMaterialMarkCompleted => 'Mark as completed';
+
+  @override
+  String get pathMaterialCompleted => 'Completed';
 
   @override
   String get pathMaterialDownloadError =>

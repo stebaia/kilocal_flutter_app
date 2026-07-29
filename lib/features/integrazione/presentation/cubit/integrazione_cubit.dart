@@ -72,4 +72,18 @@ class IntegrazioneCubit extends Cubit<IntegrazioneState> {
     );
     await load();
   }
+
+  /// Reverses [markTakenToday] — the "Preso oggi" CTA is reversible.
+  Future<void> unmarkTakenToday(IntegrazioneProduct product) async {
+    final kitId = state.data?.kitId;
+    final trackingId = product.tracking?.id;
+    if (kitId == null || trackingId == null) return;
+
+    await _repository.unmarkTaken(
+      trackingId: trackingId,
+      kitId: kitId,
+      day: DateTime.now(),
+    );
+    await load();
+  }
 }

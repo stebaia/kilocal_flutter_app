@@ -19,10 +19,20 @@ class ContinuePathCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     const cardRadius = 16.0;
     const imageOverflow = 20.0;
+    const imageSize = 157.0;
+    const minGap = AppSpacing.spaceSm;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => context.go('/path'),
+      onTap: () {
+        final area = item.area;
+        final stepId = item.stepId;
+        if (area != null && stepId != null) {
+          context.go('/path/$area/step/$stepId');
+        } else {
+          context.go('/path');
+        }
+      },
       child: SizedBox(
         height: 220,
         child: Stack(
@@ -55,13 +65,14 @@ class ContinuePathCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // White text box on the left.
+                      // White text box on the left. Right-constrained (rather
+                      // than a fixed width) so it never crowds the image on
+                      // narrow screens.
                       Positioned(
                         top: AppSpacing.spaceLg,
                         left: AppSpacing.spaceLg,
+                        right: AppSpacing.spaceLg + imageSize + minGap,
                         child: Container(
-                          width: 120,
-
                           padding: const EdgeInsets.all(AppSpacing.spaceMd),
                           decoration: BoxDecoration(
                             color: AppColors.neutralWhite,
@@ -81,7 +92,9 @@ class ContinuePathCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              l10n.homeContinuePath,
+                              item.hasStarted
+                                  ? l10n.homeContinuePath
+                                  : l10n.homeStartPath,
                               style: AppTypography.textTheme.bodyMedium
                                   ?.copyWith(
                                     color: AppColors.neutralWhite,
@@ -103,8 +116,8 @@ class ContinuePathCard extends StatelessWidget {
               top: 0,
               right: AppSpacing.spaceLg,
               child: Container(
-                width: 157,
-                height: 157,
+                width: imageSize,
+                height: imageSize,
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   color: AppColors.neutralWhite,

@@ -8,17 +8,19 @@
   "@splashLoading": {
     "description": "Text shown while the app is loading on splash"
   },
-  "onboardingTitle1": "Welcome to Kilocal",
-  "onboardingBody1": "Start your personalized wellness journey with us.",
-  "onboardingTitle2": "Follow your path",
-  "onboardingBody2": "Training, nutrition, wellbeing and integration in one place.",
-  "onboardingTitle3": "Track your progress",
-  "onboardingBody3": "Monitor your results and achieve your goals.",
+  "onboardingTitle1": "Your path.\nFour areas to follow.",
+  "onboardingBody1": "Nutrition, training, supplements and 360° wellbeing, personalized for you",
+  "onboardingTitle2": "The Starter Kit.\nYour best ally.",
+  "onboardingBody2": "The right supplements for you in a single Kit that helps you reach your goals.",
+  "onboardingTitle3": "Get guidance\nfrom our experts",
+  "onboardingBody3": "Nutritionists, personal trainers and many other experts guiding you along the way with recipes, videos, challenges and more.",
+  "onboardingTitle4": "Great. Now you can start.",
+  "onboardingBody4": "Continue to start your body recomposition journey now.",
   "onboardingNext": "Next",
   "onboardingStart": "Let's start",
   "onboardingSkip": "Skip",
   "loginTitle": "Login",
-  "loginSubtitle": "Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.",
+  "loginSubtitle": "Every day one step closer to your body recomposition.",
   "loginEmail": "Email",
   "loginPassword": "Password",
   "loginButton": "Sign in",
@@ -27,8 +29,9 @@
   "loginNoAccount": "Don't have an account?",
   "loginSignUp": "Sign up",
   "registerTitle": "Sign up",
-  "registerSubtitle": "Lorem ipsum dolor sit amet consectetur. Ullamcorper quis lacus.",
-  "registerFullName": "Full name",
+  "registerSubtitle": "To discover your type and the path tailored for you, fill in the form and start the test.",
+  "registerFirstName": "First name",
+  "registerLastName": "Last name",
   "registerEmail": "Email address",
   "registerPassword": "Password",
   "registerPasswordConfirm": "Confirm password",
@@ -78,11 +81,14 @@
   "homeQuickLinks": "Quick links",
   "homeHeroTitle": "For you",
   "homeContinuePath": "Continue the path",
+  "homeStartPath": "Start the path",
   "homeSeeStatistics": "See statistics",
   "homeMoments": "Moments",
   "homeBenefits": "Benefits",
   "homePathCardTitle": "Title content to continue lorem ipsuim",
   "homeMonthStatsDescription": "Lorem ipsum dolor sit amet consectetur. Facilisi varius.",
+  "homeComingSoonTitle": "Coming soon",
+  "homeComingSoonBody": "The content of this section will be available soon.",
   "tabHome": "Home",
   "tabPath": "Path",
   "tabDiary": "Diary",
@@ -101,6 +107,38 @@
   },
   "pathLockedUnderstood": "Got it",
   "pathLockedBoughtKit": "I bought the Starter kit",
+  "pathTimeframeLockedTitle": "Month locked",
+  "@pathTimeframeLockedTitle": {
+    "description": "Title of the sheet shown when tapping a month that is locked pending completion of the previous one."
+  },
+  "pathTimeframeLockedBody": "To unlock this month, complete every activity in the previous month first.",
+  "@pathTimeframeLockedBody": {
+    "description": "Body copy of the timeframe-locked sheet."
+  },
+  "pathTimeframeLockedBodyDetailed": "To unlock the full section: {count, plural, one{finish {count} more activity} other{finish {count} more activities}} in {monthTitle}.",
+  "@pathTimeframeLockedBodyDetailed": {
+    "description": "Body copy of the timeframe-locked sheet when we know how many activities are left in the current month.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "monthTitle": {
+        "type": "String"
+      }
+    }
+  },
+  "pathMonthCompletedTitle": "Congratulations!",
+  "@pathMonthCompletedTitle": {
+    "description": "Title of the sheet shown after completing the last activity of a month."
+  },
+  "pathMonthCompletedBody": "You've completed every activity for this month.",
+  "@pathMonthCompletedBody": {
+    "description": "Body copy of the month-completed sheet."
+  },
+  "pathMonthCompletedCta": "See statistics",
+  "@pathMonthCompletedCta": {
+    "description": "CTA on the month-completed sheet, opens the statistics screen."
+  },
   "pathUnlockTitle": "Unlock the programme",
   "@pathUnlockTitle": {
     "description": "Title of the barcode-entry bottom sheet used to unlock the programme."
@@ -140,7 +178,24 @@
   "@profileTypePointBodyFallback": {
     "description": "Fallback body in the body-map point/area sheet when there is no text."
   },
+  "profileTypeIntegrationSheetTitle": "Integration",
+  "@profileTypeIntegrationSheetTitle": {
+    "description": "Title of the intermediate sheet shown before entering the Integrazione area."
+  },
+  "profileTypeIntegrationSheetHeadline": "Your Kilocal path isn't just nutrition and movement!",
+  "@profileTypeIntegrationSheetHeadline": {
+    "description": "Bold headline in the Integrazione intermediate sheet."
+  },
+  "profileTypeIntegrationSheetBody": "The supplement kit is designed to support you step by step, reactivating your body's energy and boosting your path's results.",
+  "@profileTypeIntegrationSheetBody": {
+    "description": "Body copy in the Integrazione intermediate sheet."
+  },
+  "profileTypeIntegrationSheetCta": "See dedicated section",
+  "@profileTypeIntegrationSheetCta": {
+    "description": "CTA button in the Integrazione intermediate sheet; navigates to the Integrazione area."
+  },
   "profileTypeProductsSection": "Product information",
+  "profileTypeStarterKit": "Your Starter Kit",
   "profileTypeMyKit": "My Kit",
   "profileTypeSupplements": "Supplements and products",
   "profileKitTitle": "Kit {type}",
@@ -191,9 +246,29 @@
   "profileSupportSection": "Support",
   "profileTutorial": "Tutorial on how to use the app",
   "profileContactSupport": "Contact support",
+  "profileContactSupportNoMailApp": "No mail app is set up on this device. You can reach us at info@kilocalprogram.it",
+  "@profileContactSupportNoMailApp": {
+    "description": "Shown when the device has no mail app that can handle the mailto: link."
+  },
   "profileLogout": "Log out",
   "@profileLogout": {
     "description": "Logout action label in the profile screen"
+  },
+  "profileLogoutConfirmTitle": "Log out of your account",
+  "@profileLogoutConfirmTitle": {
+    "description": "Title of the confirmation dialog shown before logging out."
+  },
+  "profileLogoutConfirmBody": "Are you sure you want to log out of your account?",
+  "@profileLogoutConfirmBody": {
+    "description": "Body of the confirmation dialog shown before logging out."
+  },
+  "profileLogoutConfirmCancel": "Cancel",
+  "@profileLogoutConfirmCancel": {
+    "description": "Cancel button in the logout confirmation dialog."
+  },
+  "profileLogoutConfirmAction": "Log out",
+  "@profileLogoutConfirmAction": {
+    "description": "Confirm button in the logout confirmation dialog."
   },
   "profileAppVersionSection": "App",
   "profileAppVersion": "App version",
@@ -223,6 +298,7 @@
   },
   "statisticsTitle": "Statistics",
   "statisticsMonth": "Current month",
+  "statisticsTimeframeSheetTitle": "Select a period",
   "notificationsTitle": "Notifications",
   "errorGeneric": "Something went wrong. Please try again.",
   "retry": "Retry",
@@ -310,6 +386,7 @@
     "placeholders": { "days": { "type": "int" } }
   },
   "integrationMarkTaken": "Mark supplement as taken",
+  "integrationTakenToday": "Taken today",
   "integrationMarkTakenError": "Couldn't record the intake. Try again later.",
   "integrationMarkedTaken": "Intake recorded",
   "integrationInstructionsTitle": "Usage instructions",
@@ -361,10 +438,42 @@
   "diaryFilterKilocal": "Kilocal goals",
   "diaryFilterCompleted": "Completed",
   "diaryGoalCreateTitle": "New goal",
+  "diaryGoalEditTitle": "Edit goal",
+  "@diaryGoalEditTitle": {
+    "description": "Title of the goal edit sheet (create_goal_sheet reused in edit mode)."
+  },
   "diaryGoalContentHint": "Describe your goal",
   "diaryGoalCategory": "Category",
   "diaryGoalPickDate": "Add a date",
   "diaryGoalSave": "Save",
+  "diaryGoalComplete": "Complete goal",
+  "@diaryGoalComplete": {
+    "description": "Button in the goal detail sheet to mark an incomplete goal as achieved."
+  },
+  "diaryGoalMarkIncomplete": "Mark as not achieved",
+  "@diaryGoalMarkIncomplete": {
+    "description": "Button in the goal detail sheet to revert a completed goal back to not-achieved."
+  },
+  "diaryGoalDelete": "Delete goal",
+  "@diaryGoalDelete": {
+    "description": "Button in the goal detail sheet to delete the goal."
+  },
+  "diaryGoalDeleteConfirmTitle": "Delete this goal?",
+  "@diaryGoalDeleteConfirmTitle": {
+    "description": "Title of the confirmation dialog before deleting a goal."
+  },
+  "diaryGoalDeleteConfirmBody": "This action cannot be undone.",
+  "@diaryGoalDeleteConfirmBody": {
+    "description": "Body of the confirmation dialog before deleting a goal."
+  },
+  "diaryGoalDeleteConfirmCancel": "Cancel",
+  "@diaryGoalDeleteConfirmCancel": {
+    "description": "Cancel button in the goal deletion confirmation dialog."
+  },
+  "diaryGoalDeleteConfirmAction": "Delete",
+  "@diaryGoalDeleteConfirmAction": {
+    "description": "Confirm button in the goal deletion confirmation dialog."
+  },
   "diaryActivityDetailTitle": "Activity details",
   "diaryActivityCategory": "Category: {category}",
   "@diaryActivityCategory": {
@@ -397,10 +506,7 @@
   },
   "pathStepContentTitle": "Activity",
   "pathStepComplete": "Complete activity",
-  "pathStepLocked": "Locked",
-  "pathStepCurrent": "Current",
-  "pathStepCompleted": "Completed",
-  "pathStepStarted": "Started",
+  "pathStepWatchFullVideo": "Watch the whole video before marking the activity as completed",
   "pathStepVideoDuration": "{duration} min",
   "@pathStepVideoDuration": {
     "placeholders": {
@@ -438,11 +544,11 @@
   "pathAreaProgressLabel": "Your path",
   "pathMaterialsTitle": "Extra materials",
   "pathMaterialsSubtitle": "Useful resources for your path",
-  "pathMaterialAvailable": "Available",
   "pathMaterialsEmpty": "No materials available",
-  "pathMaterialsFilterAvailable": "Available",
-  "pathMaterialsFilterCompleted": "Completed",
-  "pathMaterialsFilterUnavailable": "Unavailable",
+  "pathMaterialsFilterToWatch": "To watch",
+  "pathMaterialsFilterWatched": "Watched",
+  "pathMaterialMarkCompleted": "Mark as completed",
+  "pathMaterialCompleted": "Completed",
   "pathMaterialDownloadError": "Could not open the file. Please try again.",
   "pathTimeframeStepsCount": "{count, plural, =1{1 activity} other{{count} activities}}",
   "@pathTimeframeStepsCount": {

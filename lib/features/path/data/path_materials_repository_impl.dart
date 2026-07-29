@@ -299,6 +299,7 @@ query GetMaterial($id: ID!, $lang: String!) {
       final content = _nonEmpty(translation?.content) ?? _articleContent(dto);
       final asset = dto.asset ?? dto.article?.cover;
       final file = asset?.defaultAsset ?? asset?.mobileAsset;
+      final completedIds = await _fetchCompletedMaterialIds();
 
       return PathMaterialDetail(
         id: dto.id,
@@ -307,6 +308,7 @@ query GetMaterial($id: ID!, $lang: String!) {
             _nonEmpty(articleTranslation?.title) ??
             '',
         isVideo: asset?.assetIsVideo ?? false,
+        isCompleted: completedIds.contains(dto.id),
         subtitle: _nonEmpty(articleTranslation?.subtitle),
         content: content,
         imageUrl: _assetUrl(file),

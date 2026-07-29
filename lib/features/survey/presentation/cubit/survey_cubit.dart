@@ -6,6 +6,7 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/monitoring/analytics_events.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../../path/domain/program_unlock_repository.dart';
+import '../../../user/presentation/cubit/user_cubit.dart';
 import '../../domain/entities/pharmacy.dart';
 import '../../domain/entities/survey_answer.dart';
 import '../../domain/entities/survey_outcome.dart';
@@ -22,18 +23,26 @@ class SurveyCubit extends Cubit<SurveyState> {
     required SurveyRepository repository,
     required AnalyticsEvents analytics,
     required ProgramUnlockRepository unlockRepository,
+    required UserCubit userCubit,
   }) : _repository = repository,
        _analytics = analytics,
        _unlockRepository = unlockRepository,
+       _userCubit = userCubit,
        super(const SurveyState());
 
   final SurveyRepository _repository;
   final AnalyticsEvents _analytics;
 
   /// Supplies the `use_for_barcode_check` catalogue for `other_validations:
-  /// "barcode"` steps. Shared with the restricted-access unlock sheet so both
-  /// accept exactly the same codes.
+  /// "barcode"` steps that are NOT gated to a specific kit
+  /// (`single_product_barcode_check == true`, e.g. the restricted-access
+  /// unlock flow). Shared with that sheet so both accept exactly the same
+  /// codes.
   final ProgramUnlockRepository _unlockRepository;
+
+  /// Source of the logged-in user's kit id, for the kit proof-of-purchase step
+  /// (`single_product_barcode_check == false`) — see [_loadKitBarcodeProduct].
+  final UserCubit _userCubit;
 
   // Matches the other cubit-level messages, which are Italian literals because
   // a Cubit has no BuildContext to reach AppLocalizations from.
@@ -60,6 +69,7 @@ class SurveyCubit extends Cubit<SurveyState> {
           visibleSections: _computeVisible(survey, const {}),
         ),
       );
+      unawaited(_loadKitBarcodeProduct(survey));
     } on ApiException catch (e) {
       emit(
         state.copyWith(
@@ -282,16 +292,16 @@ class SurveyCubit extends Cubit<SurveyState> {
     }
   }
 
-  /// Validates an `other_validations: "barcode"` step against the products
-  /// flagged `use_for_barcode_check` — the proof of purchase for the starter
-  /// kit. Returns whether the wizard may advance.
+  /// Validates an `other_validations: "barcode"` step — the proof of
+  /// purchase — against the right code source (see [_isKnownBarcode]).
+  /// Returns whether the wizard may advance.
   ///
-  /// Format alone proves nothing here, so the code must match the catalogue,
-  /// exactly as the restricted-access unlock sheet requires. On a mismatch the
-  /// user stays on the step with an error.
+  /// Format alone proves nothing here, so the code must match the catalogue.
+  /// On a mismatch the user stays on the step with an error.
   Future<bool> _barcodeAccepted() async {
-    final question = state.currentSection?.question;
-    if (question == null) return true;
+    final section = state.currentSection;
+    final question = section?.question;
+    if (section == null || question == null) return true;
     if (!SurveyValidationRule.parse(question.otherValidations).isBarcode) {
       return true;
     }
@@ -301,7 +311,7 @@ class SurveyCubit extends Cubit<SurveyState> {
     if (code.isEmpty) return true;
 
     emit(state.copyWith(status: SurveyStatus.submitting, clearError: true));
-    final matches = await _isKnownBarcode(code);
+    final matches = await _isKnownBarcode(code, section);
     emit(
       state.copyWith(
         status: SurveyStatus.inProgress,
@@ -337,7 +347,9 @@ class SurveyCubit extends Cubit<SurveyState> {
         final code = raw?.trim().toUpperCase() ?? '';
         // Empty is the `required` check's business, handled above.
         if (code.isEmpty) continue;
-        if (!await _isKnownBarcode(code)) return (i, _invalidBarcodeMessage);
+        if (!await _isKnownBarcode(code, section)) {
+          return (i, _invalidBarcodeMessage);
+        }
         continue;
       }
 
@@ -348,14 +360,66 @@ class SurveyCubit extends Cubit<SurveyState> {
     return null;
   }
 
-  /// Whether [code] is in the `use_for_barcode_check` catalogue. A failed read
+  /// Whether [code] is a valid proof of purchase for [section].
+  ///
+  /// `single_product_barcode_check == false` (the Starter Kit flow, e.g.
+  /// `starter_kit`) means the code must match a product from the user's own
+  /// kit ([SurveyState.kitBarcodeProduct] — see [_loadKitBarcodeProduct]);
+  /// `true` (single-product flows, e.g. the restricted-access unlock) checks
+  /// the generic `use_for_barcode_check` catalogue instead. A failed read
   /// returns false: letting an unverified code through would defeat the gate.
-  Future<bool> _isKnownBarcode(String code) async {
+  Future<bool> _isKnownBarcode(String code, SurveySection section) async {
+    if (!section.singleProductBarcodeCheck) {
+      final product = state.kitBarcodeProduct;
+      return product != null && product.codes.contains(code);
+    }
     try {
       final products = await _unlockRepository.fetchBarcodeProducts();
       return products.any((p) => p.codes.contains(code));
     } on ApiException {
       return false;
+    }
+  }
+
+  /// Picks a random product from the logged-in user's kit for the Starter
+  /// Kit proof-of-purchase step (a section with `other_validations: "barcode"`
+  /// and `single_product_barcode_check == false`, e.g. `starter_kit` section
+  /// 11) — its title fills `{{product}}` and its barcodes (+ variants) become
+  /// the accepted codes for that step, instead of the generic
+  /// `use_for_barcode_check` catalogue or the hardcoded "Starter Kit Kilocal".
+  ///
+  /// A read failure or a survey with no such step leaves [kitBarcodeProduct]
+  /// `null` — `_SectionBody` in `survey_screen.dart` then falls back to the
+  /// literal "Starter Kit Kilocal" and this step's validation fails closed via
+  /// [_isKnownBarcode].
+  Future<void> _loadKitBarcodeProduct(Survey survey) async {
+    final needsKitProduct = survey.sections.any(
+      (s) =>
+          !s.singleProductBarcodeCheck &&
+          SurveyValidationRule.parse(s.question?.otherValidations).isBarcode,
+    );
+    if (!needsKitProduct) return;
+
+    final kitId = _userCubit.state.details?.biotype?.kit?.id;
+    if (kitId == null) return;
+
+    try {
+      final products = await _repository.fetchKitBarcodeProducts(kitId);
+      final eligible = products.where((p) => p.codes.isNotEmpty).toList();
+      if (eligible.isEmpty) return;
+      eligible.shuffle();
+      final chosen = eligible.first;
+      emit(
+        state.copyWith(
+          kitBarcodeProduct: KitBarcodeProduct(
+            title: chosen.title,
+            codes: chosen.codes,
+          ),
+        ),
+      );
+    } on ApiException {
+      // Swallowed: the step degrades to the literal fallback name and fails
+      // validation closed rather than blocking the whole survey from loading.
     }
   }
 
