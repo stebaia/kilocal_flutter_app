@@ -61,14 +61,23 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
   void _play() {
     final embedUrl = widget.embedUrl;
     if (embedUrl == null) return;
+    // fullscreen=0 hides Vimeo's own fullscreen button: the player already
+    // plays inside a Flutter-managed full-screen route (see
+    // [FullscreenVimeoPlayerScreen]), so Vimeo's own requestFullscreen()
+    // would have nothing left to do.
     final autoplayUrl = Uri.parse(embedUrl).replace(
       queryParameters: {
         ...Uri.parse(embedUrl).queryParameters,
         'autoplay': '1',
+        'fullscreen': '0',
       },
     );
 
-    pushFullscreenVimeoPlayer(context, embedUrl: autoplayUrl);
+    pushFullscreenVimeoPlayer(
+      context,
+      embedUrl: autoplayUrl,
+      isLandscape: _oembed?.isLandscape ?? true,
+    );
   }
 
   @override

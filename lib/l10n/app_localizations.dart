@@ -1838,6 +1838,12 @@ abstract class AppLocalizations {
   /// **'Complete activity'**
   String get pathStepComplete;
 
+  /// No description provided for @pathStepWatchFullVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch the whole video before marking the activity as completed'**
+  String get pathStepWatchFullVideo;
+
   /// No description provided for @pathStepVideoDuration.
   ///
   /// In en, this message translates to:

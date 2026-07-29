@@ -2,13 +2,27 @@ import 'package:dio/dio.dart';
 
 /// Lightweight metadata for a Vimeo video fetched via the public v2 video API.
 class VimeoOembed {
-  const VimeoOembed({this.thumbnailUrl, this.duration});
+  const VimeoOembed({
+    this.thumbnailUrl,
+    this.duration,
+    this.width,
+    this.height,
+  });
 
   /// Poster image for the video (`thumbnail_large`, a fixed 640px-wide still).
   final String? thumbnailUrl;
 
   /// Video length, used to render the duration overlay.
   final Duration? duration;
+
+  /// Source width/height in pixels, used to tell landscape from portrait
+  /// footage so the full-screen player can pick the matching orientation.
+  final int? width;
+  final int? height;
+
+  /// Whether the video is wider than it is tall. Defaults to `true` (the
+  /// common case) when dimensions are missing.
+  bool get isLandscape => (width ?? 1) >= (height ?? 1);
 }
 
 /// Fetches public Vimeo metadata (thumbnail + duration) via the legacy `v2`
@@ -75,6 +89,8 @@ class VimeoOembedService {
       return VimeoOembed(
         thumbnailUrl: entry['thumbnail_large'] as String?,
         duration: seconds is int ? Duration(seconds: seconds) : null,
+        width: entry['width'] as int?,
+        height: entry['height'] as int?,
       );
     } on DioException {
       return null;

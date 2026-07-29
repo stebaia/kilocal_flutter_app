@@ -10,6 +10,10 @@ typedef VimeoProgressCallback = void Function(double fraction);
 /// JS channel name the host HTML page posts Vimeo player events to.
 const _kVimeoChannelName = 'VimeoEvents';
 
+/// Payload posted on the channel when the video reaches its end, in place of
+/// a 0.0-1.0 progress fraction.
+const _kEndedMessage = 'ended';
+
 /// Builds the [WebViewController] used to play a Vimeo embed, with fullscreen
 /// enabled and playback-progress reporting via the official Vimeo Player API.
 ///
@@ -22,7 +26,9 @@ const _kVimeoChannelName = 'VimeoEvents';
 /// — this host page is what makes `onProgress` possible.
 WebViewController buildVimeoController(
   Uri url, {
+  bool rotateForLandscape = false,
   VimeoProgressCallback? onProgress,
+  VoidCallback? onEnded,
 }) {
   final params = switch (WebViewPlatform.instance) {
     WebKitWebViewPlatform() => WebKitWebViewControllerCreationParams(
@@ -38,11 +44,18 @@ WebViewController buildVimeoController(
     ..addJavaScriptChannel(
       _kVimeoChannelName,
       onMessageReceived: (message) {
+        if (message.message == _kEndedMessage) {
+          onEnded?.call();
+          return;
+        }
         final fraction = double.tryParse(message.message);
         if (fraction != null) onProgress?.call(fraction);
       },
     )
-    ..loadHtmlString(_hostHtml(url), baseUrl: 'https://player.vimeo.com');
+    ..loadHtmlString(
+      _hostHtml(url, rotate: rotateForLandscape),
+      baseUrl: 'https://player.vimeo.com',
+    );
 
   final platform = controller.platform;
   if (platform is AndroidWebViewController) {
@@ -63,12 +76,42 @@ WebViewController buildVimeoController(
 /// Host page embedding the Vimeo player via the official `player.js` SDK
 /// (Vimeo Player API), so playback events are available over `postMessage`
 /// exactly as Vimeo's own documentation describes for a page that owns the
-/// `<iframe>`. Requests fullscreen automatically once playback starts (with
-/// Vimeo's own player chrome, so the user can still shrink it back down from
-/// there), and reports watch progress back to Flutter via
+/// `<iframe>`. The WebView itself already fills a dedicated full-screen native
+/// route (see [FullscreenVimeoPlayerScreen]), so this page does not also call
+/// the player's own `requestFullscreen()` — doing so on top of an
+/// already-full-screen WebView was unreliable across engines and could eat
+/// the tap that started playback, leaving the video paused. Reports watch
+/// progress and the end-of-playback event back to Flutter via
 /// [_kVimeoChannelName].
-String _hostHtml(Uri embedUrl) {
+///
+/// When [rotate] is true (a landscape video shown on a portrait screen), the
+/// `<iframe>` is rotated 90° with plain CSS, sized to the screen's *rotated*
+/// dimensions (`100vh` wide, `100vw` tall) before the rotation is applied —
+/// this is rendering done entirely inside the WebView's own browser engine,
+/// not a Flutter `Transform` on the platform view, which is what makes it
+/// safe: Flutter transforms on an embedded WebView/WKWebView don't compose
+/// correctly with the platform's own compositor and can leave the video
+/// black, but the WebView's internal CSS engine handles a rotated iframe the
+/// same way any web page would.
+String _hostHtml(Uri embedUrl, {required bool rotate}) {
   final src = embedUrl.toString();
+  final iframeStyle = rotate
+      ? '''
+    iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100vh;
+      height: 100vw;
+      border: 0;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center center;
+    }
+'''
+      : '''
+    iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+''';
+
   return '''
 <!DOCTYPE html>
 <html>
@@ -76,7 +119,7 @@ String _hostHtml(Uri embedUrl) {
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <style>
     html, body { margin: 0; padding: 0; background: #000; height: 100%; overflow: hidden; }
-    iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+$iframeStyle
   </style>
 </head>
 <body>
@@ -85,19 +128,15 @@ String _hostHtml(Uri embedUrl) {
   <script>
     var iframe = document.getElementById('vimeoPlayer');
     var player = new Vimeo.Player(iframe);
-    var requestedFullscreen = false;
-
-    player.on('play', function() {
-      if (!requestedFullscreen) {
-        requestedFullscreen = true;
-        player.requestFullscreen().catch(function() {});
-      }
-    });
 
     player.on('timeupdate', function(data) {
       if (data && data.duration) {
         $_kVimeoChannelName.postMessage(String(data.seconds / data.duration));
       }
+    });
+
+    player.on('ended', function() {
+      $_kVimeoChannelName.postMessage('$_kEndedMessage');
     });
   </script>
 </body>

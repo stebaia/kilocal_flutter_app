@@ -991,6 +991,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get pathStepComplete => 'Completa attività';
 
   @override
+  String get pathStepWatchFullVideo =>
+      'Guarda tutto il video prima di segnare l\'attività come completata';
+
+  @override
   String pathStepVideoDuration(String duration) {
     return '$duration min';
   }

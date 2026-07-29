@@ -9,6 +9,7 @@ import '../../../core/icons/app_icons.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/app_bottom_sheet.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../strumenti/promemoria/domain/promemoria_repository.dart';
 import '../../strumenti/promemoria/presentation/widgets/promemoria_create_sheet.dart';
@@ -256,15 +257,28 @@ class _StepContent extends StatelessWidget {
                   if (isVideo)
                     ValueListenableBuilder<double>(
                       valueListenable: watchedFraction,
-                      builder: (context, fraction, _) => SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: fraction >= _completionThreshold
-                              ? () => _completeStep(context)
-                              : null,
-                          child: Text(l10n.pathStepComplete),
-                        ),
-                      ),
+                      builder: (context, fraction, _) {
+                        final unlocked = fraction >= _completionThreshold;
+                        return SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            // Kept visually "disabled" (grey) until the video
+                            // is watched, but always tappable underneath so a
+                            // tap can explain why via a bottom sheet — a truly
+                            // disabled button swallows the tap instead.
+                            style: unlocked
+                                ? null
+                                : ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.divider,
+                                    foregroundColor: AppColors.textSecondary,
+                                  ),
+                            onPressed: unlocked
+                                ? () => _completeStep(context)
+                                : () => _showWatchFullVideoSheet(context),
+                            child: Text(l10n.pathStepComplete),
+                          ),
+                        );
+                      },
                     )
                   else
                     SizedBox(
@@ -278,6 +292,20 @@ class _StepContent extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showWatchFullVideoSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    showAppBottomSheet<void>(
+      context: context,
+      title: l10n.pathStepComplete,
+      child: Text(
+        l10n.pathStepWatchFullVideo,
+        style: AppTypography.textTheme.bodyMedium?.copyWith(
+          color: AppColors.textSecondary,
+        ),
       ),
     );
   }
@@ -374,17 +402,24 @@ class _StepMediaState extends State<_StepMedia> {
     final embedUrl = widget.step.asset.vimeoEmbedUrl;
     if (embedUrl == null) return;
     // Autoplay so the tap on the custom poster starts the video immediately.
+    // fullscreen=0 hides Vimeo's own fullscreen button: the player already
+    // plays inside a Flutter-managed full-screen route (see
+    // [FullscreenVimeoPlayerScreen]), so Vimeo's own requestFullscreen()
+    // would have nothing left to do.
     final autoplayUrl = Uri.parse(embedUrl).replace(
       queryParameters: {
         ...Uri.parse(embedUrl).queryParameters,
         'autoplay': '1',
+        'fullscreen': '0',
       },
     );
 
     pushFullscreenVimeoPlayer(
       context,
       embedUrl: autoplayUrl,
+      isLandscape: _oembed?.isLandscape ?? true,
       onProgress: widget.onProgress,
+      onEnded: () => widget.onProgress(1),
     );
   }
 
