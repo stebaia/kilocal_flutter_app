@@ -191,7 +191,16 @@ class SurveyCubit extends Cubit<SurveyState> {
     final visible = survey == null
         ? state.visibleSections
         : _computeVisible(survey, answers);
-    emit(state.copyWith(answers: answers, visibleSections: visible));
+    // Any answer edit un-pins the `#stop#` block: it can only have been
+    // reached by stepping back onto the risky question (see `previous()`),
+    // and the user is actively changing that answer.
+    emit(
+      state.copyWith(
+        answers: answers,
+        visibleSections: visible,
+        blockedByStop: false,
+      ),
+    );
   }
 
   // --- Navigation ------------------------------------------------------------
@@ -201,6 +210,34 @@ class SurveyCubit extends Cubit<SurveyState> {
     // unanswered required step or a failed `other_validations` rule must never
     // advance, whatever calls next().
     if (!state.canLeaveCurrentStep) return;
+
+    // A `#stop#`-marked option (e.g. "sei in gravidanza" → "Sì") blocks the
+    // survey outright: jump to the last section and show dedicated copy
+    // instead of advancing normally. Checked before the barcode/alert gates —
+    // there is nothing to confirm or validate past this point.
+    if (state.currentResultAction == SurveyResultAction.stop) {
+      emit(
+        state.copyWith(
+          currentIndex: state.visibleSections.length - 1,
+          blockedByStop: true,
+        ),
+      );
+      return;
+    }
+
+    // A `#alert#`-marked option requires the CMS confirmation dialog before
+    // continuing. The UI shows it and calls confirmAlert()/dismissAlert();
+    // next() re-runs and passes once confirmedAlertAnswers has this answer.
+    if (state.currentResultAction == SurveyResultAction.alert &&
+        state.currentAlertNeedsConfirmation) {
+      final modal = await _repository.fetchAlertModal();
+      // A missing CMS entity must not trap the user on a step with no dialog
+      // to confirm — degrade to letting them through.
+      if (modal != null) {
+        emit(state.copyWith(pendingAlert: modal));
+        return;
+      }
+    }
 
     // A `barcode` step is only valid against the products catalogue, so it is
     // checked here rather than while typing.
@@ -230,8 +267,37 @@ class SurveyCubit extends Cubit<SurveyState> {
 
   void previous() {
     if (state.currentIndex > 0) {
-      emit(state.copyWith(currentIndex: state.currentIndex - 1));
+      // Stepping back off the last section un-pins the `#stop#` block: the
+      // user is re-answering the risky question, not stuck in the CMS
+      // fallback copy.
+      emit(
+        state.copyWith(
+          currentIndex: state.currentIndex - 1,
+          blockedByStop: false,
+        ),
+      );
     }
+  }
+
+  /// Confirms the pending `#alert#` dialog and re-runs `next()`, which now
+  /// finds this answer in [SurveyState.confirmedAlertAnswers] and advances.
+  Future<void> confirmAlert() async {
+    final key = state._currentAlertAnswerKey;
+    emit(
+      state.copyWith(
+        clearPendingAlert: true,
+        confirmedAlertAnswers: key == null
+            ? state.confirmedAlertAnswers
+            : {...state.confirmedAlertAnswers, key},
+      ),
+    );
+    await next();
+  }
+
+  /// Dismisses the pending `#alert#` dialog without confirming: the user
+  /// stays on the current step.
+  void dismissAlert() {
+    emit(state.copyWith(clearPendingAlert: true));
   }
 
   /// Sends the answers. When [advanceOnly] the wizard stays in progress so the

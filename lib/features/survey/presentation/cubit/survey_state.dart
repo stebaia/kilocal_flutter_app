@@ -34,6 +34,9 @@ class SurveyState extends Equatable {
     this.outcomeProfile,
     this.errorMessage,
     this.kitBarcodeProduct,
+    this.blockedByStop = false,
+    this.pendingAlert,
+    this.confirmedAlertAnswers = const {},
   });
 
   final SurveyStatus status;
@@ -65,6 +68,21 @@ class SurveyState extends Equatable {
   /// barcode section, `single_product_barcode_check == false`), or `null`
   /// when not yet resolved / not applicable. See [KitBarcodeProduct].
   final KitBarcodeProduct? kitBarcodeProduct;
+
+  /// Set once a `#stop#`-marked option is confirmed via `next()`: the wizard
+  /// is pinned on the survey's last section showing dedicated stop copy
+  /// instead of that section's own content, and the CTA no longer advances.
+  final bool blockedByStop;
+
+  /// Non-null while an `#alert#`-marked option's confirmation dialog is
+  /// pending — `next()` set it instead of advancing. The UI shows the CMS
+  /// dialog and calls `confirmAlert()` / `dismissAlert()`.
+  final SurveyAlertModal? pendingAlert;
+
+  /// `"$sectionId:$optionId"` keys already confirmed via the `#alert#`
+  /// dialog, so re-visiting an unchanged answer doesn't ask again — only a
+  /// *different* risky selection re-prompts.
+  final Set<String> confirmedAlertAnswers;
 
   SurveySection? get currentSection =>
       currentIndex >= 0 && currentIndex < visibleSections.length
@@ -131,6 +149,49 @@ class SurveyState extends Equatable {
   double get progress =>
       visibleSections.isEmpty ? 0 : (currentIndex + 1) / visibleSections.length;
 
+  /// The gating marker (`#stop#` / `#alert#`) of the currently selected
+  /// option(s) on this step, or `null` when none is selected or its
+  /// `result_value` is a plain biotype score.
+  ///
+  /// Radio/checkbox only: `#stop#` takes priority over `#alert#` when both
+  /// somehow appear together (e.g. a multi-select question), since it is the
+  /// stricter gate.
+  SurveyResultAction? get currentResultAction {
+    final question = currentSection?.question;
+    if (question == null) return null;
+    final selectedIds = currentAnswer?.selectedOptionIds ?? const <String>[];
+    if (selectedIds.isEmpty) return null;
+    final actions = question.options
+        .where((o) => selectedIds.contains(o.id))
+        .map((o) => o.resultAction)
+        .whereType<SurveyResultAction>()
+        .toSet();
+    if (actions.contains(SurveyResultAction.stop)) {
+      return SurveyResultAction.stop;
+    }
+    if (actions.contains(SurveyResultAction.alert)) {
+      return SurveyResultAction.alert;
+    }
+    return null;
+  }
+
+  /// Key identifying the current step's selection for
+  /// [confirmedAlertAnswers], so a *changed* answer re-prompts the alert even
+  /// if the previous one had already been confirmed.
+  String? get _currentAlertAnswerKey {
+    final section = currentSection;
+    final selectedIds = currentAnswer?.selectedOptionIds ?? const <String>[];
+    if (section == null || selectedIds.isEmpty) return null;
+    return '${section.id}:${selectedIds.join(',')}';
+  }
+
+  /// Whether the current `#alert#` selection still needs its confirmation
+  /// dialog (`false` once already confirmed for this exact answer).
+  bool get currentAlertNeedsConfirmation {
+    final key = _currentAlertAnswerKey;
+    return key == null || !confirmedAlertAnswers.contains(key);
+  }
+
   SurveyState copyWith({
     SurveyStatus? status,
     Survey? survey,
@@ -142,11 +203,18 @@ class SurveyState extends Equatable {
     SurveyOutcome? outcomeProfile,
     String? errorMessage,
     KitBarcodeProduct? kitBarcodeProduct,
+    bool? blockedByStop,
+    Set<String>? confirmedAlertAnswers,
 
     /// Clears [errorMessage]. `copyWith(errorMessage: null)` cannot: a null
     /// argument is indistinguishable from "not passed", so it keeps the old
     /// message and a fixed answer would still show the previous error.
     bool clearError = false,
+
+    /// Sets [pendingAlert]. Plain `pendingAlert: null` cannot clear it — same
+    /// null-vs-not-passed ambiguity as [clearError].
+    SurveyAlertModal? pendingAlert,
+    bool clearPendingAlert = false,
   }) {
     return SurveyState(
       status: status ?? this.status,
@@ -159,6 +227,12 @@ class SurveyState extends Equatable {
       outcomeProfile: outcomeProfile ?? this.outcomeProfile,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       kitBarcodeProduct: kitBarcodeProduct ?? this.kitBarcodeProduct,
+      blockedByStop: blockedByStop ?? this.blockedByStop,
+      pendingAlert: clearPendingAlert
+          ? null
+          : (pendingAlert ?? this.pendingAlert),
+      confirmedAlertAnswers:
+          confirmedAlertAnswers ?? this.confirmedAlertAnswers,
     );
   }
 
@@ -174,5 +248,8 @@ class SurveyState extends Equatable {
     outcomeProfile,
     errorMessage,
     kitBarcodeProduct,
+    blockedByStop,
+    pendingAlert,
+    confirmedAlertAnswers,
   ];
 }

@@ -59,4 +59,12 @@ abstract interface class SurveyRepository {
   /// barcodes replace the generic `use_for_barcode_check` catalogue for
   /// validating the code entered on this step.
   Future<List<BarcodeProduct>> fetchKitBarcodeProducts(String kitId);
+
+  /// CMS copy for the confirmation dialog shown when an `#alert#`-marked
+  /// option is selected (`alert_survey_risky_selection_modal`).
+  ///
+  /// Returns `null` when the CMS entity is missing, so the caller degrades to
+  /// letting the user through unblocked rather than stalling on a dialog with
+  /// no copy.
+  Future<SurveyAlertModal?> fetchAlertModal();
 }
