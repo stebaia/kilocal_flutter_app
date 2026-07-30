@@ -768,7 +768,7 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
-  String get integrationMarkTaken => 'Segna integrato come preso';
+  String get integrationMarkTaken => 'Segna come preso';
 
   @override
   String get integrationTakenToday => 'Preso oggi';
@@ -967,6 +967,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get diaryActivityCompleteError =>
       'Impossibile completare l\'attività. Riprova.';
+
+  @override
+  String get diaryGoalToggleError =>
+      'Impossibile aggiornare il traguardo. Riprova.';
 
   @override
   String get month1 => 'Mese 1';

@@ -134,13 +134,43 @@ void main() {
       ).thenAnswer((_) async {});
       await cubit.load();
 
-      await cubit.toggleCompleted(personal);
+      final ok = await cubit.toggleCompleted(personal);
 
+      expect(ok, isTrue);
       expect(cubit.state.goals.single.isCompleted, isTrue);
       verify(
         () => repository.updateGoalCompletion(id: 'p1', completed: true),
       ).called(1);
     });
+
+    // Regression: a failed PATCH used to trigger a full reload() via load(),
+    // which re-runs fetchMonthEndStatus() — that only re-materialises a
+    // Kilocal goal while its month-end survey is still pending. Once it
+    // isn't, a subsequent fetchGoals() that omits the goal made it vanish
+    // from state.goals entirely (so from every filter, including "Tutti").
+    // The fix reverts locally instead of reloading, so the goal always stays.
+    test(
+      'toggleCompleted on a Kilocal goal reverts locally on failure without reloading',
+      () async {
+        when(() => repository.fetchGoals()).thenAnswer((_) async => [kilocal]);
+        when(
+          () => repository.updateGoalCompletion(
+            id: any(named: 'id'),
+            completed: any(named: 'completed'),
+          ),
+        ).thenThrow(Exception('boom'));
+        await cubit.load();
+
+        final ok = await cubit.toggleCompleted(kilocal);
+
+        expect(ok, isFalse);
+        // Goal is still present, unchanged, and visible under "Tutti".
+        expect(cubit.state.goals, [kilocal]);
+        expect(cubit.state.visibleGoals, [kilocal]);
+        // fetchGoals was only called once, by the initial load() — no reload.
+        verify(() => repository.fetchGoals()).called(1);
+      },
+    );
 
     test('deleteGoal removes goal and rolls back on failure', () async {
       when(

@@ -1802,6 +1802,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t complete the activity. Try again.'**
   String get diaryActivityCompleteError;
 
+  /// No description provided for @diaryGoalToggleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t update the goal. Try again.'**
+  String get diaryGoalToggleError;
+
   /// No description provided for @month1.
   ///
   /// In en, this message translates to:
