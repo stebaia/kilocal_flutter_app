@@ -191,6 +191,8 @@ SurveyOutcome mapOutcomeProfile(
         : tr?['content'] as String?,
     kitImageId: defaultAsset?['id']?.toString(),
     iconId: (row['icon'] as Map<String, dynamic>?)?['id']?.toString(),
+    mainColor: row['main_color'] as String?,
+    secondaryColor: row['secondary_color'] as String?,
   );
 }
 

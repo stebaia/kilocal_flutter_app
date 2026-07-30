@@ -28,9 +28,9 @@ class ContinuePathCard extends StatelessWidget {
         final area = item.area;
         final stepId = item.stepId;
         if (area != null && stepId != null) {
-          context.go('/path/$area/step/$stepId');
+          context.push('/path/$area/step/$stepId');
         } else {
-          context.go('/path');
+          context.push('/path');
         }
       },
       child: SizedBox(

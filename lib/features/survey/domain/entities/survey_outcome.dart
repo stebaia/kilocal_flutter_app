@@ -20,6 +20,8 @@ class SurveyOutcome extends Equatable {
     this.description,
     this.kitImageId,
     this.iconId,
+    this.mainColor,
+    this.secondaryColor,
   });
 
   /// `profiles.id`, the only identity the submit response gives us.
@@ -44,6 +46,13 @@ class SurveyOutcome extends Equatable {
   /// `profiles.icon` (an SVG file id) for the badge.
   final String? iconId;
 
+  /// `profiles.main_color` (CMS hex, e.g. `#009FE3`), used to tint the type
+  /// highlight text and the Kit card background to match this biotype.
+  final String? mainColor;
+
+  /// `profiles.secondary_color` (CMS hex), the Kit card gradient's other end.
+  final String? secondaryColor;
+
   /// True until the profile has been hydrated with its CMS copy.
   bool get isEmpty => typeLabel == null && denomination == null;
 
@@ -62,6 +71,8 @@ class SurveyOutcome extends Equatable {
     String? description,
     String? kitImageId,
     String? iconId,
+    String? mainColor,
+    String? secondaryColor,
   }) {
     return SurveyOutcome(
       id: id,
@@ -71,6 +82,8 @@ class SurveyOutcome extends Equatable {
       description: description ?? this.description,
       kitImageId: kitImageId ?? this.kitImageId,
       iconId: iconId ?? this.iconId,
+      mainColor: mainColor ?? this.mainColor,
+      secondaryColor: secondaryColor ?? this.secondaryColor,
     );
   }
 
@@ -93,5 +106,7 @@ class SurveyOutcome extends Equatable {
     description,
     kitImageId,
     iconId,
+    mainColor,
+    secondaryColor,
   ];
 }

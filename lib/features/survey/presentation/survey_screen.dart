@@ -7,6 +7,7 @@ import '../../../app/di.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/hex_color.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../user/presentation/cubit/user_cubit.dart';
 import '../domain/entities/survey_answer.dart';
@@ -186,6 +187,9 @@ class _SectionBody extends StatelessWidget {
             lineHeight: 1.2,
             placeholders: placeholders,
             highlightKeys: const {'type'},
+            highlightColor: isResult
+                ? colorFromHex(state.outcomeProfile?.mainColor)
+                : null,
           ),
         if (section.subtitle?.isNotEmpty ?? false) ...[
           const SizedBox(height: AppSpacing.spaceMd),

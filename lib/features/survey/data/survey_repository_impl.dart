@@ -235,6 +235,8 @@ query SearchPharmacies($search: String!, $limit: Int!) {
 query GetOutcomeProfile($id: GraphQLStringOrFloat!, $lang: String!) {
   profiles(filter: { id: { _eq: $id } }, limit: 1) {
     id
+    main_color
+    secondary_color
     icon { id }
     kit {
       asset {
@@ -326,8 +328,7 @@ query KitBarcodeProducts($kitId: ID!) {
             phase['products_with_duration'] as List<dynamic>? ?? const [];
         for (final junction in junctions.whereType<Map<String, dynamic>>()) {
           final product =
-              junction['kit_products_duration_id']
-                  as Map<String, dynamic>?;
+              junction['kit_products_duration_id'] as Map<String, dynamic>?;
           final raw = product?['product'] as Map<String, dynamic>?;
           if (raw == null) continue;
           final id = '${raw['id']}';
