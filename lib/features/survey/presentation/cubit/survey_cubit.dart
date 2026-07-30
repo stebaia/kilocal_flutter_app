@@ -220,6 +220,7 @@ class SurveyCubit extends Cubit<SurveyState> {
         state.copyWith(
           currentIndex: state.visibleSections.length - 1,
           blockedByStop: true,
+          stopOriginIndex: state.currentIndex,
         ),
       );
       return;
@@ -242,6 +243,24 @@ class SurveyCubit extends Cubit<SurveyState> {
     // A `barcode` step is only valid against the products catalogue, so it is
     // checked here rather than while typing.
     if (!await _barcodeAccepted()) return;
+
+    // A `#stop#` block's CTA ("Chiudi") restarts the wizard from its very
+    // first step instead of submitting — the answers (including the risky
+    // one) are never sent, and there is nowhere else in the app to send the
+    // user while `profile_status` still names this survey (any in-app
+    // destination would just be bounced back here by the onboarding redirect
+    // in router.dart).
+    if (state.blockedByStop) {
+      emit(
+        state.copyWith(
+          currentIndex: 0,
+          answers: const {},
+          blockedByStop: false,
+          clearStopOriginIndex: true,
+        ),
+      );
+      return;
+    }
 
     if (state.isLastStep) {
       // Already on the final screen: a result section has had its outcome since
@@ -266,16 +285,21 @@ class SurveyCubit extends Cubit<SurveyState> {
   }
 
   void previous() {
-    if (state.currentIndex > 0) {
-      // Stepping back off the last section un-pins the `#stop#` block: the
-      // user is re-answering the risky question, not stuck in the CMS
-      // fallback copy.
+    // Stepping back off a `#stop#` block must return to the risky question
+    // itself, not merely decrement — the jump in next() skipped over
+    // whatever sections sat between it and the last one.
+    if (state.blockedByStop) {
       emit(
         state.copyWith(
-          currentIndex: state.currentIndex - 1,
+          currentIndex: state.stopOriginIndex ?? state.currentIndex - 1,
           blockedByStop: false,
+          clearStopOriginIndex: true,
         ),
       );
+      return;
+    }
+    if (state.currentIndex > 0) {
+      emit(state.copyWith(currentIndex: state.currentIndex - 1));
     }
   }
 

@@ -127,6 +127,11 @@ void main() {
       internalName: 'type_survey',
       sections: [
         questionSection(id: 'pregnancy', options: [yesOptionStop, noOption]),
+        // A section between the risky question and the closing one, so
+        // `previous()` from the stop screen must skip back over it rather
+        // than merely decrementing — this is what the real survey looks
+        // like ("sei in gravidanza" is not the second-to-last question).
+        questionSection(id: 'unrelated', options: [noOption]),
         closingSection,
       ],
     );
@@ -154,22 +159,26 @@ void main() {
       );
     });
 
-    test('disables the CTA on the blocked screen', () async {
-      when(
-        () => repository.fetchSurvey(any()),
-      ).thenAnswer((_) async => survey());
-      final cubit = build();
-      await cubit.start('type_survey');
+    test(
+      'leaves the CTA (CMS "Chiudi") enabled on the blocked screen',
+      () async {
+        when(
+          () => repository.fetchSurvey(any()),
+        ).thenAnswer((_) async => survey());
+        final cubit = build();
+        await cubit.start('type_survey');
 
-      cubit.selectRadio(yesOptionStop);
-      await cubit.next();
+        cubit.selectRadio(yesOptionStop);
+        await cubit.next();
 
-      expect(cubit.state.canLeaveCurrentStep, isTrue); // no required question
-      expect(cubit.state.blockedByStop, isTrue);
-    });
+        expect(cubit.state.canLeaveCurrentStep, isTrue); // no required question
+        expect(cubit.state.blockedByStop, isTrue);
+      },
+    );
 
     test(
-      'going back un-pins the block and lets a new answer through',
+      'pressing the CTA on the blocked screen restarts the wizard from the '
+      'first step without submitting',
       () async {
         when(
           () => repository.fetchSurvey(any()),
@@ -181,18 +190,49 @@ void main() {
         await cubit.next();
         expect(cubit.state.blockedByStop, isTrue);
 
-        cubit.previous();
-        expect(cubit.state.blockedByStop, isFalse);
-        expect(cubit.state.currentSection?.id, 'pregnancy');
-
-        cubit.selectRadio(noOption);
-        expect(cubit.state.blockedByStop, isFalse);
         await cubit.next();
 
         expect(cubit.state.blockedByStop, isFalse);
-        expect(cubit.state.currentSection?.id, 'closing');
+        expect(cubit.state.currentIndex, 0);
+        expect(cubit.state.currentSection?.id, 'pregnancy');
+        expect(cubit.state.answers, isEmpty);
+        expect(cubit.state.status, SurveyStatus.inProgress);
+        verifyNever(
+          () => repository.submit(
+            internalName: any(named: 'internalName'),
+            answers: any(named: 'answers'),
+            survey: any(named: 'survey'),
+            pharmacy: any(named: 'pharmacy'),
+          ),
+        );
       },
     );
+
+    test('going back returns straight to the risky question, skipping '
+        'unrelated sections in between, and un-pins the block', () async {
+      when(
+        () => repository.fetchSurvey(any()),
+      ).thenAnswer((_) async => survey());
+      final cubit = build();
+      await cubit.start('type_survey');
+
+      cubit.selectRadio(yesOptionStop);
+      await cubit.next();
+      expect(cubit.state.blockedByStop, isTrue);
+
+      cubit.previous();
+      expect(cubit.state.blockedByStop, isFalse);
+      expect(cubit.state.currentSection?.id, 'pregnancy');
+
+      cubit.selectRadio(noOption);
+      expect(cubit.state.blockedByStop, isFalse);
+      await cubit.next(); // -> unrelated
+      cubit.selectRadio(noOption);
+      await cubit.next(); // -> closing
+
+      expect(cubit.state.blockedByStop, isFalse);
+      expect(cubit.state.currentSection?.id, 'closing');
+    });
   });
 
   group('#alert#', () {

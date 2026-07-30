@@ -54,6 +54,7 @@ class _SurveyView extends StatelessWidget {
         }
 
         if (state.status != SurveyStatus.completed) return;
+
         // The outcome is shown on the in-wizard result section (submitted on
         // the way in), so completing means the user dismissed it.
         //
@@ -150,9 +151,10 @@ class _StepView extends StatelessWidget {
       stepLabel: _stepLabel(section, stepNumber),
       ctaLabel: _ctaLabel(section, state),
       // A `#stop#` answer (e.g. "sei in gravidanza" → "Sì") pins the wizard on
-      // this section with no way to continue — only back, to change the
-      // answer.
-      ctaEnabled: !state.blockedByStop && state.canLeaveCurrentStep,
+      // this section: the CTA (CMS-labeled "Chiudi" here) stays enabled but,
+      // per next(), only closes the wizard rather than submitting — going
+      // back is still the only way to change the answer.
+      ctaEnabled: state.canLeaveCurrentStep,
       busy: state.status == SurveyStatus.submitting,
       // A live validation failure takes precedence: it tells the user why the
       // CTA is disabled, whereas errorMessage reports a failed request.

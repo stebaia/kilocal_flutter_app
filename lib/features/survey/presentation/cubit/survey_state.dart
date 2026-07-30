@@ -35,6 +35,7 @@ class SurveyState extends Equatable {
     this.errorMessage,
     this.kitBarcodeProduct,
     this.blockedByStop = false,
+    this.stopOriginIndex,
     this.pendingAlert,
     this.confirmedAlertAnswers = const {},
   });
@@ -73,6 +74,11 @@ class SurveyState extends Equatable {
   /// is pinned on the survey's last section showing dedicated stop copy
   /// instead of that section's own content, and the CTA no longer advances.
   final bool blockedByStop;
+
+  /// The step index the `#stop#` jump was taken from, so `previous()` can
+  /// return straight to the risky question instead of merely decrementing
+  /// past unrelated sections in between. `null` when not currently blocked.
+  final int? stopOriginIndex;
 
   /// Non-null while an `#alert#`-marked option's confirmation dialog is
   /// pending — `next()` set it instead of advancing. The UI shows the CMS
@@ -215,6 +221,11 @@ class SurveyState extends Equatable {
     /// null-vs-not-passed ambiguity as [clearError].
     SurveyAlertModal? pendingAlert,
     bool clearPendingAlert = false,
+
+    /// Sets [stopOriginIndex]. Plain `stopOriginIndex: null` cannot clear it —
+    /// same null-vs-not-passed ambiguity as [clearError].
+    int? stopOriginIndex,
+    bool clearStopOriginIndex = false,
   }) {
     return SurveyState(
       status: status ?? this.status,
@@ -228,6 +239,9 @@ class SurveyState extends Equatable {
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       kitBarcodeProduct: kitBarcodeProduct ?? this.kitBarcodeProduct,
       blockedByStop: blockedByStop ?? this.blockedByStop,
+      stopOriginIndex: clearStopOriginIndex
+          ? null
+          : (stopOriginIndex ?? this.stopOriginIndex),
       pendingAlert: clearPendingAlert
           ? null
           : (pendingAlert ?? this.pendingAlert),
@@ -249,6 +263,7 @@ class SurveyState extends Equatable {
     errorMessage,
     kitBarcodeProduct,
     blockedByStop,
+    stopOriginIndex,
     pendingAlert,
     confirmedAlertAnswers,
   ];
