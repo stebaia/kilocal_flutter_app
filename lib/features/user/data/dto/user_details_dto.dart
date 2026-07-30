@@ -93,10 +93,14 @@ class UserDetailsDto {
 
 /// Parses a Directus JSON value that may arrive as a `List` or a single value
 /// into a `List<String>?`.
+///
+/// Directus can return `[null]` for an empty multi-select (a JSON array
+/// holding a literal `null` rather than an empty array), so `null` entries are
+/// dropped instead of being stringified into a bogus `"null"` value.
 List<String>? _toStringList(dynamic value) {
   if (value == null) return null;
   if (value is List) {
-    return value.map((e) => e.toString()).toList();
+    return value.whereType<Object>().map((e) => e.toString()).toList();
   }
   return [value.toString()];
 }
