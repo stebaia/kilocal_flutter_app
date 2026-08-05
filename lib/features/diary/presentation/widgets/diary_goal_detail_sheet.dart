@@ -13,8 +13,9 @@ enum DiaryGoalDetailAction { edit, toggleCompleted, delete }
 ///
 /// Shows the goal text and offers "Modifica traguardo" (personal goals
 /// only — Kilocal predefined goals have no editable content), "Elimina
-/// traguardo" and "Completa traguardo" / "Segna come non raggiunto"
-/// (depending on current state).
+/// traguardo" (personal goals only — Kilocal ones can't be deleted, only
+/// completed/uncompleted) and "Completa traguardo" / "Segna come non
+/// raggiunto" (depending on current state).
 ///
 /// Returns the chosen [DiaryGoalDetailAction], or `null` if dismissed.
 Future<DiaryGoalDetailAction?> showDiaryGoalDetailSheet(
@@ -85,31 +86,31 @@ class _DiaryGoalDetailSheet extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.spaceSm),
-            ],
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppColors.borderCard),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.borderCard),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.spaceMd,
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    vertical: AppSpacing.spaceMd,
-                  ),
-                ),
-                onPressed: () =>
-                    Navigator.of(context).pop(DiaryGoalDetailAction.delete),
-                child: Text(
-                  l10n.diaryGoalDelete,
-                  style: AppTypography.textTheme.labelLarge?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
+                  onPressed: () =>
+                      Navigator.of(context).pop(DiaryGoalDetailAction.delete),
+                  child: Text(
+                    l10n.diaryGoalDelete,
+                    style: AppTypography.textTheme.labelLarge?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.spaceSm),
+              const SizedBox(height: AppSpacing.spaceSm),
+            ],
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(

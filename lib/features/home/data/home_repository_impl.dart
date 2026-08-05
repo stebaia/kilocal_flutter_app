@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../path/data/dto/path_area_steps_dto.dart';
 import '../../path/data/dto/path_progress_dto.dart';
 import '../../path/data/vimeo_oembed_service.dart';
 import '../domain/entities/home_data.dart';
@@ -39,48 +40,12 @@ query HomeContinueAndText($myId: ID!, $lang: String!) {
   user_details(filter: { user: { id: { _eq: $myId } } }) {
     percorso_allenamento_curr_step {
       id
-      sort
-      translations(filter: { languages_code: { code: { _eq: $lang } } }) {
-        title
-      }
-      asset {
-        asset_is_video
-        vimeo_url
-        default_asset {
-          id
-          filename_download
-        }
-      }
     }
     percorso_alimentazione_curr_step {
       id
-      sort
-      translations(filter: { languages_code: { code: { _eq: $lang } } }) {
-        title
-      }
-      asset {
-        asset_is_video
-        vimeo_url
-        default_asset {
-          id
-          filename_download
-        }
-      }
     }
     percorso_benessere_curr_step {
       id
-      sort
-      translations(filter: { languages_code: { code: { _eq: $lang } } }) {
-        title
-      }
-      asset {
-        asset_is_video
-        vimeo_url
-        default_asset {
-          id
-          filename_download
-        }
-      }
     }
   }
   private_pages(filter: { internal_name: { _eq: "dashboard" } }) {
@@ -235,8 +200,16 @@ query HomeMoments($now: String!, $lang: String!) {
       final detailsList = data['user_details'] as List<dynamic>?;
       final details = detailsList?.firstOrNull as Map<String, dynamic>?;
 
-      // Pick the first non-null current step among the three areas.
-      final step = _firstNonNullStep(details, lang);
+      // Pick the first area (in fixed order) that has a CMS current step —
+      // this only decides *which area* to continue.
+      final area = _firstAreaWithCurrStep(details);
+      // The actual step to deep-link into is then resolved the same way the
+      // Percorso tab does it (see `PathAreaDetailScreen._openTimeframe`):
+      // the current month's first not-yet-completed step, falling back to
+      // its first step — rather than trusting the CMS `curr_step` snapshot,
+      // which can point at a different step than what the area screen itself
+      // would open.
+      final step = area == null ? null : await _fetchContinueStep(area, lang);
 
       final pages = data['private_pages'] as List<dynamic>?;
       final dashboard = pages?.firstOrNull as Map<String, dynamic>?;
@@ -275,10 +248,10 @@ query HomeMoments($now: String!, $lang: String!) {
     }
   }
 
-  Map<String, dynamic>? _firstNonNullStep(
-    Map<String, dynamic>? details,
-    String lang,
-  ) {
+  /// The first area (in fixed order) whose CMS `curr_step` is set — this only
+  /// decides which of the three areas the home card continues; the step
+  /// itself is then resolved by [_fetchContinueStep].
+  String? _firstAreaWithCurrStep(Map<String, dynamic>? details) {
     if (details == null) return null;
     const stepKeys = {
       'percorso_allenamento_curr_step': 'allenamento',
@@ -286,22 +259,82 @@ query HomeMoments($now: String!, $lang: String!) {
       'percorso_benessere_curr_step': 'benessere',
     };
     for (final entry in stepKeys.entries) {
-      final step = details[entry.key] as Map<String, dynamic>?;
-      if (step == null) continue;
-      final title = _translation(step, lang)?['title'] as String?;
-      final asset = step['asset'] as Map<String, dynamic>?;
-      final file = asset?['default_asset'] as Map<String, dynamic>?;
-      final isVideo = asset?['asset_is_video'] as bool? ?? false;
-      return <String, dynamic>{
-        'title': title,
-        'image_file_id': file?['id'],
-        'image_file_name': file?['filename_download'],
-        'vimeo_url': isVideo ? (asset?['vimeo_url'] as String?) : null,
-        'step_id': step['id']?.toString(),
-        'area': entry.value,
-      };
+      if (details[entry.key] != null) return entry.value;
     }
     return null;
+  }
+
+  /// Resolves the step to deep-link into for [area], mirroring exactly what
+  /// `PathAreaDetailScreen._openTimeframe` opens when the user taps that
+  /// area's current month from the Percorso tab: the current timeframe group
+  /// (`isCurrent`, falling back to the last unlocked, not-yet-completed one),
+  /// then its first not-yet-completed step (or its first step, if the month
+  /// is already done). Returns `null` on any read failure — the caller then
+  /// falls back to the generic "Inizia il tuo percorso" card.
+  Future<Map<String, dynamic>?> _fetchContinueStep(
+    String area,
+    String lang,
+  ) async {
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/path/me/areas/$area/steps',
+      );
+      final dto = PathAreaStepsResponseDto.fromJson(response.data ?? const {});
+
+      PathGroupDto? mainGroup;
+      for (final g in dto.data.groups) {
+        if (g.isPercorsoMainTab) {
+          mainGroup = g;
+          break;
+        }
+      }
+      final steps = mainGroup?.steps ?? const <PathStepDto>[];
+      if (steps.isEmpty) return null;
+
+      final stepsByTimeframe = <int, List<PathStepDto>>{};
+      for (final step in steps) {
+        stepsByTimeframe.putIfAbsent(step.timeframe.id, () => []).add(step);
+      }
+
+      List<PathStepDto>? currentGroup;
+      for (final group in stepsByTimeframe.values) {
+        if (group.first.timeframe.isCurrent ?? false) {
+          currentGroup = group;
+          break;
+        }
+      }
+      if (currentGroup == null) {
+        for (final group in stepsByTimeframe.values.toList().reversed) {
+          final locked = group.first.timeframe.locked ?? false;
+          final completed = group.where((s) => s.completed).length;
+          if (!locked && completed < group.length) {
+            currentGroup = group;
+            break;
+          }
+        }
+      }
+      currentGroup ??= steps;
+
+      final step = currentGroup.firstWhere(
+        (s) => !s.completed,
+        orElse: () => currentGroup!.first,
+      );
+
+      final title = step.translations.titleFor(lang);
+      final asset = step.asset;
+      return <String, dynamic>{
+        'title': title,
+        'image_file_id': asset.assetIsVideo ? null : asset.defaultAsset,
+        'image_file_name': null,
+        'vimeo_url': asset.assetIsVideo ? asset.vimeoUrl : null,
+        'step_id': step.id,
+        'area': area,
+      };
+    } on ApiException {
+      return null;
+    } on DioException {
+      return null;
+    }
   }
 
   Map<String, dynamic>? _translation(Map<String, dynamic> node, String lang) {
@@ -394,8 +427,16 @@ query HomeMoments($now: String!, $lang: String!) {
   /// asset only when neither is available. See
   /// [[home-continue-path-image-gap]].
   Future<String> _resolveContinueImage(HomeContinueStepDto step) async {
-    if (step.imageFileId != null) {
-      return '${Env.baseUrl}/assets/${step.imageFileId}/${step.imageFileName}';
+    final imageFileId = step.imageFileId;
+    if (imageFileId != null) {
+      // The filename suffix is optional — Directus serves an asset by id
+      // alone (see `PathRepositoryImpl._mapStepDto`), which matters here
+      // since the REST `/path/me/areas/{area}/steps` step data (unlike the
+      // GraphQL `curr_step` this used to read) carries only the file id.
+      final name = step.imageFileName;
+      return name == null
+          ? '${Env.baseUrl}/assets/$imageFileId'
+          : '${Env.baseUrl}/assets/$imageFileId/$name';
     }
     final vimeoUrl = step.vimeoUrl;
     if (vimeoUrl != null) {
