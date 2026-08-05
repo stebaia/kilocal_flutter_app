@@ -7,6 +7,7 @@ import '../../../app/di.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/hex_color.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../user/presentation/cubit/user_cubit.dart';
 import '../domain/entities/survey_answer.dart';
@@ -44,9 +45,16 @@ class _SurveyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SurveyCubit, SurveyState>(
-      listenWhen: (p, c) => p.status != c.status,
+      listenWhen: (p, c) =>
+          p.status != c.status || p.pendingAlert != c.pendingAlert,
       listener: (context, state) async {
+        if (state.pendingAlert != null) {
+          await _showAlertDialog(context, state.pendingAlert!);
+          return;
+        }
+
         if (state.status != SurveyStatus.completed) return;
+
         // The outcome is shown on the in-wizard result section (submitted on
         // the way in), so completing means the user dismissed it.
         //
@@ -85,6 +93,43 @@ class _SurveyView extends StatelessWidget {
   }
 }
 
+/// Shows the CMS-driven confirmation dialog for an `#alert#`-marked option
+/// (`alert_survey_risky_selection_modal`). Confirming resumes the wizard via
+/// [SurveyCubit.confirmAlert]; dismissing (backdrop tap or "Annulla") leaves
+/// the user on the current step via [SurveyCubit.dismissAlert].
+Future<void> _showAlertDialog(
+  BuildContext context,
+  SurveyAlertModal modal,
+) async {
+  final cubit = context.read<SurveyCubit>();
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) => AlertDialog(
+      title: modal.title?.isNotEmpty ?? false
+          ? SurveyHtml(html: modal.title!, baseFontSize: 18, bold: true)
+          : null,
+      content: modal.content?.isNotEmpty ?? false
+          ? SurveyHtml(html: modal.content!, baseFontSize: 15)
+          : null,
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(false),
+          child: const Text('Annulla'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(dialogContext).pop(true),
+          child: const Text('Continua'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed ?? false) {
+    await cubit.confirmAlert();
+  } else {
+    cubit.dismissAlert();
+  }
+}
+
 class _StepView extends StatelessWidget {
   const _StepView({required this.state});
 
@@ -105,6 +150,10 @@ class _StepView extends StatelessWidget {
       currentIndex: state.currentIndex,
       stepLabel: _stepLabel(section, stepNumber),
       ctaLabel: _ctaLabel(section, state),
+      // A `#stop#` answer (e.g. "sei in gravidanza" → "Sì") pins the wizard on
+      // this section: the CTA (CMS-labeled "Chiudi" here) stays enabled but,
+      // per next(), only closes the wizard rather than submitting — going
+      // back is still the only way to change the answer.
       ctaEnabled: state.canLeaveCurrentStep,
       busy: state.status == SurveyStatus.submitting,
       // A live validation failure takes precedence: it tells the user why the
@@ -157,7 +206,11 @@ class _SectionBody extends StatelessWidget {
     final cubit = context.read<SurveyCubit>();
     final answer = state.currentAnswer;
 
-    final isResult = section.kind == SurveySectionKind.result;
+    // A `#stop#` answer jumps here without submitting, so nothing depends on
+    // a real outcome/submit result is safe to render — only the section's own
+    // title/subtitle/content (already CMS copy for this case).
+    final isResult =
+        section.kind == SurveySectionKind.result && !state.blockedByStop;
     // UserCubit is a get_it singleton rather than a tree-provided bloc (there is
     // no MultiBlocProvider above the router), so read it from the locator.
     final firstName = getIt<UserCubit>().state.user?.firstName;
@@ -186,6 +239,9 @@ class _SectionBody extends StatelessWidget {
             lineHeight: 1.2,
             placeholders: placeholders,
             highlightKeys: const {'type'},
+            highlightColor: isResult
+                ? colorFromHex(state.outcomeProfile?.mainColor)
+                : null,
           ),
         if (section.subtitle?.isNotEmpty ?? false) ...[
           const SizedBox(height: AppSpacing.spaceMd),
@@ -221,7 +277,7 @@ class _SectionBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.spaceLg),
           SurveyResultActions(kitShopUrl: state.submitResult?.kitShopUrl),
         ],
-        if (section.loadKilocalPoints) ...[
+        if (section.loadKilocalPoints && !state.blockedByStop) ...[
           const SizedBox(height: AppSpacing.spaceXl),
           SurveyPharmacyPicker(
             selected: state.selectedPharmacy,
@@ -229,7 +285,7 @@ class _SectionBody extends StatelessWidget {
             onSelected: cubit.selectPharmacy,
           ),
         ],
-        if (section.question != null) ...[
+        if (section.question != null && !state.blockedByStop) ...[
           const SizedBox(height: AppSpacing.spaceXl),
           _QuestionInput(
             section: section,
@@ -238,7 +294,7 @@ class _SectionBody extends StatelessWidget {
             cubit: cubit,
           ),
         ],
-        if (section.showSingleProductCta) ...[
+        if (section.showSingleProductCta && !state.blockedByStop) ...[
           const SizedBox(height: AppSpacing.spaceLg),
           _NoStarterKitButton(),
         ],

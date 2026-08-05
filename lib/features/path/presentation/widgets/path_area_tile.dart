@@ -48,16 +48,18 @@ class PathAreaTile extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: AppTypography.textTheme.titleMedium?.copyWith(
-                color: AppColors.neutralWhite,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                height: 1.15,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                style: AppTypography.textTheme.titleMedium?.copyWith(
+                  color: AppColors.neutralWhite,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  height: 1.15,
+                ),
               ),
             ),
             const SizedBox(height: 13),

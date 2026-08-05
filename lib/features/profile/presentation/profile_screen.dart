@@ -152,7 +152,7 @@ class ProfileScreen extends StatelessWidget {
                             iconUrl: biotype?.iconUrl,
                             cardColor: typeColor,
                             iconColor: typeColor,
-                            onTap: () => context.go('/profile/type'),
+                            onTap: () => context.push('/profile/type'),
                           );
                         },
                       ),
@@ -166,18 +166,18 @@ class ProfileScreen extends StatelessWidget {
                           ProfileListTile(
                             icon: Icons.description_outlined,
                             title: l10n.profilePersonalData,
-                            onTap: () => context.go('/profile/personal-data'),
+                            onTap: () => context.push('/profile/personal-data'),
                           ),
                           ProfileListTile(
                             icon: Icons.description_outlined,
                             title: l10n.profileMyAccount,
-                            onTap: () => context.go('/profile/account'),
+                            onTap: () => context.push('/profile/account'),
                           ),
                           ProfileListTile(
                             icon: Icons.description_outlined,
                             title: l10n.profileFoodPreferences,
                             onTap: () =>
-                                context.go('/profile/food-preferences'),
+                                context.push('/profile/food-preferences'),
                           ),
                         ],
                       ),

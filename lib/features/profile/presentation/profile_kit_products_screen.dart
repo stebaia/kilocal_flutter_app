@@ -6,8 +6,10 @@ import '../../../app/di.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/hex_color.dart';
 import '../../../core/widgets/app_header.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../user/presentation/cubit/user_cubit.dart';
 import 'cubit/profile_kit_cubit.dart';
 import 'domain_ext.dart';
 import 'widgets/profile_kit_content_card.dart';
@@ -51,6 +53,11 @@ class _ProfileKitProductsViewState extends State<_ProfileKitProductsView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    // Same biotype color source as ProfileTypeScreen, so the product card
+    // tint matches the Tipo the user is currently looking at.
+    final accentColor = colorFromHex(
+      getIt<UserCubit>().state.details?.biotype?.mainColor,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -63,7 +70,8 @@ class _ProfileKitProductsViewState extends State<_ProfileKitProductsView> {
             AppHeader(title: l10n.profileTypeSupplements, showBack: true),
             Expanded(
               child: BlocBuilder<ProfileKitCubit, ProfileKitState>(
-                builder: (context, state) => _body(context, state, l10n),
+                builder: (context, state) =>
+                    _body(context, state, l10n, accentColor),
               ),
             ),
           ],
@@ -76,6 +84,7 @@ class _ProfileKitProductsViewState extends State<_ProfileKitProductsView> {
     BuildContext context,
     ProfileKitState state,
     AppLocalizations l10n,
+    Color? accentColor,
   ) {
     switch (state.status) {
       case ProfileKitStatus.loading:
@@ -128,6 +137,7 @@ class _ProfileKitProductsViewState extends State<_ProfileKitProductsView> {
                   cta: product.cta,
                   ctaLabel: l10n.profileKitBuy,
                   onCtaTap: product.cta.launchable(context),
+                  accentColor: accentColor,
                 ),
               ),
             ),

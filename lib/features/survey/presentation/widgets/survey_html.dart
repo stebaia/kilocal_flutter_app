@@ -19,6 +19,7 @@ class SurveyHtml extends StatelessWidget {
     this.placeholders = const {},
     this.highlightKeys = const {},
     this.emphasisKeys = const {},
+    this.highlightColor,
   });
 
   final String html;
@@ -28,9 +29,14 @@ class SurveyHtml extends StatelessWidget {
   final double lineHeight;
   final Map<String, String> placeholders;
 
-  /// Placeholder keys whose substituted value is wrapped in the magenta
-  /// [AppColors.typeHighlight] (e.g. `type` → "Tipo 4 - Pera").
+  /// Placeholder keys whose substituted value is wrapped in [highlightColor]
+  /// (e.g. `type` → "Tipo 4 - Pera").
   final Set<String> highlightKeys;
+
+  /// Color for [highlightKeys] matches. Defaults to the brand magenta
+  /// [AppColors.typeHighlight]; the result screen overrides it with the
+  /// biotype's own CMS color so the header text matches the Kit card.
+  final Color? highlightColor;
 
   /// Placeholder keys whose substituted value is emphasised as a lead-in
   /// paragraph (heavier weight, darker ink). Used for `outcome_profile`, whose
@@ -69,7 +75,7 @@ class SurveyHtml extends StatelessWidget {
         ),
         'strong': Style(fontWeight: FontWeight.w700),
         'p': Style(margin: Margins.only(bottom: 8)),
-        '.hl': Style(color: AppColors.typeHighlight),
+        '.hl': Style(color: highlightColor ?? AppColors.typeHighlight),
         '.lead': Style(
           fontWeight: FontWeight.w700,
           color: AppColors.textPrimary,

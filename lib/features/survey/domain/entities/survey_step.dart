@@ -194,6 +194,31 @@ class SurveyQuestion extends Equatable {
   List<Object?> get props => [id, type, inputType, options];
 }
 
+/// The two `result_value` markers a CMS option can carry, gating whether the
+/// wizard may continue past it. Any other value (including null) is a plain
+/// biotype score and has no effect on navigation.
+enum SurveyResultAction {
+  /// `#stop#` — the user cannot proceed; the wizard jumps to the survey's
+  /// last section and shows dedicated copy instead of continuing.
+  stop,
+
+  /// `#alert#` — the user is warned via [SurveyAlertModal] but may confirm
+  /// and continue.
+  alert,
+}
+
+/// CMS copy (title/content) for the confirmation dialog shown when an
+/// `#alert#` option is selected (`alert_survey_risky_selection_modal`).
+class SurveyAlertModal extends Equatable {
+  const SurveyAlertModal({required this.title, required this.content});
+
+  final String? title;
+  final String? content;
+
+  @override
+  List<Object?> get props => [title, content];
+}
+
 /// A selectable answer option.
 class SurveyOption extends Equatable {
   const SurveyOption({
@@ -225,6 +250,19 @@ class SurveyOption extends Equatable {
 
   /// Warning surfaced to the user when this option is selected.
   final String? warningWhenSelected;
+
+  /// `resultValue` parsed as a gating marker (`#stop#` / `#alert#`), or `null`
+  /// when it is a plain biotype score (or absent).
+  SurveyResultAction? get resultAction {
+    switch (resultValue) {
+      case '#stop#':
+        return SurveyResultAction.stop;
+      case '#alert#':
+        return SurveyResultAction.alert;
+      default:
+        return null;
+    }
+  }
 
   @override
   List<Object?> get props => [id, text, valueToStore];

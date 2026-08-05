@@ -235,6 +235,8 @@ query SearchPharmacies($search: String!, $limit: Int!) {
 query GetOutcomeProfile($id: GraphQLStringOrFloat!, $lang: String!) {
   profiles(filter: { id: { _eq: $id } }, limit: 1) {
     id
+    main_color
+    secondary_color
     icon { id }
     kit {
       asset {
@@ -326,8 +328,7 @@ query KitBarcodeProducts($kitId: ID!) {
             phase['products_with_duration'] as List<dynamic>? ?? const [];
         for (final junction in junctions.whereType<Map<String, dynamic>>()) {
           final product =
-              junction['kit_products_duration_id']
-                  as Map<String, dynamic>?;
+              junction['kit_products_duration_id'] as Map<String, dynamic>?;
           final raw = product?['product'] as Map<String, dynamic>?;
           if (raw == null) continue;
           final id = '${raw['id']}';
@@ -368,6 +369,48 @@ query KitBarcodeProducts($kitId: ID!) {
         final code = (entry['codice'] as String).trim().toUpperCase();
         if (code.isNotEmpty) yield code;
       }
+    }
+  }
+
+  /// **Unconfirmed schema** — see [[survey-alert-modal-schema]]. Mirrors the
+  /// `internal_name`-filtered singleton pattern used for `private_pages`
+  /// (`profile_page_repository_impl.dart`); collection/field names are a
+  /// best guess (`survey_alerts`, `internal_name = alert_survey_risky_selection_modal`)
+  /// pending backend confirmation.
+  static const _alertModalQuery = r'''
+query GetSurveyAlertModal($internalName: String!, $lang: String!) {
+  survey_alerts(filter: { internal_name: { _eq: $internalName } }, limit: 1) {
+    id
+    translations(filter: { languages_code: { code: { _eq: $lang } } }) {
+      title
+      content
+    }
+  }
+}
+''';
+
+  static const _riskySelectionModalInternalName =
+      'alert_survey_risky_selection_modal';
+
+  @override
+  Future<SurveyAlertModal?> fetchAlertModal() async {
+    try {
+      final result = await _graphqlClient.query(
+        _alertModalQuery,
+        variables: <String, dynamic>{
+          'internalName': _riskySelectionModalInternalName,
+          'lang': _lang,
+        },
+      );
+      final rows =
+          (result['data'] as Map<String, dynamic>?)?['survey_alerts']
+              as List<dynamic>?;
+      if (rows == null || rows.isEmpty) return null;
+      return mapAlertModal(rows.first as Map<String, dynamic>);
+    } on ApiException {
+      return null;
+    } on DioException {
+      return null;
     }
   }
 

@@ -488,6 +488,7 @@
     "placeholders": { "date": { "type": "String" } }
   },
   "diaryActivityCompleteError": "Couldn't complete the activity. Try again.",
+  "diaryGoalToggleError": "Couldn't update the goal. Try again.",
   "month1": "Month 1",
   "phase1": "Phase 1",
   "activitiesCount": "{completed}/{total} activities",

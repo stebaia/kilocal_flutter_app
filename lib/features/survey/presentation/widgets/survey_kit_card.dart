@@ -3,11 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/config/env.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/hex_color.dart';
 import '../../../../core/widgets/cms_svg_icon.dart';
 import '../../domain/entities/survey_outcome.dart';
 
-/// The magenta kit card on the biotype result screen: the recommended Starter
-/// Kit image on a pink gradient, with the biotype icon badge top-right.
+/// The kit card on the biotype result screen: the recommended Starter Kit
+/// image on a gradient tinted with the biotype's own CMS color (falling back
+/// to the brand pink when the outcome carries no color), with the biotype
+/// icon badge top-right.
 ///
 /// Both images come from `outcome.profile` (see [SurveyOutcome]); the card
 /// hides itself when the outcome carries no kit image, rather than rendering an
@@ -22,14 +25,19 @@ class SurveyKitCard extends StatelessWidget {
     final kitImage = _assetUrl(outcome?.kitImageId);
     if (kitImage == null) return const SizedBox.shrink();
 
+    final mainColor =
+        colorFromHex(outcome?.mainColor) ?? AppColors.typeHighlight;
+    final secondaryColor =
+        colorFromHex(outcome?.secondaryColor) ?? AppColors.brandPink;
+
     return AspectRatio(
       aspectRatio: 328 / 220,
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
+          gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.typeHighlight, AppColors.brandPink],
+            colors: [mainColor, secondaryColor],
           ),
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
@@ -48,7 +56,10 @@ class SurveyKitCard extends StatelessWidget {
             Positioned(
               top: AppSpacing.spaceSm,
               right: AppSpacing.spaceSm,
-              child: _SilhouetteBadge(imageUrl: _assetUrl(outcome?.iconId)),
+              child: _SilhouetteBadge(
+                imageUrl: _assetUrl(outcome?.iconId),
+                color: mainColor,
+              ),
             ),
           ],
         ),
@@ -65,9 +76,10 @@ class SurveyKitCard extends StatelessWidget {
 }
 
 class _SilhouetteBadge extends StatelessWidget {
-  const _SilhouetteBadge({this.imageUrl});
+  const _SilhouetteBadge({this.imageUrl, required this.color});
 
   final String? imageUrl;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -85,12 +97,8 @@ class _SilhouetteBadge extends StatelessWidget {
       child: CmsSvgIcon(
         url: imageUrl,
         size: 20,
-        color: AppColors.typeHighlight,
-        fallback: const Icon(
-          Icons.spa,
-          color: AppColors.typeHighlight,
-          size: 20,
-        ),
+        color: color,
+        fallback: Icon(Icons.spa, color: color, size: 20),
       ),
     );
   }

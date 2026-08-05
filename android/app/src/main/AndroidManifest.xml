@@ -1,4 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Excludes tablets from the Play Store listing: phone-only screen sizes. -->
+    <supports-screens
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="false"
+        android:xlargeScreens="false"
+        android:requiresSmallestWidthDp="0"
+        android:compatibleWidthLimitDp="480"/>
     <!-- Allows opening the system Clock app to set a workout timer. -->
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
     <!-- Required for FCM push notifications on Android 13+ (API 33). -->

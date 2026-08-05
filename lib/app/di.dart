@@ -134,7 +134,9 @@ void configureDependencies() {
       // PerformanceInterceptor touches FirebasePerformance.instance, which
       // needs Firebase.initializeApp to have run — skip it entirely when
       // Firebase is disabled (staging flavor).
-      extraInterceptors: Env.isFirebaseEnabled ? [PerformanceInterceptor()] : [],
+      extraInterceptors: Env.isFirebaseEnabled
+          ? [PerformanceInterceptor()]
+          : [],
     ),
   );
 
@@ -224,7 +226,10 @@ void configureDependencies() {
     ),
   );
   getIt.registerLazySingleton<StatisticsRepository>(
-    () => StatisticsRepositoryImpl(dio: getIt<Dio>()),
+    () => StatisticsRepositoryImpl(
+      dio: getIt<Dio>(),
+      graphqlClient: getIt<GraphqlClient>(),
+    ),
   );
   getIt.registerFactory<StatisticsCubit>(
     () => StatisticsCubit(statisticsRepository: getIt<StatisticsRepository>()),

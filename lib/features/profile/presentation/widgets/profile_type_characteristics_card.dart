@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_shadows.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/readable_color.dart';
 
 /// Large pink "Le tue caratteristiche" card: the biotype silhouette on the
 /// right, a title top-left and a "Scopri di più" call-to-action bottom-left.
@@ -40,7 +41,7 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
 
     // The CTA pill picks up the biotype's own `main_color` so it stays on
     // theme with the card gradient; brand accent when the CMS omits it.
-    final ctaColor = _readableOnWhite(
+    final ctaColor = readableOnWhite(
       gradientColors?.firstOrNull ?? AppColors.accent,
     );
 
@@ -129,25 +130,6 @@ class ProfileTypeCharacteristicsCard extends StatelessWidget {
     );
   }
 }
-
-/// Darkens [color] until it clears the WCAG AA 4.5:1 ratio for 14px text on
-/// the white pill.
-///
-/// Several CMS biotype colors are too light to read on white — the cyan
-/// (#00ACAC), orange (#EF7900) and light blue (#009FE3) types all sit below
-/// 3:1 — so we walk the HSL lightness down instead of hardcoding per-type
-/// overrides, which keeps the hue (and the biotype's identity) intact.
-Color _readableOnWhite(Color color) {
-  const target = 4.5;
-  var hsl = HSLColor.fromColor(color);
-  while (_contrastOnWhite(hsl.toColor()) < target && hsl.lightness > 0.05) {
-    hsl = hsl.withLightness((hsl.lightness - 0.02).clamp(0.0, 1.0));
-  }
-  return hsl.toColor();
-}
-
-double _contrastOnWhite(Color color) =>
-    1.05 / (color.computeLuminance() + 0.05);
 
 /// Renders the biotype silhouette from a local asset with a graceful fallback
 /// (empty space) when the asset is missing or fails to load.

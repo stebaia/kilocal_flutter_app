@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/icons/app_icons.dart';
@@ -20,22 +19,19 @@ class ContinuePathCard extends StatelessWidget {
     const cardRadius = 16.0;
     const imageOverflow = 20.0;
 
-    const minGap = AppSpacing.spaceSm;
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
         final area = item.area;
         final stepId = item.stepId;
         if (area != null && stepId != null) {
-          context.go('/path/$area/step/$stepId');
+          context.push('/path/$area/step/$stepId');
         } else {
-          context.go('/path');
+          context.push('/path');
         }
       },
       child: SizedBox(
-        width: MediaQuery.of(context).size.width,
-
+        width: double.infinity,
         height: 220,
         child: Stack(
           children: [
@@ -86,20 +82,28 @@ class ContinuePathCard extends StatelessWidget {
             ),
 
             // Hero image overflowing the top of the red card, on the right.
+            // Capped at its design width (293) but shrinks on narrow screens
+            // (e.g. iPhone SE) so it never overflows the card's left edge.
             Positioned(
               top: 0,
+              left: AppSpacing.spaceLg,
               right: AppSpacing.spaceLg,
-              child: Container(
-                width: 293,
-                height: 161,
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: AppColors.neutralWhite,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                  child: _buildImage(item.imageUrl),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 293),
+                  child: Container(
+                    height: 161,
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: AppColors.neutralWhite,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: _buildImage(item.imageUrl),
+                    ),
+                  ),
                 ),
               ),
             ),

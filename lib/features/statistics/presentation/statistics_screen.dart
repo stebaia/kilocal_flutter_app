@@ -27,17 +27,12 @@ class StatisticsScreen extends StatelessWidget {
 class _StatisticsView extends StatelessWidget {
   const _StatisticsView();
 
-  /// Reference area whose timeframes drive the filter sheet (see
-  /// [[statistics-feature-status]] — every area's timeframes are independent,
-  /// so a single one is used as the common list for the global filter).
-  static const _referenceArea = 'allenamento';
-
   Future<void> _openTimeframeFilter(BuildContext context) async {
     final cubit = context.read<StatisticsCubit>();
     final l10n = AppLocalizations.of(context)!;
     final timeframes = await cubit.fetchTimeframes(
       l10n,
-      referenceArea: _referenceArea,
+      referenceArea: StatisticsCubit.referenceArea,
     );
     if (!context.mounted) return;
     final selected = await showStatisticsTimeframeSheet(
@@ -101,7 +96,12 @@ class _StatisticsView extends StatelessWidget {
                       stat.completed,
                       stat.total,
                     ),
-                    monthLabelOverride: state.selectedTimeframe?.title,
+                    // `integrazione` is phase-based and keeps its lifetime
+                    // figures under the month filter, so it also keeps its
+                    // own "Fase 1" label instead of the month title.
+                    monthLabelOverride: stat.id == 'integrazione'
+                        ? null
+                        : state.selectedTimeframe?.title,
                   ),
                 );
               },

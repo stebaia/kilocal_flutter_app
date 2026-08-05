@@ -267,6 +267,30 @@ still blocked, nothing to wire yet.
 > `surveys` / `survey_sections` / `survey_question` collections — there is no dedicated REST
 > GET. This resolves the proposed `GET /api/survey/{type}` in [[missing-apis]] §1.
 
+### Risky-selection gating (`#stop#` / `#alert#`)
+
+An option's `result_value` (normally a biotype score, see below) can instead carry one of two
+markers, generic to **any** option on **any** question — not specific to a "gravidanza"
+flag on the section:
+
+| Marker | Behavior |
+|--------|----------|
+| `#stop#` | Selecting it and pressing the CTA blocks the survey outright: the wizard jumps straight to the survey's **last section** and renders its own `title`/`subtitle`/`content` (already CMS copy, no new fields needed) instead of that section's normal result/question body. No submit happens. The user can still go back (arrow) to change the answer, which un-pins the block. |
+| `#alert#` | Pressing the CTA shows a confirmation dialog (title/content) instead of advancing. Confirming lets the user continue; dismissing keeps them on the step. |
+
+Implemented in `SurveyOption.resultAction` (`survey_step.dart`), `SurveyState.currentResultAction`
+/ `blockedByStop` / `pendingAlert` (`survey_state.dart`), and the interception in
+`SurveyCubit.next()` (`survey_cubit.dart`).
+
+**Open question:** the `#alert#` dialog copy is CMS-driven
+(`alert_survey_risky_selection_modal`), but there is no confirmed collection/schema for it —
+unlike every other CMS read in this file, nothing here was verified against a live GraphQL
+introspection. `SurveyRepositoryImpl.fetchAlertModal()` guesses a `survey_alerts` collection
+filtered by `internal_name`, mirroring the `private_pages` pattern
+(`profile_page_repository_impl.dart`); a missing/failed read degrades to letting the user
+through unblocked rather than trapping them on a dialog with no copy. **Needs backend
+confirmation** of the real collection/field names before this can be trusted live.
+
 ## Read model (GraphQL) — verified on staging
 
 The survey definitions are readable on `POST /graphql` (staging returns them **even

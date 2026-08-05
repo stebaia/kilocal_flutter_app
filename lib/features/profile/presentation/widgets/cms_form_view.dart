@@ -75,7 +75,9 @@ class _CmsFormViewState extends State<CmsFormView> {
   }
 
   Set<String> _asStringSet(dynamic value) {
-    if (value is List) return value.map((e) => e.toString()).toSet();
+    if (value is List) {
+      return value.whereType<Object>().map((e) => e.toString()).toSet();
+    }
     if (value is String && value.isNotEmpty) return {value};
     return <String>{};
   }

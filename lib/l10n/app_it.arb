@@ -322,7 +322,7 @@
   "@integrationMonitoringDays": {
     "placeholders": { "days": { "type": "int" } }
   },
-  "integrationMarkTaken": "Segna integrato come preso",
+  "integrationMarkTaken": "Segna come preso",
   "integrationTakenToday": "Preso oggi",
   "integrationMarkTakenError": "Impossibile registrare l'assunzione. Riprova più tardi.",
   "integrationMarkedTaken": "Assunzione registrata",
@@ -425,6 +425,7 @@
     "placeholders": { "date": { "type": "String" } }
   },
   "diaryActivityCompleteError": "Impossibile completare l'attività. Riprova.",
+  "diaryGoalToggleError": "Impossibile aggiornare il traguardo. Riprova.",
   "month1": "Mese 1",
   "phase1": "Fase 1",
   "activitiesCount": "{completed}/{total} attività",

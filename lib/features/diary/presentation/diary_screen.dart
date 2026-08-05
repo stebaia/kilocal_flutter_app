@@ -260,6 +260,7 @@ class _GoalsTab extends StatelessWidget {
     DiaryGoalsCubit cubit,
     DiaryGoal goal,
   ) async {
+    final messenger = ScaffoldMessenger.of(context);
     final action = await showDiaryGoalDetailSheet(context, goal: goal);
     switch (action) {
       case DiaryGoalDetailAction.edit:
@@ -271,7 +272,12 @@ class _GoalsTab extends StatelessWidget {
         );
         if (input != null) await cubit.updateGoal(goal, input);
       case DiaryGoalDetailAction.toggleCompleted:
-        await cubit.toggleCompleted(goal);
+        final ok = await cubit.toggleCompleted(goal);
+        if (!ok) {
+          messenger.showSnackBar(
+            SnackBar(content: Text(l10n.diaryGoalToggleError)),
+          );
+        }
       case DiaryGoalDetailAction.delete:
         if (!context.mounted) return;
         final confirmed = await _confirmGoalDeletion(context);

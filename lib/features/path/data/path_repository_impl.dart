@@ -27,6 +27,9 @@ class PathRepositoryImpl implements PathRepository {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         '/path/me/progress',
+        // The server caches this endpoint keyed by exact URL; a monotonic
+        // throwaway param forces a fresh read after step completions.
+        queryParameters: {'_': DateTime.now().millisecondsSinceEpoch},
       );
       final dto = PathProgressResponseDto.fromJson(response.data ?? const {});
       return _mapProgressDto(dto.data, l10n);

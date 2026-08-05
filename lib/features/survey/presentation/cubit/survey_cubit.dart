@@ -191,7 +191,16 @@ class SurveyCubit extends Cubit<SurveyState> {
     final visible = survey == null
         ? state.visibleSections
         : _computeVisible(survey, answers);
-    emit(state.copyWith(answers: answers, visibleSections: visible));
+    // Any answer edit un-pins the `#stop#` block: it can only have been
+    // reached by stepping back onto the risky question (see `previous()`),
+    // and the user is actively changing that answer.
+    emit(
+      state.copyWith(
+        answers: answers,
+        visibleSections: visible,
+        blockedByStop: false,
+      ),
+    );
   }
 
   // --- Navigation ------------------------------------------------------------
@@ -202,9 +211,56 @@ class SurveyCubit extends Cubit<SurveyState> {
     // advance, whatever calls next().
     if (!state.canLeaveCurrentStep) return;
 
+    // A `#stop#`-marked option (e.g. "sei in gravidanza" → "Sì") blocks the
+    // survey outright: jump to the last section and show dedicated copy
+    // instead of advancing normally. Checked before the barcode/alert gates —
+    // there is nothing to confirm or validate past this point.
+    if (state.currentResultAction == SurveyResultAction.stop) {
+      emit(
+        state.copyWith(
+          currentIndex: state.visibleSections.length - 1,
+          blockedByStop: true,
+          stopOriginIndex: state.currentIndex,
+        ),
+      );
+      return;
+    }
+
+    // A `#alert#`-marked option requires the CMS confirmation dialog before
+    // continuing. The UI shows it and calls confirmAlert()/dismissAlert();
+    // next() re-runs and passes once confirmedAlertAnswers has this answer.
+    if (state.currentResultAction == SurveyResultAction.alert &&
+        state.currentAlertNeedsConfirmation) {
+      final modal = await _repository.fetchAlertModal();
+      // A missing CMS entity must not trap the user on a step with no dialog
+      // to confirm — degrade to letting them through.
+      if (modal != null) {
+        emit(state.copyWith(pendingAlert: modal));
+        return;
+      }
+    }
+
     // A `barcode` step is only valid against the products catalogue, so it is
     // checked here rather than while typing.
     if (!await _barcodeAccepted()) return;
+
+    // A `#stop#` block's CTA ("Chiudi") restarts the wizard from its very
+    // first step instead of submitting — the answers (including the risky
+    // one) are never sent, and there is nowhere else in the app to send the
+    // user while `profile_status` still names this survey (any in-app
+    // destination would just be bounced back here by the onboarding redirect
+    // in router.dart).
+    if (state.blockedByStop) {
+      emit(
+        state.copyWith(
+          currentIndex: 0,
+          answers: const {},
+          blockedByStop: false,
+          clearStopOriginIndex: true,
+        ),
+      );
+      return;
+    }
 
     if (state.isLastStep) {
       // Already on the final screen: a result section has had its outcome since
@@ -229,9 +285,43 @@ class SurveyCubit extends Cubit<SurveyState> {
   }
 
   void previous() {
+    // Stepping back off a `#stop#` block must return to the risky question
+    // itself, not merely decrement — the jump in next() skipped over
+    // whatever sections sat between it and the last one.
+    if (state.blockedByStop) {
+      emit(
+        state.copyWith(
+          currentIndex: state.stopOriginIndex ?? state.currentIndex - 1,
+          blockedByStop: false,
+          clearStopOriginIndex: true,
+        ),
+      );
+      return;
+    }
     if (state.currentIndex > 0) {
       emit(state.copyWith(currentIndex: state.currentIndex - 1));
     }
+  }
+
+  /// Confirms the pending `#alert#` dialog and re-runs `next()`, which now
+  /// finds this answer in [SurveyState.confirmedAlertAnswers] and advances.
+  Future<void> confirmAlert() async {
+    final key = state._currentAlertAnswerKey;
+    emit(
+      state.copyWith(
+        clearPendingAlert: true,
+        confirmedAlertAnswers: key == null
+            ? state.confirmedAlertAnswers
+            : {...state.confirmedAlertAnswers, key},
+      ),
+    );
+    await next();
+  }
+
+  /// Dismisses the pending `#alert#` dialog without confirming: the user
+  /// stays on the current step.
+  void dismissAlert() {
+    emit(state.copyWith(clearPendingAlert: true));
   }
 
   /// Sends the answers. When [advanceOnly] the wizard stays in progress so the

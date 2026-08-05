@@ -69,9 +69,18 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
     }
   }
 
-  Future<void> toggleCompleted(DiaryGoal goal) async {
+  /// Returns `true` on success, `false` if the write failed (so the caller
+  /// can surface a transient error without hiding the list).
+  Future<bool> toggleCompleted(DiaryGoal goal) async {
     final target = !goal.isCompleted;
-    // Optimistic update; revert on failure by reloading.
+    final previous = state.goals;
+    // Optimistic update; on failure, revert to the pre-toggle list rather than
+    // reloading from the server. A reload re-runs fetchMonthEndStatus(), which
+    // only re-materialises a Kilocal goal while its survey is still "pending" —
+    // once it isn't, a failed PATCH followed by a reload could drop the goal
+    // from state.goals entirely, vanishing it from every filter (including
+    // "Tutti"). Reverting locally keeps the goal in place regardless, and
+    // keeps `status` at `loaded` so the list stays visible.
     emit(
       state.copyWith(
         goals: _replace(
@@ -84,8 +93,10 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
     );
     try {
       await _repository.updateGoalCompletion(id: goal.id, completed: target);
+      return true;
     } catch (_) {
-      await load();
+      emit(state.copyWith(goals: previous));
+      return false;
     }
   }
 

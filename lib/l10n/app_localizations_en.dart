@@ -965,6 +965,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Couldn\'t complete the activity. Try again.';
 
   @override
+  String get diaryGoalToggleError => 'Couldn\'t update the goal. Try again.';
+
+  @override
   String get month1 => 'Month 1';
 
   @override

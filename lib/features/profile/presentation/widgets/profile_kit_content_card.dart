@@ -4,14 +4,17 @@ import 'package:flutter_html/flutter_html.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/readable_color.dart';
 import '../../domain/entities/profile_kit.dart';
 
-/// The soft-pink content card used on both the "Il mio Kit" and "Integrazione e
-/// prodotti" screens: a centered product image, an accent-colored title, an
+/// The soft-tinted content card used on both the "Il mio Kit" and "Integrazione
+/// e prodotti" screens: a centered product image, an accent-colored title, an
 /// HTML body ("Come agisce…") and an optional pill "Acquista" button.
 ///
 /// A single card layout drives both screens; the plan card and the product card
-/// differ only in the data ([ProfileKit] vs [ProfileKitProduct]).
+/// differ only in the data ([ProfileKit] vs [ProfileKitProduct]). The tint
+/// follows the biotype's own `main_color` (see [[profiles-biotype-schema]]),
+/// matching the rest of the "Il mio Tipo" screens; brand pink when unset.
 class ProfileKitContentCard extends StatelessWidget {
   const ProfileKitContentCard({
     super.key,
@@ -21,6 +24,7 @@ class ProfileKitContentCard extends StatelessWidget {
     this.cta,
     this.ctaLabel,
     this.onCtaTap,
+    this.accentColor,
   });
 
   final String title;
@@ -36,16 +40,25 @@ class ProfileKitContentCard extends StatelessWidget {
   /// Invoked when the CTA is tapped. Disabled when null.
   final VoidCallback? onCtaTap;
 
+  /// The biotype's `main_color`; falls back to [AppColors.accent] when null.
+  final Color? accentColor;
+
   @override
   Widget build(BuildContext context) {
     final label = ctaLabel ?? cta?.label;
     final showCta = label != null && onCtaTap != null;
+    final rawAccent = accentColor ?? AppColors.accent;
+    final background = _softBackground(rawAccent);
+    // Some CMS biotype colors (cyan, orange, light blue…) are too light to
+    // read as text; darken towards a WCAG-AA-safe shade, same as the
+    // characteristics card CTA.
+    final accent = readableOnWhite(rawAccent);
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.spaceLg),
       decoration: BoxDecoration(
-        color: AppColors.accentSoft,
+        color: background,
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
       child: Column(
@@ -54,7 +67,7 @@ class ProfileKitContentCard extends StatelessWidget {
           Text(
             title,
             style: AppTypography.textTheme.titleMedium?.copyWith(
-              color: AppColors.accent,
+              color: accent,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -94,19 +107,34 @@ class ProfileKitContentCard extends StatelessWidget {
             ),
           if (showCta) ...[
             const SizedBox(height: AppSpacing.spaceMd),
-            _CtaButton(label: label, onTap: onCtaTap!),
+            _CtaButton(label: label, onTap: onCtaTap!, color: accent),
           ],
         ],
       ),
     );
   }
+
+  /// Lightens [color] towards white so it reads as a soft tinted background,
+  /// the same way [AppColors.accentSoft] relates to [AppColors.accent].
+  Color _softBackground(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl
+        .withLightness((hsl.lightness + 0.38).clamp(0.0, 0.95))
+        .withSaturation((hsl.saturation - 0.15).clamp(0.0, 1.0))
+        .toColor();
+  }
 }
 
 class _CtaButton extends StatelessWidget {
-  const _CtaButton({required this.label, required this.onTap});
+  const _CtaButton({
+    required this.label,
+    required this.onTap,
+    required this.color,
+  });
 
   final String label;
   final VoidCallback onTap;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -116,8 +144,8 @@ class _CtaButton extends StatelessWidget {
         onPressed: onTap,
         style: OutlinedButton.styleFrom(
           backgroundColor: AppColors.surface,
-          foregroundColor: AppColors.accent,
-          side: const BorderSide(color: AppColors.accent),
+          foregroundColor: color,
+          side: BorderSide(color: color),
           padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceMd),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -126,7 +154,7 @@ class _CtaButton extends StatelessWidget {
         child: Text(
           label,
           style: AppTypography.textTheme.titleSmall?.copyWith(
-            color: AppColors.accent,
+            color: color,
             fontWeight: FontWeight.w700,
           ),
         ),
