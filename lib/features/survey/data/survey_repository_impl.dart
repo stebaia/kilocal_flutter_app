@@ -372,14 +372,14 @@ query KitBarcodeProducts($kitId: ID!) {
     }
   }
 
-  /// **Unconfirmed schema** — see [[survey-alert-modal-schema]]. Mirrors the
-  /// `internal_name`-filtered singleton pattern used for `private_pages`
-  /// (`profile_page_repository_impl.dart`); collection/field names are a
-  /// best guess (`survey_alerts`, `internal_name = alert_survey_risky_selection_modal`)
-  /// pending backend confirmation.
+  /// The risky-selection dialog lives in the shared `modals` collection
+  /// (`internal_name = alert_survey_risky_selection_modal`, id 10 on staging),
+  /// alongside every other CMS dialog — not in a survey-specific collection.
+  /// Same `internal_name`-filtered singleton pattern used for `private_pages`
+  /// (`profile_page_repository_impl.dart`).
   static const _alertModalQuery = r'''
 query GetSurveyAlertModal($internalName: String!, $lang: String!) {
-  survey_alerts(filter: { internal_name: { _eq: $internalName } }, limit: 1) {
+  modals(filter: { internal_name: { _eq: $internalName } }, limit: 1) {
     id
     translations(filter: { languages_code: { code: { _eq: $lang } } }) {
       title
@@ -403,7 +403,7 @@ query GetSurveyAlertModal($internalName: String!, $lang: String!) {
         },
       );
       final rows =
-          (result['data'] as Map<String, dynamic>?)?['survey_alerts']
+          (result['data'] as Map<String, dynamic>?)?['modals']
               as List<dynamic>?;
       if (rows == null || rows.isEmpty) return null;
       return mapAlertModal(rows.first as Map<String, dynamic>);

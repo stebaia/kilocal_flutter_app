@@ -133,9 +133,7 @@ List<SurveyCondition> _mapConditions(dynamic raw) {
   return out;
 }
 
-/// Maps the `survey_alerts` singleton row to [SurveyAlertModal] (see
-/// [[survey-alert-modal-schema]] — collection/field names are a best guess
-/// pending backend confirmation).
+/// Maps a `modals` singleton row to [SurveyAlertModal].
 SurveyAlertModal mapAlertModal(Map<String, dynamic> json) {
   final tr = _first(json['translations']);
   return SurveyAlertModal(

@@ -229,10 +229,16 @@ void configureDependencies() {
     () => StatisticsRepositoryImpl(
       dio: getIt<Dio>(),
       graphqlClient: getIt<GraphqlClient>(),
+      // Resolved lazily inside the closure, so the registration order with
+      // the Integrazione section below does not matter.
+      integrazioneRepository: getIt<IntegrazioneRepository>(),
     ),
   );
   getIt.registerFactory<StatisticsCubit>(
-    () => StatisticsCubit(statisticsRepository: getIt<StatisticsRepository>()),
+    () => StatisticsCubit(
+      statisticsRepository: getIt<StatisticsRepository>(),
+      userCubit: getIt<UserCubit>(),
+    ),
   );
   getIt.registerLazySingleton<PathMaterialsRepository>(
     () => PathMaterialsRepositoryImpl(

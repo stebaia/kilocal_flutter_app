@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../l10n/app_localizations.dart';
+import '../../../user/presentation/cubit/user_cubit.dart';
 import '../../domain/entities/area_stat.dart';
 import '../../domain/statistics_repository.dart';
 
@@ -10,11 +11,17 @@ part 'statistics_state.dart';
 class StatisticsCubit extends Cubit<StatisticsState> {
   StatisticsCubit({
     required StatisticsRepository statisticsRepository,
+    UserCubit? userCubit,
     List<AreaStat>? initialData,
   }) : _statisticsRepository = statisticsRepository,
+       _userCubit = userCubit,
        super(StatisticsState(stats: initialData ?? const []));
 
   final StatisticsRepository _statisticsRepository;
+
+  /// Session user, needed to resolve the phase-based `integrazione` stats
+  /// under a month filter (the kit/phases are per-user).
+  final UserCubit? _userCubit;
 
   /// Area whose timeframes drive both the default selection and the filter
   /// sheet (see [[statistics-feature-status]] — every area's timeframes are
@@ -41,6 +48,7 @@ class StatisticsCubit extends Cubit<StatisticsState> {
       final stats = await _statisticsRepository.fetchStatistics(
         l10n,
         timeframe: state.selectedTimeframe,
+        myId: _userCubit?.state.user?.id,
       );
       emit(state.copyWith(status: StatisticsStatus.loaded, stats: stats));
     } catch (_) {

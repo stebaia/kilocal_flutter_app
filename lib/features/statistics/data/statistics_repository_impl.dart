@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../integrazione/domain/entities/integrazione_data.dart';
+import '../../integrazione/domain/integrazione_repository.dart';
 import '../../path/data/dto/path_area_steps_dto.dart';
 import '../../path/data/dto/path_progress_dto.dart';
 import '../domain/entities/area_stat.dart';
@@ -19,17 +21,31 @@ import '../domain/statistics_repository.dart';
 /// (same pattern as `HomeRepositoryImpl._fetchMonthProgress`).
 ///
 /// `benessere` is filtered out on purpose (product decision); it is still
-/// returned by the backend but not surfaced here. `integrazione` is
-/// phase-based, has no per-month semantics, and keeps its lifetime value.
+/// returned by the backend but not surfaced here.
+///
+/// `integrazione` has no `percorsi_content` (it is phase-based, backed by
+/// `kit_products` + `user_integratori`), so it is resolved separately: under a
+/// month filter it maps month N to the kit phase with `sort == N` and reports
+/// that phase's own intake progress — `0/0` while the phase is still locked,
+/// which is what the user expects for a month they have not unlocked yet.
 class StatisticsRepositoryImpl implements StatisticsRepository {
   const StatisticsRepositoryImpl({
     required Dio dio,
     required GraphqlClient graphqlClient,
+    required IntegrazioneRepository integrazioneRepository,
   }) : _dio = dio,
-       _graphqlClient = graphqlClient;
+       _graphqlClient = graphqlClient,
+       _integrazioneRepository = integrazioneRepository;
 
   final Dio _dio;
   final GraphqlClient _graphqlClient;
+  final IntegrazioneRepository _integrazioneRepository;
+
+  /// Area key of the phase-based supplements area.
+  static const _integrazioneArea = 'integrazione';
+
+  // The CMS uses codes like "it-IT"; matches `IntegrazioneCubit._lang`.
+  static const _lang = 'it-IT';
 
   /// Area resolved through each content's main-tab group, matching what
   /// `/path/me/progress` counts (`is_percorso_main_tab`), so a content reused
@@ -80,6 +96,7 @@ query StatisticsMonthTotals {
   Future<List<AreaStat>> fetchStatistics(
     AppLocalizations l10n, {
     AreaTimeframe? timeframe,
+    String? myId,
   }) async {
     try {
       final lifetime = await _fetchLifetimeProgress();
@@ -90,10 +107,18 @@ query StatisticsMonthTotals {
       }
 
       final monthCounts = await _fetchMonthCounts(timeframe.sort);
+      // `integrazione` lives outside `percorsi_content`, so its per-month
+      // figures come from the kit phases instead.
+      final phaseCount = await _fetchPhaseCounts(
+        monthSort: timeframe.sort,
+        myId: myId,
+      );
+
       return _areaMeta(l10n).map((meta) {
-        // `integrazione` is phase-based: no per-month breakdown, keep lifetime.
-        final monthCount = monthCounts[meta.internalName];
-        if (monthCount == null) {
+        final count = meta.internalName == _integrazioneArea
+            ? phaseCount
+            : monthCounts[meta.internalName];
+        if (count == null) {
           return _mapArea(meta, lifetime.areas[meta.internalName]);
         }
         return AreaStat(
@@ -101,8 +126,8 @@ query StatisticsMonthTotals {
           area: meta.title,
           assetName: meta.assetName,
           month: meta.timeframeLabel,
-          completed: monthCount.completed,
-          total: monthCount.total,
+          completed: count.completed,
+          total: count.total,
         );
       }).toList();
     } on ApiException {
@@ -206,6 +231,55 @@ query StatisticsMonthTotals {
       for (final area in {...completed.keys, ...totals.keys})
         area: (completed: completed[area] ?? 0, total: totals[area] ?? 0),
     };
+  }
+
+  /// Intake progress of the supplement phase matching the selected month, or
+  /// null when it cannot be resolved (no [myId], no kit, or the request fails)
+  /// — the caller then falls back to the lifetime figure.
+  ///
+  /// Month N maps to the phase with `sort == N`: the supplement plan advances
+  /// one phase per path month. A phase the user has not reached yet is locked,
+  /// and a locked phase reports `0/0` rather than leaking the lifetime
+  /// percentage — that stale value is what made months 2/3 look partly done.
+  ///
+  /// For an unlocked phase, `total` is the planned intake days of the phase
+  /// (sum of each supplement's `durationDays`) and `completed` the days
+  /// actually marked as taken, capped per product so an over-logged supplement
+  /// cannot push the bar past 100%.
+  Future<({int completed, int total})?> _fetchPhaseCounts({
+    required int monthSort,
+    required String? myId,
+  }) async {
+    if (myId == null) return null;
+
+    final IntegrazioneData data;
+    try {
+      data = await _integrazioneRepository.fetchIntegrazione(
+        myId: myId,
+        lang: _lang,
+      );
+    } on ApiException {
+      // Best-effort: the other areas' stats are still worth showing.
+      return null;
+    }
+    if (data.phases.isEmpty) return null;
+
+    final index = data.phases.indexWhere((phase) => phase.sort == monthSort);
+    // A month with no matching phase (e.g. the kit has fewer phases than the
+    // path has months) has nothing to report for this area.
+    if (index < 0) return (completed: 0, total: 0);
+
+    // Not reached yet → nothing done in that month, by definition.
+    if (data.isPhaseLocked(index)) return (completed: 0, total: 0);
+
+    final phase = data.phases[index];
+    var completed = 0;
+    var total = 0;
+    for (final product in phase.products) {
+      total += product.durationDays;
+      completed += product.takenCount.clamp(0, product.durationDays);
+    }
+    return (completed: completed, total: total);
   }
 
   /// The `root.internal_name` of the content's main-tab group, or null when

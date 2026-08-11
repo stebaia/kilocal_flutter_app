@@ -282,14 +282,39 @@ Implemented in `SurveyOption.resultAction` (`survey_step.dart`), `SurveyState.cu
 / `blockedByStop` / `pendingAlert` (`survey_state.dart`), and the interception in
 `SurveyCubit.next()` (`survey_cubit.dart`).
 
-**Open question:** the `#alert#` dialog copy is CMS-driven
-(`alert_survey_risky_selection_modal`), but there is no confirmed collection/schema for it —
-unlike every other CMS read in this file, nothing here was verified against a live GraphQL
-introspection. `SurveyRepositoryImpl.fetchAlertModal()` guesses a `survey_alerts` collection
-filtered by `internal_name`, mirroring the `private_pages` pattern
-(`profile_page_repository_impl.dart`); a missing/failed read degrades to letting the user
-through unblocked rather than trapping them on a dialog with no copy. **Needs backend
-confirmation** of the real collection/field names before this can be trusted live.
+**Alert dialog copy — verified 2026-08-06.** The `#alert#` dialog lives in the shared
+`modals` collection, *not* a survey-specific one (an earlier guess at `survey_alerts` was
+wrong — that collection does not exist, so `fetchAlertModal()` silently returned `null` and
+every `#alert#` option fell through the degrade path and advanced without ever showing the
+dialog). Confirmed on staging:
+
+```graphql
+modals(filter: { internal_name: { _eq: "alert_survey_risky_selection_modal" } }, limit: 1) {
+  id
+  translations(filter: { languages_code: { code: { _eq: $lang } } }) { title content }
+}
+```
+
+`modals` id **10**, `it-IT` → title `"Attenzione"`, content *"In base alle informazioni che hai
+indicato, il percorso potrebbe non essere adatto alle tue condizioni attuali. Ti consigliamo di
+confrontarti con il tuo medico per una valutazione personalizzata."* Its `ctas` relation is
+empty, so the dialog's buttons stay hardcoded ("Annulla" / "Continua").
+
+A missing/failed read still degrades to letting the user through unblocked rather than trapping
+them on a dialog with no copy.
+
+**Marked options on staging** (`survey_question_options.result_value`), verified 2026-08-06 —
+18 total, all on the health-conditions question:
+
+- `#stop#` (10): Insufficienza renale, Malattie epatiche, Disturbi alimentari (bulimia,
+  anoressia), "Si", Patologie oncologiche, Disturbi neurologici e psichiatrici, Malattie
+  polmonari croniche, Patologie ematologiche, Sistema immunitario compromesso, Uso cronico di
+  farmaci
+- `#alert#` (8): Allattamento/Gravidanza, Diabete, Malattie cardiovascolari, Allergie
+  alimentari, Dislipidemia, Ipertensione, Problemi tiroidei, Altro
+
+Note the per-option `translations.warning_when_selected` field also exists on this collection
+but is `null` for every marked option — the dialog copy comes from `modals`, not from there.
 
 ## Read model (GraphQL) — verified on staging
 
