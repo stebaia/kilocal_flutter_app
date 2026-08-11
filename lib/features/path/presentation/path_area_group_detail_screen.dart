@@ -8,6 +8,7 @@ import '../../../core/widgets/app_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../statistics/presentation/statistics_screen.dart';
 import '../domain/entities/path_area_detail.dart';
+import 'path_materials_screen.dart';
 import 'widgets/path_area_hero_card.dart';
 import 'widgets/path_locked_sheets.dart';
 import 'widgets/path_materials_row.dart';
@@ -121,6 +122,14 @@ class _PathAreaGroupDetailScreenState extends State<PathAreaGroupDetailScreen> {
                     subtitle: l10n.pathMaterialsSubtitle,
                     onTap: () => context.push(
                       '/path/benessere/materials/${widget.groupId}',
+                      // Pass the group's official categories so the materials
+                      // hub renders *and* defaults to the first official tab
+                      // ("Scopri"); without them it falls back to the
+                      // materials-derived order and lands on the wrong tab.
+                      extra: PathMaterialsRouteArgs(
+                        title: title,
+                        categories: group?.categories,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.spaceXl),

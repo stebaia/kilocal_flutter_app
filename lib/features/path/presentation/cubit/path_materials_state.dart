@@ -71,13 +71,16 @@ class PathMaterialsState extends Equatable {
     PathMaterialsStatus? status,
     PathMaterialsData? data,
     String? selectedCategoryId,
+    bool clearSelectedCategory = false,
     PathMaterialFilter? filter,
     ApiException? error,
   }) {
     return PathMaterialsState(
       status: status ?? this.status,
       data: data ?? this.data,
-      selectedCategoryId: selectedCategoryId ?? this.selectedCategoryId,
+      selectedCategoryId: clearSelectedCategory
+          ? null
+          : (selectedCategoryId ?? this.selectedCategoryId),
       filter: filter ?? this.filter,
       error: error ?? this.error,
     );

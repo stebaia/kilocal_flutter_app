@@ -52,7 +52,8 @@ class PathMaterialsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<PathMaterialsCubit>()..load(groupId: groupId),
+      create: (_) => getIt<PathMaterialsCubit>()
+        ..load(groupId: groupId, officialCategories: categories),
       child: _PathMaterialsView(
         groupId: groupId,
         title: title,
@@ -305,8 +306,9 @@ class _MaterialsList extends StatelessWidget {
     await context.push('$base/detail/${material.id}', extra: categoryTitle);
     // The detail's "Segna come completato" CTA may have just moved this
     // material from "Da vedere" to "Visti" — reload so the list/filter
-    // reflects it without the user needing to leave and come back.
-    await cubit.load(groupId: groupId);
+    // reflects it without the user needing to leave and come back. The reload
+    // keeps the selected tab, so we come back to the list we left.
+    await cubit.load(groupId: groupId, officialCategories: officialCategories);
   }
 }
 
