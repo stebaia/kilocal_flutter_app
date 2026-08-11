@@ -22,9 +22,13 @@ abstract interface class SurveyRepository {
   /// Pending month-end survey, or `null` if none
   /// (`GET /survey/me/month-end-status`).
   ///
-  /// Has a **side-effect**: when a survey is pending the backend creates the
-  /// matching `traguardo_mese_N` goal, so this must run before listing goals or
-  /// the predefined Kilocal ones never show up.
+  /// Has a **side-effect**: it runs the goals *reconcile* — materialising the
+  /// Kilocal goals the user has unlocked and auto-completing the per-area ones
+  /// that reached 100%. `GET /journal/goals` reconciles too, so this isn't the
+  /// only way the goals appear; see `wiki/diario.md`.
+  ///
+  /// A survey is reported pending only when allenamento + alimentazione +
+  /// integrazione are all at 100% for the month (benessere doesn't count).
   Future<SurveyMonthEndPending?> fetchMonthEndStatus();
 
   /// Searches the `pharmacies` collection (22k+ rows → server-side [search]).

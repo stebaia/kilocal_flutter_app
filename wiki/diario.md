@@ -14,27 +14,62 @@ required. Source: Swagger *Kilocal App*.
 | Personal objective | `category` (→ `goal_categories`) |
 | Predefined achievement | `related_goal` (→ catalog `goals`) |
 
-## Kilocal goals need a trigger first
+## Kilocal goals are materialised by a reconcile (confirmed 2026-08-11)
 
-The predefined `traguardo_mese_N` goals are **not** created by the app. They are a
-side-effect of [[survey|`GET /survey/me/month-end-status`]]: when a month-end survey is
-pending, that call idempotently creates the matching `user_reminders` row. So the
-Traguardi page must call it **before** `GET /journal/goals`, or the Kilocal goals are
-missing until the next visit. `POST /survey/submit/month_end_survey_N` later sets
-`completed_at` on the same row.
+The predefined Kilocal goals are **not** created by the app. Both
+`GET /journal/goals` **and** [[survey|`GET /survey/me/month-end-status`]] run a
+**reconcile** server-side: they materialise the goals the user has unlocked and
+auto-complete the per-area ones that have reached 100%. Either call is enough —
+the Traguardi page doesn't strictly need month-end-status first, though calling it
+stays harmless (and keeps the pending-survey state fresh).
 
-"Month complete" means the **integrazione phase is at 100%** — not step progress in
-allenamento/alimentazione. No client-side filter is needed: the list returns
-`category` OR `related_goal` rows, and the app already splits them by which field is set.
+### Four goals per month
+
+| Slug | Kind |
+|------|------|
+| `primo_mese_allenamento` | per-area |
+| `primo_mese_alimentazione` | per-area |
+| `primo_mese_integrazione` | per-area |
+| `traguardo_mese_1` | generic |
+
+Month **N+1**'s goals only appear once **all four** of month N's goals have a
+`completed_at`. So the list grows a month at a time; the absence of month 2/3 goals is
+expected state, not a gap.
+
+### How each kind completes
+
+- **Per-area** goals are auto-completed by the reconcile when that area hits 100%.
+- The **generic** goal is closed by submitting the month-end survey
+  (`POST /survey/submit/month_end_survey_N`).
+
+A month-end survey is reported **pending** only when `allenamento` +
+`alimentazione` + `integrazione` are all at 100% for that month. **Benessere does not
+count** toward it.
+
+> Earlier docs said "month complete = integrazione phase at 100%" and that only the
+> generic `traguardo_mese_N` goals exist. Both are superseded by the above.
+
+No client-side filter is needed: the list returns `category` OR `related_goal` rows,
+and the app already splits them by which field is set.
+
+## Kilocal goals can't be deleted
+
+`DELETE /journal/goals/{id}` on a Kilocal goal (one carrying `related_goal`) returns
+**`403`** — the server refuses it. Manual completion via `PATCH` is allowed, and
+completed Kilocal goals **stay in the list** (they're never removed, only flagged).
+
+The client already reflects this: `diary_goal_detail_sheet.dart` only offers
+"Elimina traguardo" for `DiaryGoalKind.personal`, so the delete call is unreachable
+for Kilocal goals.
 
 ## Endpoints
 
 | Method | Path | Purpose |
 |--------|------|---------|
-| GET | `/journal/goals` | list goals |
+| GET | `/journal/goals` | list goals — **also reconciles** (materialises unlocked goals, auto-completes per-area ones at 100%) |
 | POST | `/journal/goals` | create |
-| PATCH | `/journal/goals/{id}` | update |
-| DELETE | `/journal/goals/{id}` | delete (`204`) |
+| PATCH | `/journal/goals/{id}` | update (also used to complete: set `completed_at`) |
+| DELETE | `/journal/goals/{id}` | delete (`204`) — **`403` on Kilocal goals** (`related_goal` set) |
 
 `UserGoal` extends `UserReminder` (see [[strumenti]]) with:
 
@@ -53,7 +88,7 @@ allenamento/alimentazione. No client-side filter is needed: the list returns
 
 `UserGoalInput` extends `UserReminderInput` with `category` and/or `related_goal`.
 `category` is required for personal objectives when `related_goal` is absent (and vice-versa).
-`400` bad body · `403` not owner · `404` not found.
+`400` bad body · `403` not owner **or Kilocal goal deletion** · `404` not found.
 
 ## Resolves missing-apis §4
 

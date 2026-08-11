@@ -67,8 +67,8 @@ void main() {
       expect(cubit.state.goals, hasLength(3));
     });
 
-    // The backend materialises the `traguardo_mese_N` goals as a side-effect of
-    // the month-end check, so it has to happen before the list is fetched.
+    // The month-end check runs the goals reconcile and refreshes the pending
+    // survey state, so load() keeps it ahead of the list fetch.
     test('load triggers the month-end check before fetching goals', () async {
       when(() => repository.fetchGoals()).thenAnswer((_) async => [kilocal]);
 
@@ -144,11 +144,9 @@ void main() {
     });
 
     // Regression: a failed PATCH used to trigger a full reload() via load(),
-    // which re-runs fetchMonthEndStatus() — that only re-materialises a
-    // Kilocal goal while its month-end survey is still pending. Once it
-    // isn't, a subsequent fetchGoals() that omits the goal made it vanish
-    // from state.goals entirely (so from every filter, including "Tutti").
-    // The fix reverts locally instead of reloading, so the goal always stays.
+    // and a subsequent fetchGoals() that omitted the goal made it vanish from
+    // state.goals entirely (so from every filter, including "Tutti"). The fix
+    // reverts locally instead of reloading, so the goal always stays.
     test(
       'toggleCompleted on a Kilocal goal reverts locally on failure without reloading',
       () async {

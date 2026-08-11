@@ -22,10 +22,11 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
 
   Future<void> load() async {
     emit(state.copyWith(status: DiaryGoalsStatus.loading));
-    // The predefined Kilocal goals (`traguardo_mese_N`) are materialised by the
-    // backend as a side-effect of the month-end check, so it must run *before*
-    // fetchGoals or they'd be missing until the next visit. A failure here only
-    // costs this month's Kilocal goal, so it must not block the list.
+    // Both this call and fetchGoals() run the backend goals *reconcile*
+    // (materialise unlocked Kilocal goals, auto-complete per-area ones at
+    // 100%), so the list no longer depends on this running first — it's kept
+    // ahead of fetchGoals to also refresh the pending month-end survey state.
+    // A failure here must not block the list.
     try {
       await _surveyRepository.fetchMonthEndStatus();
     } catch (_) {}
@@ -75,12 +76,9 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
     final target = !goal.isCompleted;
     final previous = state.goals;
     // Optimistic update; on failure, revert to the pre-toggle list rather than
-    // reloading from the server. A reload re-runs fetchMonthEndStatus(), which
-    // only re-materialises a Kilocal goal while its survey is still "pending" —
-    // once it isn't, a failed PATCH followed by a reload could drop the goal
-    // from state.goals entirely, vanishing it from every filter (including
-    // "Tutti"). Reverting locally keeps the goal in place regardless, and
-    // keeps `status` at `loaded` so the list stays visible.
+    // reloading from the server. Reverting locally is cheaper than a reload and
+    // keeps `status` at `loaded` so the list stays visible instead of flipping
+    // to the error state over one failed write.
     emit(
       state.copyWith(
         goals: _replace(
