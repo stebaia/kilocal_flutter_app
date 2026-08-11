@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kilocal_flutter_app/features/path/data/path_repository_impl.dart';
+import 'package:kilocal_flutter_app/features/path/data/vimeo_oembed_service.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations_it.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -89,7 +90,12 @@ void main() {
 
   setUp(() {
     dio = _MockDio();
-    repository = PathRepositoryImpl(dio: dio);
+    // The fixtures carry no video step, so the oEmbed service is never hit —
+    // no network call happens despite the real instance.
+    repository = PathRepositoryImpl(
+      dio: dio,
+      vimeoOembedService: VimeoOembedService(),
+    );
   });
 
   void stubResponse(Map<String, dynamic> body) {

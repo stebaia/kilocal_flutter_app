@@ -47,8 +47,10 @@ class VimeoOembedService {
 
   /// Matches the numeric video id in a Vimeo url, e.g. `vimeo.com/1120185037`
   /// or `vimeo.com/1120185037?ts=0&share=copy` — both seen live in the CMS's
-  /// `vimeo_url` field.
-  static final RegExp _idPattern = RegExp(r'vimeo\.com/(\d+)');
+  /// `vimeo_url` field. The optional `video/` segment also covers player links
+  /// (`player.vimeo.com/video/1120185037`), which the CMS accepts too and which
+  /// would otherwise resolve to no poster at all.
+  static final RegExp _idPattern = RegExp(r'vimeo\.com/(?:video/)?(\d+)');
 
   /// Metadata for every url in [videoUrls], keyed by url, fetched concurrently.
   /// Urls whose lookup fails are absent from the result.

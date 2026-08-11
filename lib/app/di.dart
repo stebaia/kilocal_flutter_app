@@ -209,7 +209,10 @@ void configureDependencies() {
 
   // --- Feature: Path ---
   getIt.registerLazySingleton<PathRepository>(
-    () => PathRepositoryImpl(dio: getIt<Dio>()),
+    () => PathRepositoryImpl(
+      dio: getIt<Dio>(),
+      vimeoOembedService: getIt<VimeoOembedService>(),
+    ),
   );
   getIt.registerFactory<PathCubit>(
     () => PathCubit(
