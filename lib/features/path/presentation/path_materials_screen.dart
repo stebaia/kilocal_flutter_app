@@ -36,12 +36,17 @@ class PathMaterialsScreen extends StatelessWidget {
   const PathMaterialsScreen({
     super.key,
     required this.groupId,
+    this.area,
     this.title,
     this.categories,
   });
 
   /// Id of the area's `is_percorso_main_tab: false` ("Materiali") group.
   final String groupId;
+
+  /// Clean area key (`alimentazione` / `allenamento` / `benessere`) taken from
+  /// the route; the materials endpoint is scoped by area as well as by group.
+  final String? area;
 
   /// Optional screen title; defaults to the localized "Materiali extra".
   final String? title;
@@ -53,9 +58,10 @@ class PathMaterialsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<PathMaterialsCubit>()
-        ..load(groupId: groupId, officialCategories: categories),
+        ..load(groupId: groupId, area: area, officialCategories: categories),
       child: _PathMaterialsView(
         groupId: groupId,
+        area: area,
         title: title,
         officialCategories: categories,
       ),
@@ -66,11 +72,13 @@ class PathMaterialsScreen extends StatelessWidget {
 class _PathMaterialsView extends StatelessWidget {
   const _PathMaterialsView({
     required this.groupId,
+    this.area,
     this.title,
     this.officialCategories,
   });
 
   final String groupId;
+  final String? area;
   final String? title;
 
   /// The tapped group's official categories, when known — takes priority over
@@ -125,6 +133,7 @@ class _PathMaterialsView extends StatelessWidget {
                         state: state,
                         l10n: l10n,
                         groupId: groupId,
+                        area: area,
                         officialCategories: officialCategories,
                       );
                   }
@@ -172,12 +181,14 @@ class _MaterialsList extends StatelessWidget {
     required this.state,
     required this.l10n,
     required this.groupId,
+    this.area,
     this.officialCategories,
   });
 
   final PathMaterialsState state;
   final AppLocalizations l10n;
   final String groupId;
+  final String? area;
 
   /// The tapped group's official categories, when known — see
   /// [PathMaterialsRouteArgs]. Falls back to the materials-derived ones (the
@@ -308,7 +319,11 @@ class _MaterialsList extends StatelessWidget {
     // material from "Da vedere" to "Visti" — reload so the list/filter
     // reflects it without the user needing to leave and come back. The reload
     // keeps the selected tab, so we come back to the list we left.
-    await cubit.load(groupId: groupId, officialCategories: officialCategories);
+    await cubit.load(
+      groupId: groupId,
+      area: area,
+      officialCategories: officialCategories,
+    );
   }
 }
 

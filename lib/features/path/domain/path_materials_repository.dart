@@ -5,7 +5,16 @@ abstract class PathMaterialsRepository {
   /// Fetches the materials of the given path group (the area's "Materiali"
   /// group, `is_percorso_main_tab: false`), together with the category tabs
   /// derived from those materials.
-  Future<PathMaterialsData> fetchMaterials({required String groupId});
+  ///
+  /// [area] is the clean area key (`alimentazione` / `allenamento` /
+  /// `benessere`) required by the REST endpoint that serves these materials.
+  /// When it is unknown — a cold deep-link into the hub carries only the group
+  /// id — the repository falls back to the GraphQL collection, which is scoped
+  /// by group alone but leaves the article→material fallback to the client.
+  Future<PathMaterialsData> fetchMaterials({
+    required String groupId,
+    String? area,
+  });
 
   /// Fetches the full detail (title, HTML body, asset) of a single material.
   /// Returns `null` when the material does not exist.

@@ -5,16 +5,26 @@ import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
 import '../domain/entities/path_material.dart';
 import '../domain/path_materials_repository.dart';
+import 'dto/area_material_dto.dart';
 import 'dto/path_material_dto.dart';
 import 'vimeo_oembed_service.dart';
 
-/// GraphQL-backed implementation of [PathMaterialsRepository].
+/// Implementation of [PathMaterialsRepository].
 ///
 /// The "Materiali" group exposes no steps; its materials live in the separate
 /// `percorsi_materials` collection, reachable from the group via the
-/// `percorsi_groups_percorsi_materials` junction. We query the junction filtered
-/// by the group id and map the nested materials. Category tabs are derived from
-/// the categories present on the returned materials, de-duplicated by id.
+/// `percorsi_groups_percorsi_materials` junction.
+///
+/// The list is read from the REST endpoint
+/// `GET /path/me/areas/{area}/groups/{groupId}/materials`, which returns the
+/// materials already normalized the way the web platform renders them: the
+/// article→material fallback for title/excerpt/image is applied server-side,
+/// materials whose linked article is not published are dropped, and video
+/// materials with no cover file carry a Vimeo `thumbnail_url`. That fallback
+/// used to live here, spread across the list query, the detail query and the
+/// card mapper, and it is what made unpublished-article recipes render as empty
+/// cards. The remaining reads (detail, group progress) still go through
+/// GraphQL, which has no REST equivalent.
 class PathMaterialsRepositoryImpl implements PathMaterialsRepository {
   PathMaterialsRepositoryImpl({
     required GraphqlClient graphqlClient,
@@ -188,7 +198,90 @@ query GetMaterial($id: ID!, $lang: String!) {
 ''';
 
   @override
-  Future<PathMaterialsData> fetchMaterials({required String groupId}) async {
+  Future<PathMaterialsData> fetchMaterials({
+    required String groupId,
+    String? area,
+  }) async {
+    // Without the area key the REST route cannot be addressed, so a cold
+    // deep-link into the hub still resolves through the GraphQL collection.
+    if (area == null || area.isEmpty) {
+      return _fetchMaterialsFromGraphql(groupId: groupId);
+    }
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        '/path/me/areas/$area/groups/$groupId/materials',
+      );
+
+      final data = response.data?['data'] as Map<String, dynamic>?;
+      if (data == null) {
+        return const PathMaterialsData(categories: [], materials: []);
+      }
+
+      return _mapAreaMaterials(AreaMaterialsDto.fromJson(data));
+    } on ApiException {
+      rethrow;
+    } on DioException catch (e) {
+      throw ApiException.fromDio(e);
+    }
+  }
+
+  /// Maps the normalized REST payload. The article→material fallback and the
+  /// Vimeo posters are already applied server-side, so this only reshapes the
+  /// rows and collects the category tabs in first-seen order.
+  PathMaterialsData _mapAreaMaterials(AreaMaterialsDto dto) {
+    final materials = <PathMaterial>[];
+    final categories = <String, PathMaterialCategory>{};
+
+    for (final row in dto.materials) {
+      final categoryIds = <String>[];
+      var hidesImage = false;
+
+      for (final cat in row.categories) {
+        final id = cat.id;
+        if (id == null || id.isEmpty) continue;
+        categoryIds.add(id);
+        final category = categories.putIfAbsent(
+          id,
+          () => PathMaterialCategory(
+            id: id,
+            title: cat.resolvedTitle ?? '',
+            internalName: cat.internalName,
+          ),
+        );
+        hidesImage = hidesImage || category.hidesImage;
+      }
+
+      final image = row.image;
+      final file = image?.mobileAsset ?? image?.defaultAsset;
+
+      materials.add(
+        PathMaterial(
+          id: row.id,
+          title: row.translations.firstOrNull?.title ?? '',
+          isVideo: image?.assetIsVideo ?? false,
+          isAvailable: row.status == 'published',
+          isCompleted: row.completed,
+          categoryIds: categoryIds,
+          // `thumbnail_url` is the Vimeo poster the server resolved for video
+          // materials that carry no cover file of their own.
+          imageUrl: _assetUrl(file) ?? row.thumbnailUrl,
+          hidesImage: hidesImage,
+        ),
+      );
+    }
+
+    return PathMaterialsData(
+      categories: categories.values.toList(),
+      materials: materials,
+    );
+  }
+
+  /// Legacy GraphQL read of the group's materials, kept for callers that reach
+  /// the hub without an area key. Applies the article→material cover fallback
+  /// client-side; the REST path gets it from the server instead.
+  Future<PathMaterialsData> _fetchMaterialsFromGraphql({
+    required String groupId,
+  }) async {
     try {
       final lang = _resolveLocale();
       final result = await _graphqlClient.query(
@@ -472,11 +565,19 @@ query GetMaterial($id: ID!, $lang: String!) {
   );
 
   String? _assetUrl(PathMaterialFileDto? file) {
-    if (file?.id == null) return null;
+    final id = file?.id;
+    if (id == null) return null;
+    // The REST materials payload returns files without `filename_download`
+    // (only id/width/height/type), and Directus serves `/assets/<id>` on its
+    // own — so the name is appended only when there is one, rather than
+    // building a url with a dangling slash.
+    final filename = file?.filenameDownload;
+    if (filename == null || filename.isEmpty) {
+      return '${Env.baseUrl}/assets/$id';
+    }
     // Attachment file names contain spaces ("Obiettivo della settimana.pdf"),
     // which would make the url unparseable for url_launcher.
-    final filename = Uri.encodeComponent(file!.filenameDownload ?? '');
-    return '${Env.baseUrl}/assets/${file.id}/$filename';
+    return '${Env.baseUrl}/assets/$id/${Uri.encodeComponent(filename)}';
   }
 
   String? _nonEmpty(String? value) {

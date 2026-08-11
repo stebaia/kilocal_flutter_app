@@ -1,0 +1,233 @@
+{
+  "area": "mixed",
+  "group_id": "17",
+  "category_id": null,
+  "materials": [
+    {
+      "id": "12",
+      "status": "published",
+      "sort": null,
+      "can_check_as_completed": true,
+      "content_source": "material",
+      "article_id": null,
+      "article_status": null,
+      "article_slug": null,
+      "translations": [
+        {
+          "languages_code": "it-IT",
+          "title": "Come e quando allenarsi?",
+          "excerpt": "<p>Ogni settimana ti proponiamo due allenamenti in cui alleneremo insieme tutto il nostro corpo, e uno di pilates, utile per aumentare la flessibilit&agrave;, l&rsquo;equilibrio e muoverci in modo diverso.</p>\n<p>E gli altri quattro giorni della settimana? Beh, anche i grandi atleti hanno almeno un giorno di riposo alla settimana, che non significa stare sul divano, ma fare attivit&agrave; leggere come una passeggiata o dello stretching. Gli altri giorni puoi decidere di fare una camminata pi&ugrave; lunga o attivit&agrave; diverse che ti fanno muovere il corpo</p>\n<p>&nbsp;</p>"
+        }
+      ],
+      "image": null,
+      "thumbnail_url": null,
+      "categories": [
+        {
+          "id": "5",
+          "internal_name": "consigli-utili",
+          "translations": [
+            {
+              "languages_code": "it-IT",
+              "title": "Consigli utili"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "completed": false,
+      "completed_on": null
+    },
+    {
+      "id": "13",
+      "status": "published",
+      "sort": null,
+      "can_check_as_completed": true,
+      "content_source": "material",
+      "article_id": null,
+      "article_status": null,
+      "article_slug": null,
+      "translations": [
+        {
+          "languages_code": "it-IT",
+          "title": "Come scegliere l’orario migliore per allenarti",
+          "excerpt": "<p>Non esiste un &ldquo;momento perfetto&rdquo; valido per tutti: la scelta dipende dal tuo corpo e dalla tua giornata. Al mattino ti alleni a mente fresca e dai una scossa al metabolismo; in pausa pranzo spegni lo stress lavorativo e ricarichi energia; alla sera scarichi le tensioni e dormi meglio (se non lo fai troppo tardi). Scegli l&rsquo;orario che puoi rispettare con pi&ugrave; facilit&agrave;: la costanza conta pi&ugrave; dell&rsquo;orologio.</p>"
+        }
+      ],
+      "image": {
+        "asset_is_video": false,
+        "default_asset": {
+          "id": "50275ba2-aa02-47b2-815b-43d6e7cc7724",
+          "width": 892,
+          "height": 200,
+          "focal_point_x": null,
+          "focal_point_y": null,
+          "duration": null,
+          "type": "image/png"
+        },
+        "mobile_asset": {
+          "id": "d4bb2892-cc65-4a02-b6d9-4a61bbf69f67",
+          "width": 892,
+          "height": 200,
+          "focal_point_x": null,
+          "focal_point_y": null,
+          "duration": null,
+          "type": "image/png"
+        },
+        "mobile_resolution": "md",
+        "video": null,
+        "vimeo_url": null,
+        "translations": []
+      },
+      "thumbnail_url": null,
+      "categories": [
+        {
+          "id": "5",
+          "internal_name": "consigli-utili",
+          "translations": [
+            {
+              "languages_code": "it-IT",
+              "title": "Consigli utili"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "completed": false,
+      "completed_on": null
+    },
+    {
+      "id": "50",
+      "status": "published",
+      "sort": null,
+      "can_check_as_completed": true,
+      "content_source": "material",
+      "article_id": null,
+      "article_status": null,
+      "article_slug": null,
+      "translations": [
+        {
+          "languages_code": "it-IT",
+          "title": "Correre sembra semplice: scarpe ai piedi e via.",
+          "excerpt": "<p>In realt&agrave;, partire con il piede giusto fa la differenza tra mollare dopo due uscite e trasformare la corsa in una vera compagna di viaggio. Dal ritmo con cui iniziare, all&rsquo;abbigliamento giusto, fino a come organizzare gli allenamenti: bastano poche attenzioni per rendere l&rsquo;esperienza pi&ugrave; piacevole e duratura.</p>\n<p>&nbsp;</p>\n<p><strong>Con Stefania Menga.</strong></p>\n<p>Runner appassionata e insegnante di yoga, Stefania ha unito le sue due grandi passioni per creare pratiche dedicate a chi ama correre. Condivide la sua passione con strumenti semplici ed efficaci per aiutarti a vivere la corsa non solo come allenamento, ma come un vero percorso di benessere.</p>"
+        }
+      ],
+      "image": {
+        "asset_is_video": true,
+        "default_asset": null,
+        "mobile_asset": null,
+        "mobile_resolution": "md",
+        "video": null,
+        "vimeo_url": "https://vimeo.com/1121534749",
+        "translations": []
+      },
+      "thumbnail_url": "https://i.vimeocdn.com/video/2084328265-aa409b00d8f52da23139326b7f6a34cf76b7691c05d92e7e1cea3bf52cb83d5a-d_200x150?region=us",
+      "categories": [
+        {
+          "id": "2",
+          "internal_name": "video",
+          "translations": [
+            {
+              "languages_code": "it-IT",
+              "title": "Video"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "completed": false,
+      "completed_on": null
+    },
+    {
+      "id": "3",
+      "status": "published",
+      "sort": null,
+      "can_check_as_completed": true,
+      "content_source": "material",
+      "article_id": null,
+      "article_status": null,
+      "article_slug": null,
+      "translations": [
+        {
+          "languages_code": "it-IT",
+          "title": "Obiettivo della settimana",
+          "excerpt": "<p>Ogni settimana lavora verso un obiettivo reale, raggiungibile e che ti aiuta a stare meglio. Ti aiutiamo noi a raggiungerlo. Scarica il pdf e compilalo per tenere traccia dei tuoi progressi.</p>"
+        }
+      ],
+      "image": null,
+      "thumbnail_url": null,
+      "categories": [
+        {
+          "id": "3",
+          "internal_name": "schede",
+          "translations": [
+            {
+              "languages_code": "it-IT",
+              "title": "Schede"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "completed": false,
+      "completed_on": null
+    },
+    {
+      "id": "83",
+      "status": "published",
+      "sort": null,
+      "can_check_as_completed": true,
+      "content_source": "article",
+      "article_id": "902",
+      "article_status": "published",
+      "article_slug": "Mousse-avocado-e-limone",
+      "translations": [
+        {
+          "languages_code": "it-IT",
+          "title": "Mousse di Avocado e Limone",
+          "excerpt": "Un’idea fresca, leggera e super nutriente per una pausa sana! Questa mousse combina la cremosità naturale dell’avocado con la vivacità del limone, per uno spuntino detox ricco di grassi buoni, vitamina C e fibre."
+        }
+      ],
+      "image": {
+        "asset_is_video": false,
+        "default_asset": {
+          "id": "f17791c6-cc39-4f1f-ade9-9dc9ce599908",
+          "width": 1024,
+          "height": 1024,
+          "focal_point_x": null,
+          "focal_point_y": null,
+          "duration": null,
+          "type": "image/png"
+        },
+        "mobile_asset": {
+          "id": "3a61e179-80ca-4853-aae9-6156872778a9",
+          "width": 1024,
+          "height": 1024,
+          "focal_point_x": null,
+          "focal_point_y": null,
+          "duration": null,
+          "type": "image/png"
+        },
+        "mobile_resolution": "md",
+        "video": null,
+        "vimeo_url": null,
+        "translations": []
+      },
+      "thumbnail_url": null,
+      "categories": [
+        {
+          "id": "4",
+          "internal_name": "ricette",
+          "translations": [
+            {
+              "languages_code": "it-IT",
+              "title": "Ricette"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "completed": false,
+      "completed_on": null
+    }
+  ]
+}

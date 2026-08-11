@@ -24,17 +24,25 @@ class PathMaterialsCubit extends Cubit<PathMaterialsState> {
   /// the derived first category used to land the user on the *second* visible tab
   /// ("Consigli utili" instead of "Scopri").
   ///
+  /// [area] is the clean area key from the route; the materials endpoint is
+  /// scoped by area as well as by group. Without it the repository falls back
+  /// to the GraphQL collection — see [PathMaterialsRepository.fetchMaterials].
+  ///
   /// An already-selected category survives a reload, so coming back from a
   /// material detail (which reloads to refresh completion state) keeps the user
   /// on the tab they were browsing instead of snapping back to the first one.
   Future<void> load({
     required String groupId,
+    String? area,
     List<PathMaterialCategory>? officialCategories,
   }) async {
     emit(state.copyWith(status: PathMaterialsStatus.loading, error: null));
 
     try {
-      final data = await _materialsRepository.fetchMaterials(groupId: groupId);
+      final data = await _materialsRepository.fetchMaterials(
+        groupId: groupId,
+        area: area,
+      );
       final categories = officialCategories ?? data.categories;
       final previous = state.selectedCategoryId;
       final keepsPrevious =

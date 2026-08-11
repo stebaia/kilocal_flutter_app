@@ -209,6 +209,7 @@ final GoRouter appRouter = GoRouter(
                         final args = state.extra as PathMaterialsRouteArgs?;
                         return PathMaterialsScreen(
                           groupId: state.pathParameters['groupId']!,
+                          area: state.pathParameters['area'],
                           title: args?.title,
                           categories: args?.categories,
                         );
