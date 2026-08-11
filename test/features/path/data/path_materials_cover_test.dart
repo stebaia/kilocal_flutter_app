@@ -151,7 +151,7 @@ void main() {
     final data = await repository.fetchMaterials(groupId: 'g1');
 
     expect(data.materials.single.hidesImage, isTrue);
-    expect(data.categories.single.isAdvice, isTrue);
+    expect(data.categories.single.hidesImage, isTrue);
   });
 
   test('a material outside "Consigli utili" keeps its image', () async {
