@@ -9,6 +9,7 @@ import '../domain/entities/path_material.dart';
 import '../domain/path_repository.dart';
 import 'dto/path_area_steps_dto.dart';
 import 'dto/path_progress_dto.dart';
+import 'vimeo_oembed_service.dart';
 
 /// Dio-backed implementation of [PathRepository].
 ///
@@ -16,9 +17,18 @@ import 'dto/path_progress_dto.dart';
 /// area detail from `GET /path/me/areas/{area}/steps`. Start/complete actions
 /// use `POST /path/steps/{id}/start` and `/complete`.
 class PathRepositoryImpl implements PathRepository {
-  const PathRepositoryImpl({required Dio dio}) : _dio = dio;
+  const PathRepositoryImpl({
+    required Dio dio,
+    required VimeoOembedService vimeoOembedService,
+  }) : _dio = dio,
+       _vimeoOembedService = vimeoOembedService;
 
   final Dio _dio;
+
+  /// Video steps carry no cover file in the CMS (156/157 `percorsi_content`
+  /// rows have no image — confirmed by backend, 2026-07), so their card poster
+  /// is resolved from Vimeo, exactly as the materials list already does.
+  final VimeoOembedService _vimeoOembedService;
 
   static const _headerAsset = 'assets/path_header_ellipse.svg';
 
@@ -50,7 +60,11 @@ class PathRepositoryImpl implements PathRepository {
         '/path/me/areas/$area/steps',
       );
       final dto = PathAreaStepsResponseDto.fromJson(response.data ?? const {});
-      return _mapAreaStepsDto(dto.data, l10n);
+      // Vimeo posters for every video step of the area, resolved in one
+      // concurrent pass so the cards render a thumbnail instead of a
+      // placeholder. Failures are absent from the map and degrade to no image.
+      final posters = await _vimeoOembedService.fetchAll(_videoUrls(dto.data));
+      return _mapAreaStepsDto(dto.data, l10n, posters);
     } on ApiException {
       rethrow;
     } on DioException catch (e) {
@@ -107,7 +121,25 @@ class PathRepositoryImpl implements PathRepository {
     );
   }
 
-  PathAreaDetail _mapAreaStepsDto(PathAreaStepsDto dto, AppLocalizations l10n) {
+  /// Every distinct Vimeo url in the area payload — main-tab steps and content
+  /// groups alike, since both render step cards.
+  Iterable<String> _videoUrls(PathAreaStepsDto dto) {
+    final urls = <String>{};
+    for (final group in dto.groups) {
+      for (final step in group.steps) {
+        final asset = step.asset;
+        final url = asset.vimeoUrl;
+        if (asset.assetIsVideo && url != null) urls.add(url);
+      }
+    }
+    return urls;
+  }
+
+  PathAreaDetail _mapAreaStepsDto(
+    PathAreaStepsDto dto,
+    AppLocalizations l10n,
+    Map<String, VimeoOembed> posters,
+  ) {
     // Pick the main tab group; tolerate areas that expose no group at all
     // (200 with an empty `groups`) instead of throwing on `.first`.
     PathGroupDto? mainGroup;
@@ -157,7 +189,9 @@ class PathRepositoryImpl implements PathRepository {
         total: total,
         isLocked: timeframe.locked ?? false,
         isCurrent: timeframe.isCurrent ?? false,
-        steps: steps.map((s) => _mapStepDto(s, timeframeTitle, l10n)).toList(),
+        steps: steps
+            .map((s) => _mapStepDto(s, timeframeTitle, l10n, posters))
+            .toList(),
       );
     }).toList();
 
@@ -185,7 +219,7 @@ class PathRepositoryImpl implements PathRepository {
             title: g.translations.titleFor(l10n.localeName) ?? '',
             completed: g.steps.where((s) => s.completed).length,
             total: g.steps.length,
-            months: _monthsForGroup(g, orderedTimeframes, l10n),
+            months: _monthsForGroup(g, orderedTimeframes, l10n, posters),
             categories: _mapGroupCategories(g, l10n),
           ),
     ];
@@ -212,6 +246,7 @@ class PathRepositoryImpl implements PathRepository {
     PathGroupDto group,
     List<PathTimeframeDto> orderedTimeframes,
     AppLocalizations l10n,
+    Map<String, VimeoOembed> posters,
   ) {
     final stepsByTimeframe = <int, List<PathStepDto>>{};
     for (final step in group.steps) {
@@ -236,7 +271,7 @@ class PathRepositoryImpl implements PathRepository {
         // showing as locked 0/0 rather than disappearing.
         isLocked: (tf.locked ?? false) || total == 0,
         isCurrent: tf.isCurrent ?? false,
-        steps: [for (final s in steps) _mapStepDto(s, title, l10n)],
+        steps: [for (final s in steps) _mapStepDto(s, title, l10n, posters)],
       );
     }).toList();
   }
@@ -264,20 +299,28 @@ class PathRepositoryImpl implements PathRepository {
     PathStepDto dto,
     String timeframeTitle,
     AppLocalizations l10n,
+    Map<String, VimeoOembed> posters,
   ) {
     final title = dto.translations.titleFor(l10n.localeName) ?? '';
     final description = dto.translations.descriptionFor(l10n.localeName);
     final asset = dto.asset;
 
+    final imageId = asset.mobileAsset ?? asset.defaultAsset;
+    final cmsImageUrl = imageId != null
+        ? '${Env.baseUrl}/assets/$imageId'
+        : null;
+
     final PathStepMedia media;
     if (asset.assetIsVideo && asset.vimeoUrl != null) {
-      media = PathStepMedia(isVideo: true, vimeoUrl: asset.vimeoUrl);
-    } else {
-      final imageId = asset.mobileAsset ?? asset.defaultAsset;
+      // Prefer a CMS cover when one exists; otherwise use the Vimeo poster, so
+      // the card is never a bare placeholder just because the step is a video.
       media = PathStepMedia(
-        isVideo: false,
-        imageUrl: imageId != null ? '${Env.baseUrl}/assets/$imageId' : null,
+        isVideo: true,
+        vimeoUrl: asset.vimeoUrl,
+        imageUrl: cmsImageUrl ?? posters[asset.vimeoUrl]?.thumbnailUrl,
       );
+    } else {
+      media = PathStepMedia(isVideo: false, imageUrl: cmsImageUrl);
     }
 
     return PathStepItem(
