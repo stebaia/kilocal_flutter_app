@@ -97,6 +97,19 @@ Per il timeframe selezionato `T`:
 - **2026-06-19** — Backend ha risposto (vedi path §5): totale per area risolto via mappa
   `stepId→area`. **Sbloccato.** Prossimo passo: implementare insieme a path via `api-integrator`,
   riusando la mappa per le 3 root a step. `integrazione` quando arriva l'endpoint REST.
+- **2026-08-11** — Fix: `integrazione` sotto filtro mese non eredita più il valore lifetime.
+  Selezionando mese 2/3 la card mostrava una percentuale "sporca" (il progresso complessivo)
+  anche per mesi non ancora sbloccati. Ora `StatisticsRepositoryImpl._fetchPhaseCounts`
+  risolve l'area a fasi tramite `IntegrazioneRepository` (riuso, nessuna query duplicata):
+  - **mese N → fase con `sort == N`** (il piano integratori avanza una fase per mese);
+  - fase **non ancora sbloccata** (`IntegrazioneData.isPhaseLocked`) → **`0/0`**;
+  - fase sbloccata → `total` = somma dei `durationDays` dei prodotti della fase,
+    `completed` = giorni presi (`took_dates`), *clampati* per prodotto così un integratore
+    loggato oltre la durata non porta la barra sopra il 100%;
+  - nessun `myId` / nessun kit / errore GraphQL → fallback al lifetime (best-effort: le altre
+    aree restano visibili).
+  La label della card non è più forzata a "Fase 1": sotto filtro tutte le aree mostrano il mese
+  selezionato. `StatisticsCubit` riceve `UserCubit` per passare `myId`.
 
 ## Related
 - [[diario-attivita]]

@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kilocal_flutter_app/core/network/graphql_client.dart';
+import 'package:kilocal_flutter_app/features/integrazione/domain/entities/integrazione_data.dart';
+import 'package:kilocal_flutter_app/features/integrazione/domain/integrazione_repository.dart';
 import 'package:kilocal_flutter_app/features/statistics/data/statistics_repository_impl.dart';
 import 'package:kilocal_flutter_app/features/statistics/domain/entities/area_stat.dart';
 import 'package:kilocal_flutter_app/l10n/app_localizations_it.dart';
@@ -9,6 +11,37 @@ import 'package:mocktail/mocktail.dart';
 class _MockDio extends Mock implements Dio {}
 
 class _MockGraphqlClient extends Mock implements GraphqlClient {}
+
+class _MockIntegrazioneRepository extends Mock
+    implements IntegrazioneRepository {}
+
+/// A phase with a single supplement, so `total` == [durationDays] and
+/// `completed` == [takenDays].
+IntegrazionePhase _phase({
+  required String id,
+  required int sort,
+  int durationDays = 30,
+  int takenDays = 0,
+}) => IntegrazionePhase(
+  id: id,
+  title: 'Fase $sort',
+  sort: sort,
+  products: [
+    IntegrazioneProduct(
+      id: 'p$id',
+      title: 'Prodotto $id',
+      durationDays: durationDays,
+      quantity: 1,
+      tracking: IntegrazioneTracking(
+        id: 't$id',
+        tookDates: List.generate(
+          takenDays,
+          (i) => DateTime(2026, 1, 1).add(Duration(days: i)),
+        ),
+      ),
+    ),
+  ],
+);
 
 Map<String, dynamic> _progressResponse({
   required Map<String, List<int>> areas, // area -> [completed, total]
@@ -43,14 +76,39 @@ Map<String, dynamic> _usedIn(String area, {bool mainTab = true}) => {
 void main() {
   late _MockDio dio;
   late _MockGraphqlClient graphql;
+  late _MockIntegrazioneRepository integrazione;
   late StatisticsRepositoryImpl repository;
   final l10n = AppLocalizationsIt();
 
   setUp(() {
     dio = _MockDio();
     graphql = _MockGraphqlClient();
-    repository = StatisticsRepositoryImpl(dio: dio, graphqlClient: graphql);
+    integrazione = _MockIntegrazioneRepository();
+    repository = StatisticsRepositoryImpl(
+      dio: dio,
+      graphqlClient: graphql,
+      integrazioneRepository: integrazione,
+    );
   });
+
+  /// Stubs the user's supplement plan (phases + current phase).
+  void stubIntegrazione({
+    required List<IntegrazionePhase> phases,
+    String? currentPhaseId,
+  }) {
+    when(
+      () => integrazione.fetchIntegrazione(
+        myId: any(named: 'myId'),
+        lang: any(named: 'lang'),
+      ),
+    ).thenAnswer(
+      (_) async => IntegrazioneData(
+        phases: phases,
+        currentPhaseId: currentPhaseId,
+        kitId: '5',
+      ),
+    );
+  }
 
   void stubProgress(Map<String, dynamic> body) {
     when(
@@ -213,9 +271,19 @@ void main() {
           ],
         );
 
+        // Phase 2 reached, 10 of its 30 days taken.
+        stubIntegrazione(
+          phases: [
+            _phase(id: '1', sort: 1, durationDays: 30, takenDays: 30),
+            _phase(id: '2', sort: 2, durationDays: 30, takenDays: 10),
+          ],
+          currentPhaseId: '2',
+        );
+
         final stats = await repository.fetchStatistics(
           l10n,
           timeframe: timeframe,
+          myId: 'user-1',
         );
 
         expect(stats[0].id, 'allenamento');
@@ -224,10 +292,111 @@ void main() {
         expect(stats[1].id, 'alimentazione');
         expect(stats[1].completed, 1);
         expect(stats[1].total, 1);
-        // Phase-based area keeps its lifetime value under the month filter.
+        // Phase-based area reports the phase matching the selected month,
+        // not the lifetime 4/12.
         expect(stats[2].id, 'integrazione');
-        expect(stats[2].completed, 4);
-        expect(stats[2].total, 12);
+        expect(stats[2].completed, 10);
+        expect(stats[2].total, 30);
+      },
+    );
+
+    test(
+      'reports 0 for integrazione when the month is not unlocked yet',
+      () async {
+        stubProgress(
+          _progressResponse(
+            areas: {
+              'allenamento': [0, 0],
+              'alimentazione': [0, 0],
+              // Lifetime shows real progress from the phases already done…
+              'integrazione': [30, 90],
+            },
+          ),
+        );
+        stubGraphql(activities: const [], contents: const []);
+        // …but the user is still on phase 1, so month 2 is locked.
+        stubIntegrazione(
+          phases: [
+            _phase(id: '1', sort: 1, durationDays: 30, takenDays: 30),
+            _phase(id: '2', sort: 2, durationDays: 30, takenDays: 0),
+            _phase(id: '3', sort: 3, durationDays: 30, takenDays: 0),
+          ],
+          currentPhaseId: '1',
+        );
+
+        final stats = await repository.fetchStatistics(
+          l10n,
+          timeframe: timeframe,
+          myId: 'user-1',
+        );
+
+        final integrazioneStat = stats.firstWhere(
+          (s) => s.id == 'integrazione',
+        );
+        expect(integrazioneStat.completed, 0);
+        expect(integrazioneStat.total, 0);
+        expect(integrazioneStat.percent, 0);
+      },
+    );
+
+    test('falls back to lifetime for integrazione without a user id', () async {
+      stubProgress(
+        _progressResponse(
+          areas: {
+            'allenamento': [0, 0],
+            'alimentazione': [0, 0],
+            'integrazione': [4, 12],
+          },
+        ),
+      );
+      stubGraphql(activities: const [], contents: const []);
+
+      final stats = await repository.fetchStatistics(
+        l10n,
+        timeframe: timeframe,
+      );
+
+      final integrazioneStat = stats.firstWhere((s) => s.id == 'integrazione');
+      expect(integrazioneStat.completed, 4);
+      expect(integrazioneStat.total, 12);
+      verifyNever(
+        () => integrazione.fetchIntegrazione(
+          myId: any(named: 'myId'),
+          lang: any(named: 'lang'),
+        ),
+      );
+    });
+
+    test(
+      'reports 0 when the kit has no phase for the selected month',
+      () async {
+        stubProgress(
+          _progressResponse(
+            areas: {
+              'allenamento': [0, 0],
+              'alimentazione': [0, 0],
+              'integrazione': [4, 12],
+            },
+          ),
+        );
+        stubGraphql(activities: const [], contents: const []);
+        // Kit with a single phase, but month 2 is selected.
+        stubIntegrazione(
+          phases: [_phase(id: '1', sort: 1)],
+          currentPhaseId: '1',
+        );
+
+        final stats = await repository.fetchStatistics(
+          l10n,
+          timeframe: timeframe,
+          myId: 'user-1',
+        );
+
+        final integrazioneStat = stats.firstWhere(
+          (s) => s.id == 'integrazione',
+        );
+        expect(integrazioneStat.completed, 0);
+        expect(integrazioneStat.total, 0);
       },
     );
 
@@ -242,6 +411,7 @@ void main() {
         ),
       );
       stubGraphql(activities: const [], contents: const []);
+      stubIntegrazione(phases: const [], currentPhaseId: null);
 
       await repository.fetchStatistics(l10n, timeframe: timeframe);
 
