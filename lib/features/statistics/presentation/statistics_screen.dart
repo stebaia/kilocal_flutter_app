@@ -96,9 +96,9 @@ class _StatisticsView extends StatelessWidget {
                       stat.completed,
                       stat.total,
                     ),
-                    // Every area — `integrazione` included, now that it
-                    // reports the phase matching the selected month — is
-                    // labelled with the filtered timeframe.
+                    // Every area — `integrazione` included, since the backend
+                    // scopes them all to the selected month — is labelled with
+                    // the filtered timeframe.
                     monthLabelOverride: state.selectedTimeframe?.title,
                   ),
                 );
