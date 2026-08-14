@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../domain/entities/path_material.dart';
 import '../domain/path_materials_repository.dart';
 import 'dto/area_material_dto.dart';
@@ -264,7 +264,7 @@ query GetMaterial($id: ID!, $lang: String!) {
           categoryIds: categoryIds,
           // `thumbnail_url` is the Vimeo poster the server resolved for video
           // materials that carry no cover file of their own.
-          imageUrl: _assetUrl(file) ?? row.thumbnailUrl,
+          imageUrl: _assetUrl(file, CmsImageSize.card) ?? row.thumbnailUrl,
           hidesImage: hidesImage,
         ),
       );
@@ -332,7 +332,10 @@ query GetMaterial($id: ID!, $lang: String!) {
           final cat = cj.category;
           if (cat == null) continue;
           categoryIds.add(cat.id);
-          categoryHeroUrl ??= _assetUrl(cat.heroAsset?.defaultAsset);
+          categoryHeroUrl ??= _assetUrl(
+            cat.heroAsset?.defaultAsset,
+            CmsImageSize.hero,
+          );
           final category = categories.putIfAbsent(
             cat.id,
             () => PathMaterialCategory(
@@ -404,7 +407,7 @@ query GetMaterial($id: ID!, $lang: String!) {
         isCompleted: completedIds.contains(dto.id),
         subtitle: _nonEmpty(articleTranslation?.subtitle),
         content: content,
-        imageUrl: _assetUrl(file),
+        imageUrl: _assetUrl(file, CmsImageSize.hero),
         vimeoUrl: asset?.vimeoUrl,
         attachments: _attachments(dto),
         hidesImage: _isAdvice(dto),
@@ -544,7 +547,10 @@ query GetMaterial($id: ID!, $lang: String!) {
     // Video materials carry no image file of their own, so their cover is the
     // Vimeo poster; the remaining ones (consigli) fall back to the category
     // cover so the card is not a bare placeholder — matching the web app.
-    final imageUrl = _assetUrl(file) ?? vimeoPosterUrl ?? fallbackImageUrl;
+    final imageUrl =
+        _assetUrl(file, CmsImageSize.card) ??
+        vimeoPosterUrl ??
+        fallbackImageUrl;
 
     return PathMaterial(
       id: dto.id,
@@ -564,21 +570,22 @@ query GetMaterial($id: ID!, $lang: String!) {
     (cj) => cj.category?.internalName == PathMaterialCategories.advice,
   );
 
-  String? _assetUrl(PathMaterialFileDto? file) {
-    final id = file?.id;
-    if (id == null) return null;
-    // The REST materials payload returns files without `filename_download`
-    // (only id/width/height/type), and Directus serves `/assets/<id>` on its
-    // own — so the name is appended only when there is one, rather than
-    // building a url with a dangling slash.
-    final filename = file?.filenameDownload;
-    if (filename == null || filename.isEmpty) {
-      return '${Env.baseUrl}/assets/$id';
-    }
-    // Attachment file names contain spaces ("Obiettivo della settimana.pdf"),
-    // which would make the url unparseable for url_launcher.
-    return '${Env.baseUrl}/assets/$id/${Uri.encodeComponent(filename)}';
-  }
+  /// Image url for a material cover/thumbnail, resized server-side.
+  ///
+  /// The REST materials payload returns files without `filename_download`
+  /// (only id/width/height/type), and Directus serves `/assets/<id>` on its
+  /// own — so the name is appended only when there is one, rather than
+  /// building a url with a dangling slash.
+  String? _assetUrl(PathMaterialFileDto? file, CmsImageSize size) =>
+      cmsImageUrl(file?.id, size: size, filename: file?.filenameDownload);
+
+  /// Untransformed url for a downloadable attachment (PDFs and the like),
+  /// which must not go through the image pipeline.
+  ///
+  /// Attachment file names contain spaces ("Obiettivo della settimana.pdf"),
+  /// which would make the url unparseable for url_launcher.
+  String? _attachmentUrl(PathMaterialFileDto? file) =>
+      cmsFileUrl(file?.id, filename: file?.filenameDownload);
 
   String? _nonEmpty(String? value) {
     if (value == null) return null;
@@ -600,7 +607,7 @@ query GetMaterial($id: ID!, $lang: String!) {
 
       for (final translation in link.attachmentTranslations) {
         final file = translation.attachment;
-        final url = _assetUrl(file);
+        final url = _attachmentUrl(file);
         if (url == null) continue;
 
         attachments.add(

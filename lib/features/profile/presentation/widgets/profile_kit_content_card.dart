@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/readable_color.dart';
 import '../../domain/entities/profile_kit.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// The soft-tinted content card used on both the "Il mio Kit" and "Integrazione
 /// e prodotti" screens: a centered product image, an accent-colored title, an
@@ -82,10 +83,10 @@ class ProfileKitContentCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppRadius.md),
               ),
               padding: const EdgeInsets.all(AppSpacing.spaceSm),
-              child: Image.network(
+              child: CmsImage(
                 imageUrl!,
                 fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                errorBuilder: (_) => const SizedBox.shrink(),
               ),
             ),
             const SizedBox(height: AppSpacing.spaceMd),

@@ -12,6 +12,7 @@ import '../../../l10n/app_localizations.dart';
 import '../domain/entities/path_material.dart';
 import 'cubit/path_material_detail_cubit.dart';
 import 'widgets/path_material_video.dart';
+import '../../../../core/widgets/cms_image.dart';
 
 /// Detail of a single "Materiali extra" item.
 ///
@@ -160,10 +161,10 @@ class _TextDetail extends StatelessWidget {
                   if (material.imageUrl != null && !material.hidesImage)
                     AspectRatio(
                       aspectRatio: 1.1,
-                      child: Image.network(
+                      child: CmsImage(
                         material.imageUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
+                        errorBuilder: (_) =>
                             const ColoredBox(color: AppColors.background),
                       ),
                     ),

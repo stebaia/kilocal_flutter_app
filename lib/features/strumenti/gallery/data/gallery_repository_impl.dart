@@ -2,6 +2,7 @@ import 'dart:io';
 
 import '../../../../core/config/env.dart';
 import '../../../../core/network/graphql_client.dart';
+import '../../../../core/utils/cms_image_url.dart';
 import '../domain/entities/gallery_photo.dart';
 import '../domain/gallery_repository.dart';
 import 'gallery_api.dart';
@@ -130,7 +131,10 @@ class GalleryRepositoryImpl implements GalleryRepository {
     return GalleryPhoto(
       id: row['id']?.toString() ?? '',
       fileId: fileId,
-      imageUrl: '${Env.baseUrl}/assets/$fileId',
+      // Gallery photos are user uploads straight from the camera, so they are
+      // the heaviest originals in the app; the grid only ever shows them small.
+      imageUrl: cmsImageUrl(fileId, size: CmsImageSize.card)!,
+      fullImageUrl: cmsImageUrl(fileId, size: CmsImageSize.full)!,
       takenAt: created == null ? null : DateTime.tryParse(created)?.toLocal(),
     );
   }

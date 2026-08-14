@@ -22,6 +22,7 @@ import 'widgets/path_month_completed_sheet.dart';
 import 'widgets/path_timer_pill.dart';
 import 'widgets/path_timer_sheet.dart';
 import 'widgets/vimeo_player_controller.dart';
+import '../../../../core/widgets/cms_image.dart';
 
 class PathStepScreen extends StatelessWidget {
   const PathStepScreen({
@@ -452,7 +453,7 @@ class _StepMediaState extends State<_StepMedia> {
     }
 
     if (media.imageUrl != null) {
-      return Image.network(media.imageUrl!, fit: BoxFit.cover);
+      return CmsImage(media.imageUrl!, fit: BoxFit.cover);
     }
 
     return Container(
@@ -626,10 +627,10 @@ class _VideoPoster extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             if (thumbnailUrl != null)
-              Image.network(
+              CmsImage(
                 thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(color: Colors.black12),
+                errorBuilder: (_) => Container(color: Colors.black12),
               )
             else
               Container(color: Colors.black12),

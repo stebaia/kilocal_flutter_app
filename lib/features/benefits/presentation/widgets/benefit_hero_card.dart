@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/benefit.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Large hero card for a primary partner ("Partner Primari" section).
 class BenefitHeroCard extends StatelessWidget {
@@ -31,10 +32,10 @@ class BenefitHeroCard extends StatelessWidget {
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: benefit.imageUrl != null
-                  ? Image.network(
+                  ? CmsImage(
                       benefit.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => const _HeroPlaceholder(),
+                      errorBuilder: (_) => const _HeroPlaceholder(),
                     )
                   : const _HeroPlaceholder(),
             ),

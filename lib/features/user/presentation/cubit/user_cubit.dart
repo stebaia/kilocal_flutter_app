@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/monitoring/analytics_service.dart';
 import '../../../../core/monitoring/monitoring_service.dart';
 import '../../../../core/network/api_exception.dart';
+import '../../../../core/push/device_token_registrar.dart';
 import '../../domain/app_user.dart';
 import '../../domain/profile_status.dart';
 import '../../domain/user_details.dart';
@@ -21,14 +24,20 @@ class UserCubit extends Cubit<UserState> {
     required UserRepository userRepository,
     required MonitoringService monitoring,
     required AnalyticsService analytics,
+    DeviceTokenRegistrar? deviceTokenRegistrar,
   }) : _userRepository = userRepository,
        _monitoring = monitoring,
        _analytics = analytics,
+       _deviceTokenRegistrar = deviceTokenRegistrar,
        super(const UserState());
 
   final UserRepository _userRepository;
   final MonitoringService _monitoring;
   final AnalyticsService _analytics;
+
+  /// Registers this device's FCM token with the backend once a session exists.
+  /// `null` when Firebase is disabled (e.g. the `staging` Android flavor).
+  final DeviceTokenRegistrar? _deviceTokenRegistrar;
 
   String? _myId;
 
@@ -51,6 +60,13 @@ class UserCubit extends Cubit<UserState> {
       // Tag crash reports and analytics with the session user.
       await _monitoring.setUserId(_myId);
       await _analytics.setUserId(_myId);
+
+      // Register the push token for this session. Fire-and-forget: on iOS
+      // `getToken()` waits on APNs, and push must not delay the session load.
+      // The registrar swallows its own failures.
+      unawaited(
+        _deviceTokenRegistrar?.registerCurrentToken() ?? Future.value(),
+      );
 
       final details = await _userRepository.fetchUserDetails(_myId!);
 

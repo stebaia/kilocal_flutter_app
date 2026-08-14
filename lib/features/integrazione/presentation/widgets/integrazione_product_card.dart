@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/integrazione_data.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// A supplement card on the phase detail screen: a red gradient header (info
 /// button, title, product image), the monitoring label + `taken/total`,
@@ -143,10 +144,10 @@ class _Header extends StatelessWidget {
           if (product.imageUrl != null)
             SizedBox(
               width: 100,
-              child: Image.network(
+              child: CmsImage(
                 product.imageUrl!,
                 fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                errorBuilder: (_) => const SizedBox.shrink(),
               ),
             ),
         ],

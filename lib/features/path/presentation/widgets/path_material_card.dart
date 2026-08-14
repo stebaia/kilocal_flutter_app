@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/path_material.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Card for a single "Materiali extra" item: a hero image with a leading
 /// media-type badge (play for video, document otherwise), with the title
@@ -144,10 +145,10 @@ class _MaterialImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (url == null) return const _ImagePlaceholder();
-    return Image.network(
+    return CmsImage(
       url!,
       fit: BoxFit.cover,
-      errorBuilder: (_, _, _) => const _ImagePlaceholder(),
+      errorBuilder: (_) => const _ImagePlaceholder(),
     );
   }
 }

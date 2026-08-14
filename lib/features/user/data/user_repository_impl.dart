@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../domain/app_user.dart';
 import '../domain/user_details.dart';
 import '../domain/user_repository.dart';
@@ -190,8 +190,6 @@ query GetUserDetails($myId: ID!) {
     firstName: dto.firstName,
     lastName: dto.lastName,
     roleName: dto.role?.name,
-    avatarUrl: dto.avatar != null
-        ? '${Env.baseUrl}/assets/${dto.avatar}'
-        : null,
+    avatarUrl: cmsImageUrl(dto.avatar, size: CmsImageSize.thumb),
   );
 }

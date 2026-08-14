@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/hex_color.dart';
 import '../../../../core/widgets/cms_svg_icon.dart';
 import '../../domain/entities/survey_outcome.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// The kit card on the biotype result screen: the recommended Starter Kit
 /// image on a gradient tinted with the biotype's own CMS color (falling back
@@ -47,10 +48,10 @@ class SurveyKitCard extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(AppSpacing.spaceMd),
-              child: Image.network(
+              child: CmsImage(
                 kitImage,
                 fit: BoxFit.contain,
-                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                errorBuilder: (_) => const SizedBox.shrink(),
               ),
             ),
             Positioned(

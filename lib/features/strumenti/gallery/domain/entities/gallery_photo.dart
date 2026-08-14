@@ -6,6 +6,7 @@ class GalleryPhoto extends Equatable {
     required this.id,
     required this.fileId,
     required this.imageUrl,
+    required this.fullImageUrl,
     this.takenAt,
   });
 
@@ -16,14 +17,20 @@ class GalleryPhoto extends Equatable {
   /// `directus_files.id` — the handle the delete endpoint takes.
   final String fileId;
 
-  /// Absolute `/assets/{fileId}` URL.
+  /// Absolute `/assets/{fileId}` URL, resized for the photo grid.
+  ///
+  /// Grid-sized: use [fullImageUrl] wherever the photo is shown large, such as
+  /// the split view.
   final String imageUrl;
+
+  /// Absolute `/assets/{fileId}` URL at full-screen resolution.
+  final String fullImageUrl;
 
   /// `date_created` — when the photo was uploaded.
   final DateTime? takenAt;
 
   @override
-  List<Object?> get props => [id, fileId, imageUrl, takenAt];
+  List<Object?> get props => [id, fileId, imageUrl, fullImageUrl, takenAt];
 }
 
 /// Static copy for the tool, served by the `photo_gallery` CMS singleton.

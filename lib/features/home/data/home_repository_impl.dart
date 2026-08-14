@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../../path/data/dto/path_area_steps_dto.dart';
 import '../../path/data/dto/path_progress_dto.dart';
 import '../../path/data/vimeo_oembed_service.dart';
@@ -433,10 +433,11 @@ query HomeMoments($now: String!, $lang: String!) {
       // alone (see `PathRepositoryImpl._mapStepDto`), which matters here
       // since the REST `/path/me/areas/{area}/steps` step data (unlike the
       // GraphQL `curr_step` this used to read) carries only the file id.
-      final name = step.imageFileName;
-      return name == null
-          ? '${Env.baseUrl}/assets/$imageFileId'
-          : '${Env.baseUrl}/assets/$imageFileId/$name';
+      return cmsImageUrl(
+        imageFileId,
+        size: CmsImageSize.card,
+        filename: step.imageFileName,
+      )!;
     }
     final vimeoUrl = step.vimeoUrl;
     if (vimeoUrl != null) {

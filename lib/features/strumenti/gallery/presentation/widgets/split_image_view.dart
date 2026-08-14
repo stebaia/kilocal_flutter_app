@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import '../../../../../../core/widgets/cms_image.dart';
 
 /// Side-by-side comparison of two photos: [before] fills the frame and [after]
 /// is revealed to the right of a draggable cursor.
@@ -129,11 +130,11 @@ class _Photo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.network(
+    return CmsImage(
       url,
       fit: BoxFit.cover,
       alignment: Alignment.topCenter,
-      errorBuilder: (_, _, _) => Container(color: AppColors.divider),
+      errorBuilder: (_) => Container(color: AppColors.divider),
     );
   }
 }

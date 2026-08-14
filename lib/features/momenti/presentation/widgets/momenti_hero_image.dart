@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 class MomentiHeroImage extends StatelessWidget {
   const MomentiHeroImage({super.key, required this.imageUrl});
@@ -11,7 +12,7 @@ class MomentiHeroImage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.lg),
-      child: Image.network(
+      child: CmsImage(
         imageUrl,
         height: 200,
         width: double.infinity,

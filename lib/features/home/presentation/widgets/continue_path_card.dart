@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/home_data.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 class ContinuePathCard extends StatelessWidget {
   const ContinuePathCard({super.key, required this.item});
@@ -114,14 +115,19 @@ class ContinuePathCard extends StatelessWidget {
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.neutralWhite,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
                   child: Text(
                     item.title,
-                    style: AppTypography.textTheme.bodySmall?.copyWith(fontSize: 12),
+                    style: AppTypography.textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -136,6 +142,6 @@ class ContinuePathCard extends StatelessWidget {
     if (imageUrl.startsWith('assets/')) {
       return Image.asset(imageUrl, fit: BoxFit.cover);
     }
-    return Image.network(imageUrl, fit: BoxFit.cover);
+    return CmsImage(imageUrl, fit: BoxFit.cover);
   }
 }

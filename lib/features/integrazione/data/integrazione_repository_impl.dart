@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../domain/entities/integrazione_data.dart';
 import '../domain/integrazione_repository.dart';
 import 'dto/integrazione_dto.dart';
@@ -269,9 +269,11 @@ mutation SetCurrentPhase($id: ID!, $phaseId: Int!) {
     // lives in `asset.default_asset`. Building `/assets/<asset.id>` yields a
     // broken image (placeholder icon) — the CDN needs the file id.
     final file = product.asset?.defaultAsset;
-    final imageUrl = file?.id != null
-        ? '${Env.baseUrl}/assets/${file!.id}/${file.filenameDownload ?? ''}'
-        : null;
+    final imageUrl = cmsImageUrl(
+      file?.id,
+      size: CmsImageSize.card,
+      filename: file?.filenameDownload,
+    );
     final translation = product.translations.firstOrNull;
 
     return IntegrazioneProduct(

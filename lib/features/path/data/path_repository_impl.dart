@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/network/api_exception.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../domain/entities/path_area_detail.dart';
 import '../domain/entities/path_data.dart';
 import '../domain/entities/path_material.dart';
@@ -306,9 +306,7 @@ class PathRepositoryImpl implements PathRepository {
     final asset = dto.asset;
 
     final imageId = asset.mobileAsset ?? asset.defaultAsset;
-    final cmsImageUrl = imageId != null
-        ? '${Env.baseUrl}/assets/$imageId'
-        : null;
+    final stepImageUrl = cmsImageUrl(imageId, size: CmsImageSize.hero);
 
     final PathStepMedia media;
     if (asset.assetIsVideo && asset.vimeoUrl != null) {
@@ -317,10 +315,10 @@ class PathRepositoryImpl implements PathRepository {
       media = PathStepMedia(
         isVideo: true,
         vimeoUrl: asset.vimeoUrl,
-        imageUrl: cmsImageUrl ?? posters[asset.vimeoUrl]?.thumbnailUrl,
+        imageUrl: stepImageUrl ?? posters[asset.vimeoUrl]?.thumbnailUrl,
       );
     } else {
-      media = PathStepMedia(isVideo: false, imageUrl: cmsImageUrl);
+      media = PathStepMedia(isVideo: false, imageUrl: stepImageUrl);
     }
 
     return PathStepItem(

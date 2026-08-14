@@ -6,6 +6,7 @@ import '../../../../l10n/app_localizations.dart';
 import '../../data/vimeo_oembed_service.dart';
 import '../../../../app/di.dart';
 import 'fullscreen_vimeo_player_screen.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Full-bleed video header for a material detail, mirroring the path-step video
 /// layout: a custom poster (Vimeo oEmbed thumbnail + play button + duration)
@@ -110,7 +111,7 @@ class _PathMaterialVideoState extends State<PathMaterialVideo> {
     }
 
     if (widget.posterUrl != null) {
-      return Image.network(widget.posterUrl!, fit: BoxFit.cover);
+      return CmsImage(widget.posterUrl!, fit: BoxFit.cover);
     }
 
     return Container(
@@ -171,10 +172,10 @@ class _VideoPoster extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             if (thumbnailUrl != null)
-              Image.network(
+              CmsImage(
                 thumbnailUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Container(color: Colors.black12),
+                errorBuilder: (_) => Container(color: Colors.black12),
               )
             else
               Container(color: Colors.black12),

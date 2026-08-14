@@ -20,6 +20,7 @@ import 'widgets/profile_group_card.dart';
 import 'widgets/profile_list_tile.dart';
 import 'widgets/profile_section_label.dart';
 import 'widgets/profile_type_card.dart';
+import '../../../../core/widgets/cms_image.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -373,16 +374,14 @@ class _AvatarImage extends StatelessWidget {
       builder: (context, snapshot) {
         final token = snapshot.data;
         if (token == null) return const _AvatarPlaceholder();
-        return Image.network(
+        return CmsImage(
           url,
           width: 44,
           height: 44,
           fit: BoxFit.cover,
           headers: {'Authorization': 'Bearer $token'},
-          errorBuilder: (context, error, stackTrace) =>
-              const _AvatarPlaceholder(),
-          loadingBuilder: (context, child, progress) =>
-              progress == null ? child : const _AvatarPlaceholder(),
+          errorBuilder: (_) => const _AvatarPlaceholder(),
+          placeholder: (_) => const _AvatarPlaceholder(),
         );
       },
     );

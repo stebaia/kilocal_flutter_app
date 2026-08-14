@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../domain/entities/momenti_data.dart';
 import '../domain/momenti_repository.dart';
 import 'dto/moment_dto.dart';
@@ -113,10 +113,11 @@ query GetCurrentMoment($now: String!, $lang: String!) {
     );
   }
 
-  String? _assetUrl(MomentFileDto? file) {
-    if (file?.id == null) return null;
-    return '${Env.baseUrl}/assets/${file!.id}/${file.filenameDownload ?? ''}';
-  }
+  String? _assetUrl(MomentFileDto? file) => cmsImageUrl(
+    file?.id,
+    size: CmsImageSize.hero,
+    filename: file?.filenameDownload,
+  );
 
   String _resolveLocale() {
     // The CMS uses codes like "it-IT" / "en-US". Default to Italian for now.

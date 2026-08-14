@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../survey/presentation/widgets/survey_html.dart';
 import '../../domain/entities/benefit.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Opens the benefit detail in a brand bottom sheet (red header reused from the
 /// timer sheet).
@@ -68,10 +69,10 @@ class _BenefitDetailContentState extends State<_BenefitDetailContent> {
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: benefit.imageUrl != null
-                  ? Image.network(
+                  ? CmsImage(
                       benefit.imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => const _HeroPlaceholder(),
+                      errorBuilder: (_) => const _HeroPlaceholder(),
                     )
                   : const _HeroPlaceholder(),
             ),

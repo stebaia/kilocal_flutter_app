@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../domain/entities/gallery_photo.dart';
+import '../../../../../../core/widgets/cms_image.dart';
 
 /// The 2-column photo grid. The first cell is the "add photo" tile; the rest
 /// are the user's photos, newest first.
@@ -105,22 +106,20 @@ class _PhotoTile extends StatelessWidget {
               ? Border.all(color: AppColors.accent, width: 2)
               : null,
         ),
-        child: Image.network(
+        child: CmsImage(
           photo.imageUrl,
           fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => const Icon(
+          errorBuilder: (_) => const Icon(
             Icons.broken_image_outlined,
             color: AppColors.textSecondary,
           ),
-          loadingBuilder: (context, child, progress) => progress == null
-              ? child
-              : const Center(
-                  child: SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                ),
+          placeholder: (_) => const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
         ),
       ),
     );

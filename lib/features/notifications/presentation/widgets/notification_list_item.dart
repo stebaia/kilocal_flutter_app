@@ -10,6 +10,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/entities/notification_item.dart';
 import '../cubit/notifications_cubit.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 class NotificationListItem extends StatelessWidget {
   const NotificationListItem({super.key, required this.item});
@@ -99,7 +100,7 @@ class NotificationListItem extends StatelessWidget {
                           const SizedBox(height: AppSpacing.spaceSm),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(AppRadius.md),
-                            child: Image.network(
+                            child: CmsImage(
                               item.imageUrl!,
                               width: double.infinity,
                               height: 160,

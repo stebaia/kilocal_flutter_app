@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/icons/app_icons.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/ellipse_shadow_painter.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Illustration used inside home action cards.
 ///
@@ -53,11 +54,7 @@ class ActionCardIllustration extends StatelessWidget {
             ),
             Transform.translate(
               offset: const Offset(0, -12),
-              child: const EllipseShadow(
-                width: 80,
-                height: 16,
-                opacity: 0.15,
-              ),
+              child: const EllipseShadow(width: 80, height: 16, opacity: 0.15),
             ),
           ],
         ),
@@ -72,11 +69,7 @@ class ActionCardIllustration extends StatelessWidget {
             Image.asset(assetName!, width: 112, height: 112),
             Transform.translate(
               offset: const Offset(0, -12),
-              child: const EllipseShadow(
-                width: 80,
-                height: 16,
-                opacity: 0.15,
-              ),
+              child: const EllipseShadow(width: 80, height: 16, opacity: 0.15),
             ),
           ],
         ),
@@ -84,21 +77,14 @@ class ActionCardIllustration extends StatelessWidget {
     }
 
     if (assetName != null) {
-      return _withLockOverlay(
-        Image.asset(assetName!, width: 112, height: 112),
-      );
+      return _withLockOverlay(Image.asset(assetName!, width: 112, height: 112));
     }
 
     // Fallback to network image for any other card.
     return _withLockOverlay(
       ClipRRect(
         borderRadius: BorderRadius.circular(AppRadius.md),
-        child: Image.network(
-          imageUrl,
-          width: 116,
-          height: 116,
-          fit: BoxFit.cover,
-        ),
+        child: CmsImage(imageUrl, width: 116, height: 116, fit: BoxFit.cover),
       ),
     );
   }

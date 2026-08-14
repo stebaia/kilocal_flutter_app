@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../domain/entities/profile_kit.dart';
 import '../domain/profile_kit_repository.dart';
 import 'dto/profile_kit_dto.dart';
@@ -135,12 +135,16 @@ query ProfileKit($kitId: ID!, $lang: String!) {
     );
   }
 
-  /// Builds `{baseUrl}/assets/<fileId>/<filename>` from an `assets` entity, or
-  /// `null` when the entity has no underlying file (see [[cms-asset-url-pattern]]).
+  /// Builds a resized `{baseUrl}/assets/<fileId>/<filename>` url from an
+  /// `assets` entity, or `null` when the entity has no underlying file (see
+  /// [[cms-asset-url-pattern]]).
   String? _imageUrl(KitAssetDto? asset) {
     final file = asset?.defaultAsset;
-    if (file?.id == null) return null;
-    return '${Env.baseUrl}/assets/${file!.id}/${file.filenameDownload ?? ''}';
+    return cmsImageUrl(
+      file?.id,
+      size: CmsImageSize.card,
+      filename: file?.filenameDownload,
+    );
   }
 
   ProfileKitCta? _mapCta(KitLinkDto? link) {

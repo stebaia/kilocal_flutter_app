@@ -11,6 +11,8 @@ import '../core/monitoring/performance_interceptor.dart';
 import '../core/network/dio_client.dart';
 import '../core/network/graphql_client.dart';
 import '../core/network/token_store.dart';
+import '../core/push/device_token_api.dart';
+import '../core/push/device_token_registrar.dart';
 import '../core/push/push_notification_service.dart';
 import 'router.dart';
 import '../features/auth/data/auth_api.dart';
@@ -113,6 +115,17 @@ void configureDependencies() {
     getIt.registerLazySingleton<PushNotificationService>(
       () => PushNotificationService(),
     );
+    // Bridges the FCM token to `POST/DELETE /profile/device-tokens`. Resolved
+    // lazily, so the Dio registration below is in place by the time it is used.
+    getIt.registerLazySingleton<DeviceTokenApi>(
+      () => DeviceTokenApi(getIt<Dio>()),
+    );
+    getIt.registerLazySingleton<DeviceTokenRegistrar>(
+      () => DeviceTokenRegistrar(
+        api: getIt<DeviceTokenApi>(),
+        push: getIt<PushNotificationService>(),
+      ),
+    );
   } else {
     getIt.registerLazySingleton<MonitoringService>(NoopMonitoringService.new);
     getIt.registerLazySingleton<AnalyticsService>(
@@ -155,6 +168,9 @@ void configureDependencies() {
       api: getIt<AuthApi>(),
       tokenStore: getIt<TokenStore>(),
       onLogout: getIt<UserCubit>().clear,
+      // Revokes the FCM token while the session is still valid. Absent when
+      // Firebase is disabled (staging flavor), in which case logout is unchanged.
+      onBeforeLogout: _deviceTokenRegistrar?.unregisterCurrentToken,
     ),
   );
 
@@ -171,6 +187,7 @@ void configureDependencies() {
       userRepository: getIt<UserRepository>(),
       monitoring: getIt<MonitoringService>(),
       analytics: getIt<AnalyticsService>(),
+      deviceTokenRegistrar: _deviceTokenRegistrar,
     ),
   );
 
@@ -434,6 +451,13 @@ void configureDependencies() {
 
   // TODO: register additional Retrofit APIs, repositories, and use-cases here
 }
+
+/// The push-token registrar, or `null` when Firebase is disabled (the `staging`
+/// Android flavor never registers it, so push wiring degrades to a no-op).
+DeviceTokenRegistrar? get _deviceTokenRegistrar =>
+    getIt.isRegistered<DeviceTokenRegistrar>()
+    ? getIt<DeviceTokenRegistrar>()
+    : null;
 
 /// Called by [AuthInterceptor] when a token refresh fails: tokens have already
 /// been cleared, so we route the app back to login. Uses the router's global

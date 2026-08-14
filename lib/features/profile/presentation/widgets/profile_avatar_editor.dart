@@ -8,6 +8,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../user/presentation/cubit/user_cubit.dart';
 import '../cubit/avatar_upload_cubit.dart';
 import 'avatar_picker.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Large, tappable profile avatar shown at the top of the "My account" screen.
 ///
@@ -112,15 +113,14 @@ class _AvatarImage extends StatelessWidget {
       builder: (context, snapshot) {
         final token = snapshot.data;
         if (token == null) return const _Placeholder();
-        return Image.network(
+        return CmsImage(
           url,
           width: ProfileAvatarEditor._size,
           height: ProfileAvatarEditor._size,
           fit: BoxFit.cover,
           headers: {'Authorization': 'Bearer $token'},
-          errorBuilder: (context, error, stackTrace) => const _Placeholder(),
-          loadingBuilder: (context, child, progress) =>
-              progress == null ? child : const _Placeholder(),
+          errorBuilder: (_) => const _Placeholder(),
+          placeholder: (_) => const _Placeholder(),
         );
       },
     );

@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/config/env.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/network/graphql_client.dart';
+import '../../../core/utils/cms_image_url.dart';
 import '../domain/entities/notification_item.dart';
 import '../domain/notifications_repository.dart';
 import 'dto/notification_dto.dart';
@@ -115,10 +115,10 @@ mutation MarkReadUserNotification($id: ID!, $now: Date!) {
     // The whole notification content lives inside the server-compiled
     // `job_payload` JSON (title, body HTML, CTA, asset), all with variables
     // already substituted.
-    final assetId = dto.jobPayloadAssetId;
-    final imageUrl = assetId != null && assetId.isNotEmpty
-        ? '${Env.baseUrl}/assets/$assetId'
-        : null;
+    final imageUrl = cmsImageUrl(
+      dto.jobPayloadAssetId,
+      size: CmsImageSize.card,
+    );
 
     final ctas = <NotificationCta>[];
     final ctaUrl = dto.jobPayloadCtaUrl;

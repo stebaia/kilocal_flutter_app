@@ -72,8 +72,8 @@ class SplitImageScreen extends StatelessWidget {
                     const Divider(height: 1, color: AppColors.divider),
                     const SizedBox(height: AppSpacing.spaceLg),
                     SplitImageView(
-                      beforeUrl: before.imageUrl,
-                      afterUrl: after.imageUrl,
+                      beforeUrl: before.fullImageUrl,
+                      afterUrl: after.fullImageUrl,
                     ),
                   ],
                 ),

@@ -12,13 +12,19 @@ class AuthRepositoryImpl implements AuthRepository {
     required AuthApi api,
     required TokenStore tokenStore,
     void Function()? onLogout,
+    Future<void> Function()? onBeforeLogout,
   }) : _api = api,
        _tokenStore = tokenStore,
-       _onLogout = onLogout;
+       _onLogout = onLogout,
+       _onBeforeLogout = onBeforeLogout;
 
   final AuthApi _api;
   final TokenStore _tokenStore;
   final void Function()? _onLogout;
+
+  /// Runs while the session is still authenticated, before tokens are cleared.
+  /// Used to revoke this device's push token (`DELETE /profile/device-tokens`).
+  final Future<void> Function()? _onBeforeLogout;
 
   @override
   Future<void> login({required String email, required String password}) async {
@@ -65,6 +71,11 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<void> logout() async {
+    // Revoke the push token first: the endpoint is bearer-authenticated, so it
+    // must run while the access token is still valid. Best-effort inside the
+    // registrar — a failure here must not block signing out.
+    await _onBeforeLogout?.call();
+
     final refresh = await _tokenStore.refreshToken;
     await _tokenStore.clear();
     // Clear the cached user session so profile data does not survive logout.

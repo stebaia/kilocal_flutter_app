@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../domain/entities/integrazione_data.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Large phase card on the integrazione list.
 ///
@@ -190,10 +191,10 @@ class _PhaseImages extends StatelessWidget {
         .take(3)
         .map(
           (p) => Flexible(
-            child: Image.network(
+            child: CmsImage(
               p.imageUrl!,
               fit: BoxFit.contain,
-              errorBuilder: (_, _, _) => const Icon(
+              errorBuilder: (_) => const Icon(
                 Icons.medication_outlined,
                 color: AppColors.accent,
                 size: 32,

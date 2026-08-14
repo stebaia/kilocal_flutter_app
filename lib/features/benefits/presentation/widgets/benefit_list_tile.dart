@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/benefit.dart';
+import '../../../../../core/widgets/cms_image.dart';
 
 /// Compact row for a secondary partner ("Partner Secondari" section).
 class BenefitListTile extends StatelessWidget {
@@ -47,10 +48,10 @@ class _Logo extends StatelessWidget {
         width: 40,
         height: 40,
         child: url != null
-            ? Image.network(
+            ? CmsImage(
                 url!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const _LogoPlaceholder(),
+                errorBuilder: (_) => const _LogoPlaceholder(),
               )
             : const _LogoPlaceholder(),
       ),
