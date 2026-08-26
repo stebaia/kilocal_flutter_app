@@ -13,6 +13,7 @@ class ProfileListTile extends StatelessWidget {
     required this.title,
     this.subtitle,
     this.onTap,
+    this.color,
   });
 
   final IconData icon;
@@ -20,8 +21,14 @@ class ProfileListTile extends StatelessWidget {
   final String? subtitle;
   final VoidCallback? onTap;
 
+  /// Overrides the icon/title/chevron colour for destructive rows (e.g. account
+  /// deletion). Defaults to [AppColors.textPrimary].
+  final Color? color;
+
   @override
   Widget build(BuildContext context) {
+    final foreground = color ?? AppColors.textPrimary;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -29,7 +36,7 @@ class ProfileListTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.spaceSm),
         child: Row(
           children: [
-            Icon(icon, size: 24, color: AppColors.textPrimary),
+            Icon(icon, size: 24, color: foreground),
             const SizedBox(width: AppSpacing.spaceMd),
             Expanded(
               child: Column(
@@ -40,6 +47,7 @@ class ProfileListTile extends StatelessWidget {
                     title,
                     style: AppTypography.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
+                      color: foreground,
                     ),
                   ),
                   if (subtitle != null) ...[
@@ -54,7 +62,7 @@ class ProfileListTile extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppColors.textPrimary),
+            Icon(Icons.chevron_right, color: foreground),
           ],
         ),
       ),

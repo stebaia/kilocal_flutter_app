@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/di.dart';
 import '../../../core/theme/app_colors.dart';
@@ -132,6 +133,11 @@ class _FormBody extends StatelessWidget {
   /// Forwarded to [CmsFormView.collapseMultiSelects] (food-preferences tab).
   final bool collapseMultiSelects;
 
+  /// Website page hosting the account-deletion procedure.
+  static final Uri _accountDeletionUrl = Uri.parse(
+    'https://kilocalprogram.it/user-delete',
+  );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -183,6 +189,12 @@ class _FormBody extends StatelessWidget {
                     title: l10n.profileChangePassword,
                     onTap: () => context.push('/profile/change-password'),
                   ),
+                  ProfileListTile(
+                    icon: Icons.delete_outline,
+                    title: l10n.profileDeleteAccount,
+                    color: AppColors.accent,
+                    onTap: () => _openAccountDeletion(context),
+                  ),
                 ],
               ],
             ),
@@ -190,6 +202,24 @@ class _FormBody extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// Account deletion is completed on the website, not in the app: this opens
+  /// the deletion page in the external browser. Nothing is deleted client-side
+  /// — once the account is gone, the next authenticated call returns 401 and
+  /// [AuthInterceptor] signs the user out (see `_onAuthExpired` in `di.dart`).
+  Future<void> _openAccountDeletion(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final messenger = ScaffoldMessenger.of(context);
+    final launched = await launchUrl(
+      _accountDeletionUrl,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched && context.mounted) {
+      messenger.showSnackBar(
+        SnackBar(content: Text(l10n.profileDeleteAccountNoBrowser)),
+      );
+    }
   }
 
   /// Pre-fills each form field from the session, resolving values across

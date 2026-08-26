@@ -463,6 +463,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profilePasswordError => 'Couldn\'t update the password';
 
   @override
+  String get profileDeleteAccount => 'Delete account';
+
+  @override
+  String get profileDeleteAccountNoBrowser =>
+      'Couldn\'t open the browser. Visit kilocalprogram.it/user-delete to delete your account.';
+
+  @override
   String profilePasswordTooShort(int count) {
     return 'Password must be at least $count characters';
   }

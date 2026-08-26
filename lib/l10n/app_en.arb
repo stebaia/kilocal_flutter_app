@@ -222,6 +222,14 @@
   "profileChangePasswordSubmit": "Update password",
   "profilePasswordUpdated": "Password updated",
   "profilePasswordError": "Couldn't update the password",
+  "profileDeleteAccount": "Delete account",
+  "@profileDeleteAccount": {
+    "description": "Profile row that opens the account-deletion page on the website"
+  },
+  "profileDeleteAccountNoBrowser": "Couldn't open the browser. Visit kilocalprogram.it/user-delete to delete your account.",
+  "@profileDeleteAccountNoBrowser": {
+    "description": "Shown when no browser is available to open the account-deletion page"
+  },
   "profilePasswordTooShort": "Password must be at least {count} characters",
   "@profilePasswordTooShort": {
     "placeholders": {
