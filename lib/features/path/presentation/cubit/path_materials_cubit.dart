@@ -16,13 +16,15 @@ class PathMaterialsCubit extends Cubit<PathMaterialsState> {
 
   /// Loads the group's materials.
   ///
-  /// [officialCategories], when the caller has them, are the group's authoritative
-  /// categories — the very list the tab strip renders (see
-  /// [PathMaterialsRouteArgs]). The default tab must be picked from that same
-  /// list: the repository derives its own categories in first-seen-across-the-
-  /// materials order, which does not match the official order, so defaulting to
-  /// the derived first category used to land the user on the *second* visible tab
-  /// ("Consigli utili" instead of "Scopri").
+  /// [officialCategories], when the caller has them, are the group's preferred
+  /// category order — the list the backend exposes on the group itself (see
+  /// [PathMaterialsRouteArgs]). Material-derived categories are appended when
+  /// missing from that official list: this keeps the backend-confirmed tab order
+  /// while still surfacing CMS materials tagged with a category the group list
+  /// has not been updated with yet (e.g. Benessere / Stili di vita PDFs under
+  /// `schede`). The default tab must still be picked from this merged list:
+  /// deriving it only from the materials order used to land the user on the
+  /// *second* visible tab ("Consigli utili" instead of "Scopri").
   ///
   /// [area] is the clean area key from the route; the materials endpoint is
   /// scoped by area as well as by group. Without it the repository falls back
@@ -39,11 +41,18 @@ class PathMaterialsCubit extends Cubit<PathMaterialsState> {
     emit(state.copyWith(status: PathMaterialsStatus.loading, error: null));
 
     try {
-      final data = await _materialsRepository.fetchMaterials(
+      final fetchedData = await _materialsRepository.fetchMaterials(
         groupId: groupId,
         area: area,
       );
-      final categories = officialCategories ?? data.categories;
+      final categories = _mergeCategories(
+        officialCategories,
+        fetchedData.categories,
+      );
+      final data = PathMaterialsData(
+        categories: categories,
+        materials: fetchedData.materials,
+      );
       final previous = state.selectedCategoryId;
       final keepsPrevious =
           previous != null && categories.any((c) => c.id == previous);
@@ -63,6 +72,20 @@ class PathMaterialsCubit extends Cubit<PathMaterialsState> {
     } on ApiException catch (e) {
       emit(state.copyWith(status: PathMaterialsStatus.error, error: e));
     }
+  }
+
+  List<PathMaterialCategory> _mergeCategories(
+    List<PathMaterialCategory>? officialCategories,
+    List<PathMaterialCategory> derivedCategories,
+  ) {
+    if (officialCategories == null) return derivedCategories;
+
+    final merged = [...officialCategories];
+    final seen = officialCategories.map((c) => c.id).toSet();
+    for (final category in derivedCategories) {
+      if (seen.add(category.id)) merged.add(category);
+    }
+    return merged;
   }
 
   /// Switches the active category tab.

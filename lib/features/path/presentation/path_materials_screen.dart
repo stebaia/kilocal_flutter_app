@@ -18,11 +18,10 @@ import 'widgets/path_material_category_tabs.dart';
 /// Navigation args for [PathMaterialsScreen], passed via `GoRouterState.extra`.
 ///
 /// [categories], when provided, are the tapped group's *official* categories
-/// (`group.categories` from `GET /path/me/areas/{area}/steps`) and take
-/// priority over the categories the materials repository derives from the
-/// materials list — backend-confirmed authoritative source, since deriving
-/// tabs from materials let a mistagged one surface a duplicate-titled
-/// category tab (e.g. two "Scopri" chips). See [[statistics-feature-status]].
+/// (`group.categories` from `GET /path/me/areas/{area}/steps`) and provide the
+/// preferred tab order. The cubit appends material-derived categories that are
+/// missing from this list, so newly-tagged CMS materials can still be reached
+/// before the group category list is updated.
 class PathMaterialsRouteArgs {
   const PathMaterialsRouteArgs({this.title, this.categories});
 
@@ -82,7 +81,8 @@ class _PathMaterialsView extends StatelessWidget {
   final String? title;
 
   /// The tapped group's official categories, when known — takes priority over
-  /// [PathMaterialsState.data]'s materials-derived ones.
+  /// [PathMaterialsState.data]'s material-derived ones for ordering, while the
+  /// cubit appends any missing derived categories.
   final List<PathMaterialCategory>? officialCategories;
 
   @override
@@ -191,15 +191,15 @@ class _MaterialsList extends StatelessWidget {
   final String? area;
 
   /// The tapped group's official categories, when known — see
-  /// [PathMaterialsRouteArgs]. Falls back to the materials-derived ones (the
-  /// old behavior) only when absent, e.g. a cold deep-link into this screen.
+  /// [PathMaterialsRouteArgs]. Kept only for constructor symmetry; the cubit
+  /// merges them into [PathMaterialsState.data].
   final List<PathMaterialCategory>? officialCategories;
 
   @override
   Widget build(BuildContext context) {
     final data = state.data;
     final materials = state.visibleMaterials;
-    final categories = officialCategories ?? data?.categories ?? const [];
+    final categories = data?.categories ?? const [];
 
     return CustomScrollView(
       slivers: [
@@ -303,7 +303,7 @@ class _MaterialsList extends StatelessWidget {
   Future<void> _openDetail(BuildContext context, PathMaterial material) async {
     // The category title is shown in the (text) detail header; pass the
     // currently-selected category's title.
-    final categories = officialCategories ?? state.data?.categories ?? const [];
+    final categories = state.data?.categories ?? const [];
     String? categoryTitle;
     for (final c in categories) {
       if (c.id == state.selectedCategoryId) {
