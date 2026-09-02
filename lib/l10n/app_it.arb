@@ -180,6 +180,8 @@
   "profileChangePasswordSubmit": "Aggiorna password",
   "profilePasswordUpdated": "Password aggiornata",
   "profilePasswordError": "Impossibile aggiornare la password",
+  "profileDeleteAccount": "Elimina account",
+  "profileDeleteAccountNoBrowser": "Impossibile aprire il browser. Vai su kilocalprogram.it/user-delete per eliminare l'account.",
   "profilePasswordTooShort": "La password deve avere almeno {count} caratteri",
   "@profilePasswordTooShort": {
     "placeholders": {

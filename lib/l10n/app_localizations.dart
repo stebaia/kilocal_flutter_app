@@ -926,6 +926,18 @@ abstract class AppLocalizations {
   /// **'Couldn\'t update the password'**
   String get profilePasswordError;
 
+  /// Profile row that opens the account-deletion page on the website
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get profileDeleteAccount;
+
+  /// Shown when no browser is available to open the account-deletion page
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the browser. Visit kilocalprogram.it/user-delete to delete your account.'**
+  String get profileDeleteAccountNoBrowser;
+
   /// No description provided for @profilePasswordTooShort.
   ///
   /// In en, this message translates to:

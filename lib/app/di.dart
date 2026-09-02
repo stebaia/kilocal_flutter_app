@@ -459,14 +459,24 @@ DeviceTokenRegistrar? get _deviceTokenRegistrar =>
     ? getIt<DeviceTokenRegistrar>()
     : null;
 
-/// Called by [AuthInterceptor] when a token refresh fails: tokens have already
-/// been cleared, so we route the app back to login. Uses the router's global
-/// navigator key (no [BuildContext] available here). Idempotent: no-op if we are
-/// already on `/login` (e.g. concurrent 401s).
-void _onAuthExpired() {
+/// Called by [AuthInterceptor] when a 401 cannot be recovered by a token
+/// refresh: the session is gone (expired, revoked, or the account was deleted
+/// from the website), so we tear it down locally and route back to login.
+///
+/// [AuthInterceptor] only clears the tokens when the refresh call itself fails
+/// with a [DioException] — when there is no refresh token at all it just gives
+/// up — so we clear the store here too, and always clear [UserCubit] so no
+/// profile data survives. Clearing the session also stops the router's
+/// onboarding redirect from bouncing the user onto the pending survey.
+///
+/// Uses the router's global navigator key (no [BuildContext] available here).
+/// Idempotent: no-op if we are already on `/login` (e.g. concurrent 401s).
+Future<void> _onAuthExpired() async {
   final context = appRouter.routerDelegate.navigatorKey.currentContext;
   if (context == null) return;
   final location = appRouter.routerDelegate.currentConfiguration.uri.path;
   if (location == '/login') return;
+  await getIt<TokenStore>().clear();
+  getIt<UserCubit>().clear();
   appRouter.go('/login');
 }
