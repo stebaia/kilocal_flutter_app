@@ -2,9 +2,11 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/network/api_exception.dart';
+import '../../../survey/domain/entities/survey_answer.dart';
 import '../../../user/presentation/cubit/user_cubit.dart';
 import '../../domain/entities/integrazione_data.dart';
 import '../../domain/integrazione_repository.dart';
+import '../../../survey/domain/survey_repository.dart';
 
 part 'integrazione_state.dart';
 
@@ -14,12 +16,15 @@ class IntegrazioneCubit extends Cubit<IntegrazioneState> {
   IntegrazioneCubit({
     required IntegrazioneRepository repository,
     required UserCubit userCubit,
+    required SurveyRepository surveyRepository,
   }) : _repository = repository,
        _userCubit = userCubit,
+       _surveyRepository = surveyRepository,
        super(const IntegrazioneState());
 
   final IntegrazioneRepository _repository;
   final UserCubit _userCubit;
+  final SurveyRepository _surveyRepository;
 
   // The CMS uses codes like "it-IT" / "en-US". Default to Italian for now,
   // matching the rest of the app's GraphQL repositories.
@@ -44,13 +49,29 @@ class IntegrazioneCubit extends Cubit<IntegrazioneState> {
     }
 
     try {
+      final pending = await _fetchMonthEndStatus();
       final data = await _repository.fetchIntegrazione(
         myId: user.id,
         lang: _lang,
       );
-      emit(state.copyWith(status: IntegrazioneStatus.loaded, data: data));
+      emit(
+        state.copyWith(
+          status: IntegrazioneStatus.loaded,
+          data: data,
+          monthEndPending: pending,
+          clearMonthEndPending: pending == null,
+        ),
+      );
     } on ApiException catch (e) {
       emit(state.copyWith(status: IntegrazioneStatus.error, error: e));
+    }
+  }
+
+  Future<SurveyMonthEndPending?> _fetchMonthEndStatus() async {
+    try {
+      return await _surveyRepository.fetchMonthEndStatus();
+    } catch (_) {
+      return null;
     }
   }
 

@@ -576,6 +576,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get surveyStart => 'Inizia';
 
   @override
+  String get surveyMonthEndCta => 'Compila il questionario di fine mese';
+
+  @override
   String get surveyFindPharmacy => 'Trova una Farmacia Kilocal Point';
 
   @override

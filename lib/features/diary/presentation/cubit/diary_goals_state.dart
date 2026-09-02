@@ -8,12 +8,14 @@ class DiaryGoalsState extends Equatable {
     this.goals = const [],
     this.filter = GoalFilter.all,
     this.categories = const [],
+    this.monthEndPending,
   });
 
   final DiaryGoalsStatus status;
   final List<DiaryGoal> goals;
   final GoalFilter filter;
   final List<GoalCategory> categories;
+  final SurveyMonthEndPending? monthEndPending;
 
   /// Goals after applying the current [filter] — all derived client-side.
   List<DiaryGoal> get visibleGoals {
@@ -34,15 +36,26 @@ class DiaryGoalsState extends Equatable {
     List<DiaryGoal>? goals,
     GoalFilter? filter,
     List<GoalCategory>? categories,
+    SurveyMonthEndPending? monthEndPending,
+    bool clearMonthEndPending = false,
   }) {
     return DiaryGoalsState(
       status: status ?? this.status,
       goals: goals ?? this.goals,
       filter: filter ?? this.filter,
       categories: categories ?? this.categories,
+      monthEndPending: clearMonthEndPending
+          ? null
+          : (monthEndPending ?? this.monthEndPending),
     );
   }
 
   @override
-  List<Object?> get props => [status, goals, filter, categories];
+  List<Object?> get props => [
+    status,
+    goals,
+    filter,
+    categories,
+    monthEndPending,
+  ];
 }

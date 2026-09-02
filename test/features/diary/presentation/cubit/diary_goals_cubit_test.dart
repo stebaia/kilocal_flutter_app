@@ -4,6 +4,7 @@ import 'package:kilocal_flutter_app/features/diary/domain/entities/diary_activit
 import 'package:kilocal_flutter_app/features/diary/domain/entities/diary_goal.dart';
 import 'package:kilocal_flutter_app/features/diary/presentation/cubit/diary_goals_cubit.dart';
 import 'package:kilocal_flutter_app/features/survey/domain/survey_repository.dart';
+import 'package:kilocal_flutter_app/features/survey/domain/entities/survey_answer.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockDiaryRepository extends Mock implements DiaryRepository {}
@@ -78,6 +79,22 @@ void main() {
         () => surveyRepository.fetchMonthEndStatus(),
         () => repository.fetchGoals(),
       ]);
+    });
+
+    test('load stores pending month-end survey for the CTA', () async {
+      const pending = SurveyMonthEndPending(
+        month: 1,
+        internalName: 'month_end_survey_1',
+        goalInternalName: 'traguardo_mese_1',
+      );
+      when(
+        () => surveyRepository.fetchMonthEndStatus(),
+      ).thenAnswer((_) async => pending);
+      when(() => repository.fetchGoals()).thenAnswer((_) async => [kilocal]);
+
+      await cubit.load();
+
+      expect(cubit.state.monthEndPending, pending);
     });
 
     test('load still lists goals when the month-end check fails', () async {

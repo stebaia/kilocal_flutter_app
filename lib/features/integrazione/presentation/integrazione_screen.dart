@@ -10,6 +10,8 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../statistics/presentation/statistics_screen.dart';
+import '../../survey/domain/entities/survey_answer.dart';
+import '../../survey/presentation/widgets/month_end_survey_banner.dart';
 import '../domain/entities/integrazione_data.dart';
 import 'cubit/integrazione_cubit.dart';
 import 'widgets/integrazione_phase_card.dart';
@@ -85,7 +87,10 @@ class _IntegrazioneView extends StatelessWidget {
                           ),
                         );
                       }
-                      return _IntegrazioneContent(data: data);
+                      return _IntegrazioneContent(
+                        data: data,
+                        monthEndPending: state.monthEndPending,
+                      );
                   }
                 },
               ),
@@ -98,9 +103,10 @@ class _IntegrazioneView extends StatelessWidget {
 }
 
 class _IntegrazioneContent extends StatelessWidget {
-  const _IntegrazioneContent({required this.data});
+  const _IntegrazioneContent({required this.data, this.monthEndPending});
 
   final IntegrazioneData data;
+  final SurveyMonthEndPending? monthEndPending;
 
   @override
   Widget build(BuildContext context) {
@@ -111,14 +117,18 @@ class _IntegrazioneContent extends StatelessWidget {
         horizontal: AppSpacing.screenGutter,
         vertical: AppSpacing.spaceLg,
       ),
-      itemCount: phases.length,
+      itemCount: phases.length + (monthEndPending == null ? 0 : 1),
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.spaceLg),
       itemBuilder: (context, index) {
-        final phase = phases[index];
-        final locked = data.isPhaseLocked(index);
+        if (index == 0 && monthEndPending != null) {
+          return MonthEndSurveyBanner(pending: monthEndPending!);
+        }
+        final phaseIndex = index - (monthEndPending == null ? 0 : 1);
+        final phase = phases[phaseIndex];
+        final locked = data.isPhaseLocked(phaseIndex);
         return IntegrazionePhaseCard(
           phase: phase,
-          phaseNumber: index + 1,
+          phaseNumber: phaseIndex + 1,
           isLocked: locked,
           // "Completa prima la fase N" points at the active phase to unlock.
           unlockAfterPhase: data.activeIndex + 1,

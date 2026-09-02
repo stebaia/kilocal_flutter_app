@@ -14,7 +14,6 @@ import '../../user/presentation/cubit/user_cubit.dart';
 import '../data/biotype_texts_loader.dart';
 import 'widgets/biotype_body_map_card.dart';
 import 'widgets/biotype_body_points.dart';
-import 'widgets/biotype_point_sheet.dart';
 import 'widgets/profile_type_percorsi_grid.dart';
 
 /// "Scopri di più" screen opened from the biotype characteristics card

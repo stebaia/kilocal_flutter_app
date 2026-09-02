@@ -291,6 +291,7 @@ void configureDependencies() {
     () => IntegrazioneCubit(
       repository: getIt<IntegrazioneRepository>(),
       userCubit: getIt<UserCubit>(),
+      surveyRepository: getIt<SurveyRepository>(),
     ),
   );
   getIt.registerLazySingleton<VimeoOembedService>(() => VimeoOembedService());
