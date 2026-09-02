@@ -1136,6 +1136,12 @@ abstract class AppLocalizations {
   /// **'Start'**
   String get surveyStart;
 
+  /// No description provided for @surveyMonthEndCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete your end-of-month questionnaire'**
+  String get surveyMonthEndCta;
+
   /// No description provided for @surveyFindPharmacy.
   ///
   /// In en, this message translates to:

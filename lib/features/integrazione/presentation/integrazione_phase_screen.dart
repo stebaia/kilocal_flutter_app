@@ -8,6 +8,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/app_header.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../survey/domain/entities/survey_answer.dart';
+import '../../survey/presentation/widgets/month_end_survey_banner.dart';
 import '../domain/entities/integrazione_data.dart';
 import 'cubit/integrazione_cubit.dart';
 import 'widgets/integrazione_instructions_sheet.dart';
@@ -93,11 +95,13 @@ class _PhaseView extends StatelessWidget {
                       return _PhaseProducts(
                         phaseId: phaseId,
                         data: state.data!,
+                        monthEndPending: state.monthEndPending,
                       );
                     case IntegrazioneStatus.loaded:
                       return _PhaseProducts(
                         phaseId: phaseId,
                         data: state.data!,
+                        monthEndPending: state.monthEndPending,
                       );
                   }
                 },
@@ -111,10 +115,15 @@ class _PhaseView extends StatelessWidget {
 }
 
 class _PhaseProducts extends StatelessWidget {
-  const _PhaseProducts({required this.phaseId, required this.data});
+  const _PhaseProducts({
+    required this.phaseId,
+    required this.data,
+    this.monthEndPending,
+  });
 
   final String phaseId;
   final IntegrazioneData data;
+  final SurveyMonthEndPending? monthEndPending;
 
   @override
   Widget build(BuildContext context) {
@@ -129,10 +138,14 @@ class _PhaseProducts extends StatelessWidget {
         horizontal: AppSpacing.screenGutter,
         vertical: AppSpacing.spaceLg,
       ),
-      itemCount: phase.products.length,
+      itemCount: phase.products.length + (monthEndPending == null ? 0 : 1),
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.spaceLg),
       itemBuilder: (context, index) {
-        final product = phase.products[index];
+        if (index == 0 && monthEndPending != null) {
+          return MonthEndSurveyBanner(pending: monthEndPending!);
+        }
+        final product =
+            phase.products[index - (monthEndPending == null ? 0 : 1)];
         return IntegrazioneProductCard(
           product: product,
           onInfoTap: () => _openInstructions(context, product),

@@ -18,6 +18,7 @@ import 'widgets/diary_goal_card.dart';
 import 'widgets/diary_goal_detail_sheet.dart';
 import 'widgets/diary_hero_card.dart';
 import 'widgets/diary_history_card.dart';
+import '../../survey/presentation/widgets/month_end_survey_banner.dart';
 import 'widgets/diary_tab_switch.dart';
 
 class DiaryScreen extends StatelessWidget {
@@ -215,6 +216,10 @@ class _GoalsTab extends StatelessWidget {
             assetName: 'assets/goal.png',
           ),
           const SizedBox(height: AppSpacing.spaceMd),
+          if (state.monthEndPending != null) ...[
+            MonthEndSurveyBanner(pending: state.monthEndPending!),
+            const SizedBox(height: AppSpacing.spaceMd),
+          ],
         ];
 
         switch (state.status) {

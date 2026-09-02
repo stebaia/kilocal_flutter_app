@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../survey/domain/survey_repository.dart';
+import '../../../survey/domain/entities/survey_answer.dart';
 import '../../domain/diary_repository.dart';
 import '../../domain/entities/diary_goal.dart';
 import '../../domain/entities/goal_category.dart';
@@ -27,8 +28,9 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
     // 100%), so the list no longer depends on this running first — it's kept
     // ahead of fetchGoals to also refresh the pending month-end survey state.
     // A failure here must not block the list.
+    SurveyMonthEndPending? pending;
     try {
-      await _surveyRepository.fetchMonthEndStatus();
+      pending = await _surveyRepository.fetchMonthEndStatus();
     } catch (_) {}
     try {
       final goals = await _repository.fetchGoals();
@@ -36,6 +38,8 @@ class DiaryGoalsCubit extends Cubit<DiaryGoalsState> {
         state.copyWith(
           status: DiaryGoalsStatus.loaded,
           goals: _sortByDueDate(goals),
+          monthEndPending: pending,
+          clearMonthEndPending: pending == null,
         ),
       );
     } catch (_) {
