@@ -1,0 +1,3 @@
+// TimerWidget extension: inherits FLUTTER_BUILD_NAME / FLUTTER_BUILD_NUMBER
+// so the extension version always matches the host app.
+#include "Generated.xcconfig"

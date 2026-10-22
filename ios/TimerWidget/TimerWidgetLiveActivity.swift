@@ -23,7 +23,7 @@ struct LiveActivitiesAppAttributes: ActivityAttributes, Identifiable {
 
 // Shared store; the suite name must match the App Group configured on both the
 // Runner and this extension (and `_iosAppGroupId` in system_timer_service.dart).
-let sharedDefault = UserDefaults(suiteName: "group.com.kilocal.liveactivities")!
+let sharedDefault = UserDefaults(suiteName: "group.com.kilocal.app")!
 
 struct TimerWidgetLiveActivity: Widget {
     var body: some WidgetConfiguration {

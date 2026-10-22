@@ -23,7 +23,7 @@ e l'app resta con la sola **pill in-app** (fallback già gestito nel codice Dart
 Il codice Dart usa questo App Group (vedi `system_timer_service.dart`):
 
 ```
-group.com.kilocal.liveactivities
+group.com.kilocal.app
 ```
 
 Va creato su Apple Developer e abilitato come capability **sia su Runner sia
@@ -37,7 +37,7 @@ sull'estensione**. Se scegli un id diverso, aggiorna `_iosAppGroupId`.
      Intent" se non serve.
 3. Per **entrambi** i target (`Runner` e `TimerWidget`):
    - Signing & Capabilities ▸ **+ Capability ▸ App Groups** ▸ aggiungi
-     `group.com.kilocal.liveactivities`.
+     `group.com.kilocal.app`.
 4. **(NON necessario)** ~~Push Notifications su `Runner`~~. Gli update remoti
    sono **disattivati** nel servizio Dart (`iOSEnableRemoteUpdates: false` in
    `system_timer_service.dart`), quindi **non serve** la capability Push
@@ -66,7 +66,7 @@ I file Swift dell'estensione sono già stati scritti e sono coerenti con il plug
 `live_activities` 2.4.9 (verificati contro `example/ios/extension-example`):
 
 - `ios/TimerWidget/TimerWidgetLiveActivity.swift` — `LiveActivitiesAppAttributes`
-  + lettura `label`/`endDate` da `UserDefaults(suiteName: "group.com.kilocal.liveactivities")`
+  + lettura `label`/`endDate` da `UserDefaults(suiteName: "group.com.kilocal.app")`
   via `prefixedKey`. UI lockscreen + Dynamic Island col countdown nativo
   (`Text(timerInterval:countsDown:)`, niente bisogno di update remoti).
 - `ios/TimerWidget/TimerWidgetBundle.swift` — `@main`, espone solo

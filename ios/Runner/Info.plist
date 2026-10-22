@@ -2,18 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSCameraUsageDescription</key>
-	<string>Consenti l'accesso alla fotocamera per scattare la tua foto profilo.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Consenti l'accesso alle foto per scegliere la tua foto profilo.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>$(KILOCAL_DISPLAY_NAME)</string>
-	<key>NSSupportsLiveActivities</key>
-   	<true/>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -30,7 +24,15 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Consenti l'accesso alla fotocamera per scattare la tua foto profilo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Consenti l'accesso alle foto per scegliere la tua foto profilo.</string>
+	<key>NSSupportsLiveActivities</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -55,7 +57,6 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<!-- Allows FCM to wake the app to process push notifications. -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

@@ -28,7 +28,7 @@ class SystemTimerService {
 
   /// App Group id shared between the Runner app and the iOS widget extension.
   /// Must match the one configured in Xcode and the extension's entitlements.
-  static const String _iosAppGroupId = 'group.com.kilocal.liveactivities';
+  static const String _iosAppGroupId = 'group.com.kilocal.app';
 
   final MethodChannel _android;
   final LiveActivities _live;
